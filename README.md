@@ -45,5 +45,5 @@ publicada en internet.
 La aplicación requiere PostgreSQL y las variables de entorno
 DB_USER y DB_PASSWORD.
 
-Los scripts de creación y datos de prueba aún no están incluidos
-en este repositorio.
+Los scripts de tablas y datos de demostración están en `scripts/`.
+Consulta `GUIA_INSTALACION.txt` para instalar y ejecutar el proyecto.
