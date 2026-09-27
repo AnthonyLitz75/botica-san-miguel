@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Proveedores | Farmacia AED</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body>
+    <main>
+        <h1>Proveedores</h1>
+
+        <form th:action="@{/logout}" method="post">
+            <button type="submit">Cerrar sesión</button>
+        </form>
+
+        <p>
+            <a th:href="@{/medicamentos}">Medicamentos</a>
+        </p>
+
+        <p th:if="${puedeGestionarProveedores}">
+            <a th:href="@{/proveedores/nuevo}">Nuevo proveedor</a>
+        </p>
+
+        <form class="buscador" th:action="@{/proveedores}" method="get">
+            <label for="buscar">RUC o razón social</label>
+
+            <div class="buscador-controles">
+                <input type="search" id="buscar" name="buscar" th:value="${buscar}" placeholder="Buscar proveedor">
+
+                <label for="activo">Estado</label>
+                <select id="activo" name="activo">
+                    <option value="true" th:selected="${activo}">Activos</option>
+                    <option value="false" th:selected="${!activo}">Inactivos</option>
+                </select>
+
+                <button type="submit">Buscar</button>
+                <a th:href="@{/proveedores(activo=${activo})}">Limpiar</a>
+            </div>
+        </form>
+
+        <p th:if="${#lists.isEmpty(proveedores)}" th:text="${#strings.isEmpty(#strings.trim(buscar))
+           ? (activo
+               ? 'No hay proveedores activos registrados.'
+               : 'No hay proveedores inactivos registrados.')
+           : 'No se encontraron proveedores para esta busqueda.'}">
+        </p>
+
+        <div class="tabla-contenedor" th:unless="${#lists.isEmpty(proveedores)}">
+            <table>
+                <thead>
+                    <tr>
+                        <th>RUC</th>
+                        <th>Razón social</th>
+                        <th>Teléfono</th>
+                        <th>Correo</th>
+                        <th>Dirección</th>
+                        <th th:if="${puedeGestionarProveedores}">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="proveedor : ${proveedores}">
+                        <td th:text="${proveedor.ruc()}"></td>
+                        <td th:text="${proveedor.razonSocial()}"></td>
+                        <td th:text="${proveedor.telefono()}"></td>
+                        <td th:text="${proveedor.correo()}"></td>
+                        <td th:text="${proveedor.direccion()}"></td>
+                        <td th:if="${puedeGestionarProveedores}">
+                            <div class="acciones-medicamento">
+                                <a th:href="@{/proveedores/{id}/editar(id=${proveedor.idProveedor()})}">
+                                    Editar
+                                </a>
+
+                                <form method="post" th:if="${proveedor.activo()}"
+                                    th:action="@{/proveedores/{id}/desactivar(id=${proveedor.idProveedor()})}"
+                                    onsubmit="return confirm('¿Desactivar este proveedor? Se conservará su historial.');">
+                                    <button type="submit" class="boton-desactivar">Desactivar</button>
+                                </form>
+
+                                <form method="post" th:unless="${proveedor.activo()}"
+                                    th:action="@{/proveedores/{id}/activar(id=${proveedor.idProveedor()})}"
+                                    onsubmit="return confirm('¿Activar este proveedor?');">
+                                    <button type="submit" class="boton-activar">Activar</button>
+                                </form>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+
+</html>

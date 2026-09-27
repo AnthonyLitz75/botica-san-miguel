@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Detalle de movimiento | Farmacia AED</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+<main>
+    <h1>Detalle de movimiento</h1>
+
+    <dl class="datos-movimiento">
+        <dt>ID</dt>
+        <dd th:text="${movimiento.idMovimiento()}"></dd>
+
+        <dt>Fecha y hora</dt>
+        <dd th:text="${#temporals.format(
+                movimiento.fechaHora(), 'dd/MM/yyyy HH:mm')}"></dd>
+
+        <dt>Tipo</dt>
+        <dd th:text="${movimiento.tipo()}"></dd>
+
+        <dt>ID usuario</dt>
+        <dd th:text="${movimiento.idUsuario()}"></dd>
+
+        <dt>Motivo</dt>
+        <dd th:text="${movimiento.motivo()}"></dd>
+    </dl>
+
+    <p>
+        <a th:href="@{/movimientos}">Volver a movimientos</a>
+    </p>
+
+    <p th:if="${#lists.isEmpty(detalles)}">
+        Este movimiento no tiene detalles registrados.
+    </p>
+
+    <div class="tabla-contenedor"
+         th:unless="${#lists.isEmpty(detalles)}">
+        <table>
+            <thead>
+            <tr>
+                <th>Código</th>
+                <th>Medicamento</th>
+                <th>Número de lote</th>
+                <th>Cantidad</th>
+                <th>Unidad</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="detalle : ${detalles}">
+                <td th:text="${detalle.codigoMedicamento()}"></td>
+                <td th:text="${detalle.nombreMedicamento()}"></td>
+                <td th:text="${detalle.numeroLote()}"></td>
+                <td th:text="${detalle.cantidad()}"></td>
+                <td th:text="${detalle.unidadControl()}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>

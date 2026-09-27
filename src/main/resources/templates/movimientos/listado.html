@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Movimientos | Farmacia AED</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body>
+    <main>
+        <h1>Movimientos de inventario</h1>
+
+        <form th:action="@{/logout}" method="post">
+            <button type="submit">Cerrar sesión</button>
+        </form>
+
+        <p>
+            <a th:href="@{/medicamentos}">Medicamentos</a>
+        </p>
+
+        <p th:if="${#lists.isEmpty(movimientos)}">
+            No hay movimientos de inventario registrados.
+        </p>
+
+        <div class="tabla-contenedor" th:unless="${#lists.isEmpty(movimientos)}">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Fecha y hora</th>
+                        <th>Tipo</th>
+                        <th>ID usuario</th>
+                        <th>Motivo</th>
+                        <th>Detalle</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="movimiento : ${movimientos}">
+                        <td th:text="${movimiento.idMovimiento()}"></td>
+                        <td th:text="${#temporals.format(
+                        movimiento.fechaHora(), 'dd/MM/yyyy HH:mm')}"></td>
+                        <td th:text="${movimiento.tipo()}"></td>
+                        <td th:text="${movimiento.idUsuario()}"></td>
+                        <td th:text="${movimiento.motivo()}"></td>
+                        <td>
+                            <a th:href="@{/movimientos/{id}(id=${movimiento.idMovimiento()})}">
+                                Ver detalle
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+
+</html>

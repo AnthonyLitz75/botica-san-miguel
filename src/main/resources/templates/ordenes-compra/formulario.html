@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nueva orden de compra | Farmacia AED</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body>
+    <main>
+        <h1>Nueva orden de compra</h1>
+
+        <form th:action="@{/ordenes-compra}" method="post" th:object="${formulario}" class="formulario-medicamento">
+
+            <div th:if="${#fields.hasAnyErrors()}" role="alert">
+                <p class="error" th:each="error : ${#fields.allErrors()}" th:text="${error}"></p>
+            </div>
+
+            <p>
+                <label for="idProveedor">Proveedor</label>
+                <select th:field="*{idProveedor}" required>
+                    <option value="">Seleccionar proveedor</option>
+                    <option th:each="proveedor : ${proveedores}" th:value="${proveedor.idProveedor()}"
+                        th:text="${proveedor.razonSocial()}"></option>
+                </select>
+            </p>
+
+            <p>
+                <label for="medicamento">Medicamento</label>
+                <select id="medicamento" th:field="*{detalles[0].idMedicamento}" required>
+                    <option value="">Seleccionar medicamento</option>
+                    <option th:each="medicamento : ${medicamentos}" th:value="${medicamento.idMedicamento()}" th:text="${medicamento.codigo() + ' - '
+                            + medicamento.nombre()}"></option>
+                </select>
+            </p>
+
+            <p>
+                <label for="cantidad">Cantidad solicitada</label>
+                <input id="cantidad" type="number" min="1" step="1" th:field="*{detalles[0].cantidadSolicitada}"
+                    required>
+            </p>
+            <p>
+                <label for="costo">Costo unitario (S/)</label>
+                <input id="costo" type="number" min="0" step="0.01" th:field="*{detalles[0].costoUnitario}" required>
+            </p>
+            <p>
+                <label for="observaciones">Observaciones (opcional)</label>
+                <textarea th:field="*{observaciones}" maxlength="500"></textarea>
+            </p>
+
+            <button type="submit">Guardar orden</button>
+            <a th:href="@{/ordenes-compra}">Cancelar</a>
+        </form>
+    </main>
+</body>
+
+</html>

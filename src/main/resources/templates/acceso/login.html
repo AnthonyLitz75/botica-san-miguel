@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Iniciar sesión | Botica San Miguel</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body class="pagina-login">
+    <header class="login-cabecera">
+        <div class="login-marca">
+            <img th:src="@{/images/icono-medico-cabecera.png}" alt=""
+                 class="login-icono-medico" width="36" height="36">
+            <span>Botica San Miguel</span>
+        </div>
+    </header>
+
+    <main class="login-principal">
+        <section class="login-panel" aria-labelledby="titulo-login">
+            <div class="login-identidad">
+                <img th:src="@{/images/logo-botica-san-miguel.png}" alt=""
+                     class="login-emblema" width="96" height="96">
+                <h1 id="titulo-login">Botica San Miguel</h1>
+                <h2>Iniciar sesión</h2>
+            </div>
+
+            <p th:if="${param.error}" class="login-aviso login-aviso-error" role="alert">
+                Usuario o contraseña incorrectos.
+            </p>
+
+            <p th:if="${param.logout}" class="login-aviso login-aviso-exito" role="status">
+                Cerraste sesión correctamente.
+            </p>
+
+            <form th:action="@{/login}" method="post" class="login-formulario">
+                <div class="login-campo">
+                    <label for="username">Usuario</label>
+                    <input type="text" id="username" name="username" autocomplete="username" maxlength="50"
+                        placeholder="Nombre de usuario" required autofocus>
+                </div>
+
+                <div class="login-campo">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" name="password" autocomplete="current-password"
+                        placeholder="Contraseña" required>
+                </div>
+
+                <label class="login-mostrar-clave">
+                    <input type="checkbox" id="mostrar-password">
+                    Mostrar contraseña
+                </label>
+
+                <button type="submit" class="login-boton">
+                    Iniciar sesión
+                </button>
+            </form>
+        </section>
+    </main>
+    <script>
+        const mostrarPassword = document.getElementById("mostrar-password");
+        const password = document.getElementById("password");
+
+        mostrarPassword.addEventListener("change", () => {
+            password.type = mostrarPassword.checked ? "text" : "password";
+        });
+    </script>
+</body>
+
+</html>

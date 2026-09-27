@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lotes | Farmacia AED</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body>
+    <main>
+        <h1>Lotes</h1>
+
+        <p>
+            <strong th:text="${medicamento.codigo()}"></strong>
+            <span th:text="${medicamento.nombre()}"></span>
+        </p>
+
+        <form th:action="@{/logout}" method="post">
+            <button type="submit">Cerrar sesión</button>
+        </form>
+
+        <p>
+            <a th:href="@{/medicamentos}">Medicamentos</a>
+        </p>
+
+        <p th:if="${#lists.isEmpty(lotes)}">
+            No hay lotes registrados para este medicamento.
+        </p>
+
+        <div class="tabla-contenedor" th:unless="${#lists.isEmpty(lotes)}">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Número de lote</th>
+                        <th>Fecha de vencimiento</th>
+                        <th>Stock actual</th>
+                        <th>Unidad</th>
+                        <th th:if="${puedeRegistrarSalida}">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="lote : ${lotes}">
+                        <td th:text="${lote.numeroLote()}"></td>
+                        <td th:text="${#temporals.format(
+                        lote.fechaVencimiento(), 'dd/MM/yyyy')}"></td>
+                        <td th:text="${lote.stockActual()}"></td>
+                        <td th:text="${medicamento.unidadControl()}"></td>
+                        <td th:if="${puedeRegistrarSalida}">
+                            <a th:if="${lote.stockActual() > 0}" th:href="@{/lotes/{id}/salida(id=${lote.idLote()})}">
+                                Registrar salida
+                            </a>
+                            <span th:unless="${lote.stockActual() > 0}">
+                                Sin existencias
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+
+</html>

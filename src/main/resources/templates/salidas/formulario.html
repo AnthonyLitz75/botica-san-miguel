@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Registrar salida | Farmacia AED</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body>
+    <main>
+        <h1>Registrar salida de inventario</h1>
+
+        <dl class="datos-movimiento">
+            <dt>Medicamento</dt>
+            <dd th:text="${medicamento.codigo() + ' - ' + medicamento.nombre()}"></dd>
+            <dt>Lote</dt>
+            <dd th:text="${lote.numeroLote()}"></dd>
+            <dt>Stock actual</dt>
+            <dd th:text="${lote.stockActual() + ' ' + medicamento.unidadControl()}"></dd>
+        </dl>
+
+        <form th:action="@{/lotes/{id}/salida(id=${lote.idLote()})}" th:object="${formulario}" method="post"
+            class="formulario-medicamento">
+
+            <div th:if="${#fields.hasGlobalErrors()}" role="alert">
+                <p class="error" th:each="error : ${#fields.globalErrors()}" th:text="${error}"></p>
+            </div>
+
+            <div>
+                <label for="cantidad">Cantidad</label>
+                <input type="number" id="cantidad" th:field="*{cantidad}" min="1" step="1" required>
+                <p class="error" th:if="${#fields.hasErrors('cantidad')}" th:errors="*{cantidad}"></p>
+            </div>
+
+            <div>
+                <label for="motivo">Motivo</label>
+                <input type="text" id="motivo" th:field="*{motivo}" maxlength="250" required>
+                <p class="error" th:if="${#fields.hasErrors('motivo')}" th:errors="*{motivo}"></p>
+            </div>
+
+            <button type="submit">Registrar salida</button>
+            <a th:href="@{/medicamentos/{id}/lotes(id=${lote.idMedicamento()})}">
+                Cancelar
+            </a>
+        </form>
+    </main>
+</body>
+
+</html>

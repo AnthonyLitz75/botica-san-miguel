@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${idMedicamento != null
+        ? 'Editar medicamento | Farmacia AED'
+        : 'Nuevo medicamento | Farmacia AED'}">
+        Medicamento | Farmacia AED
+    </title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body>
+    <main>
+        <h1 th:text="${idMedicamento != null
+            ? 'Editar medicamento'
+            : 'Nuevo medicamento'}">
+            Medicamento
+        </h1>
+        <form th:action="${idMedicamento != null}
+          ? @{/medicamentos/{id}/editar(id=${idMedicamento})}
+          : @{/medicamentos}" th:object="${formulario}" method="post" class="formulario-medicamento">
+            <div>
+                <label for="codigo">Codigo</label>
+                <input type="text" th:field="*{codigo}" maxlength="50">
+                <p class="error" th:errors="*{codigo}"></p>
+            </div>
+            <div>
+                <label for="nombre">Nombre</label>
+                <input type="text" th:field="*{nombre}" maxlength="150">
+                <p class="error" th:errors="*{nombre}"></p>
+            </div>
+            <div>
+                <label for="concentracion">Concentracion (opcional)</label>
+                <input type="text" th:field="*{concentracion}" maxlength="100">
+                <p class="error" th:errors="*{concentracion}"></p>
+            </div>
+            <div>
+                <label for="presentacion">Presentacion</label>
+                <input type="text" th:field="*{presentacion}" maxlength="100">
+                <p class="error" th:errors="*{presentacion}"></p>
+            </div>
+            <div>
+                <label for="unidadControl">Unidad de control</label>
+                <select th:field="*{unidadControl}">
+                    <option value="">Seleccionar</option>
+                    <option value="CAJA">Caja</option>
+                    <option value="FRASCO">Frasco</option>
+                </select>
+                <p class="error" th:errors="*{unidadControl}"></p>
+            </div>
+            <div>
+                <label for="precioVenta">Precio de venta (S/)</label>
+                <input type="number" th:field="*{precioVenta}" min="0" step="0.01">
+                <p class="error" th:errors="*{precioVenta}"></p>
+            </div>
+            <div>
+                <label for="stockMinimo">Stock minimo</label>
+                <input type="number" th:field="*{stockMinimo}" min="0" step="1">
+                <p class="error" th:errors="*{stockMinimo}"></p>
+            </div>
+            <button type="submit" th:text="${idMedicamento != null
+            ? 'Guardar cambios'
+            : 'Guardar medicamento'}">
+                Guardar
+            </button>
+            <a th:href="@{/medicamentos}">Cancelar</a>
+        </form>
+    </main>
+</body>
+
+</html>

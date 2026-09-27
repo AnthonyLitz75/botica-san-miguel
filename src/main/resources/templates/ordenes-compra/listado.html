@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Órdenes de compra | Farmacia AED</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body>
+    <main>
+        <h1>Órdenes de compra</h1>
+        <p th:if="${mensaje != null}" th:text="${mensaje}" role="status"></p>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit">Cerrar sesión</button>
+        </form>
+
+        <p>
+            <a th:href="@{/medicamentos}">Medicamentos</a>
+        </p>
+
+        <p th:if="${puedeCrearOrden}">
+            <a th:href="@{/ordenes-compra/nuevo}">
+                Nueva orden de compra
+            </a>
+        </p>
+
+        <p th:if="${#lists.isEmpty(ordenes)}">
+            No hay órdenes de compra registradas.
+        </p>
+
+        <div class="tabla-contenedor" th:unless="${#lists.isEmpty(ordenes)}">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Número de orden</th>
+                        <th>Fecha y hora</th>
+                        <th>ID proveedor</th>
+                        <th>Estado</th>
+                        <th>Total estimado (S/)</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="orden : ${ordenes}">
+                        <td th:text="${orden.numeroOrden()}"></td>
+                        <td th:text="${#temporals.format(
+                            orden.fechaHora(), 'dd/MM/yyyy HH:mm')}"></td>
+                        <td th:text="${orden.idProveedor()}"></td>
+                        <td th:text="${orden.estado()}"></td>
+                        <td th:text="${#numbers.formatDecimal(
+                            orden.totalEstimado(), 1, 2, 'POINT')}"></td>
+                        <td>
+                            <a th:href="@{/ordenes-compra/{id}(id=${orden.idOrden()})}">
+                                Ver detalle
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+
+</html>

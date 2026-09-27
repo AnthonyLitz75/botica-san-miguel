@@ -1,0 +1,525 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: #202b32;
+  background-color: #f4f6f8;
+}
+
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+
+h1 {
+  margin: 0 0 24px;
+  font-size: 28px;
+}
+
+.tabla-contenedor {
+  overflow-x: auto;
+  background-color: #ffffff;
+  border: 1px solid #dce2e6;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid #dce2e6;
+}
+
+th {
+  background-color: #e8f2ef;
+  color: #205c4b;
+  font-size: 14px;
+}
+
+td {
+  font-size: 14px;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr:hover {
+  background-color: #f3f8f6;
+}
+
+.buscador {
+  margin-bottom: 24px;
+}
+
+.buscador label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.buscador-controles {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.buscador input {
+  width: 100%;
+  max-width: 360px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #88969e;
+  border-radius: 4px;
+  font: inherit;
+}
+
+.buscador button {
+  padding: 10px 16px;
+  border: 1px solid #205c4b;
+  border-radius: 4px;
+  background-color: #205c4b;
+  color: #ffffff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.buscador button:hover {
+  background-color: #174737;
+}
+
+.buscador a {
+  color: #205c4b;
+}
+
+.buscador input:focus-visible,
+.buscador button:focus-visible,
+.buscador a:focus-visible {
+  outline: 3px solid #2675bc;
+  outline-offset: 3px;
+}
+
+.formulario-medicamento {
+  width: 100%;
+  max-width: 560px;
+}
+
+.formulario-medicamento > div {
+  margin-bottom: 18px;
+}
+
+.formulario-medicamento label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.formulario-medicamento input,
+.formulario-medicamento select {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #88969e;
+  border-radius: 4px;
+  background-color: #ffffff;
+  color: #202b32;
+  font: inherit;
+}
+
+.formulario-medicamento button {
+  padding: 10px 16px;
+  border: 1px solid #205c4b;
+  border-radius: 4px;
+  background-color: #205c4b;
+  color: #ffffff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.formulario-medicamento button:hover {
+  background-color: #174737;
+}
+
+.formulario-medicamento a {
+  display: inline-block;
+  margin: 12px;
+  color: #205c4b;
+}
+
+.formulario-medicamento .error {
+  margin: 6px 0 0;
+  color: #b42318;
+  font-size: 14px;
+}
+
+.formulario-medicamento :focus-visible {
+  outline: 3px solid #2675bc;
+  outline-offset: 3px;
+}
+
+.enlace-nuevo {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: #205c4b;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.enlace-nuevo:focus-visible {
+  outline: 3px solid #2675bc;
+  outline-offset: 3px;
+}
+
+.acciones-medicamento {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.acciones-medicamento form {
+  margin: 0;
+}
+
+.acciones-medicamento a {
+  color: #205c4b;
+}
+
+.boton-desactivar {
+  padding: 8px 12px;
+  border: 1px solid #b42318;
+  border-radius: 4px;
+  background-color: #ffffff;
+  color: #b42318;
+  font: inherit;
+  cursor: pointer;
+}
+
+.boton-desactivar:hover {
+  background-color: #fff1f0;
+}
+
+.acciones-medicamento :focus-visible {
+  outline: 3px solid #2675bc;
+  outline-offset: 3px;
+}
+
+.boton-activar {
+  padding: 8px 12px;
+  border: 1px solid #205c4b;
+  border-radius: 4px;
+  background-color: #ffffff;
+  color: #205c4b;
+  font: inherit;
+  cursor: pointer;
+}
+
+.boton-activar:hover {
+  background-color: #e8f2ef;
+}
+
+.buscador-controles label {
+  margin: 0;
+}
+
+.buscador select {
+  padding: 10px 12px;
+  border: 1px solid #88969e;
+  border-radius: 4px;
+  background-color: #ffffff;
+  color: #202b32;
+  font: inherit;
+}
+
+.buscador select:focus-visible {
+  outline: 3px solid #2675bc;
+  outline-offset: 3px;
+}
+
+.datos-movimiento {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 12px 20px;
+  max-width: 720px;
+  margin: 24px 0;
+}
+
+.datos-movimiento dt {
+  font-weight: 600;
+}
+
+.datos-movimiento dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+  .datos-movimiento {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .datos-movimiento dd {
+    margin-bottom: 12px;
+  }
+}
+
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  color: #263238;
+  background-color: #f5f7fa;
+  line-height: 1.5;
+}
+
+main {
+  max-width: 1240px;
+  padding: 40px 28px;
+}
+
+h1 {
+  font-size: 26px;
+  font-weight: 650;
+  margin-bottom: 28px;
+}
+
+a {
+  color: #176b57;
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  color: #104c3e;
+}
+
+button {
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid #cbd5dc;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #263238;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #eef2f5;
+}
+
+.formulario-medicamento textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 10px 12px;
+  border: 1px solid #88969e;
+  border-radius: 4px;
+  background: #ffffff;
+  font: inherit;
+  resize: vertical;
+}
+
+.tabla-contenedor {
+  border-radius: 6px;
+}
+
+th {
+  background-color: #edf3f1;
+  font-weight: 600;
+}
+
+:focus-visible {
+  outline: 3px solid #2675bc;
+  outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+  main {
+    padding: 24px 16px;
+  }
+}
+
+/* Inicio de sesion */
+.pagina-login {
+  background: #eef4f2;
+}
+
+.login-cabecera {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  background: #ffffff;
+  border-bottom: 1px solid #dce5e1;
+}
+
+.login-marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #176b57;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.login-principal {
+  max-width: none;
+  min-height: calc(100dvh - 64px);
+  display: grid;
+  place-items: center;
+  padding: 40px 20px;
+}
+
+.login-panel {
+  width: 100%;
+  max-width: 440px;
+  padding: 36px;
+  background: #ffffff;
+  border: 1px solid #dce5e1;
+  border-radius: 8px;
+  box-shadow: 0 12px 36px rgb(38 50 56 / 8%);
+}
+
+.login-identidad {
+  text-align: center;
+  margin-bottom: 28px;
+}
+.login-identidad h1 {
+  margin: 16px 0 4px;
+  font-size: 26px;
+}
+.login-identidad h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 400;
+  color: #647078;
+}
+
+.login-distintivo {
+  display: inline-grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  background: #176b57;
+  color: #ffffff;
+  font-size: 36px;
+  line-height: 1;
+}
+
+.login-icono-medico {
+  display: block;
+  width: 36px;
+  height: 36px;
+  max-width: 36px;
+  max-height: 36px;
+  object-fit: contain;
+  flex: none;
+}
+
+.login-emblema {
+  display: block;
+  width: 96px;
+  height: 96px;
+  max-width: 96px;
+  max-height: 96px;
+  object-fit: contain;
+  margin: -12px auto 0;
+}
+
+.login-campo {
+  margin-bottom: 20px;
+}
+.login-campo label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.login-campo input {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid #bcc9c4;
+  border-radius: 6px;
+  background: #fafcfb;
+  color: #263238;
+  font: inherit;
+}
+
+.login-boton {
+  width: 100%;
+  min-height: 48px;
+  background: #176b57;
+  border-color: #176b57;
+  color: #ffffff;
+  font-weight: 600;
+}
+.login-boton:hover {
+  background: #104c3e;
+}
+.login-aviso {
+  padding: 12px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.login-aviso-error {
+  background: #fff1f0;
+  color: #a12622;
+  border: 1px solid #efc7c4;
+}
+.login-aviso-exito {
+  background: #edf7f0;
+  color: #23643b;
+  border: 1px solid #c9e4d1;
+}
+
+@media (max-width: 480px) {
+  .login-cabecera {
+    padding: 0 20px;
+  }
+  .login-principal {
+    padding: 24px 16px;
+  }
+  .login-panel {
+    padding: 28px 24px;
+  }
+}
+
+.login-mostrar-clave {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -4px 0 20px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.login-mostrar-clave input {
+  width: 16px;
+  height: 16px;
+  accent-color: #176b57;
+}
+
+.pagina-login {
+  background-color: #d9e8e3;
+  background-image: url("../images/fondo-login.png");
+  background-size: cover;
+  background-position: center;
+}
+
+.login-panel {
+  box-shadow: 0 14px 40px rgb(20 45 47 / 18%);
+}
