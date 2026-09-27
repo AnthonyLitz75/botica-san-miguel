@@ -1,0 +1,641 @@
+BOTICA SAN MIGUEL - GUIA DE INSTALACION Y DEMOSTRACION
+===================================================
+Dirigida a Windows y PowerShell. Proyecto academico en desarrollo.
+Esta guia incluye los scripts completos al final y copias ejecutables en scripts/.
+No ejecuta nada automaticamente. No contiene credenciales reales de PostgreSQL.
+
+IMPORTANTE
+----------
+- Use una instalacion local de demostracion, nunca una base con datos reales.
+- Los scripts NO son una copia de la base del autor: crean tablas y datos ficticios.
+- NO los ejecute en la farmacia_aed que ya usa el autor y tiene avances guardados.
+- Las cuentas de la aplicacion son PUBLICAS y solo para pruebas locales.
+- No exponga este entorno a internet, ni reutilice las claves de demostracion.
+- Los scripts no usan DROP, DELETE ni TRUNCATE. No sustituyen tablas existentes.
+- El primer script exige que no existan las tablas. El segundo exige tablas vacias.
+- Lea todas las instrucciones antes de ejecutar comandos.
+- Esta guia no publica el sitio en internet. Cada companero lo ejecuta en su PC.
+
+1. REQUISITOS
+-------------
+- JDK 25 (el pom.xml actual establece java.version=25), no solo JRE.
+- PostgreSQL 18 y pgAdmin 4. Servicio local en puerto 5432.
+- Git para clonar; si usa ZIP, Git no es necesario para ejecutar la aplicacion.
+- Internet en la primera ejecucion para descargar Maven y dependencias.
+- Maven Wrapper incluido: no necesita instalar Maven por separado.
+- No necesita Node.js.
+
+En PowerShell:
+    java -version
+
+Debe indicar Java 25. Si no encuentra Java, configure JAVA_HOME apuntando a la
+carpeta del JDK y anada su carpeta bin al PATH. Abra una nueva terminal.
+JAVA_HOME no debe apuntar a bin.
+Para comprobar el Java utilizado por Maven, dentro del proyecto:
+    .\mvnw.cmd -v
+
+Descargas oficiales:
+    https://www.oracle.com/java/technologies/downloads/
+    https://www.postgresql.org/download/windows/
+
+2. DESCARGAR EL PROYECTO
+-----------------------
+Puede descargar el ZIP desde GitHub, Code > Download ZIP, y descomprimirlo.
+Abra PowerShell dentro de la carpeta que contiene pom.xml y mvnw.cmd.
+
+Alternativamente, desde una carpeta donde quiera guardar el proyecto:
+    git clone ("https://" + "github.com/AnthonyLitz75/botica-san-miguel.git")
+    cd botica-san-miguel
+
+Verifique la carpeta:
+    Test-Path .\pom.xml
+    Test-Path .\mvnw.cmd
+Ambos deben mostrar True. El nombre del ZIP puede terminar en "-main";
+no importa el nombre de la carpeta, sino que contenga pom.xml.
+
+3. CREAR UNA BASE NUEVA EN PGADMIN
+---------------------------------
+Abra pgAdmin y conectese a su servidor PostgreSQL con SU usuario y SU clave.
+Esa clave no es una clave de los usuarios de la pagina.
+
+Para un companero que no tiene farmacia_aed:
+- Clic derecho en Databases / Bases de datos > Create > Database.
+- Nombre: farmacia_aed.
+- Owner / propietario: su usuario local, normalmente postgres.
+- Guardar.
+
+Si farmacia_aed ya existe con datos, NO la use para esta instalacion:
+- Cree una base diferente, por ejemplo botica_demo_companero.
+- En el paso 5 configure SPRING_DATASOURCE_URL con ese nombre.
+- No borre su base anterior.
+
+4. EJECUTAR LOS SCRIPTS SQL
+---------------------------
+Seleccione la base NUEVA, abra Query Tool y compruebe:
+    SELECT current_database();
+El resultado debe ser exactamente el nombre de esa base nueva.
+
+Metodo recomendado:
+A. Abra scripts/01_creacion_tablas.sql mediante Open File en Query Tool.
+B. Ejecute TODO el archivo, sin dejar solo un fragmento seleccionado.
+C. Debe terminar sin errores y crear las 11 tablas.
+D. Abra scripts/02_datos_demo.sql y ejecute TODO el archivo.
+E. Debe terminar sin errores y mostrar las consultas de comprobacion.
+
+Los mismos scripts estan completos en los anexos de este archivo:
+si los copia, copie solo el SQL entre INICIO y FIN, no las instrucciones.
+
+Cada script usa una transaccion. Si aparece un error:
+- No ejecute el siguiente script.
+- Ejecute ROLLBACK; en Query Tool para cerrar la transaccion fallida.
+- Revise el primer error, la base seleccionada y los permisos.
+- No quite las comprobaciones ni agregue DROP TABLE para forzar la instalacion.
+
+El segundo script instala pgcrypto para generar hashes BCrypt, compatibles
+con el prefijo {bcrypt} de Spring Security. Use el propietario de la base o
+un usuario con permiso CREATE. Si falta la extension, revise la instalacion
+de PostgreSQL. Documentacion:
+    https://www.postgresql.org/docs/18/pgcrypto.html
+
+Los ID son generados por PostgreSQL. Los datos se enlazan por nombre/codigo,
+sin suponer que el usuario almacen o el lote tengan siempre el ID 1.
+
+Resultado inicial:
+- 4 cuentas activas.
+- 2 medicamentos y 2 proveedores ficticios.
+- Paracetamol: lote PAR-DEMO-A con 30 cajas; vencimiento a dos anos.
+- Ibuprofeno: sin lotes (es intencional).
+- 1 movimiento de ENTRADA de 30 cajas.
+- 1 orden OC-DEMO-001, PENDIENTE, 10 cajas a 5.00 = 50.00.
+- Crear la orden no aumenta el stock.
+
+5. CONFIGURAR LA CONEXION (MISMA TERMINAL DE POWERSHELL)
+-----------------------------------------------------
+Dentro de la carpeta del proyecto:
+    $env:DB_USER = Read-Host "Usuario de PostgreSQL"
+    $clave = Read-Host "Contrasena de PostgreSQL" -AsSecureString
+    $env:DB_PASSWORD = [System.Net.NetworkCredential]::new("", $clave).Password
+    Remove-Variable clave
+
+Ingrese las credenciales de SU PostgreSQL, no admin_demo ni su clave web.
+Read-Host -AsSecureString evita mostrar y escribir la clave en el comando.
+La variable de entorno contiene la clave en memoria: no es una caja fuerte.
+No muestre $env:DB_PASSWORD ni la guarde en GitHub, archivos o capturas.
+
+Si su base se llama farmacia_aed y usa localhost:5432, no necesita otra variable.
+Si creo botica_demo_companero:
+    $env:SPRING_DATASOURCE_URL = "jdbc:postgresql://localhost:5432/botica_demo_companero"
+
+Si su puerto es diferente, ajuste 5432 en esa URL.
+Las variables se aplican a esta terminal y a los procesos que inicie desde ella.
+No se cargan automaticamente desde un archivo .env.
+No use setx para guardar la clave permanentemente.
+
+6. COMPILAR E INICIAR
+--------------------
+En esa MISMA terminal:
+    .\mvnw.cmd compile
+Si aparece BUILD SUCCESS, la compilacion termino correctamente.
+Esto no confirma por si solo la conexion ni el funcionamiento de la pagina.
+
+Inicie:
+    .\mvnw.cmd spring-boot:run
+
+Espere el mensaje Started FarmaciaAedApplication y el arranque en puerto 8080.
+El proceso permanece abierto mientras la web funciona; esto es normal.
+En el navegador abra:
+    http://localhost:8080/login
+
+No abra login.html como archivo: necesita el servidor Spring Boot y Thymeleaf.
+La computadora debe mantener PostgreSQL y la aplicacion funcionando.
+
+Si 8080 esta ocupado por otra aplicacion, no cierre procesos desconocidos.
+Antes de iniciar, puede elegir otro puerto:
+    $env:SERVER_PORT = "8081"
+    .\mvnw.cmd spring-boot:run
+Entonces abra http://localhost:8081/login.
+
+7. CUENTAS PUBLICAS DE DEMOSTRACION
+----------------------------------
+Rol             Usuario          Clave (solo pruebas locales)
+Administrador   admin_demo       AdminDemo2026!
+Almacenero      almacen_demo     FarmaciaDemo2026!
+Compras         compras_demo     ComprasDemo2026!
+Vendedor        vendedor_demo    VendedorDemo2026!
+
+Respete mayusculas y el signo !.
+Estas NO son credenciales reales, ni claves para PostgreSQL o GitHub.
+No use estas cuentas si despliega el proyecto: debe cambiarlas o eliminarlas.
+Los hashes se guardan en usuario.clave_hash; no en texto plano en la base.
+
+Para cambiar de rol, cierre sesion antes de entrar con otra cuenta.
+Algunas paginas estan restringidas: un 403 puede ser esperado segun el rol.
+
+8. PRUEBAS BASICAS
+-----------------
+Administrador:
+- Iniciar sesion y consultar medicamentos, proveedores y ordenes.
+- Revisar el detalle de OC-DEMO-001: 10 x 5.00 = 50.00.
+
+Almacenero:
+- Medicamentos > Paracetamol > Ver lotes: deben aparecer 30 cajas.
+- Consultar movimientos y ver la entrada inicial.
+- Registrar salida de 2 cajas con motivo "Salida de demostracion".
+- El stock debe bajar a 28 y debe aparecer un movimiento SALIDA de 2.
+- Intentar una salida mayor que el stock: debe rechazarse sin descontar.
+- No repita la salida valida esperando siempre 28: cada salida cambia el stock.
+
+Compras:
+- Crear una orden con proveedor y medicamento activos.
+- Verificar importe = cantidad x costo unitario.
+- Comprobar que guardar una orden pendiente no modifica el stock.
+
+Vendedor:
+- Consultar medicamentos y lotes.
+- No debe tener permiso para registrar una salida de inventario.
+
+Los modulos de ventas, recepcion de compras y otras partes del proyecto
+estan pendientes. La existencia de sus tablas no significa que haya interfaz.
+
+9. DETENER Y VOLVER A INICIAR
+----------------------------
+En la terminal del servidor: Ctrl + C.
+Para retirar las credenciales del entorno de esa terminal:
+    Remove-Item Env:DB_PASSWORD -ErrorAction SilentlyContinue
+    Remove-Item Env:DB_USER -ErrorAction SilentlyContinue
+    Remove-Item Env:SPRING_DATASOURCE_URL -ErrorAction SilentlyContinue
+    Remove-Item Env:SERVER_PORT -ErrorAction SilentlyContinue
+
+La base conserva los datos. Para volver a iniciar:
+- Configure otra vez las variables del paso 5.
+- Ejecute spring-boot:run.
+- NO vuelva a ejecutar los scripts de instalacion.
+
+10. PROBLEMAS FRECUENTES
+-----------------------
+"release version 25 not supported":
+    Maven esta usando otro JDK. Compruebe java -version, .\mvnw.cmd -v y JAVA_HOME.
+"Connection refused":
+    Compruebe que PostgreSQL este iniciado, host, puerto y URL.
+"database ... does not exist":
+    Cree la base nueva o corrija SPRING_DATASOURCE_URL.
+"password authentication failed":
+    Revise DB_USER/DB_PASSWORD; configurelas en la terminal que inicia el servidor.
+"relation usuario does not exist":
+    Faltan tablas o ejecuto el SQL en otra base/esquema. Use el esquema public.
+"function crypt/gen_salt does not exist":
+    Falta pgcrypto o no termino correctamente el segundo script.
+"relation ... already exists" / "Las tablas deben estar vacias":
+    Esta repitiendo instalacion o usando una base con datos. Ejecute ROLLBACK;
+    y revise. No elimine datos para continuar.
+No inicia sesion:
+    Confirme que el segundo script termino y use una cuenta del paso 7.
+    PostgreSQL y la app deben apuntar a la misma base.
+403 Forbidden:
+    Confirme el rol. No desactive Spring Security para evadir la restriccion.
+Maven no descarga dependencias:
+    Revise internet/proxy/firewall. No necesita modificar el pom.xml.
+Cambios HTML/CSS no aparecen:
+    Reinicie Spring Boot y recargue el navegador con Ctrl + F5.
+
+11. SUBIR ESTOS ARCHIVOS A GITHUB (AUTOR, MANUAL)
+------------------------------------------------
+Ejecute desde la carpeta farmacia-aed:
+    git status
+    git add GUIA_INSTALACION.txt scripts/01_creacion_tablas.sql scripts/02_datos_demo.sql
+    git diff --cached --stat
+    git commit -m "Agregar guia de instalacion y scripts de demostracion"
+    git push
+
+Revise los archivos antes de confirmar. Estos comandos no suben una base viva.
+No publique DB_PASSWORD ni datos personales. El repositorio contiene codigo y
+scripts; no aloja la aplicacion. localhost siempre apunta a la PC del visitante.
+
+El README actual dice que no hay scripts. Cuando suba estos archivos, reemplace
+esa frase por: "Scripts de instalacion en scripts/. Consulte GUIA_INSTALACION.txt."
+Haga git add README.md y un commit para ese cambio antes de enviarlo.
+
+ANEXO A: SQL DE CREACION DE TABLAS
+=================================
+INICIO DEL SQL A (copiar desde la siguiente linea)
+-- Instalacion nueva: ejecutar una sola vez en una base vacia.
+-- No borra ni reemplaza tablas existentes. Ante errores, ejecutar ROLLBACK.
+BEGIN;
+
+CREATE TABLE usuario (
+    id_usuario INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    nombre_usuario VARCHAR(50) NOT NULL UNIQUE,
+    clave_hash VARCHAR(255) NOT NULL,
+    rol VARCHAR(20) NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+
+    CONSTRAINT chk_usuario_rol
+        CHECK (rol IN (
+            'ADMINISTRADOR',
+            'VENDEDOR',
+            'ALMACENERO',
+            'COMPRAS'
+        ))
+);
+
+
+CREATE TABLE medicamento (
+    id_medicamento INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    codigo VARCHAR(50) NOT NULL UNIQUE,
+    nombre VARCHAR(150) NOT NULL,
+    concentracion VARCHAR(100),
+    presentacion VARCHAR(100) NOT NULL,
+    unidad_control VARCHAR(30) NOT NULL,
+    precio_venta NUMERIC(12,2) NOT NULL,
+    stock_minimo INTEGER NOT NULL DEFAULT 0,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+
+    CONSTRAINT chk_medicamento_precio
+        CHECK (precio_venta >= 0),
+
+    CONSTRAINT chk_medicamento_stock_minimo
+        CHECK (stock_minimo >= 0)
+);
+
+
+CREATE TABLE lote (
+    id_lote INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_medicamento INTEGER NOT NULL,
+    numero_lote VARCHAR(50) NOT NULL,
+    fecha_vencimiento DATE NOT NULL,
+    stock_actual INTEGER NOT NULL DEFAULT 0,
+
+    CONSTRAINT fk_lote_medicamento
+        FOREIGN KEY (id_medicamento)
+        REFERENCES medicamento (id_medicamento),
+
+    CONSTRAINT uq_lote_medicamento_numero
+        UNIQUE (id_medicamento, numero_lote),
+
+    CONSTRAINT chk_lote_stock
+        CHECK (stock_actual >= 0)
+);
+
+
+CREATE TABLE proveedor (
+    id_proveedor INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ruc VARCHAR(11) NOT NULL UNIQUE,
+    razon_social VARCHAR(150) NOT NULL,
+    telefono VARCHAR(20),
+    correo VARCHAR(150),
+    direccion VARCHAR(200),
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+
+    CONSTRAINT chk_proveedor_ruc
+        CHECK (ruc ~ '^[0-9]{11}$')
+);
+
+
+CREATE TABLE cliente (
+    id_cliente INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    tipo_documento VARCHAR(20) NOT NULL,
+    numero_documento VARCHAR(20) NOT NULL,
+    nombre_completo VARCHAR(150) NOT NULL,
+    telefono VARCHAR(20),
+    correo VARCHAR(150),
+
+    CONSTRAINT uq_cliente_documento
+        UNIQUE (tipo_documento, numero_documento)
+);
+
+
+CREATE TABLE orden_compra (
+    id_orden INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    numero_orden VARCHAR(30) NOT NULL UNIQUE,
+    id_usuario INTEGER NOT NULL,
+    id_proveedor INTEGER NOT NULL,
+    fecha_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    estado VARCHAR(25) NOT NULL DEFAULT 'PENDIENTE',
+    total_estimado NUMERIC(12,2) NOT NULL DEFAULT 0,
+    observaciones VARCHAR(500),
+
+    CONSTRAINT fk_orden_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario (id_usuario),
+
+    CONSTRAINT fk_orden_proveedor
+        FOREIGN KEY (id_proveedor)
+        REFERENCES proveedor (id_proveedor),
+
+    CONSTRAINT chk_orden_estado
+        CHECK (estado IN (
+            'PENDIENTE',
+            'PARCIALMENTE_RECIBIDA',
+            'RECIBIDA',
+            'CANCELADA'
+        )),
+
+    CONSTRAINT chk_orden_total
+        CHECK (total_estimado >= 0)
+);
+
+
+CREATE TABLE detalle_orden_compra (
+    id_detalle_orden INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_orden INTEGER NOT NULL,
+    id_medicamento INTEGER NOT NULL,
+    cantidad_solicitada INTEGER NOT NULL,
+    costo_unitario NUMERIC(12,2) NOT NULL,
+    importe_estimado NUMERIC(12,2) NOT NULL,
+
+    CONSTRAINT fk_detalle_orden_compra
+        FOREIGN KEY (id_orden)
+        REFERENCES orden_compra (id_orden),
+
+    CONSTRAINT fk_detalle_orden_medicamento
+        FOREIGN KEY (id_medicamento)
+        REFERENCES medicamento (id_medicamento),
+
+    CONSTRAINT uq_detalle_orden_medicamento
+        UNIQUE (id_orden, id_medicamento),
+
+    CONSTRAINT chk_detalle_orden_cantidad
+        CHECK (cantidad_solicitada > 0),
+
+    CONSTRAINT chk_detalle_orden_costo
+        CHECK (costo_unitario >= 0),
+
+    CONSTRAINT chk_detalle_orden_importe
+        CHECK (
+            importe_estimado = cantidad_solicitada * costo_unitario
+        )
+);
+
+
+CREATE TABLE venta (
+    id_venta INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_usuario INTEGER NOT NULL,
+    id_cliente INTEGER,
+    fecha_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    subtotal NUMERIC(12,2) NOT NULL,
+    descuento_total NUMERIC(12,2) NOT NULL DEFAULT 0,
+    total NUMERIC(12,2) NOT NULL,
+    numero_comprobante VARCHAR(30) NOT NULL UNIQUE,
+
+    CONSTRAINT fk_venta_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario (id_usuario),
+
+    CONSTRAINT fk_venta_cliente
+        FOREIGN KEY (id_cliente)
+        REFERENCES cliente (id_cliente),
+
+    CONSTRAINT chk_venta_subtotal
+        CHECK (subtotal >= 0),
+
+    CONSTRAINT chk_venta_descuento
+        CHECK (
+            descuento_total >= 0
+            AND descuento_total <= subtotal
+        ),
+
+    CONSTRAINT chk_venta_total
+        CHECK (total = subtotal - descuento_total)
+);
+
+
+CREATE TABLE detalle_venta (
+    id_detalle_venta INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_venta INTEGER NOT NULL,
+    id_lote INTEGER NOT NULL,
+    cantidad INTEGER NOT NULL,
+    precio_unitario NUMERIC(12,2) NOT NULL,
+    descuento_importe NUMERIC(12,2) NOT NULL DEFAULT 0,
+    importe NUMERIC(12,2) NOT NULL,
+
+    CONSTRAINT fk_detalle_venta
+        FOREIGN KEY (id_venta)
+        REFERENCES venta (id_venta),
+
+    CONSTRAINT fk_detalle_venta_lote
+        FOREIGN KEY (id_lote)
+        REFERENCES lote (id_lote),
+
+    CONSTRAINT chk_detalle_venta_cantidad
+        CHECK (cantidad > 0),
+
+    CONSTRAINT chk_detalle_venta_precio
+        CHECK (precio_unitario >= 0),
+
+    CONSTRAINT chk_detalle_venta_descuento
+        CHECK (
+            descuento_importe >= 0
+            AND descuento_importe <= cantidad * precio_unitario
+        ),
+
+    CONSTRAINT chk_detalle_venta_importe
+        CHECK (
+            importe = cantidad * precio_unitario - descuento_importe
+        )
+);
+
+
+CREATE TABLE movimiento_inventario (
+    id_movimiento INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_usuario INTEGER NOT NULL,
+    id_proveedor INTEGER,
+    id_venta INTEGER UNIQUE,
+    id_orden INTEGER,
+    tipo VARCHAR(10) NOT NULL,
+    fecha_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    motivo VARCHAR(250) NOT NULL,
+
+    CONSTRAINT fk_movimiento_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario (id_usuario),
+
+    CONSTRAINT fk_movimiento_proveedor
+        FOREIGN KEY (id_proveedor)
+        REFERENCES proveedor (id_proveedor),
+
+    CONSTRAINT fk_movimiento_venta
+        FOREIGN KEY (id_venta)
+        REFERENCES venta (id_venta),
+
+    CONSTRAINT fk_movimiento_orden
+        FOREIGN KEY (id_orden)
+        REFERENCES orden_compra (id_orden),
+
+    CONSTRAINT chk_movimiento_tipo
+        CHECK (tipo IN ('ENTRADA', 'SALIDA')),
+
+    CONSTRAINT chk_movimiento_venta
+        CHECK (
+            id_venta IS NULL
+            OR (tipo = 'SALIDA' AND id_orden IS NULL)
+        ),
+
+    CONSTRAINT chk_movimiento_compra
+        CHECK (
+            id_orden IS NULL
+            OR (
+                tipo = 'ENTRADA'
+                AND id_venta IS NULL
+                AND id_proveedor IS NOT NULL
+            )
+        )
+);
+
+
+CREATE TABLE detalle_movimiento (
+    id_detalle_movimiento INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_movimiento INTEGER NOT NULL,
+    id_lote INTEGER NOT NULL,
+    id_detalle_orden INTEGER,
+    cantidad INTEGER NOT NULL,
+
+    CONSTRAINT fk_detalle_movimiento
+        FOREIGN KEY (id_movimiento)
+        REFERENCES movimiento_inventario (id_movimiento),
+
+    CONSTRAINT fk_detalle_movimiento_lote
+        FOREIGN KEY (id_lote)
+        REFERENCES lote (id_lote),
+
+    CONSTRAINT fk_detalle_movimiento_orden
+        FOREIGN KEY (id_detalle_orden)
+        REFERENCES detalle_orden_compra (id_detalle_orden),
+
+    CONSTRAINT chk_detalle_movimiento_cantidad
+        CHECK (cantidad > 0)
+);
+
+COMMIT;
+
+FIN DEL SQL A
+
+ANEXO B: SQL DE DATOS FICTICIOS
+==============================
+INICIO DEL SQL B (copiar desde la siguiente linea)
+-- SOLO DEMOSTRACION LOCAL. Las claves publicas NO son aptas para produccion.
+-- Ejecutar despues de 01_creacion_tablas.sql, con las tablas vacias.
+BEGIN;
+
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM usuario)
+       OR EXISTS (SELECT 1 FROM medicamento)
+       OR EXISTS (SELECT 1 FROM lote)
+       OR EXISTS (SELECT 1 FROM proveedor)
+       OR EXISTS (SELECT 1 FROM cliente)
+       OR EXISTS (SELECT 1 FROM orden_compra)
+       OR EXISTS (SELECT 1 FROM detalle_orden_compra)
+       OR EXISTS (SELECT 1 FROM venta)
+       OR EXISTS (SELECT 1 FROM detalle_venta)
+       OR EXISTS (SELECT 1 FROM movimiento_inventario)
+       OR EXISTS (SELECT 1 FROM detalle_movimiento) THEN
+        RAISE EXCEPTION 'Las tablas deben estar vacias. No se modificaron datos. Ejecute ROLLBACK.';
+    END IF;
+END;
+$$;
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+INSERT INTO usuario (nombre, nombre_usuario, clave_hash, rol) VALUES
+('Administrador de prueba', 'admin_demo',
+ '{bcrypt}' || crypt('AdminDemo2026!', gen_salt('bf', 10)), 'ADMINISTRADOR'),
+('Almacenero de prueba', 'almacen_demo',
+ '{bcrypt}' || crypt('FarmaciaDemo2026!', gen_salt('bf', 10)), 'ALMACENERO'),
+('Compras de prueba', 'compras_demo',
+ '{bcrypt}' || crypt('ComprasDemo2026!', gen_salt('bf', 10)), 'COMPRAS'),
+('Vendedor de prueba', 'vendedor_demo',
+ '{bcrypt}' || crypt('VendedorDemo2026!', gen_salt('bf', 10)), 'VENDEDOR');
+
+INSERT INTO medicamento
+(codigo, nombre, concentracion, presentacion, unidad_control, precio_venta, stock_minimo)
+VALUES
+('MED-001', 'Paracetamol', '500 mg', 'Caja de 20 tabletas', 'CAJA', 8.50, 10),
+('MED-002', 'Ibuprofeno', '400 mg', 'Caja de 10 tabletas', 'CAJA', 13.50, 5);
+
+INSERT INTO proveedor (ruc, razon_social, telefono, correo, direccion) VALUES
+('20000000001', 'Distribuidora de prueba', '999000111',
+ 'proveedor@example.com', 'Direccion de prueba'),
+('20000000002', 'Distribuidora Demos Dos', '999000333',
+ 'compras2@example.com', 'Direccion de prueba 2');
+
+INSERT INTO lote (id_medicamento, numero_lote, fecha_vencimiento, stock_actual)
+SELECT id_medicamento, 'PAR-DEMO-A', CURRENT_DATE + INTERVAL '2 years', 30
+FROM medicamento WHERE codigo = 'MED-001';
+
+WITH nuevo_movimiento AS (
+    INSERT INTO movimiento_inventario (id_usuario, tipo, motivo)
+    SELECT id_usuario, 'ENTRADA', 'Existencias iniciales de demostracion'
+    FROM usuario WHERE nombre_usuario = 'almacen_demo'
+    RETURNING id_movimiento
+)
+INSERT INTO detalle_movimiento (id_movimiento, id_lote, cantidad)
+SELECT m.id_movimiento, l.id_lote, 30
+FROM nuevo_movimiento m CROSS JOIN lote l
+JOIN medicamento med ON med.id_medicamento = l.id_medicamento
+WHERE med.codigo = 'MED-001' AND l.numero_lote = 'PAR-DEMO-A';
+
+WITH nueva_orden AS (
+    INSERT INTO orden_compra
+    (numero_orden, id_usuario, id_proveedor, total_estimado, observaciones)
+    SELECT 'OC-DEMO-001', u.id_usuario, p.id_proveedor, 50.00,
+           'Orden de compra de demostracion'
+    FROM usuario u CROSS JOIN proveedor p
+    WHERE u.nombre_usuario = 'compras_demo' AND p.ruc = '20000000001'
+    RETURNING id_orden
+)
+INSERT INTO detalle_orden_compra
+(id_orden, id_medicamento, cantidad_solicitada, costo_unitario, importe_estimado)
+SELECT o.id_orden, m.id_medicamento, 10, 5.00, 50.00
+FROM nueva_orden o CROSS JOIN medicamento m WHERE m.codigo = 'MED-001';
+
+COMMIT;
+
+-- Verificacion: 4 usuarios, 2 medicamentos, 1 lote, 2 proveedores y 1 orden.
+SELECT nombre_usuario, rol, activo FROM usuario ORDER BY id_usuario;
+SELECT m.codigo, l.numero_lote, l.stock_actual, l.fecha_vencimiento
+FROM lote l JOIN medicamento m ON m.id_medicamento = l.id_medicamento;
+SELECT numero_orden, estado, total_estimado FROM orden_compra;
+
+FIN DEL SQL B
+
