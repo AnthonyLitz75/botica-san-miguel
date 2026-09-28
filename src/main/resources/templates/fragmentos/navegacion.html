@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+    <nav th:fragment="menu(seccion)" class="inventario-nav" aria-label="Secciones">
+        <a th:href="@{/medicamentos}" th:attr="aria-current=${seccion == 'Medicamentos' ? 'page' : null}"><span class="icono icono-pill" aria-hidden="true"></span>Medicamentos</a>
+        <a th:if="${puedeConsultarProveedores}" th:href="@{/proveedores}" th:attr="aria-current=${seccion == 'Proveedores' ? 'page' : null}"><span class="icono icono-truck" aria-hidden="true"></span>Proveedores</a>
+        <a th:if="${puedeConsultarOrdenesCompra}" th:href="@{/ordenes-compra}" th:attr="aria-current=${seccion == 'Órdenes de compra' ? 'page' : null}"><span class="icono icono-clipboard-list" aria-hidden="true"></span>Órdenes de compra</a>
+        <a th:if="${puedeConsultarMovimientos}" th:href="@{/movimientos}" th:attr="aria-current=${seccion == 'Movimientos' ? 'page' : null}"><span class="icono icono-arrow-left-right" aria-hidden="true"></span>Movimientos</a>
+    </nav>
+    <aside th:fragment="lateral(seccion)" class="inventario-lateral" aria-label="Navegación principal">
+        <a class="inventario-marca" th:href="@{/medicamentos}">
+            <img th:src="@{/images/icono-medico-cabecera.png}" width="42" height="42" alt="">
+            <span>Botica<span class="marca-nombre">San Miguel</span></span>
+        </a>
+        <p class="nav-titulo">GESTIÓN</p>
+        <nav th:replace="~{fragmentos/navegacion :: menu(${seccion})}"></nav>
+        <div class="lateral-pie"><span class="icono icono-package" aria-hidden="true"></span>Inventario y compras</div>
+    </aside>
+    <header th:fragment="cabecera(seccion, area)" class="inventario-cabecera">
+        <details class="menu-movil">
+            <summary title="Abrir o cerrar navegación" aria-label="Abrir o cerrar navegación"><span class="icono icono-menu" aria-hidden="true"></span></summary>
+            <nav th:replace="~{fragmentos/navegacion :: menu(${seccion})}"></nav>
+        </details>
+        <div class="cabecera-seccion"><span th:text="${area}"></span><span aria-hidden="true">/</span><strong th:text="${seccion}"></strong></div>
+        <div class="cabecera-cuenta">
+            <span class="usuario-avatar"><span class="icono icono-user-round" aria-hidden="true"></span></span>
+            <div class="usuario-datos"><strong th:text="${nombreUsuario}"></strong><span th:text="${rolUsuario}"></span></div>
+            <form th:action="@{/logout}" method="post">
+                <button class="boton-icono cerrar-sesion" type="submit" title="Cerrar sesión" aria-label="Cerrar sesión"><span class="icono icono-log-out" aria-hidden="true"></span></button>
+            </form>
+        </div>
+    </header>
+</body>
+</html>

@@ -1,67 +1,43 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Detalle de orden | Farmacia AED</title>
+    <title>Detalle de orden | Botica San Miguel</title>
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    <link rel="stylesheet" th:href="@{/css/inventario.css}">
 </head>
+<body class="pagina-inventario">
+    <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
+    <aside th:replace="~{fragmentos/navegacion :: lateral('Órdenes de compra')}"></aside>
+    <div class="inventario-area">
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Órdenes de compra', 'Compras')}"></header>
+        <main id="contenido" class="inventario-contenido">
 
-<body>
-    <main>
-        <h1>Detalle de orden de compra</h1>
-
-        <dl class="datos-movimiento">
-            <dt>Número de orden</dt>
-            <dd th:text="${orden.numeroOrden()}"></dd>
-            <dt>Fecha y hora</dt>
-            <dd th:text="${#temporals.format(
-            orden.fechaHora(), 'dd/MM/yyyy HH:mm')}"></dd>
-            <dt>Proveedor</dt>
-            <dd th:text="${proveedor.razonSocial()}"></dd>
-            <dt>Estado</dt>
-            <dd th:text="${orden.estado()}"></dd>
-            <dt>Total estimado (S/)</dt>
-            <dd th:text="${#numbers.formatDecimal(
-            orden.totalEstimado(), 1, 2, 'POINT')}"></dd>
-            <dt>Observaciones</dt>
-            <dd th:text="${orden.observaciones() == null
-            ? 'Sin observaciones' : orden.observaciones()}"></dd>
-        </dl>
-
-        <p><a th:href="@{/ordenes-compra}">Volver a órdenes</a></p>
-
-        <p th:if="${#lists.isEmpty(detalles)}">
-            Esta orden no tiene medicamentos registrados.
-        </p>
-        <div class="tabla-contenedor" th:unless="${#lists.isEmpty(detalles)}">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Código</th>
-                        <th>Medicamento</th>
-                        <th>Unidad</th>
-                        <th>Cantidad solicitada</th>
-                        <th>Costo unitario (S/)</th>
-                        <th>Importe estimado (S/)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="detalle : ${detalles}">
-                        <td th:text="${detalle.codigoMedicamento()}"></td>
-                        <td th:text="${detalle.nombreMedicamento()}"></td>
-                        <td th:text="${detalle.unidadControl()}"></td>
-                        <td th:text="${detalle.cantidadSolicitada()}"></td>
-                        <td th:text="${#numbers.formatDecimal(
-                        detalle.costoUnitario(), 1, 2, 'POINT')}"></td>
-                        <td th:text="${#numbers.formatDecimal(
-                        detalle.importeEstimado(), 1, 2, 'POINT')}"></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </main>
+            <div class="inventario-titulo"><div><p class="seccion-etiqueta">COMPRAS</p><h1>Detalle de orden de compra</h1></div><a class="inventario-boton boton-secundario" th:href="@{/ordenes-compra}"><span class="icono icono-arrow-left" aria-hidden="true"></span>Volver a órdenes</a></div>
+            <dl class="resumen-registro">
+                <div class="resumen-completo"><dt>Número de orden</dt><dd class="codigo-medicamento" th:text="${orden.numeroOrden()}"></dd></div>
+                <div><dt>Fecha y hora</dt><dd th:text="${#temporals.format(orden.fechaHora(), 'dd/MM/yyyy HH:mm')}"></dd></div>
+                <div><dt>Proveedor</dt><dd th:text="${proveedor.razonSocial()}"></dd></div>
+                <div><dt>Estado</dt><dd><span class="estado-registro" th:classappend="${orden.estado() == 'CANCELADA' ? 'estado-cancelado' : (orden.estado() == 'RECIBIDA' ? 'estado-recibido' : '')}" th:text="${#strings.replace(orden.estado(), '_', ' ')}"></span></dd></div>
+                <div><dt>Total estimado (S/)</dt><dd class="importe-resumen" th:text="${#numbers.formatDecimal(orden.totalEstimado(), 1, 'NONE', 2, 'POINT')}"></dd></div>
+                <div class="resumen-amplio"><dt>Observaciones</dt><dd th:text="${#strings.isEmpty(orden.observaciones()) ? 'Sin observaciones' : orden.observaciones()}"></dd></div>
+            </dl>
+            <section class="inventario-resultados" aria-labelledby="titulo-detalle">
+                <div class="resultados-cabecera"><h2 id="titulo-detalle">Medicamentos solicitados <span class="cantidad-resultados" th:text="${#lists.size(detalles)}"></span></h2></div>
+                <div class="inventario-vacio" th:if="${#lists.isEmpty(detalles)}"><span class="icono icono-package" aria-hidden="true"></span><p>Esta orden no tiene medicamentos registrados.</p></div>
+                <div class="tabla-contenedor inventario-tabla tabla-detalles" th:unless="${#lists.isEmpty(detalles)}" tabindex="0" role="region" aria-label="Detalle de orden, tabla desplazable">
+                    <table>
+                        <thead><tr><th scope="col">Código</th><th scope="col">Medicamento</th><th scope="col">Unidad</th><th scope="col" class="numero">Cantidad solicitada</th><th scope="col" class="numero">Costo unitario (S/)</th><th scope="col" class="numero">Importe estimado (S/)</th></tr></thead>
+                        <tbody><tr th:each="detalle : ${detalles}">
+                            <td class="codigo-medicamento" th:text="${detalle.codigoMedicamento()}"></td><td class="nombre-medicamento" th:text="${detalle.nombreMedicamento()}"></td>
+                            <td><span class="unidad-medicamento" th:text="${detalle.unidadControl()}"></span></td><td class="numero" th:text="${detalle.cantidadSolicitada()}"></td>
+                            <td class="numero" th:text="${#numbers.formatDecimal(detalle.costoUnitario(), 1, 'NONE', 2, 'POINT')}"></td><td class="numero" th:text="${#numbers.formatDecimal(detalle.importeEstimado(), 1, 'NONE', 2, 'POINT')}"></td>
+                        </tr></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
 </body>
-
 </html>

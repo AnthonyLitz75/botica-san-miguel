@@ -1,67 +1,64 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:text="${idProveedor != null
-        ? 'Editar proveedor | Farmacia AED'
-        : 'Nuevo proveedor | Farmacia AED'}">
-        Proveedor | Farmacia AED
-    </title>
+    <title th:text="${idProveedor != null ? 'Editar proveedor | Botica San Miguel' : 'Nuevo proveedor | Botica San Miguel'}">Proveedor | Botica San Miguel</title>
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    <link rel="stylesheet" th:href="@{/css/inventario.css}">
 </head>
-
-<body>
-    <main>
-        <h1 th:text="${idProveedor != null
-        ? 'Editar proveedor'
-        : 'Nuevo proveedor'}">
-            Proveedor
-        </h1>
-
-        <form th:action="${idProveedor != null}
-          ? @{/proveedores/{id}/editar(id=${idProveedor})}
-          : @{/proveedores}" th:object="${formulario}" method="post" class="formulario-medicamento">
-
-            <div>
-                <label for="ruc">RUC</label>
-                <input type="text" id="ruc" th:field="*{ruc}" maxlength="11" inputmode="numeric" required>
-                <p class="error" th:if="${#fields.hasErrors('ruc')}" th:errors="*{ruc}"></p>
+<body class="pagina-inventario">
+    <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
+    <aside th:replace="~{fragmentos/navegacion :: lateral('Proveedores')}"></aside>
+    <div class="inventario-area">
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Proveedores', 'Compras')}"></header>
+        <main id="contenido" class="inventario-contenido">
+            <div class="inventario-titulo">
+                <div><p class="seccion-etiqueta">PROVEEDORES</p><h1 th:text="${idProveedor != null ? 'Editar proveedor' : 'Nuevo proveedor'}">Proveedor</h1></div>
+                <a class="inventario-boton boton-secundario" th:href="@{/proveedores}"><span class="icono icono-arrow-left" aria-hidden="true"></span>Volver a proveedores</a>
             </div>
-
-            <div>
-                <label for="razonSocial">Razón social</label>
-                <input type="text" id="razonSocial" th:field="*{razonSocial}" maxlength="150" required>
-                <p class="error" th:if="${#fields.hasErrors('razonSocial')}" th:errors="*{razonSocial}"></p>
-            </div>
-
-            <div>
-                <label for="telefono">Teléfono (opcional)</label>
-                <input type="tel" id="telefono" th:field="*{telefono}" maxlength="20">
-                <p class="error" th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}"></p>
-            </div>
-
-            <div>
-                <label for="correo">Correo (opcional)</label>
-                <input type="email" id="correo" th:field="*{correo}" maxlength="150">
-                <p class="error" th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}"></p>
-            </div>
-
-            <div>
-                <label for="direccion">Dirección (opcional)</label>
-                <input type="text" id="direccion" th:field="*{direccion}" maxlength="200">
-                <p class="error" th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}"></p>
-            </div>
-
-            <button type="submit" th:text="${idProveedor != null
-                ? 'Guardar cambios'
-                : 'Guardar proveedor'}">
-                Guardar
-            </button>
-            <a th:href="@{/proveedores}">Cancelar</a>
-        </form>
-    </main>
+            <form th:action="${idProveedor != null} ? @{/proveedores/{id}/editar(id=${idProveedor})} : @{/proveedores}" th:object="${formulario}" method="post" class="proveedor-formulario">
+                <fieldset>
+                    <legend>Datos del proveedor</legend>
+                    <div class="proveedor-campos">
+                        <div>
+                            <label for="ruc">RUC</label>
+                            <input type="text" id="ruc" th:field="*{ruc}" maxlength="11" inputmode="numeric" required th:attr="aria-invalid=${#fields.hasErrors('ruc')},aria-describedby=${#fields.hasErrors('ruc') ? 'error-ruc' : null}">
+                            <p class="error" id="error-ruc" th:if="${#fields.hasErrors('ruc')}" th:errors="*{ruc}"></p>
+                        </div>
+                        <div>
+                            <label for="razonSocial">Razón social</label>
+                            <input type="text" id="razonSocial" th:field="*{razonSocial}" maxlength="150" required th:attr="aria-invalid=${#fields.hasErrors('razonSocial')},aria-describedby=${#fields.hasErrors('razonSocial') ? 'error-razon' : null}">
+                            <p class="error" id="error-razon" th:if="${#fields.hasErrors('razonSocial')}" th:errors="*{razonSocial}"></p>
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <legend>Contacto</legend>
+                    <div class="proveedor-campos">
+                        <div>
+                            <label for="telefono">Teléfono <span class="campo-opcional">(opcional)</span></label>
+                            <input type="tel" id="telefono" th:field="*{telefono}" maxlength="20" th:attr="aria-invalid=${#fields.hasErrors('telefono')},aria-describedby=${#fields.hasErrors('telefono') ? 'error-telefono' : null}">
+                            <p class="error" id="error-telefono" th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}"></p>
+                        </div>
+                        <div>
+                            <label for="correo">Correo <span class="campo-opcional">(opcional)</span></label>
+                            <input type="email" id="correo" th:field="*{correo}" maxlength="150" th:attr="aria-invalid=${#fields.hasErrors('correo')},aria-describedby=${#fields.hasErrors('correo') ? 'error-correo' : null}">
+                            <p class="error" id="error-correo" th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}"></p>
+                        </div>
+                        <div class="campo-completo">
+                            <label for="direccion">Dirección <span class="campo-opcional">(opcional)</span></label>
+                            <input type="text" id="direccion" th:field="*{direccion}" maxlength="200" th:attr="aria-invalid=${#fields.hasErrors('direccion')},aria-describedby=${#fields.hasErrors('direccion') ? 'error-direccion' : null}">
+                            <p class="error" id="error-direccion" th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}"></p>
+                        </div>
+                    </div>
+                </fieldset>
+                <div class="proveedor-formulario-acciones">
+                    <button type="submit" class="inventario-boton boton-principal"><span class="icono icono-save" aria-hidden="true"></span><span th:text="${idProveedor != null ? 'Guardar cambios' : 'Guardar proveedor'}">Guardar</span></button>
+                    <a class="inventario-boton boton-secundario" th:href="@{/proveedores}"><span class="icono icono-x" aria-hidden="true"></span>Cancelar</a>
+                </div>
+            </form>
+        </main>
+    </div>
 </body>
-
 </html>

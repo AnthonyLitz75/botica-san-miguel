@@ -1,65 +1,48 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Lotes | Farmacia AED</title>
+    <title>Lotes | Botica San Miguel</title>
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    <link rel="stylesheet" th:href="@{/css/inventario.css}">
 </head>
-
-<body>
-    <main>
-        <h1>Lotes</h1>
-
-        <p>
-            <strong th:text="${medicamento.codigo()}"></strong>
-            <span th:text="${medicamento.nombre()}"></span>
-        </p>
-
-        <form th:action="@{/logout}" method="post">
-            <button type="submit">Cerrar sesión</button>
-        </form>
-
-        <p>
-            <a th:href="@{/medicamentos}">Medicamentos</a>
-        </p>
-
-        <p th:if="${#lists.isEmpty(lotes)}">
-            No hay lotes registrados para este medicamento.
-        </p>
-
-        <div class="tabla-contenedor" th:unless="${#lists.isEmpty(lotes)}">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Número de lote</th>
-                        <th>Fecha de vencimiento</th>
-                        <th>Stock actual</th>
-                        <th>Unidad</th>
-                        <th th:if="${puedeRegistrarSalida}">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="lote : ${lotes}">
-                        <td th:text="${lote.numeroLote()}"></td>
-                        <td th:text="${#temporals.format(
-                        lote.fechaVencimiento(), 'dd/MM/yyyy')}"></td>
-                        <td th:text="${lote.stockActual()}"></td>
-                        <td th:text="${medicamento.unidadControl()}"></td>
-                        <td th:if="${puedeRegistrarSalida}">
-                            <a th:if="${lote.stockActual() > 0}" th:href="@{/lotes/{id}/salida(id=${lote.idLote()})}">
-                                Registrar salida
-                            </a>
-                            <span th:unless="${lote.stockActual() > 0}">
-                                Sin existencias
-                            </span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </main>
+<body class="pagina-inventario">
+    <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
+    <aside th:replace="~{fragmentos/navegacion :: lateral('Medicamentos')}"></aside>
+    <div class="inventario-area">
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Medicamentos', 'Inventario')}"></header>
+        <main id="contenido" class="inventario-contenido">
+            <div class="inventario-titulo">
+                <div><p class="seccion-etiqueta">INVENTARIO</p><h1>Lotes</h1></div>
+                <a class="inventario-boton boton-secundario" th:href="@{/medicamentos}"><span class="icono icono-arrow-left" aria-hidden="true"></span>Volver a medicamentos</a>
+            </div>
+            <dl class="resumen-registro">
+                <div><dt>Código</dt><dd class="codigo-medicamento" th:text="${medicamento.codigo()}"></dd></div>
+                <div><dt>Medicamento</dt><dd class="nombre-medicamento" th:text="${medicamento.nombre()}"></dd></div>
+                <div><dt>Unidad de control</dt><dd><span class="unidad-medicamento" th:text="${medicamento.unidadControl()}"></span></dd></div>
+            </dl>
+            <section class="inventario-resultados" aria-labelledby="titulo-resultados">
+                <div class="resultados-cabecera"><h2 id="titulo-resultados">Lotes registrados <span class="cantidad-resultados" th:text="${#lists.size(lotes)}"></span></h2></div>
+                <div class="inventario-vacio" th:if="${#lists.isEmpty(lotes)}"><span class="icono icono-package" aria-hidden="true"></span><p>No hay lotes registrados para este medicamento.</p></div>
+                <div class="tabla-contenedor inventario-tabla tabla-detalles" th:unless="${#lists.isEmpty(lotes)}" tabindex="0" role="region" aria-label="Lotes, tabla desplazable">
+                    <table>
+                        <thead><tr><th scope="col">Número de lote</th><th scope="col">Fecha de vencimiento</th><th scope="col" class="numero">Stock actual</th><th scope="col">Unidad</th><th scope="col" th:if="${puedeRegistrarSalida}">Acciones</th></tr></thead>
+                        <tbody><tr th:each="lote : ${lotes}">
+                            <td class="codigo-medicamento" th:text="${lote.numeroLote()}"></td>
+                            <td class="fecha-registro" th:text="${#temporals.format(lote.fechaVencimiento(), 'dd/MM/yyyy')}"></td>
+                            <td class="numero" th:text="${lote.stockActual()}"></td>
+                            <td><span class="unidad-medicamento" th:text="${medicamento.unidadControl()}"></span></td>
+                            <td th:if="${puedeRegistrarSalida}">
+                                <a class="enlace-lotes" th:if="${lote.stockActual() > 0}" th:href="@{/lotes/{id}/salida(id=${lote.idLote()})}"><span class="icono icono-arrow-left-right" aria-hidden="true"></span>Registrar salida</a>
+                                <span class="estado-registro estado-cancelado" th:unless="${lote.stockActual() > 0}">Sin existencias</span>
+                            </td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p class="resultados-pie" th:text="${#lists.size(lotes)} + (${#lists.size(lotes) == 1} ? ' lote registrado' : ' lotes registrados')"></p>
+            </section>
+        </main>
+    </div>
 </body>
-
 </html>

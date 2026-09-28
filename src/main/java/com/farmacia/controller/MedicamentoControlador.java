@@ -35,40 +35,9 @@ public class MedicamentoControlador {
             Model model,
             Authentication autenticacion) {
 
-        boolean esAdministrador = autenticacion.getAuthorities().stream()
-                .anyMatch(autoridad -> autoridad.getAuthority().equals("ROLE_ADMINISTRADOR"));
-
-        model.addAttribute(
-                "medicamentos",
-                servicio.buscarPorEstado(buscar, activo));
+        model.addAttribute("medicamentos", servicio.buscarPorEstado(buscar, activo));
         model.addAttribute("buscar", buscar);
         model.addAttribute("activo", activo);
-        model.addAttribute("esAdministrador", esAdministrador);
-
-        boolean puedeConsultarProveedores = autenticacion.getAuthorities().stream()
-                .anyMatch(autoridad -> switch (autoridad.getAuthority()) {
-                    case "ROLE_ADMINISTRADOR",
-                            "ROLE_COMPRAS",
-                            "ROLE_ALMACENERO" ->
-                        true;
-                    default -> false;
-                });
-
-        model.addAttribute(
-                "puedeConsultarProveedores",
-                puedeConsultarProveedores);
-
-        boolean puedeConsultarMovimientos = autenticacion.getAuthorities().stream()
-                .anyMatch(autoridad -> autoridad.getAuthority().equals("ROLE_ADMINISTRADOR")
-                        || autoridad.getAuthority().equals("ROLE_ALMACENERO"));
-
-        model.addAttribute(
-                "puedeConsultarMovimientos",
-                puedeConsultarMovimientos);
-
-        model.addAttribute(
-                "puedeConsultarOrdenesCompra",
-                puedeConsultarProveedores);
         return "medicamentos/listado";
     }
 

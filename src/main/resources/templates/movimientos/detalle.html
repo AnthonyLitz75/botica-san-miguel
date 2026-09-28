@@ -3,62 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Detalle de movimiento | Farmacia AED</title>
+    <title>Detalle de movimiento | Botica San Miguel</title>
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    <link rel="stylesheet" th:href="@{/css/inventario.css}">
 </head>
-<body>
-<main>
-    <h1>Detalle de movimiento</h1>
+<body class="pagina-inventario">
+    <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
+    <aside th:replace="~{fragmentos/navegacion :: lateral('Movimientos')}"></aside>
+    <div class="inventario-area">
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Movimientos', 'Inventario')}"></header>
+        <main id="contenido" class="inventario-contenido">
 
-    <dl class="datos-movimiento">
-        <dt>ID</dt>
-        <dd th:text="${movimiento.idMovimiento()}"></dd>
-
-        <dt>Fecha y hora</dt>
-        <dd th:text="${#temporals.format(
-                movimiento.fechaHora(), 'dd/MM/yyyy HH:mm')}"></dd>
-
-        <dt>Tipo</dt>
-        <dd th:text="${movimiento.tipo()}"></dd>
-
-        <dt>ID usuario</dt>
-        <dd th:text="${movimiento.idUsuario()}"></dd>
-
-        <dt>Motivo</dt>
-        <dd th:text="${movimiento.motivo()}"></dd>
-    </dl>
-
-    <p>
-        <a th:href="@{/movimientos}">Volver a movimientos</a>
-    </p>
-
-    <p th:if="${#lists.isEmpty(detalles)}">
-        Este movimiento no tiene detalles registrados.
-    </p>
-
-    <div class="tabla-contenedor"
-         th:unless="${#lists.isEmpty(detalles)}">
-        <table>
-            <thead>
-            <tr>
-                <th>Código</th>
-                <th>Medicamento</th>
-                <th>Número de lote</th>
-                <th>Cantidad</th>
-                <th>Unidad</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="detalle : ${detalles}">
-                <td th:text="${detalle.codigoMedicamento()}"></td>
-                <td th:text="${detalle.nombreMedicamento()}"></td>
-                <td th:text="${detalle.numeroLote()}"></td>
-                <td th:text="${detalle.cantidad()}"></td>
-                <td th:text="${detalle.unidadControl()}"></td>
-            </tr>
-            </tbody>
-        </table>
+            <div class="inventario-titulo"><div><p class="seccion-etiqueta">INVENTARIO</p><h1>Detalle de movimiento</h1></div><a class="inventario-boton boton-secundario" th:href="@{/movimientos}"><span class="icono icono-arrow-left" aria-hidden="true"></span>Volver a movimientos</a></div>
+            <dl class="resumen-registro">
+                <div><dt>ID</dt><dd class="codigo-medicamento" th:text="${movimiento.idMovimiento()}"></dd></div>
+                <div><dt>Fecha y hora</dt><dd th:text="${#temporals.format(movimiento.fechaHora(), 'dd/MM/yyyy HH:mm')}"></dd></div>
+                <div><dt>Tipo</dt><dd><span class="tipo-movimiento" th:classappend="${movimiento.tipo() == 'SALIDA'} ? 'tipo-salida'" th:text="${movimiento.tipo()}"></span></dd></div>
+                <div><dt>ID usuario</dt><dd th:text="${movimiento.idUsuario()}"></dd></div>
+                <div class="resumen-amplio"><dt>Motivo</dt><dd th:text="${movimiento.motivo()}"></dd></div>
+            </dl>
+            <section class="inventario-resultados" aria-labelledby="titulo-detalle">
+                <div class="resultados-cabecera"><h2 id="titulo-detalle">Detalle del movimiento <span class="cantidad-resultados" th:text="${#lists.size(detalles)}"></span></h2></div>
+                <div class="inventario-vacio" th:if="${#lists.isEmpty(detalles)}"><span class="icono icono-package" aria-hidden="true"></span><p>Este movimiento no tiene detalles registrados.</p></div>
+                <div class="tabla-contenedor inventario-tabla tabla-detalles" th:unless="${#lists.isEmpty(detalles)}" tabindex="0" role="region" aria-label="Detalle del movimiento, tabla desplazable">
+                    <table>
+                        <thead><tr><th scope="col">Código</th><th scope="col">Medicamento</th><th scope="col">Número de lote</th><th scope="col" class="numero">Cantidad</th><th scope="col">Unidad</th></tr></thead>
+                        <tbody><tr th:each="detalle : ${detalles}">
+                            <td class="codigo-medicamento" th:text="${detalle.codigoMedicamento()}"></td><td class="nombre-medicamento" th:text="${detalle.nombreMedicamento()}"></td>
+                            <td class="codigo-medicamento" th:text="${detalle.numeroLote()}"></td><td class="numero" th:text="${detalle.cantidad()}"></td>
+                            <td><span class="unidad-medicamento" th:text="${detalle.unidadControl()}"></span></td>
+                        </tr></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
     </div>
-</main>
 </body>
 </html>

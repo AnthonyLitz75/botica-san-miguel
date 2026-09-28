@@ -1,59 +1,54 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Nueva orden de compra | Farmacia AED</title>
+    <title>Nueva orden de compra | Botica San Miguel</title>
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    <link rel="stylesheet" th:href="@{/css/inventario.css}">
 </head>
+<body class="pagina-inventario">
+    <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
+    <aside th:replace="~{fragmentos/navegacion :: lateral('Órdenes de compra')}"></aside>
+    <div class="inventario-area">
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Órdenes de compra', 'Compras')}"></header>
+        <main id="contenido" class="inventario-contenido">
 
-<body>
-    <main>
-        <h1>Nueva orden de compra</h1>
-
-        <form th:action="@{/ordenes-compra}" method="post" th:object="${formulario}" class="formulario-medicamento">
-
-            <div th:if="${#fields.hasAnyErrors()}" role="alert">
-                <p class="error" th:each="error : ${#fields.allErrors()}" th:text="${error}"></p>
-            </div>
-
-            <p>
-                <label for="idProveedor">Proveedor</label>
-                <select th:field="*{idProveedor}" required>
-                    <option value="">Seleccionar proveedor</option>
-                    <option th:each="proveedor : ${proveedores}" th:value="${proveedor.idProveedor()}"
-                        th:text="${proveedor.razonSocial()}"></option>
-                </select>
-            </p>
-
-            <p>
-                <label for="medicamento">Medicamento</label>
-                <select id="medicamento" th:field="*{detalles[0].idMedicamento}" required>
-                    <option value="">Seleccionar medicamento</option>
-                    <option th:each="medicamento : ${medicamentos}" th:value="${medicamento.idMedicamento()}" th:text="${medicamento.codigo() + ' - '
-                            + medicamento.nombre()}"></option>
-                </select>
-            </p>
-
-            <p>
-                <label for="cantidad">Cantidad solicitada</label>
-                <input id="cantidad" type="number" min="1" step="1" th:field="*{detalles[0].cantidadSolicitada}"
-                    required>
-            </p>
-            <p>
-                <label for="costo">Costo unitario (S/)</label>
-                <input id="costo" type="number" min="0" step="0.01" th:field="*{detalles[0].costoUnitario}" required>
-            </p>
-            <p>
-                <label for="observaciones">Observaciones (opcional)</label>
-                <textarea th:field="*{observaciones}" maxlength="500"></textarea>
-            </p>
-
-            <button type="submit">Guardar orden</button>
-            <a th:href="@{/ordenes-compra}">Cancelar</a>
-        </form>
-    </main>
+            <div class="inventario-titulo"><div><p class="seccion-etiqueta">COMPRAS</p><h1>Nueva orden de compra</h1></div><a class="inventario-boton boton-secundario" th:href="@{/ordenes-compra}"><span class="icono icono-arrow-left" aria-hidden="true"></span>Volver a órdenes</a></div>
+            <form th:action="@{/ordenes-compra}" method="post" th:object="${formulario}" class="proveedor-formulario orden-formulario">
+                <div class="aviso-operacion aviso-error" th:if="${#fields.hasAnyErrors()}" role="alert">
+                    <p th:each="error : ${#fields.allErrors()}" th:text="${error}"></p>
+                </div>
+                <fieldset>
+                    <legend>Proveedor</legend>
+                    <div class="proveedor-campos">
+                        <div class="campo-completo">
+                            <label for="idProveedor">Razón social</label>
+                            <select id="idProveedor" th:field="*{idProveedor}" required th:attr="aria-invalid=${#fields.hasErrors('idProveedor')}">
+                                <option value="">Seleccionar proveedor</option>
+                                <option th:each="proveedor : ${proveedores}" th:value="${proveedor.idProveedor()}" th:text="${proveedor.razonSocial()}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <legend>Detalle de la compra</legend>
+                    <div class="proveedor-campos">
+                        <div class="campo-completo">
+                            <label for="medicamento">Medicamento</label>
+                            <select id="medicamento" th:field="*{detalles[0].idMedicamento}" required th:attr="aria-invalid=${#fields.hasErrors('detalles[0].idMedicamento')}">
+                                <option value="">Seleccionar medicamento</option>
+                                <option th:each="medicamento : ${medicamentos}" th:value="${medicamento.idMedicamento()}" th:text="${medicamento.codigo() + ' - ' + medicamento.nombre()}"></option>
+                            </select>
+                        </div>
+                        <div><label for="cantidad">Cantidad solicitada</label><input id="cantidad" type="number" min="1" step="1" th:field="*{detalles[0].cantidadSolicitada}" required th:attr="aria-invalid=${#fields.hasErrors('detalles[0].cantidadSolicitada')}"></div>
+                        <div><label for="costo">Costo unitario (S/)</label><input id="costo" type="number" min="0" step="0.01" th:field="*{detalles[0].costoUnitario}" required th:attr="aria-invalid=${#fields.hasErrors('detalles[0].costoUnitario')}"></div>
+                        <div class="campo-completo"><label for="observaciones">Observaciones <span class="campo-opcional">(opcional)</span></label><textarea id="observaciones" th:field="*{observaciones}" maxlength="500" rows="3"></textarea></div>
+                    </div>
+                </fieldset>
+                <div class="proveedor-formulario-acciones"><button class="inventario-boton boton-principal" type="submit"><span class="icono icono-save" aria-hidden="true"></span>Guardar orden</button><a class="inventario-boton boton-secundario" th:href="@{/ordenes-compra}"><span class="icono icono-x" aria-hidden="true"></span>Cancelar</a></div>
+            </form>
+        </main>
+    </div>
 </body>
-
 </html>

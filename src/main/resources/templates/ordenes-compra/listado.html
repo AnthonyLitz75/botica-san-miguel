@@ -1,66 +1,42 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Órdenes de compra | Farmacia AED</title>
+    <title>Órdenes de compra | Botica San Miguel</title>
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    <link rel="stylesheet" th:href="@{/css/inventario.css}">
 </head>
+<body class="pagina-inventario">
+    <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
+    <aside th:replace="~{fragmentos/navegacion :: lateral('Órdenes de compra')}"></aside>
+    <div class="inventario-area">
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Órdenes de compra', 'Compras')}"></header>
+        <main id="contenido" class="inventario-contenido">
 
-<body>
-    <main>
-        <h1>Órdenes de compra</h1>
-        <p th:if="${mensaje != null}" th:text="${mensaje}" role="status"></p>
-        <form th:action="@{/logout}" method="post">
-            <button type="submit">Cerrar sesión</button>
-        </form>
-
-        <p>
-            <a th:href="@{/medicamentos}">Medicamentos</a>
-        </p>
-
-        <p th:if="${puedeCrearOrden}">
-            <a th:href="@{/ordenes-compra/nuevo}">
-                Nueva orden de compra
-            </a>
-        </p>
-
-        <p th:if="${#lists.isEmpty(ordenes)}">
-            No hay órdenes de compra registradas.
-        </p>
-
-        <div class="tabla-contenedor" th:unless="${#lists.isEmpty(ordenes)}">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Número de orden</th>
-                        <th>Fecha y hora</th>
-                        <th>ID proveedor</th>
-                        <th>Estado</th>
-                        <th>Total estimado (S/)</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="orden : ${ordenes}">
-                        <td th:text="${orden.numeroOrden()}"></td>
-                        <td th:text="${#temporals.format(
-                            orden.fechaHora(), 'dd/MM/yyyy HH:mm')}"></td>
-                        <td th:text="${orden.idProveedor()}"></td>
-                        <td th:text="${orden.estado()}"></td>
-                        <td th:text="${#numbers.formatDecimal(
-                            orden.totalEstimado(), 1, 2, 'POINT')}"></td>
-                        <td>
-                            <a th:href="@{/ordenes-compra/{id}(id=${orden.idOrden()})}">
-                                Ver detalle
-                            </a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </main>
+            <div class="inventario-titulo">
+                <div><p class="seccion-etiqueta">COMPRAS</p><h1>Órdenes de compra</h1></div>
+                <a class="inventario-boton boton-principal" th:if="${puedeCrearOrden}" th:href="@{/ordenes-compra/nuevo}"><span class="icono icono-plus" aria-hidden="true"></span>Nueva orden de compra</a>
+            </div>
+            <p class="aviso-operacion aviso-exito" th:if="${mensaje != null}" th:text="${mensaje}" role="status"></p>
+            <section class="inventario-resultados registro-listado" aria-labelledby="titulo-resultados">
+                <div class="resultados-cabecera"><h2 id="titulo-resultados">Listado de órdenes <span class="cantidad-resultados" th:text="${#lists.size(ordenes)}"></span></h2></div>
+                <div class="inventario-vacio" th:if="${#lists.isEmpty(ordenes)}"><span class="icono icono-clipboard-list" aria-hidden="true"></span><p>No hay órdenes de compra registradas.</p></div>
+                <div class="tabla-contenedor inventario-tabla tabla-ordenes" th:unless="${#lists.isEmpty(ordenes)}" tabindex="0" role="region" aria-label="Órdenes de compra, tabla desplazable">
+                    <table>
+                        <thead><tr><th scope="col">Número de orden</th><th scope="col">Fecha y hora</th><th scope="col">ID proveedor</th><th scope="col">Estado</th><th scope="col" class="numero">Total estimado (S/)</th><th scope="col">Detalle</th></tr></thead>
+                        <tbody><tr th:each="orden : ${ordenes}">
+                            <td class="codigo-medicamento numero-orden" th:text="${orden.numeroOrden()}"></td>
+                            <td class="fecha-registro" th:text="${#temporals.format(orden.fechaHora(), 'dd/MM/yyyy HH:mm')}"></td>
+                            <td th:text="${orden.idProveedor()}"></td><td><span class="estado-registro" th:classappend="${orden.estado() == 'CANCELADA' ? 'estado-cancelado' : (orden.estado() == 'RECIBIDA' ? 'estado-recibido' : '')}" th:text="${#strings.replace(orden.estado(), '_', ' ')}"></span></td>
+                            <td class="numero" th:text="${#numbers.formatDecimal(orden.totalEstimado(), 1, 'NONE', 2, 'POINT')}"></td>
+                            <td><a class="enlace-lotes" th:href="@{/ordenes-compra/{id}(id=${orden.idOrden()})}"><span class="icono icono-clipboard-list" aria-hidden="true"></span>Ver detalle</a></td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p class="resultados-pie" th:text="${#lists.size(ordenes)} + (${#lists.size(ordenes) == 1} ? ' orden registrada' : ' órdenes registradas')"></p>
+            </section>
+        </main>
+    </div>
 </body>
-
 </html>

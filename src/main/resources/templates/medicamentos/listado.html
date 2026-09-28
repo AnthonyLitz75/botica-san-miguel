@@ -4,101 +4,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Medicamentos | Farmacia AED</title>
+    <title>Medicamentos | Botica San Miguel</title>
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    <link rel="stylesheet" th:href="@{/css/inventario.css}">
 </head>
 
-<body>
-    <main>
-        <h1>Medicamentos</h1>
-        <form th:action="@{/logout}" method="post">
-            <button type="submit">Cerrar sesión</button>
-        </form>
-        <p th:if="${puedeConsultarProveedores}">
-            <a th:href="@{/proveedores}">Proveedores</a>
-        </p>
-        <p th:if="${puedeConsultarOrdenesCompra}">
-            <a th:href="@{/ordenes-compra}">Órdenes de compra</a>
-        </p>
-        <p th:if="${puedeConsultarMovimientos}">
-            <a th:href="@{/movimientos}">Movimientos de inventario</a>
-        </p>
-        <p th:if="${esAdministrador}">
-            <a th:href="@{/medicamentos/nuevo}">Nuevo Medicamento</a>
-        </p>
-        <form class="buscador" th:action="@{/medicamentos}" method="get">
-            <label for="buscar">Nombre o codigo</label>
-
-            <div class="buscador-controles">
-                <input type="search" id="buscar" name="buscar" th:value="${buscar}" placeholder="Buscar medicamento">
-                <label for="activo">Estado</label>
-                <select id="activo" name="activo">
-                    <option value="true" th:selected="${activo}">Activos</option>
-                    <option value="false" th:selected="${!activo}">Inactivos</option>
-                </select>
-                <button type="submit">Buscar</button>
-                <a th:href="@{/medicamentos(activo=${activo})}">Limpiar</a>
+<body class="pagina-inventario">
+    <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
+    <aside th:replace="~{fragmentos/navegacion :: lateral('Medicamentos')}"></aside>
+    <div class="inventario-area">
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Medicamentos', 'Inventario')}"></header>
+        <main id="contenido" class="inventario-contenido">
+            <div class="inventario-titulo">
+                <div>
+                    <p class="seccion-etiqueta">INVENTARIO</p>
+                    <h1>Medicamentos</h1>
+                </div>
+                <a class="inventario-boton boton-principal" th:if="${esAdministrador}"
+                    th:href="@{/medicamentos/nuevo}"><span class="icono icono-plus" aria-hidden="true"></span>Nuevo
+                    medicamento</a>
             </div>
-        </form>
-        <p th:if="${#lists.isEmpty(medicamentos)}" th:text="${#strings.isEmpty(#strings.trim(buscar))
-            ? (activo
-           ? 'No hay medicamentos activos registrados.'
-           : 'No hay medicamentos inactivos registrados.')
-            : 'No se encontraron medicamentos para esta busqueda.'}">
-        </p>
-        <div class="tabla-contenedor" th:if="${!#lists.isEmpty(medicamentos)}">
-            <table>
-                <thead>
-                    <tr>
-                        <th scope="col">Codigo</th>
-                        <th scope="col">Nombre</th>
-                        <th scope="col">Concentracion</th>
-                        <th scope="col">Presentacion</th>
-                        <th scope="col">Unidad</th>
-                        <th scope="col">Precio de venta (S/)</th>
-                        <th scope="col">Stock minimo</th>
-                        <th scope="col">Inventario</th>
-                        <th th:if="${esAdministrador}">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="medicamento : ${medicamentos}">
-                        <td th:text="${medicamento.codigo()}"></td>
-                        <td th:text="${medicamento.nombre()}"></td>
-                        <td th:text="${medicamento.concentracion()}"></td>
-                        <td th:text="${medicamento.presentacion()}"></td>
-                        <td th:text="${medicamento.unidadControl()}"></td>
-                        <td th:text="${medicamento.precioVenta()}"></td>
-                        <td th:text="${medicamento.stockMinimo()}"></td>
-                        <td>
-                            <a th:href="@{/medicamentos/{id}/lotes(id=${medicamento.idMedicamento()})}">
-                                Ver lotes
-                            </a>
-                        </td>
-                        <td th:if="${esAdministrador}">
-                            <div class="acciones-medicamento">
-                                <a th:href="@{/medicamentos/{id}/editar(id=${medicamento.idMedicamento()})}">
-                                    Editar
-                                </a>
-
-                                <form method="post" th:if="${medicamento.activo()}"
-                                    th:action="@{/medicamentos/{id}/desactivar(id=${medicamento.idMedicamento()})}"
-                                    onsubmit="return confirm('¿Desactivar este medicamento? Se conservará su historial.');">
-                                    <button type="submit" class="boton-desactivar">Desactivar</button>
-                                </form>
-
-                                <form method="post" th:unless="${medicamento.activo()}"
-                                    th:action="@{/medicamentos/{id}/activar(id=${medicamento.idMedicamento()})}"
-                                    onsubmit="return confirm('¿Activar este medicamento?');">
-                                    <button type="submit" class="boton-activar">Activar</button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </main>
+            <form class="inventario-filtros" th:action="@{/medicamentos}" method="get" role="search">
+                <div class="filtro-busqueda">
+                    <label for="buscar">Nombre o código</label>
+                    <div class="entrada-busqueda"><span class="icono icono-search" aria-hidden="true"></span><input
+                            type="search" id="buscar" name="buscar" th:value="${buscar}"
+                            placeholder="Buscar medicamento"></div>
+                </div>
+                <div class="filtro-estado">
+                    <label for="activo">Estado</label>
+                    <select id="activo" name="activo">
+                        <option value="true" th:selected="${activo}">Activos</option>
+                        <option value="false" th:selected="${!activo}">Inactivos</option>
+                    </select>
+                </div>
+                <div class="filtro-acciones">
+                    <button class="inventario-boton boton-principal" type="submit"><span class="icono icono-search"
+                            aria-hidden="true"></span>Buscar</button>
+                    <a class="inventario-boton boton-secundario" th:href="@{/medicamentos(activo=${activo})}"><span
+                            class="icono icono-x" aria-hidden="true"></span>Limpiar</a>
+                </div>
+            </form>
+            <section class="inventario-resultados" aria-labelledby="titulo-resultados">
+                <div class="resultados-cabecera">
+                    <h2 id="titulo-resultados">Listado de medicamentos <span class="cantidad-resultados"
+                            th:text="${#lists.size(medicamentos)}"></span></h2>
+                    <span class="estado-listado" th:classappend="${!activo} ? 'estado-inactivo'"
+                        th:text="${activo} ? 'Activos' : 'Inactivos'"></span>
+                </div>
+                <div class="inventario-vacio" th:if="${#lists.isEmpty(medicamentos)}">
+                    <span class="icono icono-package" aria-hidden="true"></span>
+                    <p
+                        th:text="${#strings.isEmpty(#strings.trim(buscar)) ? (activo ? 'No hay medicamentos activos registrados.' : 'No hay medicamentos inactivos registrados.') : 'No se encontraron medicamentos para esta búsqueda.'}">
+                    </p>
+                </div>
+                <div class="tabla-contenedor inventario-tabla" th:if="${!#lists.isEmpty(medicamentos)}" tabindex="0"
+                    role="region" aria-label="Medicamentos, tabla desplazable">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">Código</th>
+                                <th scope="col">Medicamento</th>
+                                <th scope="col">Concentración</th>
+                                <th scope="col">Presentación</th>
+                                <th scope="col">Unidad</th>
+                                <th scope="col" class="numero">Precio (S/)</th>
+                                <th scope="col" class="numero">Stock mínimo</th>
+                                <th scope="col">Inventario</th>
+                                <th scope="col" th:if="${esAdministrador}">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="medicamento : ${medicamentos}">
+                                <td class="codigo-medicamento" th:text="${medicamento.codigo()}"></td>
+                                <td class="nombre-medicamento" th:text="${medicamento.nombre()}"></td>
+                                <td
+                                    th:text="${#strings.isEmpty(medicamento.concentracion()) ? '-' : medicamento.concentracion()}">
+                                </td>
+                                <td th:text="${medicamento.presentacion()}"></td>
+                                <td><span class="unidad-medicamento" th:text="${medicamento.unidadControl()}"></span>
+                                </td>
+                                <td class="numero"
+                                    th:text="${#numbers.formatDecimal(medicamento.precioVenta(), 1, 'NONE', 2, 'POINT')}">
+                                </td>
+                                <td class="numero" th:text="${medicamento.stockMinimo()}"></td>
+                                <td><a class="enlace-lotes"
+                                        th:href="@{/medicamentos/{id}/lotes(id=${medicamento.idMedicamento()})}"><span
+                                            class="icono icono-package" aria-hidden="true"></span>Ver lotes</a></td>
+                                <td th:if="${esAdministrador}">
+                                    <div class="inventario-acciones">
+                                        <a class="boton-icono"
+                                            th:href="@{/medicamentos/{id}/editar(id=${medicamento.idMedicamento()})}"
+                                            title="Editar medicamento"
+                                            th:attr="aria-label=${'Editar ' + medicamento.nombre()}"><span
+                                                class="icono icono-pencil" aria-hidden="true"></span></a>
+                                        <form method="post" th:if="${medicamento.activo()}"
+                                            th:action="@{/medicamentos/{id}/desactivar(id=${medicamento.idMedicamento()})}"
+                                            onsubmit="return confirm('¿Desactivar este medicamento? Se conservará su historial.');">
+                                            <button class="boton-icono accion-desactivar" type="submit"
+                                                title="Desactivar medicamento"
+                                                th:attr="aria-label=${'Desactivar ' + medicamento.nombre()}"><span
+                                                    class="icono icono-circle-minus" aria-hidden="true"></span></button>
+                                        </form>
+                                        <form method="post" th:unless="${medicamento.activo()}"
+                                            th:action="@{/medicamentos/{id}/activar(id=${medicamento.idMedicamento()})}"
+                                            onsubmit="return confirm('¿Activar este medicamento?');">
+                                            <button class="boton-icono" type="submit" title="Activar medicamento"
+                                                th:attr="aria-label=${'Activar ' + medicamento.nombre()}"><span
+                                                    class="icono icono-circle-check" aria-hidden="true"></span></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="resultados-pie"
+                    th:text="${#lists.size(medicamentos)} + (${#lists.size(medicamentos) == 1} ? ' medicamento encontrado' : ' medicamentos encontrados')">
+                </p>
+            </section>
+        </main>
+    </div>
 </body>
 
 </html>
