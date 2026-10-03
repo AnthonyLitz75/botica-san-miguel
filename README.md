@@ -47,3 +47,9 @@ DB_USER y DB_PASSWORD.
 
 Los scripts de tablas y datos de demostración están en `scripts/`.
 Consulta `GUIA_INSTALACION.txt` para instalar y ejecutar el proyecto.
+
+## API de medicamentos
+
+La API JSON permite consultar, crear, actualizar y desactivar medicamentos con
+GET, POST, PUT y DELETE. Consulta [API_POSTMAN.md](API_POSTMAN.md) para probarla
+con Postman. Las operaciones de escritura requieren el rol Administrador.

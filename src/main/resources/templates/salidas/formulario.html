@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
     <link rel="stylesheet" th:href="@{/css/inventario.css}">
 </head>
+
 <body class="pagina-inventario">
     <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
     <aside th:replace="~{fragmentos/navegacion :: lateral('Medicamentos')}"></aside>
@@ -14,15 +16,31 @@
         <header th:replace="~{fragmentos/navegacion :: cabecera('Medicamentos', 'Inventario')}"></header>
         <main id="contenido" class="inventario-contenido">
             <div class="inventario-titulo">
-                <div><p class="seccion-etiqueta">INVENTARIO</p><h1>Registrar salida de inventario</h1></div>
-                <a class="inventario-boton boton-secundario" th:href="@{/medicamentos/{id}/lotes(id=${lote.idMedicamento()})}"><span class="icono icono-arrow-left" aria-hidden="true"></span>Volver a lotes</a>
+                <div>
+                    <p class="seccion-etiqueta">INVENTARIO</p>
+                    <h1>Registrar salida de inventario</h1>
+                </div>
+                <a class="inventario-boton boton-secundario"
+                    th:href="@{/medicamentos/{id}/lotes(id=${lote.idMedicamento()})}"><span
+                        class="icono icono-arrow-left" aria-hidden="true"></span>Volver a lotes</a>
             </div>
             <dl class="resumen-registro">
-                <div><dt>Medicamento</dt><dd th:text="${medicamento.codigo() + ' - ' + medicamento.nombre()}"></dd></div>
-                <div><dt>Lote</dt><dd class="codigo-medicamento" th:text="${lote.numeroLote()}"></dd></div>
-                <div><dt>Stock actual</dt><dd><strong class="importe-resumen" th:text="${lote.stockActual()}"></strong> <span class="unidad-medicamento" th:text="${medicamento.unidadControl()}"></span></dd></div>
+                <div>
+                    <dt>Medicamento</dt>
+                    <dd th:text="${medicamento.codigo() + ' - ' + medicamento.nombre()}"></dd>
+                </div>
+                <div>
+                    <dt>Lote</dt>
+                    <dd class="codigo-medicamento" th:text="${lote.numeroLote()}"></dd>
+                </div>
+                <div>
+                    <dt>Stock actual</dt>
+                    <dd><strong class="importe-resumen" th:text="${lote.stockActual()}"></strong> <span
+                            class="unidad-medicamento" th:text="${medicamento.unidadControl()}"></span></dd>
+                </div>
             </dl>
-            <form th:action="@{/lotes/{id}/salida(id=${lote.idLote()})}" th:object="${formulario}" method="post" class="proveedor-formulario">
+            <form th:action="@{/lotes/{id}/salida(id=${lote.idLote()})}" th:object="${formulario}" method="post"
+                class="proveedor-formulario">
                 <div class="aviso-operacion aviso-error" th:if="${#fields.hasGlobalErrors()}" role="alert">
                     <p th:each="error : ${#fields.globalErrors()}" th:text="${error}"></p>
                 </div>
@@ -31,22 +49,30 @@
                     <div class="proveedor-campos">
                         <div>
                             <label for="cantidad">Cantidad</label>
-                            <input type="number" id="cantidad" th:field="*{cantidad}" min="1" step="1" required th:attr="aria-invalid=${#fields.hasErrors('cantidad')},aria-describedby=${#fields.hasErrors('cantidad') ? 'error-cantidad' : null}">
-                            <p class="error" id="error-cantidad" th:if="${#fields.hasErrors('cantidad')}" th:errors="*{cantidad}"></p>
+                            <input type="number" id="cantidad" th:field="*{cantidad}" min="1" step="1" required
+                                th:attr="aria-invalid=${#fields.hasErrors('cantidad')},aria-describedby=${#fields.hasErrors('cantidad') ? 'error-cantidad' : null}">
+                            <p class="error" id="error-cantidad" th:if="${#fields.hasErrors('cantidad')}"
+                                th:errors="*{cantidad}"></p>
                         </div>
                         <div class="campo-completo">
                             <label for="motivo">Motivo</label>
-                            <textarea id="motivo" th:field="*{motivo}" maxlength="250" rows="3" required th:attr="aria-invalid=${#fields.hasErrors('motivo')},aria-describedby=${#fields.hasErrors('motivo') ? 'error-motivo' : null}"></textarea>
-                            <p class="error" id="error-motivo" th:if="${#fields.hasErrors('motivo')}" th:errors="*{motivo}"></p>
+                            <textarea id="motivo" th:field="*{motivo}" maxlength="250" rows="3" required
+                                th:attr="aria-invalid=${#fields.hasErrors('motivo')},aria-describedby=${#fields.hasErrors('motivo') ? 'error-motivo' : null}"></textarea>
+                            <p class="error" id="error-motivo" th:if="${#fields.hasErrors('motivo')}"
+                                th:errors="*{motivo}"></p>
                         </div>
                     </div>
                 </fieldset>
                 <div class="proveedor-formulario-acciones">
-                    <button type="submit" class="inventario-boton boton-principal"><span class="icono icono-save" aria-hidden="true"></span>Registrar salida</button>
-                    <a class="inventario-boton boton-secundario" th:href="@{/medicamentos/{id}/lotes(id=${lote.idMedicamento()})}"><span class="icono icono-x" aria-hidden="true"></span>Cancelar</a>
+                    <button type="submit" class="inventario-boton boton-principal"><span class="icono icono-save"
+                            aria-hidden="true"></span>Registrar salida</button>
+                    <a class="inventario-boton boton-secundario"
+                        th:href="@{/medicamentos/{id}/lotes(id=${lote.idMedicamento()})}"><span class="icono icono-x"
+                            aria-hidden="true"></span>Cancelar</a>
                 </div>
             </form>
         </main>
     </div>
 </body>
+
 </html>

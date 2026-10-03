@@ -16,9 +16,8 @@ public class VerificacionBaseDatos implements CommandLineRunner {
     @Override
     public void run(String... args) {
         String baseDatos = jdbcTemplate.queryForObject(
-            "SELECT current_database()",
-            String.class
-        );
+                "SELECT current_database()",
+                String.class);
 
         System.out.println("Conexion PostgreSQL correcta: " + baseDatos);
     }

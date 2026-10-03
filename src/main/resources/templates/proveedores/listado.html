@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
     <link rel="stylesheet" th:href="@{/css/inventario.css}">
 </head>
+
 <body class="pagina-inventario">
     <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
     <aside th:replace="~{fragmentos/navegacion :: lateral('Proveedores')}"></aside>
@@ -14,13 +16,20 @@
         <header th:replace="~{fragmentos/navegacion :: cabecera('Proveedores', 'Compras')}"></header>
         <main id="contenido" class="inventario-contenido">
             <div class="inventario-titulo">
-                <div><p class="seccion-etiqueta">COMPRAS</p><h1>Proveedores</h1></div>
-                <a class="inventario-boton boton-principal" th:if="${puedeGestionarProveedores}" th:href="@{/proveedores/nuevo}"><span class="icono icono-plus" aria-hidden="true"></span>Nuevo proveedor</a>
+                <div>
+                    <p class="seccion-etiqueta">COMPRAS</p>
+                    <h1>Proveedores</h1>
+                </div>
+                <a class="inventario-boton boton-principal" th:if="${puedeGestionarProveedores}"
+                    th:href="@{/proveedores/nuevo}"><span class="icono icono-plus" aria-hidden="true"></span>Nuevo
+                    proveedor</a>
             </div>
             <form class="inventario-filtros" th:action="@{/proveedores}" method="get" role="search">
                 <div class="filtro-busqueda">
                     <label for="buscar">RUC o razón social</label>
-                    <div class="entrada-busqueda"><span class="icono icono-search" aria-hidden="true"></span><input type="search" id="buscar" name="buscar" th:value="${buscar}" placeholder="Buscar proveedor"></div>
+                    <div class="entrada-busqueda"><span class="icono icono-search" aria-hidden="true"></span><input
+                            type="search" id="buscar" name="buscar" th:value="${buscar}" placeholder="Buscar proveedor">
+                    </div>
                 </div>
                 <div class="filtro-estado">
                     <label for="activo">Estado</label>
@@ -30,43 +39,85 @@
                     </select>
                 </div>
                 <div class="filtro-acciones">
-                    <button class="inventario-boton boton-principal" type="submit"><span class="icono icono-search" aria-hidden="true"></span>Buscar</button>
-                    <a class="inventario-boton boton-secundario" th:href="@{/proveedores(activo=${activo})}"><span class="icono icono-x" aria-hidden="true"></span>Limpiar</a>
+                    <button class="inventario-boton boton-principal" type="submit"><span class="icono icono-search"
+                            aria-hidden="true"></span>Buscar</button>
+                    <a class="inventario-boton boton-secundario" th:href="@{/proveedores(activo=${activo})}"><span
+                            class="icono icono-x" aria-hidden="true"></span>Limpiar</a>
                 </div>
             </form>
             <section class="inventario-resultados" aria-labelledby="titulo-resultados">
                 <div class="resultados-cabecera">
-                    <h2 id="titulo-resultados">Listado de proveedores <span class="cantidad-resultados" th:text="${#lists.size(proveedores)}"></span></h2>
-                    <span class="estado-listado" th:classappend="${!activo} ? 'estado-inactivo'" th:text="${activo} ? 'Activos' : 'Inactivos'"></span>
+                    <h2 id="titulo-resultados">Listado de proveedores <span class="cantidad-resultados"
+                            th:text="${#lists.size(proveedores)}"></span></h2>
+                    <span class="estado-listado" th:classappend="${!activo} ? 'estado-inactivo'"
+                        th:text="${activo} ? 'Activos' : 'Inactivos'"></span>
                 </div>
                 <div class="inventario-vacio" th:if="${#lists.isEmpty(proveedores)}">
                     <span class="icono icono-truck" aria-hidden="true"></span>
-                    <p th:text="${#strings.isEmpty(#strings.trim(buscar)) ? (activo ? 'No hay proveedores activos registrados.' : 'No hay proveedores inactivos registrados.') : 'No se encontraron proveedores para esta búsqueda.'}"></p>
+                    <p
+                        th:text="${#strings.isEmpty(#strings.trim(buscar)) ? (activo ? 'No hay proveedores activos registrados.' : 'No hay proveedores inactivos registrados.') : 'No se encontraron proveedores para esta búsqueda.'}">
+                    </p>
                 </div>
-                <div class="tabla-contenedor inventario-tabla tabla-proveedores" th:unless="${#lists.isEmpty(proveedores)}" tabindex="0" role="region" aria-label="Proveedores, tabla desplazable">
+                <div class="tabla-contenedor inventario-tabla tabla-proveedores"
+                    th:unless="${#lists.isEmpty(proveedores)}" tabindex="0" role="region"
+                    aria-label="Proveedores, tabla desplazable">
                     <table>
-                        <thead><tr><th scope="col">RUC</th><th scope="col">Razón social</th><th scope="col">Teléfono</th><th scope="col">Correo</th><th scope="col">Dirección</th><th scope="col" th:if="${puedeGestionarProveedores}">Acciones</th></tr></thead>
-                        <tbody><tr th:each="proveedor : ${proveedores}">
-                            <td class="codigo-medicamento" th:text="${proveedor.ruc()}"></td>
-                            <td class="nombre-medicamento" th:text="${proveedor.razonSocial()}"></td>
-                            <td class="telefono-proveedor" th:text="${#strings.isEmpty(proveedor.telefono()) ? '-' : proveedor.telefono()}"></td>
-                            <td class="contacto-proveedor" th:text="${#strings.isEmpty(proveedor.correo()) ? '-' : proveedor.correo()}"></td>
-                            <td class="contacto-proveedor" th:text="${#strings.isEmpty(proveedor.direccion()) ? '-' : proveedor.direccion()}"></td>
-                            <td th:if="${puedeGestionarProveedores}"><div class="inventario-acciones">
-                                <a class="boton-icono" th:href="@{/proveedores/{id}/editar(id=${proveedor.idProveedor()})}" title="Editar proveedor" th:attr="aria-label=${'Editar ' + proveedor.razonSocial()}"><span class="icono icono-pencil" aria-hidden="true"></span></a>
-                                <form method="post" th:if="${proveedor.activo()}" th:action="@{/proveedores/{id}/desactivar(id=${proveedor.idProveedor()})}" onsubmit="return confirm('¿Desactivar este proveedor? Se conservará su historial.');">
-                                    <button class="boton-icono accion-desactivar" type="submit" title="Desactivar proveedor" th:attr="aria-label=${'Desactivar ' + proveedor.razonSocial()}"><span class="icono icono-circle-minus" aria-hidden="true"></span></button>
-                                </form>
-                                <form method="post" th:unless="${proveedor.activo()}" th:action="@{/proveedores/{id}/activar(id=${proveedor.idProveedor()})}" onsubmit="return confirm('¿Activar este proveedor?');">
-                                    <button class="boton-icono" type="submit" title="Activar proveedor" th:attr="aria-label=${'Activar ' + proveedor.razonSocial()}"><span class="icono icono-circle-check" aria-hidden="true"></span></button>
-                                </form>
-                            </div></td>
-                        </tr></tbody>
+                        <thead>
+                            <tr>
+                                <th scope="col">RUC</th>
+                                <th scope="col">Razón social</th>
+                                <th scope="col">Teléfono</th>
+                                <th scope="col">Correo</th>
+                                <th scope="col">Dirección</th>
+                                <th scope="col" th:if="${puedeGestionarProveedores}">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="proveedor : ${proveedores}">
+                                <td class="codigo-medicamento" th:text="${proveedor.ruc()}"></td>
+                                <td class="nombre-medicamento" th:text="${proveedor.razonSocial()}"></td>
+                                <td class="telefono-proveedor"
+                                    th:text="${#strings.isEmpty(proveedor.telefono()) ? '-' : proveedor.telefono()}">
+                                </td>
+                                <td class="contacto-proveedor"
+                                    th:text="${#strings.isEmpty(proveedor.correo()) ? '-' : proveedor.correo()}"></td>
+                                <td class="contacto-proveedor"
+                                    th:text="${#strings.isEmpty(proveedor.direccion()) ? '-' : proveedor.direccion()}">
+                                </td>
+                                <td th:if="${puedeGestionarProveedores}">
+                                    <div class="inventario-acciones">
+                                        <a class="boton-icono"
+                                            th:href="@{/proveedores/{id}/editar(id=${proveedor.idProveedor()})}"
+                                            title="Editar proveedor"
+                                            th:attr="aria-label=${'Editar ' + proveedor.razonSocial()}"><span
+                                                class="icono icono-pencil" aria-hidden="true"></span></a>
+                                        <form method="post" th:if="${proveedor.activo()}"
+                                            th:action="@{/proveedores/{id}/desactivar(id=${proveedor.idProveedor()})}"
+                                            onsubmit="return confirm('¿Desactivar este proveedor? Se conservará su historial.');">
+                                            <button class="boton-icono accion-desactivar" type="submit"
+                                                title="Desactivar proveedor"
+                                                th:attr="aria-label=${'Desactivar ' + proveedor.razonSocial()}"><span
+                                                    class="icono icono-circle-minus" aria-hidden="true"></span></button>
+                                        </form>
+                                        <form method="post" th:unless="${proveedor.activo()}"
+                                            th:action="@{/proveedores/{id}/activar(id=${proveedor.idProveedor()})}"
+                                            onsubmit="return confirm('¿Activar este proveedor?');">
+                                            <button class="boton-icono" type="submit" title="Activar proveedor"
+                                                th:attr="aria-label=${'Activar ' + proveedor.razonSocial()}"><span
+                                                    class="icono icono-circle-check" aria-hidden="true"></span></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
-                <p class="resultados-pie" th:text="${#lists.size(proveedores)} + (${#lists.size(proveedores) == 1} ? ' proveedor encontrado' : ' proveedores encontrados')"></p>
+                <p class="resultados-pie"
+                    th:text="${#lists.size(proveedores)} + (${#lists.size(proveedores) == 1} ? ' proveedor encontrado' : ' proveedores encontrados')">
+                </p>
             </section>
         </main>
     </div>
 </body>
+
 </html>

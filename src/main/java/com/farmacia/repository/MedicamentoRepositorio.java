@@ -50,15 +50,16 @@ public class MedicamentoRepositorio {
                 fila.getBoolean("activo")), activo, texto, texto);
     }
 
-    public void guardar(MedicamentoFormulario medicamentoFormulario) {
+    public Integer guardar(MedicamentoFormulario medicamentoFormulario) {
         String sql = """
                 INSERT INTO medicamento (codigo, nombre, concentracion,
                                          presentacion, unidad_control,
                                          precio_venta, stock_minimo, activo)
                 VALUES (?, ?, ?, ?, ?, ?, ?, TRUE)
+                RETURNING id_medicamento
                 """;
 
-        jdbcTemplate.update(sql,
+        return jdbcTemplate.queryForObject(sql, Integer.class,
                 medicamentoFormulario.codigo(),
                 medicamentoFormulario.nombre(),
                 medicamentoFormulario.concentracion(),

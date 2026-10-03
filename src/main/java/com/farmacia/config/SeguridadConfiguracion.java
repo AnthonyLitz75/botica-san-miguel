@@ -2,13 +2,18 @@ package com.farmacia.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.http.HttpMethod;
 
 @Configuration
+@EnableWebSecurity
 public class SeguridadConfiguracion {
 
         @Bean
@@ -16,7 +21,31 @@ public class SeguridadConfiguracion {
                 return PasswordEncoderFactories.createDelegatingPasswordEncoder();
         }
 
+    @Bean
+    @Order(1)
+    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http)
+            throws Exception {
+        http
+                .securityMatcher("/api/**")
+                .authorizeHttpRequests(autorizacion -> autorizacion
+                        .requestMatchers(HttpMethod.GET, "/api/medicamentos", "/api/medicamentos/*")
+                        .hasAnyRole("ADMINISTRADOR", "VENDEDOR", "ALMACENERO", "COMPRAS")
+                        .requestMatchers(HttpMethod.POST, "/api/medicamentos")
+                        .hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/medicamentos/*")
+                        .hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/medicamentos/*")
+                        .hasRole("ADMINISTRADOR")
+                        .anyRequest().denyAll())
+                .httpBasic(Customizer.withDefaults())
+                .sessionManagement(sesion -> sesion.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .csrf(csrf -> csrf.disable());
+
+        return http.build();
+    }
+
         @Bean
+    @Order(2)
         public SecurityFilterChain securityFilterChain(HttpSecurity http)
                         throws Exception {
 

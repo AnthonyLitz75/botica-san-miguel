@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 @ControllerAdvice(assignableTypes = {
-    MedicamentoControlador.class, ProveedorControlador.class,
-    OrdenCompraControlador.class, MovimientoInventarioControlador.class,
-    LoteControlador.class, SalidaInventarioControlador.class
+        MedicamentoControlador.class, ProveedorControlador.class,
+        OrdenCompraControlador.class, MovimientoInventarioControlador.class,
+        LoteControlador.class, SalidaInventarioControlador.class
 })
 public class NavegacionCompartida {
     @ModelAttribute

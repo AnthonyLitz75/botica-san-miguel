@@ -1,0 +1,377 @@
+{
+  "info": {
+    "_postman_id": "273eb5c6-cc72-4553-a3c8-adc2b684994d",
+    "name": "Botica San Miguel - API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58647740"
+  },
+  "item": [
+    {
+      "name": "POST - Precio inválido",
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "admin_demo",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "AdminDemo2026!",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"codigo\": \"MED-POSTMAN-001\",\r\n  \"nombre\": \"Medicamento de prueba\",\r\n  \"concentracion\": \"500 mg\",\r\n  \"presentacion\": \"Caja de 10 tabletas\",\r\n  \"unidadControl\": \"CAJA\",\r\n  \"precioVenta\": -1,\r\n  \"stockMinimo\": 5\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/medicamentos",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "medicamentos"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Listar medicamentos activos",
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "admin_demo",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "AdminDemo2026!",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/medicamentos",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "medicamentos"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Consultar medicamento por ID",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "admin_demo",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "AdminDemo2026!",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "text"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/medicamentos/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "medicamentos",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Medicamento inexistente (404)",
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "admin_demo",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "AdminDemo2026!",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/medicamentos/999999",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "medicamentos",
+            "999999"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Sin autenticación (401)",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"codigo\": \"MED-PERMISOS-001\",\r\n  \"nombre\": \"Prueba de permisos\",\r\n  \"concentracion\": \"500 mg\",\r\n  \"presentacion\": \"Caja de 10 tabletas\",\r\n  \"unidadControl\": \"CAJA\",\r\n  \"precioVenta\": 10.50,\r\n  \"stockMinimo\": 5\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/medicamentos",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "medicamentos"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST - Almacén sin permiso (403)",
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "almacen_demo",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "FarmaciaDemo2026!",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"codigo\": \"MED-PERMISOS-001\",\r\n  \"nombre\": \"Prueba de permisos\",\r\n  \"concentracion\": \"500 mg\",\r\n  \"presentacion\": \"Caja de 10 tabletas\",\r\n  \"unidadControl\": \"CAJA\",\r\n  \"precioVenta\": 10.50,\r\n  \"stockMinimo\": 5\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/medicamentos",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "medicamentos"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST - Crear medicamento",
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "admin_demo",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "AdminDemo2026!",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"codigo\": \"MED-DEMO-002\",\r\n  \"nombre\": \"Medicamento de demostracion\",\r\n  \"concentracion\": \"500 mg\",\r\n  \"presentacion\": \"Caja de 10 tabletas\",\r\n  \"unidadControl\": \"CAJA\",\r\n  \"precioVenta\": 10.50,\r\n  \"stockMinimo\": 5\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/medicamentos",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "medicamentos"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PUT - Actualizar medicamento",
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "admin_demo",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "AdminDemo2026!",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"codigo\": \"MED-DEMO-002\",\r\n  \"nombre\": \"Medicamento de demostracion actualizado\",\r\n  \"concentracion\": \"500 mg\",\r\n  \"presentacion\": \"Caja de 10 tabletas\",\r\n  \"unidadControl\": \"CAJA\",\r\n  \"precioVenta\": 12.00,\r\n  \"stockMinimo\": 8\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/medicamentos/5",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "medicamentos",
+            "5"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "DELETE - Desactivar medicamento",
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "admin_demo",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "AdminDemo2026!",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/medicamentos/5",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "medicamentos",
+            "5"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

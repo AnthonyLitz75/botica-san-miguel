@@ -16,39 +16,39 @@ import org.springframework.security.core.Authentication;
 @RequestMapping("/medicamentos/{idMedicamento}/lotes")
 public class LoteControlador {
 
-    private final LoteServicio loteServicio;
-    private final MedicamentoServicio medicamentoServicio;
+        private final LoteServicio loteServicio;
+        private final MedicamentoServicio medicamentoServicio;
 
-    public LoteControlador(
-            LoteServicio loteServicio,
-            MedicamentoServicio medicamentoServicio) {
-        this.loteServicio = loteServicio;
-        this.medicamentoServicio = medicamentoServicio;
-    }
+        public LoteControlador(
+                        LoteServicio loteServicio,
+                        MedicamentoServicio medicamentoServicio) {
+                this.loteServicio = loteServicio;
+                this.medicamentoServicio = medicamentoServicio;
+        }
 
-    @GetMapping
-    public String listar(
-            @PathVariable("idMedicamento") Integer idMedicamento,
-            Model model,
-            Authentication authentication) {
+        @GetMapping
+        public String listar(
+                        @PathVariable("idMedicamento") Integer idMedicamento,
+                        Model model,
+                        Authentication authentication) {
 
-        Medicamento medicamento = medicamentoServicio
-                .buscarPorId(idMedicamento)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Medicamento no encontrado"));
+                Medicamento medicamento = medicamentoServicio
+                                .buscarPorId(idMedicamento)
+                                .orElseThrow(() -> new ResponseStatusException(
+                                                HttpStatus.NOT_FOUND,
+                                                "Medicamento no encontrado"));
 
-        model.addAttribute("medicamento", medicamento);
-        model.addAttribute(
-                "lotes",
-                loteServicio.listarPorMedicamento(idMedicamento));
+                model.addAttribute("medicamento", medicamento);
+                model.addAttribute(
+                                "lotes",
+                                loteServicio.listarPorMedicamento(idMedicamento));
 
-        boolean puedeRegistrarSalida = authentication.getAuthorities()
-                .stream()
-                .anyMatch(autoridad -> autoridad.getAuthority().equals("ROLE_ADMINISTRADOR")
-                        || autoridad.getAuthority().equals("ROLE_ALMACENERO"));
+                boolean puedeRegistrarSalida = authentication.getAuthorities()
+                                .stream()
+                                .anyMatch(autoridad -> autoridad.getAuthority().equals("ROLE_ADMINISTRADOR")
+                                                || autoridad.getAuthority().equals("ROLE_ALMACENERO"));
 
-        model.addAttribute("puedeRegistrarSalida", puedeRegistrarSalida);
-        return "lotes/listado";
-    }
+                model.addAttribute("puedeRegistrarSalida", puedeRegistrarSalida);
+                return "lotes/listado";
+        }
 }

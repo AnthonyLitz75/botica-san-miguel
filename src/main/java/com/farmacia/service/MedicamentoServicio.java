@@ -25,8 +25,8 @@ public class MedicamentoServicio {
         return repositorio.buscarActivos(textoLimpio);
     }
 
-    public void guardar(MedicamentoFormulario formulario) {
-        repositorio.guardar(limpiarDatos(formulario));
+    public Integer guardar(MedicamentoFormulario formulario) {
+        return repositorio.guardar(limpiarDatos(formulario));
     }
 
     public boolean actualizar(Integer id, MedicamentoFormulario formulario) {

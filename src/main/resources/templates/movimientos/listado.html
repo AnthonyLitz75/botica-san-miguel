@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
     <link rel="stylesheet" th:href="@{/css/inventario.css}">
 </head>
+
 <body class="pagina-inventario">
     <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
     <aside th:replace="~{fragmentos/navegacion :: lateral('Movimientos')}"></aside>
@@ -14,23 +16,59 @@
         <header th:replace="~{fragmentos/navegacion :: cabecera('Movimientos', 'Inventario')}"></header>
         <main id="contenido" class="inventario-contenido">
 
-            <div class="inventario-titulo"><div><p class="seccion-etiqueta">INVENTARIO</p><h1>Movimientos de inventario</h1></div></div>
+            <div class="inventario-titulo">
+                <div>
+                    <p class="seccion-etiqueta">INVENTARIO</p>
+                    <h1>Movimientos de inventario</h1>
+                </div>
+            </div>
             <section class="inventario-resultados registro-listado" aria-labelledby="titulo-resultados">
-                <div class="resultados-cabecera"><h2 id="titulo-resultados">Historial de movimientos <span class="cantidad-resultados" th:text="${#lists.size(movimientos)}"></span></h2></div>
-                <div class="inventario-vacio" th:if="${#lists.isEmpty(movimientos)}"><span class="icono icono-arrow-left-right" aria-hidden="true"></span><p>No hay movimientos de inventario registrados.</p></div>
-                <div class="tabla-contenedor inventario-tabla tabla-movimientos" th:unless="${#lists.isEmpty(movimientos)}" tabindex="0" role="region" aria-label="Movimientos, tabla desplazable">
+                <div class="resultados-cabecera">
+                    <h2 id="titulo-resultados">Historial de movimientos <span class="cantidad-resultados"
+                            th:text="${#lists.size(movimientos)}"></span></h2>
+                </div>
+                <div class="inventario-vacio" th:if="${#lists.isEmpty(movimientos)}"><span
+                        class="icono icono-arrow-left-right" aria-hidden="true"></span>
+                    <p>No hay movimientos de inventario registrados.</p>
+                </div>
+                <div class="tabla-contenedor inventario-tabla tabla-movimientos"
+                    th:unless="${#lists.isEmpty(movimientos)}" tabindex="0" role="region"
+                    aria-label="Movimientos, tabla desplazable">
                     <table>
-                        <thead><tr><th scope="col">ID</th><th scope="col">Fecha y hora</th><th scope="col">Tipo</th><th scope="col">ID usuario</th><th scope="col">Motivo</th><th scope="col">Detalle</th></tr></thead>
-                        <tbody><tr th:each="movimiento : ${movimientos}">
-                            <td class="codigo-medicamento" th:text="${movimiento.idMovimiento()}"></td><td class="fecha-registro" th:text="${#temporals.format(movimiento.fechaHora(), 'dd/MM/yyyy HH:mm')}"></td>
-                            <td><span class="tipo-movimiento" th:classappend="${movimiento.tipo() == 'SALIDA'} ? 'tipo-salida'" th:text="${movimiento.tipo()}"></span></td><td th:text="${movimiento.idUsuario()}"></td><td class="motivo-movimiento" th:text="${movimiento.motivo()}"></td>
-                            <td><a class="enlace-lotes" th:href="@{/movimientos/{id}(id=${movimiento.idMovimiento()})}"><span class="icono icono-clipboard-list" aria-hidden="true"></span>Ver detalle</a></td>
-                        </tr></tbody>
+                        <thead>
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">Fecha y hora</th>
+                                <th scope="col">Tipo</th>
+                                <th scope="col">ID usuario</th>
+                                <th scope="col">Motivo</th>
+                                <th scope="col">Detalle</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="movimiento : ${movimientos}">
+                                <td class="codigo-medicamento" th:text="${movimiento.idMovimiento()}"></td>
+                                <td class="fecha-registro"
+                                    th:text="${#temporals.format(movimiento.fechaHora(), 'dd/MM/yyyy HH:mm')}"></td>
+                                <td><span class="tipo-movimiento"
+                                        th:classappend="${movimiento.tipo() == 'SALIDA'} ? 'tipo-salida'"
+                                        th:text="${movimiento.tipo()}"></span></td>
+                                <td th:text="${movimiento.idUsuario()}"></td>
+                                <td class="motivo-movimiento" th:text="${movimiento.motivo()}"></td>
+                                <td><a class="enlace-lotes"
+                                        th:href="@{/movimientos/{id}(id=${movimiento.idMovimiento()})}"><span
+                                            class="icono icono-clipboard-list" aria-hidden="true"></span>Ver detalle</a>
+                                </td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
-                <p class="resultados-pie" th:text="${#lists.size(movimientos)} + (${#lists.size(movimientos) == 1} ? ' movimiento registrado' : ' movimientos registrados')"></p>
+                <p class="resultados-pie"
+                    th:text="${#lists.size(movimientos)} + (${#lists.size(movimientos) == 1} ? ' movimiento registrado' : ' movimientos registrados')">
+                </p>
             </section>
         </main>
     </div>
 </body>
+
 </html>
