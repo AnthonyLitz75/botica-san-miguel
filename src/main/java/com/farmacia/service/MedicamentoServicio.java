@@ -70,5 +70,4 @@ public class MedicamentoServicio {
         return repositorio.buscarPorEstado(textoLimpio, activo);
     }
 
-    
 }

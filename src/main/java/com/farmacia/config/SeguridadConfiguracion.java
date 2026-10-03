@@ -21,31 +21,33 @@ public class SeguridadConfiguracion {
                 return PasswordEncoderFactories.createDelegatingPasswordEncoder();
         }
 
-    @Bean
-    @Order(1)
-    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http)
-            throws Exception {
-        http
-                .securityMatcher("/api/**")
-                .authorizeHttpRequests(autorizacion -> autorizacion
-                        .requestMatchers(HttpMethod.GET, "/api/medicamentos", "/api/medicamentos/*")
-                        .hasAnyRole("ADMINISTRADOR", "VENDEDOR", "ALMACENERO", "COMPRAS")
-                        .requestMatchers(HttpMethod.POST, "/api/medicamentos")
-                        .hasRole("ADMINISTRADOR")
-                        .requestMatchers(HttpMethod.PUT, "/api/medicamentos/*")
-                        .hasRole("ADMINISTRADOR")
-                        .requestMatchers(HttpMethod.DELETE, "/api/medicamentos/*")
-                        .hasRole("ADMINISTRADOR")
-                        .anyRequest().denyAll())
-                .httpBasic(Customizer.withDefaults())
-                .sessionManagement(sesion -> sesion.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .csrf(csrf -> csrf.disable());
+        @Bean
+        @Order(1)
+        public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http)
+                        throws Exception {
+                http
+                                .securityMatcher("/api/**")
+                                .authorizeHttpRequests(autorizacion -> autorizacion
+                                                .requestMatchers(HttpMethod.GET, "/api/medicamentos",
+                                                                "/api/medicamentos/*")
+                                                .hasAnyRole("ADMINISTRADOR", "VENDEDOR", "ALMACENERO", "COMPRAS")
+                                                .requestMatchers(HttpMethod.POST, "/api/medicamentos")
+                                                .hasRole("ADMINISTRADOR")
+                                                .requestMatchers(HttpMethod.PUT, "/api/medicamentos/*")
+                                                .hasRole("ADMINISTRADOR")
+                                                .requestMatchers(HttpMethod.DELETE, "/api/medicamentos/*")
+                                                .hasRole("ADMINISTRADOR")
+                                                .anyRequest().denyAll())
+                                .httpBasic(Customizer.withDefaults())
+                                .sessionManagement(
+                                                sesion -> sesion.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .csrf(csrf -> csrf.disable());
 
-        return http.build();
-    }
+                return http.build();
+        }
 
         @Bean
-    @Order(2)
+        @Order(2)
         public SecurityFilterChain securityFilterChain(HttpSecurity http)
                         throws Exception {
 

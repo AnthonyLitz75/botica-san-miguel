@@ -37,114 +37,114 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(SeguridadConfiguracion.class)
 class MedicamentoApiControladorTest {
 
-    private static final String MEDICAMENTO_JSON = """
-            {"codigo":"MED-003","nombre":"Amoxicilina","concentracion":"500 mg",
-             "presentacion":"Caja de 10 capsulas","unidadControl":"CAJA",
-             "precioVenta":12.50,"stockMinimo":5}
-            """;
+        private static final String MEDICAMENTO_JSON = """
+                        {"codigo":"MED-003","nombre":"Amoxicilina","concentracion":"500 mg",
+                         "presentacion":"Caja de 10 capsulas","unidadControl":"CAJA",
+                         "precioVenta":12.50,"stockMinimo":5}
+                        """;
 
-    @Autowired
-    private MockMvc mvc;
+        @Autowired
+        private MockMvc mvc;
 
-    @MockitoBean
-    private MedicamentoServicio servicio;
+        @MockitoBean
+        private MedicamentoServicio servicio;
 
-    @MockitoBean
-    private UsuarioDetallesServicio usuarios;
+        @MockitoBean
+        private UsuarioDetallesServicio usuarios;
 
-    @BeforeEach
-    void configurarUsuarios() {
-        when(usuarios.loadUserByUsername(any())).thenAnswer(invocacion -> {
-            String nombre = invocacion.getArgument(0);
-            String rol = switch (nombre) {
-                case "admin" -> "ADMINISTRADOR";
-                case "vendedor" -> "VENDEDOR";
-                default -> throw new UsernameNotFoundException("Usuario no encontrado");
-            };
-            return User.withUsername(nombre).password("{noop}clave").roles(rol).build();
-        });
-    }
+        @BeforeEach
+        void configurarUsuarios() {
+                when(usuarios.loadUserByUsername(any())).thenAnswer(invocacion -> {
+                        String nombre = invocacion.getArgument(0);
+                        String rol = switch (nombre) {
+                                case "admin" -> "ADMINISTRADOR";
+                                case "vendedor" -> "VENDEDOR";
+                                default -> throw new UsernameNotFoundException("Usuario no encontrado");
+                        };
+                        return User.withUsername(nombre).password("{noop}clave").roles(rol).build();
+                });
+        }
 
-    @Test
-    void requiereAutenticacionBasic() throws Exception {
-        mvc.perform(get("/api/medicamentos"))
-                .andExpect(status().isUnauthorized());
-    }
+        @Test
+        void requiereAutenticacionBasic() throws Exception {
+                mvc.perform(get("/api/medicamentos"))
+                                .andExpect(status().isUnauthorized());
+        }
 
-    @Test
-    void vendedorPuedeConsultarPeroNoModificar() throws Exception {
-        when(servicio.buscarPorEstado("", true)).thenReturn(List.of(medicamento()));
+        @Test
+        void vendedorPuedeConsultarPeroNoModificar() throws Exception {
+                when(servicio.buscarPorEstado("", true)).thenReturn(List.of(medicamento()));
 
-        mvc.perform(get("/api/medicamentos").header("Authorization", credenciales("vendedor")))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].codigo").value("MED-003"));
+                mvc.perform(get("/api/medicamentos").header("Authorization", credenciales("vendedor")))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$[0].codigo").value("MED-003"));
 
-        mvc.perform(post("/api/medicamentos").header("Authorization", credenciales("vendedor"))
-                .contentType(MediaType.APPLICATION_JSON).content(MEDICAMENTO_JSON))
-                .andExpect(status().isForbidden());
+                mvc.perform(post("/api/medicamentos").header("Authorization", credenciales("vendedor"))
+                                .contentType(MediaType.APPLICATION_JSON).content(MEDICAMENTO_JSON))
+                                .andExpect(status().isForbidden());
 
-        mvc.perform(put("/api/medicamentos/7").header("Authorization", credenciales("vendedor"))
-                .contentType(MediaType.APPLICATION_JSON).content(MEDICAMENTO_JSON))
-                .andExpect(status().isForbidden());
+                mvc.perform(put("/api/medicamentos/7").header("Authorization", credenciales("vendedor"))
+                                .contentType(MediaType.APPLICATION_JSON).content(MEDICAMENTO_JSON))
+                                .andExpect(status().isForbidden());
 
-        mvc.perform(delete("/api/medicamentos/7").header("Authorization", credenciales("vendedor")))
-                .andExpect(status().isForbidden());
-    }
+                mvc.perform(delete("/api/medicamentos/7").header("Authorization", credenciales("vendedor")))
+                                .andExpect(status().isForbidden());
+        }
 
-    @Test
-    void administradorPuedeCrearEditarYDesactivar() throws Exception {
-        when(servicio.guardar(any())).thenReturn(7);
-        when(servicio.buscarPorId(7)).thenReturn(Optional.of(medicamento()));
-        when(servicio.actualizar(eq(7), any())).thenReturn(true);
-        when(servicio.desactivar(7)).thenReturn(true);
+        @Test
+        void administradorPuedeCrearEditarYDesactivar() throws Exception {
+                when(servicio.guardar(any())).thenReturn(7);
+                when(servicio.buscarPorId(7)).thenReturn(Optional.of(medicamento()));
+                when(servicio.actualizar(eq(7), any())).thenReturn(true);
+                when(servicio.desactivar(7)).thenReturn(true);
 
-        mvc.perform(post("/api/medicamentos").header("Authorization", credenciales("admin"))
-                .contentType(MediaType.APPLICATION_JSON).content(MEDICAMENTO_JSON))
-                .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/api/medicamentos/7"))
-                .andExpect(jsonPath("$.idMedicamento").value(7));
+                mvc.perform(post("/api/medicamentos").header("Authorization", credenciales("admin"))
+                                .contentType(MediaType.APPLICATION_JSON).content(MEDICAMENTO_JSON))
+                                .andExpect(status().isCreated())
+                                .andExpect(header().string("Location", "/api/medicamentos/7"))
+                                .andExpect(jsonPath("$.idMedicamento").value(7));
 
-        mvc.perform(put("/api/medicamentos/7").header("Authorization", credenciales("admin"))
-                .contentType(MediaType.APPLICATION_JSON).content(MEDICAMENTO_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nombre").value("Amoxicilina"));
+                mvc.perform(put("/api/medicamentos/7").header("Authorization", credenciales("admin"))
+                                .contentType(MediaType.APPLICATION_JSON).content(MEDICAMENTO_JSON))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.nombre").value("Amoxicilina"));
 
-        mvc.perform(delete("/api/medicamentos/7").header("Authorization", credenciales("admin")))
-                .andExpect(status().isNoContent());
+                mvc.perform(delete("/api/medicamentos/7").header("Authorization", credenciales("admin")))
+                                .andExpect(status().isNoContent());
 
-        verify(servicio).desactivar(7);
-    }
+                verify(servicio).desactivar(7);
+        }
 
-    @Test
-    void validaDatosYCodigoDuplicado() throws Exception {
-        mvc.perform(post("/api/medicamentos").header("Authorization", credenciales("admin"))
-                .contentType(MediaType.APPLICATION_JSON).content("{}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.campos.codigo").exists());
+        @Test
+        void validaDatosYCodigoDuplicado() throws Exception {
+                mvc.perform(post("/api/medicamentos").header("Authorization", credenciales("admin"))
+                                .contentType(MediaType.APPLICATION_JSON).content("{}"))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.campos.codigo").exists());
 
-        when(servicio.guardar(any())).thenThrow(new DuplicateKeyException("codigo duplicado"));
-        mvc.perform(post("/api/medicamentos").header("Authorization", credenciales("admin"))
-                .contentType(MediaType.APPLICATION_JSON).content(MEDICAMENTO_JSON))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error").exists());
-    }
+                when(servicio.guardar(any())).thenThrow(new DuplicateKeyException("codigo duplicado"));
+                mvc.perform(post("/api/medicamentos").header("Authorization", credenciales("admin"))
+                                .contentType(MediaType.APPLICATION_JSON).content(MEDICAMENTO_JSON))
+                                .andExpect(status().isConflict())
+                                .andExpect(jsonPath("$.error").exists());
+        }
 
-    @Test
-    void idInexistenteDevuelve404() throws Exception {
-        mvc.perform(get("/api/medicamentos/999").header("Authorization", credenciales("vendedor")))
-                .andExpect(status().isNotFound());
+        @Test
+        void idInexistenteDevuelve404() throws Exception {
+                mvc.perform(get("/api/medicamentos/999").header("Authorization", credenciales("vendedor")))
+                                .andExpect(status().isNotFound());
 
-        mvc.perform(delete("/api/medicamentos/999").header("Authorization", credenciales("admin")))
-                .andExpect(status().isNotFound());
-    }
+                mvc.perform(delete("/api/medicamentos/999").header("Authorization", credenciales("admin")))
+                                .andExpect(status().isNotFound());
+        }
 
-    private String credenciales(String nombre) {
-        String valor = nombre + ":clave";
-        return "Basic " + Base64.getEncoder().encodeToString(valor.getBytes(StandardCharsets.UTF_8));
-    }
+        private String credenciales(String nombre) {
+                String valor = nombre + ":clave";
+                return "Basic " + Base64.getEncoder().encodeToString(valor.getBytes(StandardCharsets.UTF_8));
+        }
 
-    private Medicamento medicamento() {
-        return new Medicamento(7, "MED-003", "Amoxicilina", "500 mg",
-                "Caja de 10 capsulas", "CAJA", new BigDecimal("12.50"), 5, true);
-    }
+        private Medicamento medicamento() {
+                return new Medicamento(7, "MED-003", "Amoxicilina", "500 mg",
+                                "Caja de 10 capsulas", "CAJA", new BigDecimal("12.50"), 5, true);
+        }
 }

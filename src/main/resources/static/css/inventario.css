@@ -468,43 +468,182 @@
 .icono-user-round {
   mask-image: url("../images/icons/user-round.svg");
 }
-.icono-arrow-left { mask-image: url("../images/icons/arrow-left.svg"); }
-.icono-save { mask-image: url("../images/icons/save.svg"); }
-.tabla-proveedores table { min-width: 880px; }
-.tabla-proveedores .contacto-proveedor { max-width: 250px; overflow-wrap: anywhere; }
-.telefono-proveedor { white-space: nowrap; }
-.proveedor-formulario { max-width: 900px; border-top: 1px solid #e0e5e1; padding-top: 24px; }
-.proveedor-formulario fieldset { min-width: 0; border: 0; margin: 0 0 26px; padding: 0 0 26px; border-bottom: 1px solid #e0e5e1; }
-.proveedor-formulario legend { padding: 0; margin-bottom: 18px; font-size: 16px; font-weight: 600; }
-.proveedor-campos { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
-.proveedor-campos .campo-completo { grid-column: 1 / -1; }
-.proveedor-campos label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 600; }
-.campo-opcional { font-weight: 400; color: #748179; }
-.proveedor-campos input, .proveedor-campos select, .proveedor-campos textarea { width: 100%; min-width: 0; min-height: 44px; padding: 10px 12px; font: inherit; background: #fff; color: #35443b; border: 1px solid #cdd7d1; border-radius: 6px; }
-.proveedor-campos textarea { resize: vertical; }
-.proveedor-campos [aria-invalid="true"] { border-color: #b42318; }
-.proveedor-campos .error { margin: 6px 0 0; color: #b42318; font-size: 13px; overflow-wrap: anywhere; }
-.proveedor-formulario-acciones { display: flex; flex-wrap: wrap; gap: 10px; }
-.registro-listado { border-top: 1px solid #e0e5e1; padding-top: 24px; }
-.tabla-ordenes table { min-width: 900px; }
-.tabla-movimientos table { min-width: 850px; }
-.tabla-detalles table { min-width: 800px; }
-.fecha-registro { white-space: nowrap; font-variant-numeric: tabular-nums; }
-.motivo-movimiento { max-width: 350px; overflow-wrap: anywhere; }
-.estado-registro, .tipo-movimiento { display: inline-block; padding: 5px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap; background: #fff3d9; color: #805c16; }
-.estado-recibido, .tipo-movimiento { background: #e6f4eb; color: #276443; }
-.estado-cancelado { background: #fbe9e6; color: #a2443e; }
-.tipo-salida { background: #eaf0fc; color: #42649b; }
-.resumen-registro { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 32px; margin: 0 0 28px; padding: 24px 0; border-block: 1px solid #e0e5e1; }
-.resumen-registro > div { min-width: 0; }
-.resumen-registro dt { margin-bottom: 8px; font-size: 12px; color: #748179; }
-.resumen-registro dd { margin: 0; line-height: 1.5; overflow-wrap: anywhere; }
-.resumen-registro .codigo-medicamento { white-space: normal; }
-.resumen-completo, .resumen-amplio { grid-column: 1 / -1; }
-.importe-resumen { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
-@media (max-width: 760px) { .resumen-registro { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; } }
-@media (max-width: 400px) { .resumen-registro { grid-template-columns: 1fr; } }
-@media (max-width: 600px) { .proveedor-campos { grid-template-columns: 1fr; } }
+.icono-arrow-left {
+  mask-image: url("../images/icons/arrow-left.svg");
+}
+.icono-save {
+  mask-image: url("../images/icons/save.svg");
+}
+.tabla-proveedores table {
+  min-width: 880px;
+}
+.tabla-proveedores .contacto-proveedor {
+  max-width: 250px;
+  overflow-wrap: anywhere;
+}
+.telefono-proveedor {
+  white-space: nowrap;
+}
+.proveedor-formulario {
+  max-width: 900px;
+  border-top: 1px solid #e0e5e1;
+  padding-top: 24px;
+}
+.proveedor-formulario fieldset {
+  min-width: 0;
+  border: 0;
+  margin: 0 0 26px;
+  padding: 0 0 26px;
+  border-bottom: 1px solid #e0e5e1;
+}
+.proveedor-formulario legend {
+  padding: 0;
+  margin-bottom: 18px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.proveedor-campos {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+}
+.proveedor-campos .campo-completo {
+  grid-column: 1 / -1;
+}
+.proveedor-campos label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.campo-opcional {
+  font-weight: 400;
+  color: #748179;
+}
+.proveedor-campos input,
+.proveedor-campos select,
+.proveedor-campos textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  font: inherit;
+  background: #fff;
+  color: #35443b;
+  border: 1px solid #cdd7d1;
+  border-radius: 6px;
+}
+.proveedor-campos textarea {
+  resize: vertical;
+}
+.proveedor-campos [aria-invalid="true"] {
+  border-color: #b42318;
+}
+.proveedor-campos .error {
+  margin: 6px 0 0;
+  color: #b42318;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.proveedor-formulario-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.registro-listado {
+  border-top: 1px solid #e0e5e1;
+  padding-top: 24px;
+}
+.tabla-ordenes table {
+  min-width: 900px;
+}
+.tabla-movimientos table {
+  min-width: 850px;
+}
+.tabla-detalles table {
+  min-width: 800px;
+}
+.fecha-registro {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.motivo-movimiento {
+  max-width: 350px;
+  overflow-wrap: anywhere;
+}
+.estado-registro,
+.tipo-movimiento {
+  display: inline-block;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: #fff3d9;
+  color: #805c16;
+}
+.estado-recibido,
+.tipo-movimiento {
+  background: #e6f4eb;
+  color: #276443;
+}
+.estado-cancelado {
+  background: #fbe9e6;
+  color: #a2443e;
+}
+.tipo-salida {
+  background: #eaf0fc;
+  color: #42649b;
+}
+.resumen-registro {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px 32px;
+  margin: 0 0 28px;
+  padding: 24px 0;
+  border-block: 1px solid #e0e5e1;
+}
+.resumen-registro > div {
+  min-width: 0;
+}
+.resumen-registro dt {
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #748179;
+}
+.resumen-registro dd {
+  margin: 0;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.resumen-registro .codigo-medicamento {
+  white-space: normal;
+}
+.resumen-completo,
+.resumen-amplio {
+  grid-column: 1 / -1;
+}
+.importe-resumen {
+  font-size: 20px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 760px) {
+  .resumen-registro {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+}
+@media (max-width: 400px) {
+  .resumen-registro {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 600px) {
+  .proveedor-campos {
+    grid-template-columns: 1fr;
+  }
+}
 @media (max-width: 1100px) {
   .inventario-lateral {
     width: 216px;

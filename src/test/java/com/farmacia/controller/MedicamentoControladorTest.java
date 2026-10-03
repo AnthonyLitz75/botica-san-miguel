@@ -15,10 +15,10 @@ import static org.mockito.Mockito.when;
 class MedicamentoControladorTest {
     @ParameterizedTest
     @CsvSource({
-        "ADMINISTRADOR, Administrador, true, true, true",
-        "ALMACENERO, Almacenero, false, true, true",
-        "COMPRAS, Compras, false, true, false",
-        "VENDEDOR, Vendedor, false, false, false"
+            "ADMINISTRADOR, Administrador, true, true, true",
+            "ALMACENERO, Almacenero, false, true, true",
+            "COMPRAS, Compras, false, true, false",
+            "VENDEDOR, Vendedor, false, false, false"
     })
     void adaptaInicioAlRol(String rol, String etiqueta, boolean administra,
             boolean consultaCompras, boolean consultaMovimientos) {
