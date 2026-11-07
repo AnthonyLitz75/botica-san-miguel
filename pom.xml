@@ -5,15 +5,15 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.1.1</version>
+		<version>4.1.2</version>
 		<relativePath/>
 		<!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.farmacia</groupId>
 	<artifactId>farmacia-aed</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
+	<name>Farmacia AED</name>
+	<description>Proyecto de Algoritmos y Estrucutra de datos</description>
 	<url/>
 	<licenses>
 		<license/>
