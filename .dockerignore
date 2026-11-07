@@ -1,0 +1,26 @@
+# Control de versiones y herramientas
+.git
+.gitignore
+.gitattributes
+
+# Especificaciones locales y documentación
+.specify
+.agents
+specs
+docs
+AGENTS.md
+
+# Directorios de compilación local y binarios
+target/
+*.log
+
+# Documentación de texto y guías de desarrollo
+*.md
+!README.md
+API_POSTMAN.md
+GUIA_INSTALACION.txt
+
+# Configuración local sensible
+application-local.properties
+.env
+.env.*
