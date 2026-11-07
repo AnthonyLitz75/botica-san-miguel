@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Registrar salida | Botica San Miguel</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    <link rel="stylesheet" th:href="@{/css/inventario.css}">
+</head>
+
+<body class="pagina-inventario">
+    <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
+    <aside th:replace="~{fragmentos/navegacion :: lateral('Movimientos')}"></aside>
+    <div class="inventario-area">
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Movimientos', 'Inventario')}"></header>
+        <main id="contenido" class="inventario-contenido">
+            <div class="inventario-titulo">
+                <div>
+                    <p class="seccion-etiqueta">INVENTARIO / CONTROL DE EXISTENCIAS</p>
+                    <h1>Registrar salida de inventario</h1>
+                </div>
+                <a class="inventario-boton boton-secundario" th:href="@{/movimientos}">
+                    <span class="icono icono-arrow-left" aria-hidden="true"></span>Volver a movimientos
+                </a>
+            </div>
+
+            <div class="aviso-operacion aviso-error" th:if="${#lists.isEmpty(lotes)}" role="alert">
+                <span class="icono icono-x" aria-hidden="true"></span>
+                <div>
+                    <p>No hay lotes con existencias disponibles actualmente para registrar salidas.</p>
+                </div>
+            </div>
+
+            <form th:unless="${#lists.isEmpty(lotes)}" th:action="@{/salidas/nueva}" th:object="${formulario}"
+                method="post" class="proveedor-formulario">
+
+                <div class="aviso-operacion aviso-error" th:if="${#fields.hasGlobalErrors()}" role="alert">
+                    <span class="icono icono-x" aria-hidden="true"></span>
+                    <div>
+                        <p th:each="error : ${#fields.globalErrors()}" th:text="${error}"></p>
+                    </div>
+                </div>
+
+                <fieldset>
+                    <legend>Datos del descargo de inventario</legend>
+                    <div class="proveedor-campos">
+                        <div class="campo-completo">
+                            <label for="idLote">Lote y medicamento</label>
+                            <select id="idLote" th:field="*{idLote}" required
+                                th:attr="aria-invalid=${#fields.hasErrors('idLote')},aria-describedby=${#fields.hasErrors('idLote') ? 'error-idLote' : null}">
+                                <option value="">-- Seleccionar lote con existencias --</option>
+                                <option th:each="item : ${lotes}" th:value="${item.idLote()}"
+                                    th:attr="data-stock=${item.stockActual()},data-unidad=${item.unidadControl()},data-prioritario=${idsLotesPrioritarios.contains(item.idLote())}"
+                                    th:text="${(idsLotesPrioritarios.contains(item.idLote()) ? '★ PRIORITARIO FEFO — ' : '') + item.nombreMedicamento() + ' (' + item.codigoMedicamento() + ') — Lote: ' + item.numeroLote() + ' | Stock: ' + item.stockActual() + ' ' + item.unidadControl() + ' | Vence: ' + #temporals.format(item.fechaVencimiento(), 'dd/MM/yyyy')}">
+                                </option>
+                            </select>
+                            <span class="campo-ayuda"><span class="fefo-indicador" aria-hidden="true"></span> PRIORITARIO FEFO indica el lote vigente con vencimiento más próximo para ese medicamento.</span>
+                            <p class="error" id="error-idLote" th:if="${#fields.hasErrors('idLote')}"
+                                th:errors="*{idLote}"></p>
+                        </div>
+
+                        <div>
+                            <label for="cantidad">Cantidad a retirar</label>
+                            <input type="number" id="cantidad" th:field="*{cantidad}" min="1" step="1"
+                                placeholder="Ej. 2" required
+                                th:attr="aria-invalid=${#fields.hasErrors('cantidad')},aria-describedby=${#fields.hasErrors('cantidad') ? 'error-cantidad' : null}">
+                            <span class="campo-ayuda" id="ayuda-stock">Selecciona un lote para verificar existencias.</span>
+                            <p class="error" id="error-cantidad" th:if="${#fields.hasErrors('cantidad')}"
+                                th:errors="*{cantidad}"></p>
+                        </div>
+
+                        <div>
+                            <label>Proyección de saldo</label>
+                            <div class="orden-calculo-previo" id="caja-saldo">
+                                <span>Stock restante:</span>
+                                <strong id="saldo-restante">0</strong>
+                            </div>
+                            <span class="campo-ayuda">Se descontará inmediatamente del lote seleccionado.</span>
+                        </div>
+
+                        <div class="campo-completo">
+                            <label for="motivo">Motivo de la salida</label>
+                            <textarea id="motivo" th:field="*{motivo}" maxlength="250" rows="3"
+                                placeholder="Ej. Merma por rotura, producto vencido, ajuste de inventario..." required
+                                th:attr="aria-invalid=${#fields.hasErrors('motivo')},aria-describedby=${#fields.hasErrors('motivo') ? 'error-motivo' : null}"></textarea>
+                            <p class="error" id="error-motivo" th:if="${#fields.hasErrors('motivo')}"
+                                th:errors="*{motivo}"></p>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <div class="proveedor-formulario-acciones">
+                    <button type="submit" class="inventario-boton boton-principal">
+                        <span class="icono icono-save" aria-hidden="true"></span>Registrar salida
+                    </button>
+                    <a class="inventario-boton boton-secundario" th:href="@{/movimientos}">
+                        <span class="icono icono-x" aria-hidden="true"></span>Cancelar
+                    </a>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <script>
+        const selectLote = document.getElementById("idLote");
+        const inputCantSalida = document.getElementById("cantidad");
+        const ayudaStock = document.getElementById("ayuda-stock");
+        const saldoRestante = document.getElementById("saldo-restante");
+        const cajaSaldo = document.getElementById("caja-saldo");
+
+        function obtenerStockSeleccionado() {
+            if (!selectLote) return 0;
+            const opcion = selectLote.options[selectLote.selectedIndex];
+            if (!opcion || !opcion.hasAttribute("data-stock")) return 0;
+            return parseInt(opcion.getAttribute("data-stock"), 10) || 0;
+        }
+
+        function obtenerUnidadSeleccionada() {
+            if (!selectLote) return "";
+            const opcion = selectLote.options[selectLote.selectedIndex];
+            return (opcion && opcion.getAttribute("data-unidad")) || "";
+        }
+
+        function actualizarProyeccion() {
+            const stockActual = obtenerStockSeleccionado();
+            const unidad = obtenerUnidadSeleccionada();
+
+            if (selectLote && selectLote.value) {
+                ayudaStock.textContent = `Stock disponible en lote: ${stockActual} ${unidad}`;
+                inputCantSalida.max = stockActual;
+            } else {
+                ayudaStock.textContent = "Selecciona un lote para verificar existencias.";
+                inputCantSalida.removeAttribute("max");
+            }
+
+            const retiro = parseInt(inputCantSalida.value, 10) || 0;
+            const restante = stockActual - retiro;
+            saldoRestante.textContent = selectLote.value ? `${restante} ${unidad}` : "0";
+
+            if (selectLote.value && (restante < 0 || retiro <= 0)) {
+                cajaSaldo.style.background = "#fef3f2";
+                cajaSaldo.style.borderColor = "#fecdca";
+                saldoRestante.style.color = "#b42318";
+            } else if (selectLote.value) {
+                cajaSaldo.style.background = "#f0f7f4";
+                cajaSaldo.style.borderColor = "#cce3d9";
+                saldoRestante.style.color = "#156552";
+            } else {
+                cajaSaldo.style.background = "";
+                cajaSaldo.style.borderColor = "";
+                saldoRestante.style.color = "";
+            }
+        }
+
+        if (selectLote && inputCantSalida) {
+            selectLote.addEventListener("change", actualizarProyeccion);
+            inputCantSalida.addEventListener("input", actualizarProyeccion);
+            actualizarProyeccion();
+        }
+    </script>
+</body>
+
+</html>
+

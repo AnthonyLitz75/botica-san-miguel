@@ -1,6 +1,7 @@
 package com.farmacia.service;
 
 import com.farmacia.model.Lote;
+import com.farmacia.model.LoteDisponibleVista;
 import com.farmacia.repository.LoteRepositorio;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -22,5 +23,13 @@ public class LoteServicio {
 
     public Optional<Lote> buscarPorId(Integer idLote) {
         return repositorio.buscarPorId(idLote);
+    }
+
+    public List<LoteDisponibleVista> listarDisponiblesConMedicamento() {
+        return repositorio.listarDisponiblesConMedicamento();
+    }
+
+    public List<LoteDisponibleVista> listarDisponiblesPorMedicamento(Integer idMedicamento) {
+        return repositorio.listarDisponiblesPorMedicamento(idMedicamento);
     }
 }

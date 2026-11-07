@@ -1,11 +1,13 @@
 package com.farmacia.repository;
 
 import com.farmacia.model.Medicamento;
+import com.farmacia.model.ResumenStockInventario;
 import java.util.List;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import com.farmacia.dto.MedicamentoFormulario;
 import java.util.Optional;
+import java.time.LocalDate;
 
 @Repository
 public class MedicamentoRepositorio {
@@ -138,5 +140,47 @@ public class MedicamentoRepositorio {
                 """;
 
         return jdbcTemplate.update(sql, id);
+    }
+
+    public List<ResumenStockInventario> listarResumenStock(LocalDate fechaCorte) {
+        String sql = """
+                WITH recibidas AS (
+                    SELECT dm.id_detalle_orden,
+                           COALESCE(SUM(dm.cantidad), 0)::INTEGER AS cantidad_recibida
+                    FROM detalle_movimiento dm
+                    JOIN movimiento_inventario mi ON mi.id_movimiento = dm.id_movimiento
+                    WHERE mi.tipo = 'ENTRADA' AND mi.id_orden IS NOT NULL
+                    GROUP BY dm.id_detalle_orden
+                ), pendientes AS (
+                    SELECT d.id_medicamento,
+                           SUM(GREATEST(d.cantidad_solicitada - COALESCE(r.cantidad_recibida, 0), 0))::INTEGER
+                               AS cantidad_pendiente
+                    FROM detalle_orden_compra d
+                    JOIN orden_compra o ON o.id_orden = d.id_orden
+                    LEFT JOIN recibidas r ON r.id_detalle_orden = d.id_detalle_orden
+                    WHERE o.estado IN ('PENDIENTE', 'PARCIALMENTE_RECIBIDA')
+                    GROUP BY d.id_medicamento
+                ), existencias AS (
+                    SELECT l.id_medicamento,
+                           COALESCE(SUM(CASE WHEN l.fecha_vencimiento >= ?
+                                             THEN l.stock_actual ELSE 0 END), 0)::INTEGER AS stock_disponible
+                    FROM lote l
+                    GROUP BY l.id_medicamento
+                )
+                SELECT m.id_medicamento, m.codigo, m.nombre, m.unidad_control,
+                       m.stock_minimo,
+                       COALESCE(e.stock_disponible, 0)::INTEGER AS stock_disponible,
+                       COALESCE(p.cantidad_pendiente, 0)::INTEGER AS pendiente_recibir
+                FROM medicamento m
+                LEFT JOIN existencias e ON e.id_medicamento = m.id_medicamento
+                LEFT JOIN pendientes p ON p.id_medicamento = m.id_medicamento
+                WHERE m.activo = TRUE
+                ORDER BY m.nombre, m.id_medicamento
+                """;
+
+        return jdbcTemplate.query(sql, (fila, numeroFila) -> new ResumenStockInventario(
+                fila.getInt("id_medicamento"), fila.getString("codigo"), fila.getString("nombre"),
+                fila.getString("unidad_control"), fila.getInt("stock_minimo"),
+                fila.getInt("stock_disponible"), fila.getInt("pendiente_recibir")), fechaCorte);
     }
 }

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Recepción de mercadería | Botica San Miguel</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    <link rel="stylesheet" th:href="@{/css/inventario.css}">
+</head>
+
+<body class="pagina-inventario">
+    <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
+    <aside th:replace="~{fragmentos/navegacion :: lateral('Órdenes de compra')}"></aside>
+    <div class="inventario-area">
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Órdenes de compra', 'Recepción')}"></header>
+        <main id="contenido" class="inventario-contenido">
+            <div class="inventario-titulo">
+                <div>
+                    <p class="seccion-etiqueta">ALMACÉN / INGRESO DE MERCADERÍA</p>
+                    <h1>Registrar recepción</h1>
+                    <p class="recepcion-intro">Confirma qué productos llegaron, con su lote y vencimiento.</p>
+                </div>
+                <a class="inventario-boton boton-secundario"
+                    th:href="@{/ordenes-compra/{id}(id=${orden.idOrden()})}">
+                    <span class="icono icono-arrow-left" aria-hidden="true"></span>Volver al detalle
+                </a>
+            </div>
+
+            <div class="aviso-operacion aviso-error" th:if="${error != null}" role="alert">
+                <span class="icono icono-x" aria-hidden="true"></span>
+                <span th:text="${error}"></span>
+            </div>
+
+            <section class="recepcion-resumen" aria-label="Resumen de la orden">
+                <div>
+                    <span class="recepcion-resumen-label">Orden</span>
+                    <strong th:text="${orden.numeroOrden()}">OC-0000</strong>
+                </div>
+                <div>
+                    <span class="recepcion-resumen-label">Estado</span>
+                    <span class="estado-registro estado-parcial"
+                        th:text="${#strings.replace(orden.estado(), '_', ' ')}">PENDIENTE</span>
+                </div>
+                <div>
+                    <span class="recepcion-resumen-label">Unidades por recibir</span>
+                    <strong class="recepcion-total" th:text="${totalPendiente}">0</strong>
+                </div>
+            </section>
+
+            <form id="formulario-recepcion" class="recepcion-formulario"
+                th:action="@{/ordenes-compra/{id}/recepcion(id=${orden.idOrden()})}"
+                th:object="${formulario}" method="post">
+                <div class="recepcion-cabecera">
+                    <div>
+                        <h2>Productos de la orden</h2>
+                        <p>Selecciona solo las líneas que llegaron en esta entrega.</p>
+                    </div>
+                    <span class="recepcion-seleccion-resumen" id="resumen-seleccion" aria-live="polite">
+                        0 productos seleccionados
+                    </span>
+                </div>
+
+                <div class="aviso-operacion aviso-error" id="error-seleccion" role="alert" hidden>
+                    Selecciona al menos un producto para registrar la recepción.
+                </div>
+
+                <noscript>
+                    <p class="aviso-operacion aviso-error">Activa JavaScript para seleccionar y enviar las líneas recibidas.</p>
+                </noscript>
+
+                <div class="tabla-contenedor recepcion-tabla-contenedor" th:if="${!#lists.isEmpty(lineas)}"
+                    tabindex="0" role="region" aria-label="Productos pendientes de recepción, tabla desplazable">
+                    <table class="recepcion-tabla">
+                        <thead>
+                            <tr>
+                                <th scope="col">Producto</th>
+                                <th scope="col" class="numero">Solicitado</th>
+                                <th scope="col" class="numero">Recibido</th>
+                                <th scope="col" class="numero">Saldo actual</th>
+                                <th scope="col">Incluir</th>
+                                <th scope="col">Lote y vencimiento</th>
+                                <th scope="col" class="numero">Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="linea, iterStat : ${lineas}"
+                                th:classappend="${linea.cantidadPendiente() == 0 ? 'linea-completa' : ''}"
+                                th:attr="data-pendiente=${linea.cantidadPendiente()}">
+                                <td class="recepcion-producto">
+                                    <span class="codigo-medicamento" th:text="${linea.codigo()}">MED-000</span>
+                                    <strong th:text="${linea.nombre()}">Medicamento</strong>
+                                </td>
+                                <td class="numero" th:text="${linea.cantidadSolicitada()}">0</td>
+                                <td class="numero" th:text="${linea.cantidadRecibida()}">0</td>
+                                <td class="numero">
+                                    <span class="cantidad-pendiente"
+                                        th:classappend="${linea.cantidadPendiente() == 0 ? 'sin-pendiente' : ''}"
+                                        data-saldo th:text="${linea.cantidadPendiente()}">0</span>
+                                </td>
+                                <td>
+                                    <label class="recepcion-selector">
+                                        <input type="checkbox" class="recepcion-incluir"
+                                            th:disabled="${linea.cantidadPendiente() == 0}"
+                                            th:attr="aria-label=${'Incluir ' + linea.nombre()}, aria-controls=${'campos-recepcion-' + iterStat.index}">
+                                        <span>Recibir</span>
+                                    </label>
+                                    <input type="hidden" data-campo="idDetalleOrden" disabled
+                                        th:value="${linea.idDetalleOrden()}">
+                                </td>
+                                <td>
+                                    <div class="recepcion-campos" th:id="${'campos-recepcion-' + iterStat.index}">
+                                        <label class="campo-recepcion">
+                                            <span>Número de lote</span>
+                                            <input type="text" data-campo="numeroLote" maxlength="50"
+                                                placeholder="Ej. L-2026-04" disabled>
+                                        </label>
+                                        <label class="campo-recepcion">
+                                            <span>Fecha de vencimiento</span>
+                                            <input type="date" data-campo="fechaVencimiento" disabled
+                                                th:attr="min=${minFechaVencimiento}">
+                                        </label>
+                                    </div>
+                                </td>
+                                <td class="numero recepcion-cantidad-celda">
+                                    <label class="campo-recepcion">
+                                        <span class="solo-lector">Cantidad recibida</span>
+                                        <input class="recepcion-cantidad" type="number" data-campo="cantidad"
+                                            min="1" step="1" disabled
+                                            th:attr="max=${linea.cantidadPendiente()}, aria-label=${'Cantidad recibida de ' + linea.nombre()}">
+                                    </label>
+                                    <small class="recepcion-restante">Quedan <strong data-restante
+                                        th:text="${linea.cantidadPendiente()}">0</strong></small>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="inventario-vacio" th:if="${#lists.isEmpty(lineas)}">
+                    <span class="icono icono-circle-check" aria-hidden="true"></span>
+                    <p>Esta orden no tiene cantidades pendientes de recibir.</p>
+                </div>
+
+                <div class="recepcion-nota">
+                    <label for="motivo">Nota de recepción <span class="campo-opcional">(opcional)</span></label>
+                    <input id="motivo" type="text" th:field="*{motivo}" maxlength="250"
+                        placeholder="Ej. Entrega parcial, cajas dañadas o incidencia del proveedor">
+                </div>
+
+                <div class="proveedor-formulario-acciones">
+                    <button class="inventario-boton boton-principal" type="submit"
+                        th:disabled="${#lists.isEmpty(lineas)}">
+                        <span class="icono icono-save" aria-hidden="true"></span>Guardar recepción
+                    </button>
+                    <a class="inventario-boton boton-secundario"
+                        th:href="@{/ordenes-compra/{id}(id=${orden.idOrden()})}">Volver sin guardar</a>
+                </div>
+            </form>
+        </main>
+    </div>
+    <script th:src="@{/js/recepcion-orden.js}" defer></script>
+</body>
+
+</html>

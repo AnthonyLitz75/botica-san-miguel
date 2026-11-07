@@ -19,46 +19,27 @@
         <main id="contenido" class="inventario-contenido">
             <div class="inventario-titulo">
                 <div>
-                    <p class="seccion-etiqueta">INVENTARIO</p>
+                    <p class="seccion-etiqueta">INVENTARIO / CATÁLOGO</p>
                     <h1 th:text="${idMedicamento != null ? 'Editar medicamento' : 'Nuevo medicamento'}">Medicamento</h1>
                 </div>
-                <a class="inventario-boton boton-secundario" th:href="@{/medicamentos}"><span
-                        class="icono icono-arrow-left" aria-hidden="true"></span>Volver a medicamentos</a>
+                <a class="inventario-boton boton-secundario" th:href="@{/medicamentos}">
+                    <span class="icono icono-arrow-left" aria-hidden="true"></span>Volver a medicamentos
+                </a>
             </div>
+
             <form
                 th:action="${idMedicamento != null} ? @{/medicamentos/{id}/editar(id=${idMedicamento})} : @{/medicamentos}"
                 th:object="${formulario}" method="post" class="proveedor-formulario">
                 <fieldset>
-                    <legend>Datos del medicamento</legend>
+                    <legend>Identificación y ficha técnica</legend>
                     <div class="proveedor-campos">
                         <div>
-                            <label for="codigo">Código</label>
+                            <label for="codigo">Código interno</label>
                             <input type="text" id="codigo" th:field="*{codigo}" maxlength="50" required
+                                placeholder="Ej. MED-003"
                                 th:attr="aria-invalid=${#fields.hasErrors('codigo')},aria-describedby=${#fields.hasErrors('codigo') ? 'error-codigo' : null}">
                             <p class="error" id="error-codigo" th:if="${#fields.hasErrors('codigo')}"
                                 th:errors="*{codigo}"></p>
-                        </div>
-                        <div>
-                            <label for="nombre">Nombre</label>
-                            <input type="text" id="nombre" th:field="*{nombre}" maxlength="150" required
-                                th:attr="aria-invalid=${#fields.hasErrors('nombre')},aria-describedby=${#fields.hasErrors('nombre') ? 'error-nombre' : null}">
-                            <p class="error" id="error-nombre" th:if="${#fields.hasErrors('nombre')}"
-                                th:errors="*{nombre}"></p>
-                        </div>
-                        <div>
-                            <label for="concentracion">Concentración <span
-                                    class="campo-opcional">(opcional)</span></label>
-                            <input type="text" id="concentracion" th:field="*{concentracion}" maxlength="100"
-                                th:attr="aria-invalid=${#fields.hasErrors('concentracion')},aria-describedby=${#fields.hasErrors('concentracion') ? 'error-concentracion' : null}">
-                            <p class="error" id="error-concentracion" th:if="${#fields.hasErrors('concentracion')}"
-                                th:errors="*{concentracion}"></p>
-                        </div>
-                        <div>
-                            <label for="presentacion">Presentación</label>
-                            <input type="text" id="presentacion" th:field="*{presentacion}" maxlength="100" required
-                                th:attr="aria-invalid=${#fields.hasErrors('presentacion')},aria-describedby=${#fields.hasErrors('presentacion') ? 'error-presentacion' : null}">
-                            <p class="error" id="error-presentacion" th:if="${#fields.hasErrors('presentacion')}"
-                                th:errors="*{presentacion}"></p>
                         </div>
                         <div>
                             <label for="unidadControl">Unidad de control</label>
@@ -71,33 +52,67 @@
                             <p class="error" id="error-unidadControl" th:if="${#fields.hasErrors('unidadControl')}"
                                 th:errors="*{unidadControl}"></p>
                         </div>
+                        <div class="campo-completo">
+                            <label for="nombre">Nombre del medicamento</label>
+                            <input type="text" id="nombre" th:field="*{nombre}" maxlength="150" required
+                                placeholder="Ej. Amoxicilina, Ibuprofeno, Loratadina..."
+                                th:attr="aria-invalid=${#fields.hasErrors('nombre')},aria-describedby=${#fields.hasErrors('nombre') ? 'error-nombre' : null}">
+                            <p class="error" id="error-nombre" th:if="${#fields.hasErrors('nombre')}"
+                                th:errors="*{nombre}"></p>
+                        </div>
+                        <div>
+                            <label for="concentracion">Concentración <span
+                                    class="campo-opcional">(opcional)</span></label>
+                            <input type="text" id="concentracion" th:field="*{concentracion}" maxlength="100"
+                                placeholder="Ej. 500 mg, 100 mg/5 mL"
+                                th:attr="aria-invalid=${#fields.hasErrors('concentracion')},aria-describedby=${#fields.hasErrors('concentracion') ? 'error-concentracion' : null}">
+                            <p class="error" id="error-concentracion" th:if="${#fields.hasErrors('concentracion')}"
+                                th:errors="*{concentracion}"></p>
+                        </div>
+                        <div>
+                            <label for="presentacion">Presentación comercial</label>
+                            <input type="text" id="presentacion" th:field="*{presentacion}" maxlength="100" required
+                                placeholder="Ej. Caja de 20 tabletas"
+                                th:attr="aria-invalid=${#fields.hasErrors('presentacion')},aria-describedby=${#fields.hasErrors('presentacion') ? 'error-presentacion' : null}">
+                            <p class="error" id="error-presentacion" th:if="${#fields.hasErrors('presentacion')}"
+                                th:errors="*{presentacion}"></p>
+                        </div>
                     </div>
                 </fieldset>
+
                 <fieldset>
                     <legend>Precio y control de inventario</legend>
                     <div class="proveedor-campos">
                         <div>
                             <label for="precioVenta">Precio de venta (S/)</label>
                             <input type="number" id="precioVenta" th:field="*{precioVenta}" min="0" step="0.01" required
+                                placeholder="0.00"
                                 th:attr="aria-invalid=${#fields.hasErrors('precioVenta')},aria-describedby=${#fields.hasErrors('precioVenta') ? 'error-precioVenta' : null}">
+                            <span class="campo-ayuda">Precio unitario según la unidad de control seleccionada.</span>
                             <p class="error" id="error-precioVenta" th:if="${#fields.hasErrors('precioVenta')}"
                                 th:errors="*{precioVenta}"></p>
                         </div>
                         <div>
-                            <label for="stockMinimo">Stock mínimo</label>
+                            <label for="stockMinimo">Stock mínimo de alerta</label>
                             <input type="number" id="stockMinimo" th:field="*{stockMinimo}" min="0" step="1" required
+                                placeholder="Ej. 10"
                                 th:attr="aria-invalid=${#fields.hasErrors('stockMinimo')},aria-describedby=${#fields.hasErrors('stockMinimo') ? 'error-stockMinimo' : null}">
+                            <span class="campo-ayuda">Cantidad mínima antes de requerir reposición.</span>
                             <p class="error" id="error-stockMinimo" th:if="${#fields.hasErrors('stockMinimo')}"
                                 th:errors="*{stockMinimo}"></p>
                         </div>
                     </div>
                 </fieldset>
+
                 <div class="proveedor-formulario-acciones">
-                    <button type="submit" class="inventario-boton boton-principal"><span class="icono icono-save"
-                            aria-hidden="true"></span><span
-                            th:text="${idMedicamento != null ? 'Guardar cambios' : 'Guardar medicamento'}">Guardar</span></button>
-                    <a class="inventario-boton boton-secundario" th:href="@{/medicamentos}"><span class="icono icono-x"
-                            aria-hidden="true"></span>Cancelar</a>
+                    <button type="submit" class="inventario-boton boton-principal">
+                        <span class="icono icono-save" aria-hidden="true"></span>
+                        <span
+                            th:text="${idMedicamento != null ? 'Guardar cambios' : 'Guardar medicamento'}">Guardar</span>
+                    </button>
+                    <a class="inventario-boton boton-secundario" th:href="@{/medicamentos}">
+                        <span class="icono icono-x" aria-hidden="true"></span>Cancelar
+                    </a>
                 </div>
             </form>
         </main>

@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 @ControllerAdvice(assignableTypes = {
                 MedicamentoControlador.class, ProveedorControlador.class,
                 OrdenCompraControlador.class, MovimientoInventarioControlador.class,
-                LoteControlador.class, SalidaInventarioControlador.class
+                LoteControlador.class, SalidaInventarioControlador.class,
+                PanelAlertaControlador.class, ClienteWebControlador.class
 })
 public class NavegacionCompartida {
         @ModelAttribute
@@ -32,8 +33,15 @@ public class NavegacionCompartida {
                                 || roles.contains("ROLE_COMPRAS") || roles.contains("ROLE_ALMACENERO");
                 modelo.addAttribute("puedeConsultarProveedores", consultaCompras);
                 modelo.addAttribute("puedeConsultarOrdenesCompra", consultaCompras);
-                modelo.addAttribute("puedeConsultarMovimientos", roles.contains("ROLE_ADMINISTRADOR")
-                                || roles.contains("ROLE_ALMACENERO"));
+                modelo.addAttribute("puedeConsultarAlertas", roles.stream().anyMatch(rol ->
+                                rol.equals("ROLE_ADMINISTRADOR") || rol.equals("ROLE_COMPRAS")
+                                        || rol.equals("ROLE_ALMACENERO") || rol.equals("ROLE_VENDEDOR")));
+                modelo.addAttribute("puedeConsultarClientes", roles.contains("ROLE_ADMINISTRADOR")
+                                || roles.contains("ROLE_VENDEDOR"));
+                boolean puedeConsultarMovimientos = roles.contains("ROLE_ADMINISTRADOR")
+                                || roles.contains("ROLE_ALMACENERO");
+                modelo.addAttribute("puedeConsultarMovimientos", puedeConsultarMovimientos);
+                modelo.addAttribute("puedeRegistrarSalida", puedeConsultarMovimientos);
         }
 
 }

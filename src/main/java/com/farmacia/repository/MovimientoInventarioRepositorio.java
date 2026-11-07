@@ -90,6 +90,25 @@ public class MovimientoInventarioRepositorio {
                 return movimientos.stream().findFirst();
         }
 
+        public Integer registrarEntrada(Integer idUsuario, Integer idProveedor,
+                        Integer idOrden, String motivo) {
+                String sql = """
+                                INSERT INTO movimiento_inventario (id_usuario, id_proveedor, id_orden, tipo, motivo)
+                                VALUES (?, ?, ?, 'ENTRADA', ?)
+                                RETURNING id_movimiento
+                                """;
+                return jdbcTemplate.queryForObject(sql, Integer.class, idUsuario, idProveedor, idOrden, motivo);
+        }
+
+        public void registrarDetalleEntrada(Integer idMovimiento, Integer idLote,
+                        Integer idDetalleOrden, Integer cantidad) {
+                String sql = """
+                                INSERT INTO detalle_movimiento (id_movimiento, id_lote, id_detalle_orden, cantidad)
+                                VALUES (?, ?, ?, ?)
+                                """;
+                jdbcTemplate.update(sql, idMovimiento, idLote, idDetalleOrden, cantidad);
+        }
+
         public Integer registrarSalida(Integer idUsuario, String motivo) {
                 String sql = """
                                 INSERT INTO movimiento_inventario (

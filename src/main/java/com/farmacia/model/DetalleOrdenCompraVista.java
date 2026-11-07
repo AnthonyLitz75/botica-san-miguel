@@ -9,6 +9,8 @@ public record DetalleOrdenCompraVista(
         String nombreMedicamento,
         String unidadControl,
         Integer cantidadSolicitada,
+        Integer cantidadRecibida,
+        Integer cantidadPendiente,
         BigDecimal costoUnitario,
         BigDecimal importeEstimado) {
 }

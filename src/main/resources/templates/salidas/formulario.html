@@ -17,62 +17,130 @@
         <main id="contenido" class="inventario-contenido">
             <div class="inventario-titulo">
                 <div>
-                    <p class="seccion-etiqueta">INVENTARIO</p>
+                    <p class="seccion-etiqueta">INVENTARIO / CONTROL DE EXISTENCIAS</p>
                     <h1>Registrar salida de inventario</h1>
                 </div>
                 <a class="inventario-boton boton-secundario"
-                    th:href="@{/medicamentos/{id}/lotes(id=${lote.idMedicamento()})}"><span
-                        class="icono icono-arrow-left" aria-hidden="true"></span>Volver a lotes</a>
+                    th:href="@{/medicamentos/{id}/lotes(id=${lote.idMedicamento()})}">
+                    <span class="icono icono-arrow-left" aria-hidden="true"></span>Volver a lotes
+                </a>
             </div>
+
             <dl class="resumen-registro">
                 <div>
                     <dt>Medicamento</dt>
-                    <dd th:text="${medicamento.codigo() + ' - ' + medicamento.nombre()}"></dd>
+                    <dd>
+                        <span class="codigo-medicamento" th:text="${medicamento.codigo()}"></span>
+                        <span class="nombre-medicamento" th:text="${medicamento.nombre()}"></span>
+                    </dd>
                 </div>
                 <div>
-                    <dt>Lote</dt>
-                    <dd class="codigo-medicamento" th:text="${lote.numeroLote()}"></dd>
+                    <dt>Lote seleccionado</dt>
+                    <dd>
+                        <span class="codigo-medicamento" th:text="${lote.numeroLote()}"></span>
+                        <span class="fefo-badge" th:if="${lotePrioritario}" aria-label="Lote prioritario por vencimiento según FEFO">
+                            <span class="fefo-indicador" aria-hidden="true"></span>Prioritario FEFO
+                        </span>
+                        <span class="fefo-secundario" th:unless="${lotePrioritario}">Este lote no es el primero según FEFO.</span>
+                    </dd>
                 </div>
                 <div>
-                    <dt>Stock actual</dt>
-                    <dd><strong class="importe-resumen" th:text="${lote.stockActual()}"></strong> <span
-                            class="unidad-medicamento" th:text="${medicamento.unidadControl()}"></span></dd>
+                    <dt>Stock disponible en lote</dt>
+                    <dd>
+                        <strong class="importe-resumen" id="stock-actual-valor"
+                            th:attr="data-stock=${lote.stockActual()}" th:text="${lote.stockActual()}"></strong>
+                        <span class="unidad-medicamento" th:text="${medicamento.unidadControl()}"></span>
+                    </dd>
                 </div>
             </dl>
+
             <form th:action="@{/lotes/{id}/salida(id=${lote.idLote()})}" th:object="${formulario}" method="post"
                 class="proveedor-formulario">
+
                 <div class="aviso-operacion aviso-error" th:if="${#fields.hasGlobalErrors()}" role="alert">
-                    <p th:each="error : ${#fields.globalErrors()}" th:text="${error}"></p>
+                    <span class="icono icono-x" aria-hidden="true"></span>
+                    <div>
+                        <p th:each="error : ${#fields.globalErrors()}" th:text="${error}"></p>
+                    </div>
                 </div>
+
                 <fieldset>
-                    <legend>Datos de la salida</legend>
+                    <legend>Datos del descargo de inventario</legend>
                     <div class="proveedor-campos">
                         <div>
-                            <label for="cantidad">Cantidad</label>
-                            <input type="number" id="cantidad" th:field="*{cantidad}" min="1" step="1" required
+                            <label for="cantidad">Cantidad a retirar</label>
+                            <input type="number" id="cantidad" th:field="*{cantidad}" min="1" step="1"
+                                placeholder="Ej. 2" required
                                 th:attr="aria-invalid=${#fields.hasErrors('cantidad')},aria-describedby=${#fields.hasErrors('cantidad') ? 'error-cantidad' : null}">
+                            <span class="campo-ayuda"
+                                th:text="${'Máximo permitido: ' + lote.stockActual() + ' ' + medicamento.unidadControl()}"></span>
                             <p class="error" id="error-cantidad" th:if="${#fields.hasErrors('cantidad')}"
                                 th:errors="*{cantidad}"></p>
                         </div>
+
+                        <div>
+                            <label>Proyección de saldo</label>
+                            <div class="orden-calculo-previo" id="caja-saldo">
+                                <span>Stock final del lote:</span>
+                                <strong id="saldo-restante" th:text="${lote.stockActual()}">0</strong>
+                            </div>
+                            <span class="campo-ayuda">Se descontará inmediatamente al confirmar.</span>
+                        </div>
+
                         <div class="campo-completo">
-                            <label for="motivo">Motivo</label>
-                            <textarea id="motivo" th:field="*{motivo}" maxlength="250" rows="3" required
+                            <label for="motivo">Motivo de la salida</label>
+                            <textarea id="motivo" th:field="*{motivo}" maxlength="250" rows="3"
+                                placeholder="Ej. Salida de demostración, merma por rotura, ajuste de inventario..."
+                                required
                                 th:attr="aria-invalid=${#fields.hasErrors('motivo')},aria-describedby=${#fields.hasErrors('motivo') ? 'error-motivo' : null}"></textarea>
                             <p class="error" id="error-motivo" th:if="${#fields.hasErrors('motivo')}"
                                 th:errors="*{motivo}"></p>
                         </div>
                     </div>
                 </fieldset>
+
                 <div class="proveedor-formulario-acciones">
-                    <button type="submit" class="inventario-boton boton-principal"><span class="icono icono-save"
-                            aria-hidden="true"></span>Registrar salida</button>
+                    <button type="submit" class="inventario-boton boton-principal">
+                        <span class="icono icono-save" aria-hidden="true"></span>Registrar salida
+                    </button>
                     <a class="inventario-boton boton-secundario"
-                        th:href="@{/medicamentos/{id}/lotes(id=${lote.idMedicamento()})}"><span class="icono icono-x"
-                            aria-hidden="true"></span>Cancelar</a>
+                        th:href="@{/medicamentos/{id}/lotes(id=${lote.idMedicamento()})}">
+                        <span class="icono icono-x" aria-hidden="true"></span>Cancelar
+                    </a>
                 </div>
             </form>
         </main>
     </div>
+
+    <script>
+        const inputCantSalida = document.getElementById("cantidad");
+        const stockElemento = document.getElementById("stock-actual-valor");
+        const saldoRestante = document.getElementById("saldo-restante");
+        const cajaSaldo = document.getElementById("caja-saldo");
+
+        if (inputCantSalida && stockElemento && saldoRestante) {
+            const stockInicial = parseInt(stockElemento.getAttribute("data-stock"), 10) || 0;
+
+            function actualizarProyeccionSaldo() {
+                const retiro = parseInt(inputCantSalida.value, 10) || 0;
+                const restante = stockInicial - retiro;
+                saldoRestante.textContent = restante;
+
+                if (restante < 0) {
+                    cajaSaldo.style.background = "#fef3f2";
+                    cajaSaldo.style.borderColor = "#fecdca";
+                    saldoRestante.style.color = "#b42318";
+                } else {
+                    cajaSaldo.style.background = "#f0f7f4";
+                    cajaSaldo.style.borderColor = "#cce3d9";
+                    saldoRestante.style.color = "#156552";
+                }
+            }
+
+            inputCantSalida.addEventListener("input", actualizarProyeccionSaldo);
+            actualizarProyeccionSaldo();
+        }
+    </script>
 </body>
 
 </html>

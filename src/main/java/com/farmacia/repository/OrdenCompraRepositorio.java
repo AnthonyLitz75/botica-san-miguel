@@ -65,6 +65,39 @@ public class OrdenCompraRepositorio {
                 return ordenes.stream().findFirst();
         }
 
+        public Optional<OrdenCompra> buscarPorIdParaActualizar(Integer idOrden) {
+                String sql = """
+                                SELECT id_orden, numero_orden, id_usuario, id_proveedor,
+                                       fecha_hora, estado, total_estimado, observaciones
+                                FROM orden_compra WHERE id_orden = ? FOR UPDATE
+                                """;
+                List<OrdenCompra> ordenes = jdbcTemplate.query(sql,
+                        (fila, numeroFila) -> new OrdenCompra(fila.getInt("id_orden"),
+                                fila.getString("numero_orden"), fila.getInt("id_usuario"),
+                                fila.getInt("id_proveedor"), fila.getObject("fecha_hora", LocalDateTime.class),
+                                fila.getString("estado"), fila.getBigDecimal("total_estimado"),
+                                fila.getString("observaciones")), idOrden);
+                return ordenes.stream().findFirst();
+        }
+
+        public int actualizarEstado(Integer idOrden, String estado) {
+                String sql = """
+                                UPDATE orden_compra SET estado = ?
+                                WHERE id_orden = ? AND estado IN ('PENDIENTE', 'PARCIALMENTE_RECIBIDA')
+                                """;
+                return jdbcTemplate.update(sql, estado, idOrden);
+        }
+
+        public boolean tieneRecepciones(Integer idOrden) {
+                String sql = """
+                                SELECT EXISTS (
+                                    SELECT 1 FROM movimiento_inventario
+                                    WHERE id_orden = ? AND tipo = 'ENTRADA'
+                                )
+                                """;
+                return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, idOrden));
+        }
+
         public Integer guardar(
                         String numeroOrden,
                         Integer idUsuario,

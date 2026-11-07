@@ -3,6 +3,7 @@ package com.farmacia.controller;
 import com.farmacia.model.Medicamento;
 import com.farmacia.service.LoteServicio;
 import com.farmacia.service.MedicamentoServicio;
+import com.farmacia.service.LotePrioridadServicio;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,12 +19,15 @@ public class LoteControlador {
 
         private final LoteServicio loteServicio;
         private final MedicamentoServicio medicamentoServicio;
+        private final LotePrioridadServicio prioridadServicio;
 
         public LoteControlador(
                         LoteServicio loteServicio,
-                        MedicamentoServicio medicamentoServicio) {
+                        MedicamentoServicio medicamentoServicio,
+                        LotePrioridadServicio prioridadServicio) {
                 this.loteServicio = loteServicio;
                 this.medicamentoServicio = medicamentoServicio;
+                this.prioridadServicio = prioridadServicio;
         }
 
         @GetMapping
@@ -39,9 +43,10 @@ public class LoteControlador {
                                                 "Medicamento no encontrado"));
 
                 model.addAttribute("medicamento", medicamento);
-                model.addAttribute(
-                                "lotes",
-                                loteServicio.listarPorMedicamento(idMedicamento));
+                var lotes = loteServicio.listarPorMedicamento(idMedicamento);
+                model.addAttribute("lotes", lotes);
+                model.addAttribute("idsLotesPrioritarios", prioridadServicio.identificarLotesPrioritarios(
+                                loteServicio.listarDisponiblesPorMedicamento(idMedicamento)));
 
                 boolean puedeRegistrarSalida = authentication.getAuthorities()
                                 .stream()

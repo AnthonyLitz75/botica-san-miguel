@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Clientes | Botica San Miguel</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}"><link rel="stylesheet" th:href="@{/css/inventario.css}">
+</head>
+<body class="pagina-inventario">
+    <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
+    <aside th:replace="~{fragmentos/navegacion :: lateral('Clientes')}"></aside>
+    <div class="inventario-area">
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Clientes', 'Atención al cliente')}"></header>
+        <main id="contenido" class="inventario-contenido">
+            <div class="inventario-titulo"><div><p class="seccion-etiqueta">VENTAS / DIRECTORIO</p><h1>Clientes</h1>
+                <p class="clientes-intro">Consulta y mantén los datos de identificación y contacto.</p></div>
+                <a class="inventario-boton boton-principal" th:href="@{/clientes/nuevo}"><span class="icono icono-plus" aria-hidden="true"></span>Nuevo cliente</a>
+            </div>
+
+            <div class="aviso-operacion aviso-exito" th:if="${mensaje != null}" role="status"><span class="icono icono-circle-check" aria-hidden="true"></span><span th:text="${mensaje}"></span></div>
+
+            <form class="inventario-filtros clientes-filtros" th:action="@{/clientes}" method="get" role="search">
+                <div class="filtro-busqueda"><label for="buscar">Buscar por documento o nombre</label><div class="entrada-busqueda">
+                    <span class="icono icono-search" aria-hidden="true"></span><input type="search" id="buscar" name="buscar" th:value="${buscar}" maxlength="150" placeholder="DNI, RUC o nombre del cliente">
+                </div></div>
+                <div class="filtro-acciones"><button class="inventario-boton boton-principal" type="submit"><span class="icono icono-search" aria-hidden="true"></span>Buscar</button>
+                    <a class="inventario-boton boton-secundario" th:href="@{/clientes}"><span class="icono icono-x" aria-hidden="true"></span>Limpiar</a></div>
+            </form>
+
+            <section class="inventario-resultados" aria-labelledby="titulo-clientes">
+                <div class="resultados-cabecera"><h2 id="titulo-clientes">Listado de clientes <span class="cantidad-resultados" th:text="${#lists.size(clientes)}">0</span></h2></div>
+                <div class="inventario-vacio" th:if="${#lists.isEmpty(clientes)}"><span class="icono icono-user-round" aria-hidden="true"></span>
+                    <p th:text="${#strings.isEmpty(buscar) ? 'Aún no hay clientes registrados.' : 'No se encontraron clientes para esta búsqueda.'}">Sin resultados.</p>
+                    <a th:if="${#strings.isEmpty(buscar)}" class="enlace-lotes" th:href="@{/clientes/nuevo}">Registrar primer cliente</a>
+                </div>
+                <div class="tabla-contenedor inventario-tabla tabla-clientes" th:unless="${#lists.isEmpty(clientes)}" tabindex="0" role="region" aria-label="Clientes, tabla desplazable">
+                    <table><thead><tr><th scope="col">Documento</th><th scope="col">Nombre completo</th><th scope="col">Teléfono</th><th scope="col">Correo</th><th scope="col">Acciones</th></tr></thead>
+                    <tbody><tr th:each="cliente : ${clientes}">
+                        <td><span class="cliente-tipo-documento" th:text="${cliente.tipoDocumento()}">DNI</span><span class="codigo-medicamento" th:text="${cliente.numeroDocumento()}">00000000</span></td>
+                        <td class="nombre-medicamento" th:text="${cliente.nombreCompleto()}">Nombre</td>
+                        <td th:text="${#strings.isEmpty(cliente.telefono()) ? '—' : cliente.telefono()}">—</td>
+                        <td class="contacto-proveedor" th:text="${#strings.isEmpty(cliente.correo()) ? '—' : cliente.correo()}">—</td>
+                        <td><a class="boton-icono" th:href="@{/clientes/{id}/editar(id=${cliente.idCliente()})}" title="Editar cliente" th:attr="aria-label=${'Editar ' + cliente.nombreCompleto()}"><span class="icono icono-pencil" aria-hidden="true"></span></a></td>
+                    </tr></tbody></table>
+                </div>
+                <p class="resultados-pie" th:text="${#lists.size(clientes)} + (${#lists.size(clientes) == 1} ? ' cliente encontrado' : ' clientes encontrados')">0 clientes encontrados</p>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

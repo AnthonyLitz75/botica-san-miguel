@@ -18,43 +18,58 @@
 
             <div class="inventario-titulo">
                 <div>
-                    <p class="seccion-etiqueta">INVENTARIO</p>
-                    <h1>Detalle de movimiento</h1>
-                </div><a class="inventario-boton boton-secundario" th:href="@{/movimientos}"><span
-                        class="icono icono-arrow-left" aria-hidden="true"></span>Volver a movimientos</a>
+                    <p class="seccion-etiqueta">INVENTARIO / AUDITORÍA DE KARDEX</p>
+                    <h1 th:text="${'Movimiento #' + movimiento.idMovimiento()}">Detalle de movimiento</h1>
+                </div>
+                <a class="inventario-boton boton-secundario" th:href="@{/movimientos}">
+                    <span class="icono icono-arrow-left" aria-hidden="true"></span>Volver a movimientos
+                </a>
             </div>
+
             <dl class="resumen-registro">
                 <div>
-                    <dt>ID</dt>
-                    <dd class="codigo-medicamento" th:text="${movimiento.idMovimiento()}"></dd>
+                    <dt>ID de operación</dt>
+                    <dd>
+                        <span class="codigo-medicamento" th:text="${'#' + movimiento.idMovimiento()}"></span>
+                    </dd>
                 </div>
                 <div>
                     <dt>Fecha y hora</dt>
-                    <dd th:text="${#temporals.format(movimiento.fechaHora(), 'dd/MM/yyyy HH:mm')}"></dd>
+                    <dd class="fecha-registro"
+                        th:text="${#temporals.format(movimiento.fechaHora(), 'dd/MM/yyyy HH:mm')}"></dd>
                 </div>
                 <div>
-                    <dt>Tipo</dt>
-                    <dd><span class="tipo-movimiento" th:classappend="${movimiento.tipo() == 'SALIDA'} ? 'tipo-salida'"
-                            th:text="${movimiento.tipo()}"></span></dd>
+                    <dt>Tipo de movimiento</dt>
+                    <dd>
+                        <span class="tipo-movimiento" th:classappend="${movimiento.tipo() == 'SALIDA'} ? 'tipo-salida'"
+                            th:text="${movimiento.tipo()}"></span>
+                    </dd>
                 </div>
                 <div>
-                    <dt>ID usuario</dt>
-                    <dd th:text="${movimiento.idUsuario()}"></dd>
+                    <dt>Usuario responsable</dt>
+                    <dd>
+                        <span class="unidad-medicamento" th:text="${'Usuario #' + movimiento.idUsuario()}"></span>
+                    </dd>
                 </div>
                 <div class="resumen-amplio">
-                    <dt>Motivo</dt>
+                    <dt>Motivo / Observación</dt>
                     <dd th:text="${movimiento.motivo()}"></dd>
                 </div>
             </dl>
+
             <section class="inventario-resultados" aria-labelledby="titulo-detalle">
                 <div class="resultados-cabecera">
-                    <h2 id="titulo-detalle">Detalle del movimiento <span class="cantidad-resultados"
-                            th:text="${#lists.size(detalles)}"></span></h2>
+                    <h2 id="titulo-detalle">
+                        Lotes afectados en el movimiento
+                        <span class="cantidad-resultados" th:text="${#lists.size(detalles)}"></span>
+                    </h2>
                 </div>
-                <div class="inventario-vacio" th:if="${#lists.isEmpty(detalles)}"><span class="icono icono-package"
-                        aria-hidden="true"></span>
+
+                <div class="inventario-vacio" th:if="${#lists.isEmpty(detalles)}">
+                    <span class="icono icono-package" aria-hidden="true"></span>
                     <p>Este movimiento no tiene detalles registrados.</p>
                 </div>
+
                 <div class="tabla-contenedor inventario-tabla tabla-detalles" th:unless="${#lists.isEmpty(detalles)}"
                     tabindex="0" role="region" aria-label="Detalle del movimiento, tabla desplazable">
                     <table>
@@ -69,11 +84,21 @@
                         </thead>
                         <tbody>
                             <tr th:each="detalle : ${detalles}">
-                                <td class="codigo-medicamento" th:text="${detalle.codigoMedicamento()}"></td>
+                                <td>
+                                    <span class="codigo-medicamento" th:text="${detalle.codigoMedicamento()}"></span>
+                                </td>
                                 <td class="nombre-medicamento" th:text="${detalle.nombreMedicamento()}"></td>
-                                <td class="codigo-medicamento" th:text="${detalle.numeroLote()}"></td>
-                                <td class="numero" th:text="${detalle.cantidad()}"></td>
-                                <td><span class="unidad-medicamento" th:text="${detalle.unidadControl()}"></span></td>
+                                <td>
+                                    <span class="codigo-medicamento" th:text="${detalle.numeroLote()}"></span>
+                                </td>
+                                <td class="numero">
+                                    <span class="stock-minimo-badge"
+                                        th:classappend="${movimiento.tipo() == 'ENTRADA' ? 'stock-disponible' : ''}"
+                                        th:text="${(movimiento.tipo() == 'ENTRADA' ? '+' : '-') + detalle.cantidad()}"></span>
+                                </td>
+                                <td>
+                                    <span class="unidad-medicamento" th:text="${detalle.unidadControl()}"></span>
+                                </td>
                             </tr>
                         </tbody>
                     </table>

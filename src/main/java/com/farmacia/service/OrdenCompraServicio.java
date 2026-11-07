@@ -16,6 +16,15 @@ import com.farmacia.dto.OrdenCompraFormulario;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 import com.farmacia.model.DetalleOrdenCompraVista;
+import com.farmacia.model.LineaRecepcionVista;
+import com.farmacia.dto.RecepcionOrdenFormulario;
+import com.farmacia.dto.DetalleRecepcionFormulario;
+import com.farmacia.repository.LoteRepositorio;
+import com.farmacia.repository.MovimientoInventarioRepositorio;
+import java.time.LocalDate;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,19 +37,25 @@ public class OrdenCompraServicio {
         private final UsuarioRepositorio usuarioRepositorio;
         private final ProveedorRepositorio proveedorRepositorio;
         private final MedicamentoRepositorio medicamentoRepositorio;
+        private final LoteRepositorio loteRepositorio;
+        private final MovimientoInventarioRepositorio movimientoRepositorio;
 
         public OrdenCompraServicio(
                         OrdenCompraRepositorio ordenRepositorio,
                         DetalleOrdenCompraRepositorio detalleRepositorio,
                         UsuarioRepositorio usuarioRepositorio,
                         ProveedorRepositorio proveedorRepositorio,
-                        MedicamentoRepositorio medicamentoRepositorio) {
+                        MedicamentoRepositorio medicamentoRepositorio,
+                        LoteRepositorio loteRepositorio,
+                        MovimientoInventarioRepositorio movimientoRepositorio) {
 
                 this.ordenRepositorio = ordenRepositorio;
                 this.detalleRepositorio = detalleRepositorio;
                 this.usuarioRepositorio = usuarioRepositorio;
                 this.proveedorRepositorio = proveedorRepositorio;
                 this.medicamentoRepositorio = medicamentoRepositorio;
+                this.loteRepositorio = loteRepositorio;
+                this.movimientoRepositorio = movimientoRepositorio;
         }
 
         public List<OrdenCompra> listar() {
@@ -145,7 +160,7 @@ public class OrdenCompraServicio {
                 return total.setScale(2);
         }
 
-        @Transactional
+        @Transactional(rollbackFor = Exception.class)
         public Integer guardar(
                         String nombreUsuario,
                         OrdenCompraFormulario formulario) {
@@ -191,6 +206,85 @@ public class OrdenCompraServicio {
                 }
 
                 return idOrden;
+        }
+
+        public List<LineaRecepcionVista> listarLineasRecepcion(Integer idOrden) {
+                return detalleRepositorio.listarLineasRecepcion(idOrden);
+        }
+
+        @Transactional(rollbackFor = Exception.class)
+        public void registrarRecepcion(Integer idOrden, String nombreUsuario,
+                        RecepcionOrdenFormulario formulario) {
+                if (formulario == null || formulario.detalles() == null || formulario.detalles().isEmpty())
+                        throw new IllegalArgumentException("Agrega al menos un producto recibido");
+                var usuario = validarUsuario(nombreUsuario, "ALMACENERO");
+                var orden = ordenRepositorio.buscarPorIdParaActualizar(idOrden)
+                        .orElseThrow(() -> new IllegalArgumentException("Orden de compra no encontrada"));
+                if (!orden.estado().equals("PENDIENTE") && !orden.estado().equals("PARCIALMENTE_RECIBIDA"))
+                        throw new IllegalArgumentException("La orden no admite más recepciones");
+
+                Map<Integer, LineaRecepcionVista> lineas = detalleRepositorio.listarLineasRecepcion(idOrden)
+                        .stream().collect(Collectors.toMap(LineaRecepcionVista::idDetalleOrden, Function.identity()));
+                var ids = new HashSet<Integer>();
+                int pendienteTotal = 0;
+                for (var linea : lineas.values()) {
+                        if (linea.cantidadRecibida() < 0 || linea.cantidadPendiente() < 0)
+                                throw new IllegalStateException("La orden tiene cantidades recibidas inconsistentes");
+                        pendienteTotal = Math.addExact(pendienteTotal, linea.cantidadPendiente());
+                }
+                for (DetalleRecepcionFormulario detalle : formulario.detalles()) {
+                        if (detalle == null || detalle.idDetalleOrden() == null || detalle.cantidad() == null
+                                || detalle.cantidad() <= 0 || detalle.numeroLote() == null
+                                || detalle.numeroLote().isBlank() || detalle.numeroLote().length() > 50
+                                || detalle.fechaVencimiento() == null
+                                || !detalle.fechaVencimiento().isAfter(LocalDate.now()))
+                                throw new IllegalArgumentException("Revisa lote, vencimiento y cantidad recibida");
+                        if (!ids.add(detalle.idDetalleOrden()))
+                                throw new IllegalArgumentException("No repitas una línea de la orden");
+                        var linea = lineas.get(detalle.idDetalleOrden());
+                        if (linea == null) throw new IllegalArgumentException("La línea no pertenece a esta orden");
+                        if (detalle.cantidad() > linea.cantidadPendiente())
+                                throw new IllegalArgumentException("La cantidad supera lo pendiente para " + linea.nombre());
+                        pendienteTotal -= detalle.cantidad();
+                }
+                String motivo = formulario.motivo() == null || formulario.motivo().isBlank()
+                        ? "Recepción de compra" : formulario.motivo().strip();
+                if (motivo.length() > 250) throw new IllegalArgumentException("El motivo admite hasta 250 caracteres");
+                int idMovimiento = movimientoRepositorio.registrarEntrada(usuario.idUsuario(),
+                        orden.idProveedor(), idOrden, motivo);
+                for (var detalle : formulario.detalles()) {
+                        var linea = lineas.get(detalle.idDetalleOrden());
+                        int idLote = loteRepositorio.registrarOIncrementar(linea.idMedicamento(),
+                                detalle.numeroLote().strip(), detalle.fechaVencimiento(), detalle.cantidad());
+                        movimientoRepositorio.registrarDetalleEntrada(idMovimiento, idLote,
+                                detalle.idDetalleOrden(), detalle.cantidad());
+                }
+                String estado = pendienteTotal == 0 ? "RECIBIDA" : "PARCIALMENTE_RECIBIDA";
+                if (ordenRepositorio.actualizarEstado(idOrden, estado) != 1)
+                        throw new IllegalStateException("No se pudo actualizar el estado de la orden");
+        }
+
+        @Transactional(rollbackFor = Exception.class)
+        public void cancelarOrden(Integer idOrden, String nombreUsuario) {
+                validarUsuario(nombreUsuario, "COMPRAS");
+                var orden = ordenRepositorio.buscarPorIdParaActualizar(idOrden)
+                        .orElseThrow(() -> new IllegalArgumentException("Orden de compra no encontrada"));
+                if (!orden.estado().equals("PENDIENTE"))
+                        throw new IllegalArgumentException("Solo se pueden cancelar órdenes pendientes sin recepciones");
+                boolean tieneRecepciones = ordenRepositorio.tieneRecepciones(idOrden)
+                        || detalleRepositorio.listarLineasRecepcion(idOrden).stream()
+                                .anyMatch(linea -> linea.cantidadRecibida() > 0);
+                if (tieneRecepciones) throw new IllegalArgumentException("La orden ya tiene recepciones registradas");
+                if (ordenRepositorio.actualizarEstado(idOrden, "CANCELADA") != 1)
+                        throw new IllegalStateException("No se pudo cancelar la orden");
+        }
+
+        private com.farmacia.model.Usuario validarUsuario(String nombreUsuario, String rolRequerido) {
+                var usuario = usuarioRepositorio.buscarPorNombreUsuario(nombreUsuario)
+                        .orElseThrow(() -> new AccessDeniedException("Usuario no autorizado"));
+                boolean permitido = usuario.rol().equals("ADMINISTRADOR") || usuario.rol().equals(rolRequerido);
+                if (!usuario.activo() || !permitido) throw new AccessDeniedException("Usuario no autorizado");
+                return usuario;
         }
 
         public List<DetalleOrdenCompraVista> listarDetallesVista(

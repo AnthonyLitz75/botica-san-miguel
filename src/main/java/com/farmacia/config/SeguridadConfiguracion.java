@@ -11,6 +11,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.http.HttpMethod;
+import java.time.Clock;
 
 @Configuration
 @EnableWebSecurity
@@ -19,6 +20,11 @@ public class SeguridadConfiguracion {
         @Bean
         public PasswordEncoder passwordEncoder() {
                 return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        }
+
+        @Bean
+        public Clock clock() {
+                return Clock.systemDefaultZone();
         }
 
         @Bean
@@ -37,6 +43,14 @@ public class SeguridadConfiguracion {
                                                 .hasRole("ADMINISTRADOR")
                                                 .requestMatchers(HttpMethod.DELETE, "/api/medicamentos/*")
                                                 .hasRole("ADMINISTRADOR")
+                                                .requestMatchers(HttpMethod.GET, "/api/clientes", "/api/clientes/*")
+                                                .hasAnyRole("ADMINISTRADOR", "VENDEDOR")
+                                                .requestMatchers(HttpMethod.POST, "/api/clientes")
+                                                .hasAnyRole("ADMINISTRADOR", "VENDEDOR")
+                                                .requestMatchers(HttpMethod.PUT, "/api/clientes/*")
+                                                .hasAnyRole("ADMINISTRADOR", "VENDEDOR")
+                                                .requestMatchers(HttpMethod.GET, "/api/alertas", "/api/alertas/**")
+                                                .hasAnyRole("ADMINISTRADOR", "COMPRAS", "ALMACENERO", "VENDEDOR")
                                                 .anyRequest().denyAll())
                                 .httpBasic(Customizer.withDefaults())
                                 .sessionManagement(
@@ -84,16 +98,24 @@ public class SeguridadConfiguracion {
 
                                                 .requestMatchers(
                                                                 HttpMethod.GET,
+                                                                "/salidas/nueva",
                                                                 "/lotes/{idLote}/salida")
                                                 .hasAnyRole("ADMINISTRADOR", "ALMACENERO")
 
                                                 .requestMatchers(
                                                                 HttpMethod.POST,
+                                                                "/salidas/nueva",
                                                                 "/lotes/{idLote}/salida")
                                                 .hasAnyRole("ADMINISTRADOR", "ALMACENERO")
 
                                                 .requestMatchers("/lotes/**")
                                                 .denyAll()
+
+                                                .requestMatchers(HttpMethod.GET, "/alertas")
+                                                .hasAnyRole("ADMINISTRADOR", "COMPRAS", "ALMACENERO", "VENDEDOR")
+
+                                                .requestMatchers("/clientes", "/clientes/**")
+                                                .hasAnyRole("ADMINISTRADOR", "VENDEDOR")
 
                                                 .requestMatchers(
                                                                 HttpMethod.GET,
@@ -107,8 +129,22 @@ public class SeguridadConfiguracion {
                                                 .requestMatchers(HttpMethod.POST, "/ordenes-compra")
                                                 .hasAnyRole("ADMINISTRADOR", "COMPRAS")
 
+                                                .requestMatchers(HttpMethod.GET, "/ordenes-compra/{idOrden:[0-9]+}/recepcion")
+                                                .hasAnyRole("ADMINISTRADOR", "ALMACENERO")
+                                                .requestMatchers(HttpMethod.POST, "/ordenes-compra/{idOrden:[0-9]+}/recepcion")
+                                                .hasAnyRole("ADMINISTRADOR", "ALMACENERO")
+                                                .requestMatchers(HttpMethod.POST, "/ordenes-compra/{idOrden:[0-9]+}/cancelar")
+                                                .hasAnyRole("ADMINISTRADOR", "COMPRAS")
+
                                                 .requestMatchers("/ordenes-compra", "/ordenes-compra/**")
                                                 .denyAll()
+
+                                                .requestMatchers(HttpMethod.GET, "/ventas/preparacion")
+                                                .hasAnyRole("ADMINISTRADOR", "VENDEDOR")
+                                                .requestMatchers(HttpMethod.POST, "/ventas/preparacion", "/ventas/preparacion/deshacer")
+                                                .hasAnyRole("ADMINISTRADOR", "VENDEDOR")
+                                                .requestMatchers(HttpMethod.DELETE, "/ventas/preparacion/{idMedicamento:[0-9]+}")
+                                                .hasAnyRole("ADMINISTRADOR", "VENDEDOR")
 
                                                 .anyRequest().authenticated())
                                 .formLogin(formulario -> formulario
