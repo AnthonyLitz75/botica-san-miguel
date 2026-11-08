@@ -1,55 +1,274 @@
+<div align="center">
+
+<img src="src/main/resources/static/images/logo-botica-san-miguel.png" alt="Logo de Botica San Miguel" width="120" />
+
 # Botica San Miguel
 
-Proyecto académico para el curso de Algoritmos y Estructura de Datos.
+**Sistema web de gestión de inventario, compras y preparación de ventas para una botica.**
 
-Sistema web de gestión de inventario y compras para una botica.
-Se encuentra en desarrollo y no está preparado para uso en producción.
+![Java](https://img.shields.io/badge/Java-25-ED8B00?logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.1.2-6DB33F?logo=springboot&logoColor=white)
+![Spring Security](https://img.shields.io/badge/Spring_Security-RBAC-6DB33F?logo=springsecurity&logoColor=white)
+![Thymeleaf](https://img.shields.io/badge/Thymeleaf-SSR-005F0F?logo=thymeleaf&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-4169E1?logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-multi--stage-2496ED?logo=docker&logoColor=white)
 
-## Funciones implementadas
+[Características](#características) ·
+[Inicio rápido](#inicio-rápido) ·
+[Arquitectura](#arquitectura) ·
+[Estructuras de datos](#estructuras-de-datos) ·
+[API](#api) ·
+[Pruebas](#pruebas)
 
-- Inicio y cierre de sesión.
-- Control de acceso por roles.
-- Gestión de medicamentos y proveedores.
-- Consulta de lotes y existencias.
-- Registro de salidas de inventario.
-- Consulta de movimientos y sus detalles.
-- Creación y consulta de órdenes de compra.
+</div>
 
-## Roles
+---
 
-- Administrador.
-- Almacenero.
-- Compras.
-- Vendedor.
+## Descripción
 
-Las funciones disponibles dependen del rol del usuario.
+Botica San Miguel es una aplicación web que cubre la operación diaria de una botica: catálogo de medicamentos, control de lotes y vencimientos, entradas y salidas de inventario, órdenes de compra a proveedores, alertas de reposición y preparación de ventas, con acceso diferenciado por rol.
 
-## Tecnologías
+Fue desarrollada como proyecto académico del curso **Algoritmos y Estructura de Datos**, con el objetivo de aplicar estructuras propias y de la biblioteca estándar de Java (lista enlazada, pila y cola de prioridad) a un problema real: la rotación de lotes por vencimiento (FEFO).
 
-- Java y Spring Boot.
-- Spring Security.
-- Thymeleaf.
-- JDBC.
-- PostgreSQL.
-- HTML y CSS.
+> [!NOTE]
+> El proyecto está en desarrollo y no está preparado para uso en producción.
+
+## Características
+
+### Inventario
+
+- **Medicamentos:** consulta, creación, edición, activación y desactivación sin borrar el historial.
+- **Lotes y existencias:** consulta de lotes por medicamento, con indicador del **lote prioritario FEFO** (primero en vencer, primero en salir).
+- **Salidas de inventario:** registro desde un lote o mediante un formulario de salida directa, con validación de existencias.
+- **Movimientos:** historial de entradas y salidas con el detalle de cada operación.
+
+### Compras y proveedores
+
+- **Proveedores:** consulta, creación, edición, activación y desactivación.
+- **Órdenes de compra:** creación, consulta, cancelación de órdenes pendientes y **recepción total o parcial**, que registra los lotes recibidos y actualiza el estado de la orden (`PENDIENTE`, `PARCIALMENTE_RECIBIDA`, `RECIBIDA`, `CANCELADA`).
+
+### Ventas y clientes
+
+- **Clientes:** consulta, creación y edición.
+- **Preparación de venta:** armado de una venta en sesión con asignación automática de lotes por FEFO y opción de **deshacer** (disponible como API JSON).
+
+### Alertas
+
+Panel de medicamentos **agotados** o con **stock bajo**, reposición sugerida (descontando lo pendiente de recibir), lotes **vencidos** y lotes **por vencer** en los próximos 90 días.
+
+### Control de acceso (RBAC)
+
+| Función                                  | Administrador | Almacenero | Compras | Vendedor |
+| :--------------------------------------- | :-----------: | :--------: | :-----: | :------: |
+| Consultar medicamentos, lotes y alertas  |      Sí       |     Sí     |   Sí    |    Sí    |
+| Crear, editar y desactivar medicamentos  |      Sí       |     No     |   No    |    No    |
+| Consultar proveedores                    |      Sí       |     Sí     |   Sí    |    No    |
+| Crear y editar proveedores               |      Sí       |     No     |   Sí    |    No    |
+| Clientes                                 |      Sí       |     No     |   No    |    Sí    |
+| Consultar órdenes de compra              |      Sí       |     Sí     |   Sí    |    No    |
+| Crear y cancelar órdenes de compra       |      Sí       |     No     |   Sí    |    No    |
+| Recibir órdenes de compra                |      Sí       |     Sí     |   No    |    No    |
+| Registrar salidas y consultar movimientos |      Sí       |     Sí     |   No    |    No    |
+| Preparación de venta                     |      Sí       |     No     |   No    |    Sí    |
+
+## Stack tecnológico
+
+| Capa                | Tecnologías                                                         |
+| :------------------ | :------------------------------------------------------------------ |
+| **Backend**         | Java 25, Spring Boot 4.1.2, Spring MVC, Spring JDBC, Bean Validation |
+| **Seguridad**       | Spring Security (formulario de acceso para la web y HTTP Basic para la API) |
+| **Vistas**          | Thymeleaf, HTML5, CSS3 y JavaScript sin frameworks de UI            |
+| **Base de datos**   | PostgreSQL 18                                                       |
+| **Pruebas**         | JUnit 5, Spring Test (más de 50 pruebas)                            |
+| **Herramientas**    | Maven Wrapper, Docker (multi-stage), Postman                        |
+
+## Inicio rápido
+
+### Requisitos
+
+- JDK 25 (no solo JRE).
+- PostgreSQL 18 y, opcionalmente, pgAdmin 4.
+- No necesitas instalar Maven ni Node.js: el proyecto incluye Maven Wrapper.
+
+### 1. Base de datos
+
+Crea una base de datos **nueva** (por ejemplo, `farmacia_aed`) y ejecuta los scripts de la carpeta `scripts/` en este orden:
+
+| Script                    | Contenido                                                                                       |
+| :------------------------ | :---------------------------------------------------------------------------------------------- |
+| `01_creacion_tablas.sql`  | Estructura completa: 11 tablas, restricciones e índices. Exige que las tablas no existan.       |
+| `02_datos_demo.sql`       | Datos ficticios: 4 cuentas, 2 medicamentos, 2 proveedores, un lote, un movimiento y una orden. Exige tablas vacías. |
+
+> [!IMPORTANT]
+> Los scripts no usan `DROP`, `DELETE` ni `TRUNCATE`. No los ejecutes sobre una base con datos reales. La guía paso a paso está en [`GUIA_INSTALACION.txt`](GUIA_INSTALACION.txt).
+
+### 2. Configuración
+
+La conexión se define con variables de entorno:
+
+| Variable      | Descripción                 | Valor por defecto                                |
+| :------------ | :-------------------------- | :----------------------------------------------- |
+| `DB_URL`      | URL JDBC de la base         | `jdbc:postgresql://localhost:5432/farmacia_aed`  |
+| `DB_USER`     | Usuario de PostgreSQL       | `postgres`                                       |
+| `DB_PASSWORD` | Contraseña del usuario      | Valor de desarrollo local; define siempre la tuya |
+| `PORT`        | Puerto del servidor         | `8080`                                           |
+
+<details>
+<summary><b>Windows (PowerShell)</b></summary>
+
+```powershell
+$env:DB_USER = "postgres"
+$env:DB_PASSWORD = "tu-contraseña-local"
+
+.\mvnw.cmd spring-boot:run
+```
+
+</details>
+
+<details>
+<summary><b>Linux / macOS</b></summary>
+
+```bash
+export DB_USER="postgres"
+export DB_PASSWORD="tu-contraseña-local"
+
+./mvnw spring-boot:run
+```
+
+</details>
+
+La aplicación quedará disponible en `http://localhost:8080/login`.
+
+### Cuentas de demostración
+
+> [!WARNING]
+> Estas credenciales son públicas y solo sirven para pruebas locales. Cámbialas o elimínalas antes de cualquier despliegue.
+
+| Rol           | Usuario         | Contraseña          |
+| :------------ | :-------------- | :------------------ |
+| Administrador | `admin_demo`    | `AdminDemo2026!`    |
+| Almacenero    | `almacen_demo`  | `FarmaciaDemo2026!` |
+| Compras       | `compras_demo`  | `ComprasDemo2026!`  |
+| Vendedor      | `vendedor_demo` | `VendedorDemo2026!` |
+
+## Arquitectura
+
+```mermaid
+flowchart LR
+    subgraph Cliente["Navegador / Postman"]
+        WEB[Vistas Thymeleaf]
+        API[Cliente API JSON]
+    end
+
+    subgraph Backend["Backend (Spring Boot)"]
+        SEC[Spring Security]
+        CT[Controllers MVC y REST]
+        SV[Services]
+        ED[Estructuras de datos]
+        RP[Repositorios JDBC]
+    end
+
+    DB[(PostgreSQL)]
+
+    WEB --> SEC
+    API --> SEC
+    SEC --> CT
+    CT --> SV
+    SV --> ED
+    SV --> RP
+    RP --> DB
+```
+
+El backend sigue una arquitectura en capas (controller, service, repository) con acceso a datos mediante JDBC directo, lo que mantiene explícitas las consultas y las transacciones. Hay dos cadenas de seguridad: una para la API (`/api/**`, sin estado y con HTTP Basic) y otra para la web (sesión con formulario de acceso).
+
+## Estructuras de datos
+
+El curso se centra en estructuras de datos; estas son las que usa el sistema (paquete `com.farmacia.estructuras`):
+
+| Estructura                                         | Clase                | Aplicación                                                                                                                                              |
+| :------------------------------------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Lista simplemente enlazada** (implementación propia) | `ListaEnlazada`      | Líneas de la preparación de venta, que conservan su orden de ingreso. Permite agregar, buscar, reemplazar y eliminar por criterio.                      |
+| **Pila (LIFO)**                                    | `PilaDeshacer`       | Historial de instantáneas para deshacer cambios en la preparación de venta.                                                                             |
+| **Cola de prioridad**                              | `ColaPrioridadLotes` | Orden FEFO: primero el lote con vencimiento más cercano (desempata por ID). Se usa para planificar salidas e identificar el lote prioritario de cada medicamento. |
+
+`PilaDeshacer` se apoya en `ArrayDeque` y `ColaPrioridadLotes` en `PriorityQueue`; `ListaEnlazada` está implementada con nodos propios.
+
+## API
+
+La web convive con una API JSON que usa la misma base de datos y requiere HTTP Basic.
+
+| Recurso             | Operaciones                                                | Roles                                     |
+| :------------------ | :--------------------------------------------------------- | :---------------------------------------- |
+| `/api/medicamentos` | `GET`, `POST`, `PUT` y `DELETE` (desactiva)                | Consulta: todos. Escritura: Administrador |
+| `/api/clientes`     | `GET`, `POST` y `PUT`                                      | Administrador y Vendedor                  |
+| `/api/alertas`      | `GET` en `/stock`, `/reposicion`, `/vencidos` y `/por-vencer` | Todos los roles                           |
+
+La preparación de venta (`/ventas/preparacion`) también responde JSON, pero usa la sesión iniciada en la web, no HTTP Basic.
+
+Consulta [`API_POSTMAN.md`](API_POSTMAN.md) y la colección de la carpeta `POSTMAN/` para probar la API de medicamentos.
+
+## Seguridad
+
+- **Contraseñas:** almacenadas con hash BCrypt (`DelegatingPasswordEncoder`).
+- **Autorización por rol:** cada ruta declara explícitamente los roles permitidos y las rutas no listadas de la API se deniegan por defecto.
+- **API sin estado:** sin sesión y con CSRF desactivado solo en `/api/**`; la web mantiene la protección habitual de Spring Security.
+- **Desactivación lógica:** los medicamentos y proveedores no se borran, para conservar el historial.
+- **Contenedor:** la imagen Docker se ejecuta con un usuario sin privilegios.
+
+## Pruebas
+
+```bash
+./mvnw test
+```
+
+Incluye pruebas unitarias de las estructuras de datos y de los servicios, y pruebas de controladores. Las pruebas de persistencia (`*PersistenciaTest`) usan `@SpringBootTest` y requieren una base PostgreSQL con los scripts de `scripts/` y las variables de entorno configuradas.
+
+## Despliegue con Docker
+
+El `Dockerfile` compila la aplicación con Java 25 y genera una imagen ligera que lee el puerto desde `PORT`; está pensado para plataformas como Render.
+
+```bash
+docker build -t botica-san-miguel .
+docker run -p 8080:8080 \
+  -e DB_URL="jdbc:postgresql://host:5432/farmacia_aed" \
+  -e DB_USER="usuario" -e DB_PASSWORD="contraseña" \
+  botica-san-miguel
+```
+
+> [!WARNING]
+> Antes de publicar cualquier instancia, cambia o elimina las cuentas de demostración y configura tus propias credenciales de base de datos.
 
 ## Estado del proyecto
 
-Primera entrega parcial. Algunas funciones están pendientes.
+En desarrollo. Pendiente según el código actual:
 
-Este repositorio contiene el código fuente, no una aplicación
-publicada en internet.
+- Confirmar la venta: la preparación de venta aún no se guarda en las tablas `venta` y `detalle_venta`.
+- Pantalla web para la preparación de venta; por ahora solo existe la API.
+- Ampliar la colección de Postman a clientes y alertas.
 
-## Base de datos
+## Estructura del proyecto
 
-La aplicación requiere PostgreSQL y las variables de entorno
-DB_USER y DB_PASSWORD.
-
-Los scripts de tablas y datos de demostración están en `scripts/`.
-Consulta `GUIA_INSTALACION.txt` para instalar y ejecutar el proyecto.
-
-## API de medicamentos
-
-La API JSON permite consultar, crear, actualizar y desactivar medicamentos con
-GET, POST, PUT y DELETE. Consulta [API_POSTMAN.md](API_POSTMAN.md) para probarla
-con Postman. Las operaciones de escritura requieren el rol Administrador.
+```text
+botica-san-miguel/
+├── src/
+│   ├── main/
+│   │   ├── java/com/farmacia/
+│   │   │   ├── config/        # Seguridad: cadenas web y API
+│   │   │   ├── controller/    # Controladores MVC y REST
+│   │   │   ├── service/       # Lógica de negocio y transacciones
+│   │   │   ├── repository/    # Acceso a datos con JDBC
+│   │   │   ├── estructuras/   # ListaEnlazada, PilaDeshacer, ColaPrioridadLotes
+│   │   │   ├── model/         # Entidades y vistas de dominio
+│   │   │   └── dto/           # Formularios y objetos de transferencia
+│   │   └── resources/
+│   │       ├── templates/     # Vistas Thymeleaf por módulo
+│   │       ├── static/        # CSS, JS, imágenes e iconos
+│   │       └── application.properties
+│   └── test/java/             # Pruebas unitarias, de controladores y de persistencia
+├── scripts/                   # Scripts SQL de tablas y datos de demostración
+├── POSTMAN/                   # Colección de Postman
+├── API_POSTMAN.md             # Guía de la API de medicamentos
+├── GUIA_INSTALACION.txt       # Instalación paso a paso en Windows
+├── Dockerfile
+└── pom.xml
+```
