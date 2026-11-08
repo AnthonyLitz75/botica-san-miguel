@@ -1,14 +1,8 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title
-        th:text="${idProveedor != null ? 'Editar proveedor | Botica San Miguel' : 'Nuevo proveedor | Botica San Miguel'}">
-        Proveedor | Botica San Miguel</title>
-    <link rel="stylesheet" th:href="@{/css/estilos.css}">
-    <link rel="stylesheet" th:href="@{/css/inventario.css}">
+<head th:replace="~{fragmentos/head :: recursos(${idProveedor != null ? 'Editar proveedor' : 'Nuevo proveedor'})}">
+    <title th:text="${idProveedor != null ? 'Editar proveedor | Botica San Miguel' : 'Nuevo proveedor | Botica San Miguel'}">Proveedor | Botica San Miguel</title>
 </head>
 
 <body class="pagina-inventario">
@@ -84,17 +78,18 @@
                 </fieldset>
 
                 <div class="proveedor-formulario-acciones">
-                    <button type="submit" class="inventario-boton boton-principal">
+                    <button type="submit" class="inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md">
                         <span class="icono icono-save" aria-hidden="true"></span>
                         <span th:text="${idProveedor != null ? 'Guardar cambios' : 'Guardar proveedor'}">Guardar</span>
                     </button>
-                    <a class="inventario-boton boton-secundario" th:href="@{/proveedores}">
+                    <a class="inventario-boton boton-secundario transition-all duration-150 active:scale-95" th:href="@{/proveedores}">
                         <span class="icono icono-x" aria-hidden="true"></span>Cancelar
                     </a>
                 </div>
             </form>
         </main>
     </div>
+    <script th:src="@{/js/formularios.js}" defer></script>
 </body>
 
 </html>

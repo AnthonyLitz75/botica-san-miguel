@@ -1,12 +1,8 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<head th:replace="~{fragmentos/head :: recursos('Recepción de mercadería')}">
     <title>Recepción de mercadería | Botica San Miguel</title>
-    <link rel="stylesheet" th:href="@{/css/estilos.css}">
-    <link rel="stylesheet" th:href="@{/css/inventario.css}">
 </head>
 
 <body class="pagina-inventario">
@@ -21,18 +17,18 @@
                     <h1>Registrar recepción</h1>
                     <p class="recepcion-intro">Confirma qué productos llegaron, con su lote y vencimiento.</p>
                 </div>
-                <a class="inventario-boton boton-secundario"
+                <a class="inventario-boton boton-secundario transition-all duration-150 active:scale-95 hover:shadow-sm"
                     th:href="@{/ordenes-compra/{id}(id=${orden.idOrden()})}">
                     <span class="icono icono-arrow-left" aria-hidden="true"></span>Volver al detalle
                 </a>
             </div>
 
-            <div class="aviso-operacion aviso-error" th:if="${error != null}" role="alert">
+            <div class="aviso-operacion aviso-error shadow-sm" th:if="${error != null}" role="alert">
                 <span class="icono icono-x" aria-hidden="true"></span>
                 <span th:text="${error}"></span>
             </div>
 
-            <section class="recepcion-resumen" aria-label="Resumen de la orden">
+            <section class="recepcion-resumen shadow-sm transition-all duration-200" aria-label="Resumen de la orden">
                 <div>
                     <span class="recepcion-resumen-label">Orden</span>
                     <strong th:text="${orden.numeroOrden()}">OC-0000</strong>
@@ -70,7 +66,7 @@
                 </noscript>
 
                 <div class="tabla-contenedor recepcion-tabla-contenedor" th:if="${!#lists.isEmpty(lineas)}"
-                    tabindex="0" role="region" aria-label="Productos pendientes de recepción, tabla desplazable">
+                    role="region" aria-label="Productos pendientes de recepción, tabla desplazable">
                     <table class="recepcion-tabla">
                         <thead>
                             <tr>
@@ -85,6 +81,7 @@
                         </thead>
                         <tbody>
                             <tr th:each="linea, iterStat : ${lineas}"
+                                class="hover:bg-slate-50/70 transition-colors duration-150"
                                 th:classappend="${linea.cantidadPendiente() == 0 ? 'linea-completa' : ''}"
                                 th:attr="data-pendiente=${linea.cantidadPendiente()}">
                                 <td class="recepcion-producto">
@@ -149,11 +146,11 @@
                 </div>
 
                 <div class="proveedor-formulario-acciones">
-                    <button class="inventario-boton boton-principal" type="submit"
+                    <button class="inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md" type="submit"
                         th:disabled="${#lists.isEmpty(lineas)}">
                         <span class="icono icono-save" aria-hidden="true"></span>Guardar recepción
                     </button>
-                    <a class="inventario-boton boton-secundario"
+                    <a class="inventario-boton boton-secundario transition-all duration-150 active:scale-95"
                         th:href="@{/ordenes-compra/{id}(id=${orden.idOrden()})}">Volver sin guardar</a>
                 </div>
             </form>

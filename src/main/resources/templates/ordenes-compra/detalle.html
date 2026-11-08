@@ -1,12 +1,8 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<head th:replace="~{fragmentos/head :: recursos('Detalle de orden')}">
     <title>Detalle de orden | Botica San Miguel</title>
-    <link rel="stylesheet" th:href="@{/css/estilos.css}">
-    <link rel="stylesheet" th:href="@{/css/inventario.css}">
 </head>
 
 <body class="pagina-inventario">
@@ -63,28 +59,61 @@
                 </div>
             </dl>
 
-            <div class="aviso-operacion aviso-exito" th:if="${mensaje != null}" role="status">
+            <div class="aviso-operacion aviso-exito shadow-sm" th:if="${mensaje != null}" role="status">
                 <span class="icono icono-circle-check" aria-hidden="true"></span>
                 <span th:text="${mensaje}"></span>
             </div>
-            <div class="aviso-operacion aviso-error" th:if="${error != null}" role="alert">
+            <div class="aviso-operacion aviso-error shadow-sm" th:if="${error != null}" role="alert">
                 <span class="icono icono-x" aria-hidden="true"></span>
                 <span th:text="${error}"></span>
             </div>
 
             <div class="orden-acciones" th:if="${puedeRecibir || puedeCancelar}">
-                <a class="inventario-boton boton-principal" th:if="${puedeRecibir}"
+                <a class="inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md" th:if="${puedeRecibir}"
                     th:href="@{/ordenes-compra/{id}/recepcion(id=${orden.idOrden()})}">
                     <span class="icono icono-package" aria-hidden="true"></span>Registrar recepción
                 </a>
-                <form th:if="${puedeCancelar}" method="post"
-                    th:action="@{/ordenes-compra/{id}/cancelar(id=${orden.idOrden()})}"
-                    onsubmit="return confirm('¿Cancelar esta orden pendiente? Esta acción no se puede deshacer.');">
-                    <button class="inventario-boton boton-peligro" type="submit">
-                        <span class="icono icono-x" aria-hidden="true"></span>Cancelar orden
-                    </button>
-                </form>
+                <button th:if="${puedeCancelar}" id="btn-abrir-modal-cancelar" type="button"
+                    class="inventario-boton boton-peligro transition-all duration-150 active:scale-95 hover:shadow-md">
+                    <span class="icono icono-x" aria-hidden="true"></span>Cancelar orden
+                </button>
             </div>
+
+            <!-- Modal de confirmación accesible con HTML5 dialog y Tailwind CSS -->
+            <dialog id="modal-cancelar" th:if="${puedeCancelar}"
+                class="rounded-2xl p-0 shadow-2xl max-w-md w-full border border-slate-200 bg-white backdrop:bg-slate-900/60 backdrop:backdrop-blur-sm m-auto text-slate-800">
+                <div class="p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center text-rose-600 flex-shrink-0">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900 m-0">¿Cancelar orden de compra?</h3>
+                            <p class="text-xs text-slate-500 font-medium m-0">Esta acción es irreversible</p>
+                        </div>
+                    </div>
+
+                    <p class="text-sm text-slate-600 leading-relaxed mb-6">
+                        Estás a punto de cancelar la orden <strong class="text-slate-900 font-semibold" th:text="${orden.numeroOrden()}">OC-0000</strong>. Una vez confirmada, no se podrán registrar recepciones ni ingresos a inventario de esta orden.
+                    </p>
+
+                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                        <button type="button" id="btn-cerrar-modal"
+                            class="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors duration-150 active:scale-95">
+                            Volver sin cancelar
+                        </button>
+                        <form method="post" th:action="@{/ordenes-compra/{id}/cancelar(id=${orden.idOrden()})}">
+                            <button type="submit"
+                                class="px-4 py-2 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-sm transition-all duration-150 active:scale-95 flex items-center gap-1.5">
+                                <span class="icono icono-x" aria-hidden="true"></span>
+                                <span>Sí, cancelar orden</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </dialog>
 
             <section class="inventario-resultados" aria-labelledby="titulo-detalle">
                 <div class="resultados-cabecera">
@@ -100,7 +129,7 @@
                 </div>
 
                 <div class="tabla-contenedor inventario-tabla tabla-detalles" th:unless="${#lists.isEmpty(detalles)}"
-                    tabindex="0" role="region" aria-label="Detalle de orden, tabla desplazable">
+                    role="region" aria-label="Detalle de orden, tabla desplazable">
                     <table>
                         <thead>
                             <tr>
@@ -115,7 +144,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="detalle : ${detalles}">
+                            <tr th:each="detalle : ${detalles}" class="hover:bg-slate-50/80 transition-colors duration-150">
                                 <td>
                                     <span class="codigo-medicamento" th:text="${detalle.codigoMedicamento()}"></span>
                                 </td>
@@ -148,6 +177,32 @@
             </section>
         </main>
     </div>
+
+    <script th:src="@{/js/formularios.js}" defer></script>
+    <script th:if="${puedeCancelar}">
+        const modalCancelar = document.getElementById("modal-cancelar");
+        const btnAbrirModal = document.getElementById("btn-abrir-modal-cancelar");
+        const btnCerrarModal = document.getElementById("btn-cerrar-modal");
+
+        if (modalCancelar && btnAbrirModal && btnCerrarModal) {
+            btnAbrirModal.addEventListener("click", () => {
+                modalCancelar.showModal();
+            });
+
+            btnCerrarModal.addEventListener("click", () => {
+                modalCancelar.close();
+            });
+
+            modalCancelar.addEventListener("click", (e) => {
+                const rect = modalCancelar.getBoundingClientRect();
+                const enDialogo = rect.top <= e.clientY && e.clientY <= rect.top + rect.height
+                    && rect.left <= e.clientX && e.clientX <= rect.left + rect.width;
+                if (!enDialogo) {
+                    modalCancelar.close();
+                }
+            });
+        }
+    </script>
 </body>
 
 </html>

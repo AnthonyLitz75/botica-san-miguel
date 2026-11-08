@@ -1,12 +1,8 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<head th:replace="~{fragmentos/head :: recursos('Registrar salida')}">
     <title>Registrar salida | Botica San Miguel</title>
-    <link rel="stylesheet" th:href="@{/css/estilos.css}">
-    <link rel="stylesheet" th:href="@{/css/inventario.css}">
 </head>
 
 <body class="pagina-inventario">
@@ -29,6 +25,14 @@
                 <span class="icono icono-x" aria-hidden="true"></span>
                 <div>
                     <p>No hay lotes con existencias disponibles actualmente para registrar salidas.</p>
+                </div>
+            </div>
+
+            <div class="p-3 mb-4 rounded-lg bg-emerald-50/80 border border-emerald-200 text-xs text-emerald-900 flex items-start gap-2.5 shadow-sm" th:unless="${#lists.isEmpty(lotes)}">
+                <span class="icono icono-circle-check text-emerald-600 mt-0.5" aria-hidden="true"></span>
+                <div>
+                    <strong class="font-semibold text-emerald-950">Despacho asistido por Cola de Prioridad (FEFO):</strong>
+                    <span> Los lotes identificados con <strong class="text-emerald-800">★ PRIORITARIO FEFO</strong> tienen la fecha de vencimiento más próxima y deben despacharse primero según la regla <em>First Expired, First Out</em>.</span>
                 </div>
             </div>
 
@@ -55,7 +59,10 @@
                                     th:text="${(idsLotesPrioritarios.contains(item.idLote()) ? '★ PRIORITARIO FEFO — ' : '') + item.nombreMedicamento() + ' (' + item.codigoMedicamento() + ') — Lote: ' + item.numeroLote() + ' | Stock: ' + item.stockActual() + ' ' + item.unidadControl() + ' | Vence: ' + #temporals.format(item.fechaVencimiento(), 'dd/MM/yyyy')}">
                                 </option>
                             </select>
-                            <span class="campo-ayuda"><span class="fefo-indicador" aria-hidden="true"></span> PRIORITARIO FEFO indica el lote vigente con vencimiento más próximo para ese medicamento.</span>
+                            <span class="campo-ayuda flex items-center gap-1.5 text-xs text-emerald-800 mt-1">
+                                <span class="fefo-indicador" aria-hidden="true"></span>
+                                <span><strong>PRIORITARIO FEFO:</strong> Lote con prioridad temporal #1 según la Cola de Prioridad por menor vencimiento.</span>
+                            </span>
                             <p class="error" id="error-idLote" th:if="${#fields.hasErrors('idLote')}"
                                 th:errors="*{idLote}"></p>
                         </div>
@@ -71,7 +78,7 @@
                         </div>
 
                         <div>
-                            <label>Proyección de saldo</label>
+                            <span class="campo-etiqueta block mb-2 text-[13px] font-semibold text-[#2c3b35]">Proyección de saldo</span>
                             <div class="orden-calculo-previo" id="caja-saldo">
                                 <span>Stock restante:</span>
                                 <strong id="saldo-restante">0</strong>
@@ -91,10 +98,10 @@
                 </fieldset>
 
                 <div class="proveedor-formulario-acciones">
-                    <button type="submit" class="inventario-boton boton-principal">
+                    <button type="submit" class="inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md">
                         <span class="icono icono-save" aria-hidden="true"></span>Registrar salida
                     </button>
-                    <a class="inventario-boton boton-secundario" th:href="@{/movimientos}">
+                    <a class="inventario-boton boton-secundario transition-all duration-150 active:scale-95" th:href="@{/movimientos}">
                         <span class="icono icono-x" aria-hidden="true"></span>Cancelar
                     </a>
                 </div>
@@ -102,6 +109,7 @@
         </main>
     </div>
 
+    <script th:src="@{/js/formularios.js}" defer></script>
     <script>
         const selectLote = document.getElementById("idLote");
         const inputCantSalida = document.getElementById("cantidad");
@@ -113,7 +121,7 @@
             if (!selectLote) return 0;
             const opcion = selectLote.options[selectLote.selectedIndex];
             if (!opcion || !opcion.hasAttribute("data-stock")) return 0;
-            return parseInt(opcion.getAttribute("data-stock"), 10) || 0;
+            return Number.parseInt(opcion.getAttribute("data-stock"), 10) || 0;
         }
 
         function obtenerUnidadSeleccionada() {
@@ -134,7 +142,7 @@
                 inputCantSalida.removeAttribute("max");
             }
 
-            const retiro = parseInt(inputCantSalida.value, 10) || 0;
+            const retiro = Number.parseInt(inputCantSalida.value, 10) || 0;
             const restante = stockActual - retiro;
             saldoRestante.textContent = selectLote.value ? `${restante} ${unidad}` : "0";
 

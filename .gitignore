@@ -40,3 +40,8 @@ application-local.properties
 
 # Registros de ejecucion
 *.log
+
+# Node & Frontend
+node_modules/
+package-lock.json
+

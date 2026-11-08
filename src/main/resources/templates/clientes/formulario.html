@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<head th:replace="~{fragmentos/head :: recursos(${idCliente != null ? 'Editar cliente' : 'Nuevo cliente'})}">
     <title th:text="${idCliente != null ? 'Editar cliente | Botica San Miguel' : 'Nuevo cliente | Botica San Miguel'}">Cliente | Botica San Miguel</title>
-    <link rel="stylesheet" th:href="@{/css/estilos.css}"><link rel="stylesheet" th:href="@{/css/inventario.css}">
 </head>
 <body class="pagina-inventario">
     <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
@@ -28,7 +26,7 @@
                     </div>
                     <div><label for="numeroDocumento">Número de documento</label>
                         <input id="numeroDocumento" type="text" th:field="*{numeroDocumento}" inputmode="numeric" maxlength="11" autocomplete="off" placeholder="8 dígitos para DNI o 11 para RUC" required th:attr="aria-invalid=${#fields.hasErrors('numeroDocumento')},aria-describedby=${#fields.hasErrors('numeroDocumento') ? 'error-documento' : null}">
-                        <span class="campo-ayuda">DNI: 8 dígitos. RUC: 11 dígitos.</span><p class="error" id="error-documento" th:if="${#fields.hasErrors('numeroDocumento')}" th:errors="*{numeroDocumento}"></p>
+                        <span class="campo-ayuda" id="ayuda-documento">DNI: 8 dígitos. RUC: 11 dígitos.</span><p class="error" id="error-documento" th:if="${#fields.hasErrors('numeroDocumento')}" th:errors="*{numeroDocumento}"></p>
                     </div>
                     <div class="campo-completo"><label for="nombreCompleto">Nombre completo o razón social</label>
                         <input id="nombreCompleto" type="text" th:field="*{nombreCompleto}" maxlength="150" autocomplete="name" placeholder="Nombre y apellidos o razón social" required th:attr="aria-invalid=${#fields.hasErrors('nombreCompleto')},aria-describedby=${#fields.hasErrors('nombreCompleto') ? 'error-nombre' : null}">
@@ -41,11 +39,12 @@
                     <div><label for="correo">Correo electrónico</label><input id="correo" type="email" th:field="*{correo}" maxlength="150" autocomplete="email" placeholder="cliente@correo.com" th:attr="aria-invalid=${#fields.hasErrors('correo')},aria-describedby=${#fields.hasErrors('correo') ? 'error-correo' : null}"><p class="error" id="error-correo" th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}"></p></div>
                 </div></fieldset>
 
-                <div class="proveedor-formulario-acciones"><button type="submit" class="inventario-boton boton-principal"><span class="icono icono-save" aria-hidden="true"></span><span th:text="${idCliente != null ? 'Guardar cambios' : 'Guardar cliente'}">Guardar</span></button>
-                    <a class="inventario-boton boton-secundario" th:href="@{/clientes}"><span class="icono icono-x" aria-hidden="true"></span>Cancelar</a>
+                <div class="proveedor-formulario-acciones"><button type="submit" class="inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md"><span class="icono icono-save" aria-hidden="true"></span><span th:text="${idCliente != null ? 'Guardar cambios' : 'Guardar cliente'}">Guardar</span></button>
+                    <a class="inventario-boton boton-secundario transition-all duration-150 active:scale-95" th:href="@{/clientes}"><span class="icono icono-x" aria-hidden="true"></span>Cancelar</a>
                 </div>
             </form>
         </main>
     </div>
+    <script th:src="@{/js/formularios.js}" defer></script>
 </body>
 </html>

@@ -1,0 +1,12 @@
+{
+  "name": "botica-san-miguel",
+  "version": "1.0.0",
+  "description": "Sistema Web de Gestión de Farmacia - Botica San Miguel",
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/main/resources/static/css/tailwind-input.css -o ./src/main/resources/static/css/tailwind.css --minify",
+    "watch:css": "tailwindcss -i ./src/main/resources/static/css/tailwind-input.css -o ./src/main/resources/static/css/tailwind.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

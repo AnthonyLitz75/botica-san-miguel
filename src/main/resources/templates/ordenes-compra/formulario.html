@@ -1,12 +1,8 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<head th:replace="~{fragmentos/head :: recursos('Nueva orden de compra')}">
     <title>Nueva orden de compra | Botica San Miguel</title>
-    <link rel="stylesheet" th:href="@{/css/estilos.css}">
-    <link rel="stylesheet" th:href="@{/css/inventario.css}">
 </head>
 
 <body class="pagina-inventario">
@@ -92,10 +88,10 @@
                 </fieldset>
 
                 <div class="proveedor-formulario-acciones">
-                    <button class="inventario-boton boton-principal" type="submit">
+                    <button class="inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md" type="submit">
                         <span class="icono icono-save" aria-hidden="true"></span>Guardar orden
                     </button>
-                    <a class="inventario-boton boton-secundario" th:href="@{/ordenes-compra}">
+                    <a class="inventario-boton boton-secundario transition-all duration-150 active:scale-95" th:href="@{/ordenes-compra}">
                         <span class="icono icono-x" aria-hidden="true"></span>Cancelar
                     </a>
                 </div>
@@ -103,14 +99,15 @@
         </main>
     </div>
 
+    <script th:src="@{/js/formularios.js}" defer></script>
     <script>
         const inputCantidad = document.getElementById("cantidad");
         const inputCosto = document.getElementById("costo");
         const importePrevio = document.getElementById("importe-previo");
 
         function actualizarImporteEstimado() {
-            const cant = parseFloat(inputCantidad.value) || 0;
-            const costo = parseFloat(inputCosto.value) || 0;
+            const cant = Number.parseFloat(inputCantidad.value) || 0;
+            const costo = Number.parseFloat(inputCosto.value) || 0;
             const total = cant >= 0 && costo >= 0 ? cant * costo : 0;
             importePrevio.textContent = "S/ " + total.toFixed(2);
         }

@@ -1,12 +1,8 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<head th:replace="~{fragmentos/head :: recursos('Registrar salida')}">
     <title>Registrar salida | Botica San Miguel</title>
-    <link rel="stylesheet" th:href="@{/css/estilos.css}">
-    <link rel="stylesheet" th:href="@{/css/inventario.css}">
 </head>
 
 <body class="pagina-inventario">
@@ -36,12 +32,18 @@
                 </div>
                 <div>
                     <dt>Lote seleccionado</dt>
-                    <dd>
+                    <dd class="flex flex-wrap items-center gap-2">
                         <span class="codigo-medicamento" th:text="${lote.numeroLote()}"></span>
-                        <span class="fefo-badge" th:if="${lotePrioritario}" aria-label="Lote prioritario por vencimiento según FEFO">
+                        <span class="fefo-badge inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-sm cursor-help transition-transform hover:scale-105"
+                            th:if="${lotePrioritario}"
+                            title="Lote sugerido por la Cola de Prioridad FEFO al tener la fecha de vencimiento más cercana"
+                            aria-label="Lote prioritario por vencimiento según FEFO">
                             <span class="fefo-indicador" aria-hidden="true"></span>Prioritario FEFO
                         </span>
-                        <span class="fefo-secundario" th:unless="${lotePrioritario}">Este lote no es el primero según FEFO.</span>
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200"
+                            th:unless="${lotePrioritario}">
+                            ⚠️ Lote secundario (existen lotes con vencimiento previo)
+                        </span>
                     </dd>
                 </div>
                 <div>
@@ -53,6 +55,15 @@
                     </dd>
                 </div>
             </dl>
+
+            <div class="p-3 mb-4 rounded-lg bg-emerald-50/80 border border-emerald-200 text-xs text-emerald-900 flex items-center gap-2.5 shadow-sm" th:if="${lotePrioritario}">
+                <span class="icono icono-circle-check text-emerald-600" aria-hidden="true"></span>
+                <span><strong>Recomendación FEFO confirmada:</strong> Este lote es el prioritario en la <em>Cola de Prioridad</em> por tener el vencimiento más cercano. Cumple con la política óptima de rotación.</span>
+            </div>
+            <div class="p-3 mb-4 rounded-lg bg-amber-50/80 border border-amber-200 text-xs text-amber-900 flex items-center gap-2.5 shadow-sm" th:unless="${lotePrioritario}">
+                <span class="icono icono-package text-amber-600" aria-hidden="true"></span>
+                <span><strong>Aviso de rotación:</strong> Estás despachando un lote secundario. Recuerda justificar en el motivo la razón del descargo excepcional.</span>
+            </div>
 
             <form th:action="@{/lotes/{id}/salida(id=${lote.idLote()})}" th:object="${formulario}" method="post"
                 class="proveedor-formulario">
@@ -79,7 +90,7 @@
                         </div>
 
                         <div>
-                            <label>Proyección de saldo</label>
+                            <span class="campo-etiqueta block mb-2 text-[13px] font-semibold text-[#2c3b35]">Proyección de saldo</span>
                             <div class="orden-calculo-previo" id="caja-saldo">
                                 <span>Stock final del lote:</span>
                                 <strong id="saldo-restante" th:text="${lote.stockActual()}">0</strong>
@@ -100,10 +111,10 @@
                 </fieldset>
 
                 <div class="proveedor-formulario-acciones">
-                    <button type="submit" class="inventario-boton boton-principal">
+                    <button type="submit" class="inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md">
                         <span class="icono icono-save" aria-hidden="true"></span>Registrar salida
                     </button>
-                    <a class="inventario-boton boton-secundario"
+                    <a class="inventario-boton boton-secundario transition-all duration-150 active:scale-95"
                         th:href="@{/medicamentos/{id}/lotes(id=${lote.idMedicamento()})}">
                         <span class="icono icono-x" aria-hidden="true"></span>Cancelar
                     </a>
@@ -112,6 +123,7 @@
         </main>
     </div>
 
+    <script th:src="@{/js/formularios.js}" defer></script>
     <script>
         const inputCantSalida = document.getElementById("cantidad");
         const stockElemento = document.getElementById("stock-actual-valor");
@@ -119,10 +131,10 @@
         const cajaSaldo = document.getElementById("caja-saldo");
 
         if (inputCantSalida && stockElemento && saldoRestante) {
-            const stockInicial = parseInt(stockElemento.getAttribute("data-stock"), 10) || 0;
+            const stockInicial = Number.parseInt(stockElemento.getAttribute("data-stock"), 10) || 0;
 
             function actualizarProyeccionSaldo() {
-                const retiro = parseInt(inputCantSalida.value, 10) || 0;
+                const retiro = Number.parseInt(inputCantSalida.value, 10) || 0;
                 const restante = stockInicial - retiro;
                 saldoRestante.textContent = restante;
 

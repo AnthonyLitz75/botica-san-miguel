@@ -1,12 +1,8 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<head th:replace="~{fragmentos/head :: recursos('Detalle de movimiento')}">
     <title>Detalle de movimiento | Botica San Miguel</title>
-    <link rel="stylesheet" th:href="@{/css/estilos.css}">
-    <link rel="stylesheet" th:href="@{/css/inventario.css}">
 </head>
 
 <body class="pagina-inventario">
@@ -71,7 +67,7 @@
                 </div>
 
                 <div class="tabla-contenedor inventario-tabla tabla-detalles" th:unless="${#lists.isEmpty(detalles)}"
-                    tabindex="0" role="region" aria-label="Detalle del movimiento, tabla desplazable">
+                    role="region" aria-label="Detalle del movimiento, tabla desplazable">
                     <table>
                         <thead>
                             <tr>

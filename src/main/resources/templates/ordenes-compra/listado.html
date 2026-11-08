@@ -1,12 +1,8 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<head th:replace="~{fragmentos/head :: recursos('Órdenes de compra')}">
     <title>Órdenes de compra | Botica San Miguel</title>
-    <link rel="stylesheet" th:href="@{/css/estilos.css}">
-    <link rel="stylesheet" th:href="@{/css/inventario.css}">
 </head>
 
 <body class="pagina-inventario">
@@ -46,7 +42,7 @@
                 </div>
 
                 <div class="tabla-contenedor inventario-tabla tabla-ordenes" th:unless="${#lists.isEmpty(ordenes)}"
-                    tabindex="0" role="region" aria-label="Órdenes de compra, tabla desplazable">
+                    role="region" aria-label="Órdenes de compra, tabla desplazable">
                     <table>
                         <thead>
                             <tr>

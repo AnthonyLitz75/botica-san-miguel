@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-
+<head>
+    <title>Navegación | Botica San Miguel</title>
+</head>
 <body>
     <nav th:fragment="menu(seccion)" class="inventario-nav" aria-label="Secciones">
         <a th:href="@{/medicamentos}" th:attr="aria-current=${seccion == 'Medicamentos' ? 'page' : null}">
@@ -35,17 +37,17 @@
     </nav>
 
     <aside th:fragment="lateral(seccion)" class="inventario-lateral" aria-label="Navegación principal">
-        <a class="inventario-marca" th:href="@{/medicamentos}">
-            <img th:src="@{/images/logo-botica-san-miguel.png}" width="44" height="44" alt="">
+        <a class="inventario-marca transition-transform duration-200 hover:scale-[1.02]" th:href="@{/medicamentos}">
+            <img th:src="@{/images/logo-botica-san-miguel.png}" width="44" height="44" alt="" class="transition-transform duration-300 hover:rotate-6">
             <div>
-                <span class="marca-subtitulo">BOTICA</span>
-                <span class="marca-nombre">San Miguel</span>
+                <span class="marca-subtitulo tracking-wider text-xs font-semibold">BOTICA</span>
+                <span class="marca-nombre font-bold">San Miguel</span>
             </div>
         </a>
-        <p class="nav-titulo">MÓDULOS DE GESTIÓN</p>
+        <p class="nav-titulo tracking-wider text-xs font-semibold">MÓDULOS DE GESTIÓN</p>
         <nav th:replace="~{fragmentos/navegacion :: menu(${seccion})}"></nav>
         <div class="lateral-pie">
-            <span class="punto-activo" aria-hidden="true"></span>
+            <span class="punto-activo animate-pulse" aria-hidden="true"></span>
             <span>Sistema de Inventario</span>
         </div>
     </aside>
@@ -59,7 +61,7 @@
         </details>
 
         <div class="cabecera-seccion">
-            <span class="cabecera-area-badge">
+            <span class="cabecera-area-badge shadow-sm">
                 <span class="icono icono-package" aria-hidden="true"></span>
                 <span th:text="${area}"></span>
             </span>
@@ -68,7 +70,7 @@
         </div>
 
         <div class="cabecera-cuenta">
-            <div class="usuario-capsula">
+            <div class="usuario-capsula transition-all duration-200 hover:shadow-sm">
                 <span class="usuario-avatar">
                     <span class="icono icono-user-round" aria-hidden="true"></span>
                 </span>
@@ -79,7 +81,7 @@
             </div>
             <span class="cuenta-divisor" aria-hidden="true"></span>
             <form th:action="@{/logout}" method="post">
-                <button class="boton-icono cerrar-sesion" type="submit" title="Cerrar sesión"
+                <button class="boton-icono cerrar-sesion transition-transform duration-150 hover:scale-110 active:scale-95" type="submit" title="Cerrar sesión"
                     aria-label="Cerrar sesión">
                     <span class="icono icono-log-out" aria-hidden="true"></span>
                 </button>

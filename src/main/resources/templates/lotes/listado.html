@@ -1,12 +1,8 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<head th:replace="~{fragmentos/head :: recursos('Lotes')}">
     <title>Lotes | Botica San Miguel</title>
-    <link rel="stylesheet" th:href="@{/css/estilos.css}">
-    <link rel="stylesheet" th:href="@{/css/inventario.css}">
 </head>
 
 <body class="pagina-inventario">
@@ -40,6 +36,14 @@
                 </div>
             </dl>
 
+            <div class="p-3 mb-4 rounded-lg bg-emerald-50/80 border border-emerald-200 text-xs text-emerald-900 flex items-start gap-2.5 shadow-sm" th:unless="${#lists.isEmpty(lotes)}">
+                <span class="icono icono-circle-check text-emerald-600 mt-0.5" aria-hidden="true"></span>
+                <div>
+                    <strong class="font-semibold text-emerald-950">Política de Inventario FEFO (First Expired, First Out):</strong>
+                    <span> Los lotes se ordenan dinámicamente mediante una <em>Cola de Prioridad</em> según la fecha de vencimiento más próxima para garantizar el despacho preferente del stock más antiguo.</span>
+                </div>
+            </div>
+
             <section class="inventario-resultados" aria-labelledby="titulo-resultados">
                 <div class="resultados-cabecera">
                     <h2 id="titulo-resultados">
@@ -54,7 +58,7 @@
                 </div>
 
                 <div class="tabla-contenedor inventario-tabla tabla-detalles" th:unless="${#lists.isEmpty(lotes)}"
-                    tabindex="0" role="region" aria-label="Lotes, tabla desplazable">
+                    role="region" aria-label="Lotes, tabla desplazable">
                     <table>
                         <thead>
                             <tr>
@@ -67,7 +71,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="lote : ${lotes}">
+                            <tr th:each="lote : ${lotes}" class="hover:bg-slate-50/80 transition-colors duration-150">
                                 <td>
                                     <span class="codigo-medicamento" th:text="${lote.numeroLote()}"></span>
                                 </td>
@@ -75,11 +79,20 @@
                                     th:text="${#temporals.format(lote.fechaVencimiento(), 'dd/MM/yyyy')}">
                                 </td>
                                 <td>
-                                    <span class="fefo-badge" th:if="${idsLotesPrioritarios.contains(lote.idLote())}"
-                                        aria-label="Lote prioritario por vencimiento según FEFO">
-                                        <span class="fefo-indicador" aria-hidden="true"></span>Prioritario FEFO
-                                    </span>
-                                    <span class="fefo-secundario" th:unless="${idsLotesPrioritarios.contains(lote.idLote())}">—</span>
+                                    <div class="flex flex-col items-start gap-1" th:if="${idsLotesPrioritarios.contains(lote.idLote())}">
+                                        <span class="fefo-badge inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-sm cursor-help transition-transform hover:scale-105"
+                                            title="Algoritmo FEFO: Primer lote a despachar ordenado en Cola de Prioridad por menor fecha de vencimiento"
+                                            aria-label="Lote prioritario por vencimiento según FEFO">
+                                            <span class="fefo-indicador" aria-hidden="true"></span>Prioritario FEFO
+                                        </span>
+                                        <span class="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
+                                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>1° en Cola de Prioridad
+                                        </span>
+                                    </div>
+                                    <div class="flex flex-col items-start gap-0.5" th:unless="${idsLotesPrioritarios.contains(lote.idLote())}">
+                                        <span class="fefo-secundario text-slate-400 text-xs">—</span>
+                                        <span class="text-[11px] text-slate-400">Reserva secundaria</span>
+                                    </div>
                                 </td>
                                 <td class="numero">
                                     <span class="stock-minimo-badge"
@@ -90,7 +103,7 @@
                                     <span class="unidad-medicamento" th:text="${medicamento.unidadControl()}"></span>
                                 </td>
                                 <td th:if="${puedeRegistrarSalida}">
-                                    <a class="enlace-lotes" th:if="${lote.stockActual() > 0}"
+                                    <a class="enlace-lotes inline-flex items-center gap-1 font-medium text-emerald-700 hover:text-emerald-800 transition-colors" th:if="${lote.stockActual() > 0}"
                                         th:href="@{/lotes/{id}/salida(id=${lote.idLote()})}">
                                         <span class="icono icono-arrow-left-right" aria-hidden="true"></span>Registrar
                                         salida
