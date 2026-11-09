@@ -155,15 +155,12 @@ La aplicación quedará disponible en `http://localhost:8080/login`.
 
 ### Cuentas de demostración
 
-> [!WARNING]
-> Estas credenciales son públicas y solo sirven para pruebas locales. Cámbialas o elimínalas antes de cualquier despliegue.
-
-| Rol           | Usuario         | Contraseña          |
-| :------------ | :-------------- | :------------------ |
-| Administrador | `admin_demo`    | `AdminDemo2026!`    |
-| Almacenero    | `almacen_demo`  | `FarmaciaDemo2026!` |
-| Compras       | `compras_demo`  | `ComprasDemo2026!`  |
-| Vendedor      | `vendedor_demo` | `VendedorDemo2026!` |
+| Rol           | Usuario         |
+| :------------ | :-------------- |
+| Administrador | `admin_demo`    |
+| Almacenero    | `almacen_demo`  |
+| Compras       | `compras_demo`  |
+| Vendedor      | `vendedor_demo` |
 
 ## Estilos con Tailwind CSS
 
