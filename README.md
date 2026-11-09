@@ -10,11 +10,13 @@
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.1.2-6DB33F?logo=springboot&logoColor=white)
 ![Spring Security](https://img.shields.io/badge/Spring_Security-RBAC-6DB33F?logo=springsecurity&logoColor=white)
 ![Thymeleaf](https://img.shields.io/badge/Thymeleaf-SSR-005F0F?logo=thymeleaf&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?logo=tailwindcss&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-4169E1?logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-multi--stage-2496ED?logo=docker&logoColor=white)
 
 [Características](#características) ·
 [Inicio rápido](#inicio-rápido) ·
+[Estilos](#estilos-con-tailwind-css) ·
 [Arquitectura](#arquitectura) ·
 [Estructuras de datos](#estructuras-de-datos) ·
 [API](#api) ·
@@ -77,10 +79,10 @@ Panel de medicamentos **agotados** o con **stock bajo**, reposición sugerida (d
 | :------------------ | :------------------------------------------------------------------ |
 | **Backend**         | Java 25, Spring Boot 4.1.2, Spring MVC, Spring JDBC, Bean Validation |
 | **Seguridad**       | Spring Security (formulario de acceso para la web y HTTP Basic para la API) |
-| **Vistas**          | Thymeleaf, HTML5, CSS3 y JavaScript sin frameworks de UI            |
+| **Vistas**          | Thymeleaf, HTML5, Tailwind CSS 3.4 (más CSS propio) y JavaScript sin frameworks de UI |
 | **Base de datos**   | PostgreSQL 18                                                       |
 | **Pruebas**         | JUnit 5, Spring Test (más de 50 pruebas)                            |
-| **Herramientas**    | Maven Wrapper, Docker (multi-stage), Postman                        |
+| **Herramientas**    | Maven Wrapper, Node.js y npm (compilación de Tailwind), Docker (multi-stage), Postman |
 
 ## Inicio rápido
 
@@ -88,7 +90,8 @@ Panel de medicamentos **agotados** o con **stock bajo**, reposición sugerida (d
 
 - JDK 25 (no solo JRE).
 - PostgreSQL 18 y, opcionalmente, pgAdmin 4.
-- No necesitas instalar Maven ni Node.js: el proyecto incluye Maven Wrapper.
+- Node.js (versión LTS) y npm: Maven los invoca para compilar los estilos con Tailwind CSS.
+- No necesitas instalar Maven: el proyecto incluye Maven Wrapper.
 
 ### 1. Base de datos
 
@@ -102,7 +105,18 @@ Crea una base de datos **nueva** (por ejemplo, `farmacia_aed`) y ejecuta los scr
 > [!IMPORTANT]
 > Los scripts no usan `DROP`, `DELETE` ni `TRUNCATE`. No los ejecutes sobre una base con datos reales. La guía paso a paso está en [`GUIA_INSTALACION.txt`](GUIA_INSTALACION.txt).
 
-### 2. Configuración
+### 2. Dependencias de estilos
+
+Instala las dependencias de Node una sola vez, desde la raíz del proyecto:
+
+```bash
+npm install
+```
+
+> [!IMPORTANT]
+> Maven ejecuta `npm run build:css` en cada compilación (`spring-boot:run`, `test`, `package`). Si omites `npm install`, la compilación falla con el error `tailwindcss: not found`.
+
+### 3. Configuración y ejecución
 
 La conexión se define con variables de entorno:
 
@@ -150,6 +164,21 @@ La aplicación quedará disponible en `http://localhost:8080/login`.
 | Almacenero    | `almacen_demo`  | `FarmaciaDemo2026!` |
 | Compras       | `compras_demo`  | `ComprasDemo2026!`  |
 | Vendedor      | `vendedor_demo` | `VendedorDemo2026!` |
+
+## Estilos con Tailwind CSS
+
+La interfaz combina Tailwind CSS con las hojas de estilo propias del proyecto (`estilos.css` e `inventario.css`). El `preflight` de Tailwind está desactivado para que ambos convivan sin conflictos, y la paleta de la botica se define en `tailwind.config.js` (colores `botica` y `alerta`).
+
+| Archivo                                      | Función                                                               |
+| :------------------------------------------- | :-------------------------------------------------------------------- |
+| `src/main/resources/static/css/tailwind-input.css` | Entrada de Tailwind.                                            |
+| `src/main/resources/static/css/tailwind.css` | Salida minificada generada; se versiona en el repositorio.            |
+| `tailwind.config.js`                         | Rutas que Tailwind escanea (`templates/` y `static/js/`) y paleta.    |
+
+| Comando               | Uso                                                                                     |
+| :-------------------- | :-------------------------------------------------------------------------------------- |
+| `npm run build:css`   | Genera `tailwind.css` minificado. Maven lo ejecuta automáticamente al compilar.         |
+| `npm run watch:css`   | Regenera `tailwind.css` al guardar cambios en las plantillas; útil mientras editas la interfaz. |
 
 ## Arquitectura
 
@@ -218,6 +247,7 @@ Consulta [`API_POSTMAN.md`](API_POSTMAN.md) y la colección de la carpeta `POSTM
 ## Pruebas
 
 ```bash
+npm install   # solo la primera vez
 ./mvnw test
 ```
 
@@ -262,13 +292,16 @@ botica-san-miguel/
 │   │   │   └── dto/           # Formularios y objetos de transferencia
 │   │   └── resources/
 │   │       ├── templates/     # Vistas Thymeleaf por módulo
-│   │       ├── static/        # CSS, JS, imágenes e iconos
+│   │       ├── static/        # CSS (propio y Tailwind generado), JS, imágenes e iconos
 │   │       └── application.properties
 │   └── test/java/             # Pruebas unitarias, de controladores y de persistencia
 ├── scripts/                   # Scripts SQL de tablas y datos de demostración
 ├── POSTMAN/                   # Colección de Postman
 ├── API_POSTMAN.md             # Guía de la API de medicamentos
+├── package.json               # Dependencias de Node y scripts de Tailwind (build:css, watch:css)
+├── tailwind.config.js         # Configuración y paleta de Tailwind CSS
 ├── GUIA_INSTALACION.txt       # Instalación paso a paso en Windows
 ├── Dockerfile
+├── .dockerignore
 └── pom.xml
 ```

@@ -12,6 +12,7 @@ AGENTS.md
 
 # Directorios de compilación local y binarios
 target/
+node_modules/
 *.log
 
 # Documentación de texto y guías de desarrollo

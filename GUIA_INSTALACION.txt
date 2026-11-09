@@ -1,7 +1,7 @@
 BOTICA SAN MIGUEL - GUIA DE INSTALACION Y DEMOSTRACION
 ===================================================
 Dirigida a Windows y PowerShell. Proyecto academico en desarrollo.
-Esta guia incluye los scripts completos al final y copias ejecutables en scripts/.
+Los scripts SQL ejecutables estan en la carpeta scripts/ del proyecto.
 No ejecuta nada automaticamente. No contiene credenciales reales de PostgreSQL.
 
 IMPORTANTE
@@ -21,9 +21,9 @@ IMPORTANTE
 - JDK 25 (el pom.xml actual establece java.version=25), no solo JRE.
 - PostgreSQL 18 y pgAdmin 4. Servicio local en puerto 5432.
 - Git para clonar; si usa ZIP, Git no es necesario para ejecutar la aplicacion.
-- Internet en la primera ejecucion para descargar Maven y dependencias.
+- Node.js (version LTS) y npm. Maven los usa para compilar los estilos Tailwind CSS.
+- Internet en la primera ejecucion para descargar Maven, dependencias de Java y paquetes de Node.
 - Maven Wrapper incluido: no necesita instalar Maven por separado.
-- No necesita Node.js.
 
 En PowerShell:
     java -version
@@ -34,8 +34,15 @@ JAVA_HOME no debe apuntar a bin.
 Para comprobar el Java utilizado por Maven, dentro del proyecto:
     .\mvnw.cmd -v
 
+En PowerShell, compruebe Node.js y npm:
+    node -v
+    npm -v
+Ambos deben mostrar una version. Si acaba de instalar Node.js, abra una
+terminal nueva para que reconozca los comandos.
+
 Descargas oficiales:
     https://www.oracle.com/java/technologies/downloads/
+    https://nodejs.org/
     https://www.postgresql.org/download/windows/
 
 2. DESCARGAR EL PROYECTO
@@ -82,8 +89,8 @@ C. Debe terminar sin errores y crear las 11 tablas.
 D. Abra scripts/02_datos_demo.sql y ejecute TODO el archivo.
 E. Debe terminar sin errores y mostrar las consultas de comprobacion.
 
-Los mismos scripts estan completos en los anexos de este archivo:
-si los copia, copie solo el SQL entre INICIO y FIN, no las instrucciones.
+Use siempre los archivos de la carpeta scripts/: esta guia no incluye copias
+del SQL. Si copia el contenido, copie el archivo completo, no fragmentos.
 
 Cada script usa una transaccion. Si aparece un error:
 - No ejecute el siguiente script.
@@ -133,7 +140,18 @@ No use setx para guardar la clave permanentemente.
 
 6. COMPILAR E INICIAR
 --------------------
-En esa MISMA terminal:
+En esa MISMA terminal, dentro de la carpeta que contiene package.json,
+instale primero las dependencias de estilos (solo la primera vez, o cuando
+cambie package.json):
+    npm install
+
+Maven ejecuta npm run build:css en cada compilacion (compile, test,
+spring-boot:run y package) para generar
+src/main/resources/static/css/tailwind.css. Si omite npm install, la
+compilacion falla con el error "tailwindcss: not found" (o "'tailwindcss' no
+se reconoce como un comando" en Windows).
+
+Luego compile:
     .\mvnw.cmd compile
 Si aparece BUILD SUCCESS, la compilacion termino correctamente.
 Esto no confirma por si solo la conexion ni el funcionamiento de la pagina.
@@ -194,8 +212,10 @@ Vendedor:
 - Consultar medicamentos y lotes.
 - No debe tener permiso para registrar una salida de inventario.
 
-Los modulos de ventas, recepcion de compras y otras partes del proyecto
-estan pendientes. La existencia de sus tablas no significa que haya interfaz.
+La confirmacion de ventas (registro en las tablas venta y detalle_venta) y la
+pantalla web de preparacion de venta estan pendientes: por ahora la
+preparacion de venta solo existe como API. La existencia de sus tablas no
+significa que haya interfaz.
 
 9. DETENER Y VOLVER A INICIAR
 ----------------------------
@@ -235,8 +255,14 @@ No inicia sesion:
     Confirme el rol. No desactive Spring Security para evadir la restriccion.
 Maven no descarga dependencias:
     Revise internet/proxy/firewall. No necesita modificar el pom.xml.
+"tailwindcss: not found" / "'tailwindcss' no se reconoce" / error al ejecutar npm:
+    Falta ejecutar npm install o Node.js no esta instalado. Compruebe node -v y
+    npm -v, ejecute npm install en la carpeta que contiene package.json y vuelva
+    a compilar. Si acaba de instalar Node.js, abra una terminal nueva.
 Cambios HTML/CSS no aparecen:
-    Reinicie Spring Boot y recargue el navegador con Ctrl + F5.
+    Reinicie Spring Boot y recargue el navegador con Ctrl + F5. Si cambio clases
+    de Tailwind en las plantillas, regenere los estilos con npm run build:css
+    (o deje npm run watch:css abierto en otra terminal mientras edita).
 
 11. SUBIR ESTOS ARCHIVOS A GITHUB (AUTOR, MANUAL)
 ------------------------------------------------
@@ -250,8 +276,3 @@ Ejecute desde la carpeta farmacia-aed:
 Revise los archivos antes de confirmar. Estos comandos no suben una base viva.
 No publique DB_PASSWORD ni datos personales. El repositorio contiene codigo y
 scripts; no aloja la aplicacion. localhost siempre apunta a la PC del visitante.
-
-El README actual dice que no hay scripts. Cuando suba estos archivos, reemplace
-esa frase por: "Scripts de instalacion en scripts/. Consulte GUIA_INSTALACION.txt."
-Haga git add README.md y un commit para ese cambio antes de enviarlo.
-
