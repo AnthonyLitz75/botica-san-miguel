@@ -1109,11 +1109,17 @@
   color: #b42318;
 }
 
-/* Estados visuales de stock en tabla de lotes */
+/* Estados visuales de stock en tabla de lotes y catálogo */
 .stock-disponible {
   background: #e8f5ee;
   border-color: #b7e4c7;
   color: #166534;
+}
+
+.stock-critico {
+  background: #fef3c7;
+  border-color: #fde68a;
+  color: #92400e;
 }
 
 .stock-agotado {
@@ -1601,4 +1607,33 @@
   margin-left: 6px;
   color: #718078;
   font-size: 11px;
+}
+
+/* ==========================================================================
+   MÓDULO DE PREPARACIÓN DE VENTA Y DESPACHO FEFO (US-1, US-2, US-3, US-4)
+   ========================================================================== */
+.fefo-lote-item {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  padding: 0.125rem 0;
+}
+
+.boton-retirar {
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.15s ease-in-out;
+}
+
+.boton-retirar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .tabla-detalles table {
+    min-width: 680px;
+  }
 }

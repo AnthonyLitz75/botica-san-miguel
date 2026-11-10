@@ -28,16 +28,21 @@ public class MedicamentoRepositorio {
 
     public List<Medicamento> buscarPorEstado(String texto, boolean activo) {
         String sql = """
-                SELECT id_medicamento, codigo, nombre, concentracion,
-                       presentacion, unidad_control, precio_venta,
-                       stock_minimo, activo
-                FROM medicamento
-                WHERE activo = ?
+                SELECT m.id_medicamento, m.codigo, m.nombre, m.concentracion,
+                       m.presentacion, m.unidad_control, m.precio_venta,
+                       m.stock_minimo, m.activo,
+                       COALESCE(SUM(CASE WHEN l.fecha_vencimiento >= CURRENT_DATE THEN l.stock_actual ELSE 0 END), 0)::INTEGER AS stock_actual
+                FROM medicamento m
+                LEFT JOIN lote l ON l.id_medicamento = m.id_medicamento
+                WHERE m.activo = ?
                 AND (
-                    POSITION(LOWER(?) IN LOWER(nombre)) > 0
-                    OR POSITION(LOWER(?) IN LOWER(codigo)) > 0
+                    POSITION(LOWER(?) IN LOWER(m.nombre)) > 0
+                    OR POSITION(LOWER(?) IN LOWER(m.codigo)) > 0
                 )
-                ORDER BY nombre, id_medicamento
+                GROUP BY m.id_medicamento, m.codigo, m.nombre, m.concentracion,
+                         m.presentacion, m.unidad_control, m.precio_venta,
+                         m.stock_minimo, m.activo
+                ORDER BY m.codigo, m.id_medicamento
                 """;
 
         return jdbcTemplate.query(sql, (fila, numeroFila) -> new Medicamento(
@@ -49,7 +54,8 @@ public class MedicamentoRepositorio {
                 fila.getString("unidad_control"),
                 fila.getBigDecimal("precio_venta"),
                 fila.getInt("stock_minimo"),
-                fila.getBoolean("activo")), activo, texto, texto);
+                fila.getBoolean("activo"),
+                fila.getInt("stock_actual")), activo, texto, texto);
     }
 
     public Integer guardar(MedicamentoFormulario medicamentoFormulario) {
@@ -73,11 +79,16 @@ public class MedicamentoRepositorio {
 
     public Optional<Medicamento> buscarPorId(Integer id) {
         String sql = """
-                SELECT id_medicamento, codigo, nombre, concentracion,
-                       presentacion, unidad_control, precio_venta,
-                       stock_minimo, activo
-                FROM medicamento
-                WHERE id_medicamento = ?
+                SELECT m.id_medicamento, m.codigo, m.nombre, m.concentracion,
+                       m.presentacion, m.unidad_control, m.precio_venta,
+                       m.stock_minimo, m.activo,
+                       COALESCE(SUM(CASE WHEN l.fecha_vencimiento >= CURRENT_DATE THEN l.stock_actual ELSE 0 END), 0)::INTEGER AS stock_actual
+                FROM medicamento m
+                LEFT JOIN lote l ON l.id_medicamento = m.id_medicamento
+                WHERE m.id_medicamento = ?
+                GROUP BY m.id_medicamento, m.codigo, m.nombre, m.concentracion,
+                         m.presentacion, m.unidad_control, m.precio_venta,
+                         m.stock_minimo, m.activo
                 """;
 
         List<Medicamento> resultados = jdbcTemplate.query(
@@ -91,7 +102,8 @@ public class MedicamentoRepositorio {
                         fila.getString("unidad_control"),
                         fila.getBigDecimal("precio_venta"),
                         fila.getInt("stock_minimo"),
-                        fila.getBoolean("activo")),
+                        fila.getBoolean("activo"),
+                        fila.getInt("stock_actual")),
                 id);
 
         return resultados.stream().findFirst();
@@ -175,7 +187,7 @@ public class MedicamentoRepositorio {
                 LEFT JOIN existencias e ON e.id_medicamento = m.id_medicamento
                 LEFT JOIN pendientes p ON p.id_medicamento = m.id_medicamento
                 WHERE m.activo = TRUE
-                ORDER BY m.nombre, m.id_medicamento
+                ORDER BY m.codigo, m.id_medicamento
                 """;
 
         return jdbcTemplate.query(sql, (fila, numeroFila) -> new ResumenStockInventario(

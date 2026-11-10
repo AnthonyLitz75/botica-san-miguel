@@ -76,6 +76,7 @@
                                 <th scope="col">Unidad</th>
                                 <th scope="col" class="numero">Precio (S/)</th>
                                 <th scope="col" class="numero">Stock mín.</th>
+                                <th scope="col" class="numero">Stock actual</th>
                                 <th scope="col">Inventario</th>
                                 <th scope="col" th:if="${esAdministrador}">Acciones</th>
                             </tr>
@@ -100,6 +101,13 @@
                                 </td>
                                 <td class="numero">
                                     <span class="stock-minimo-badge" th:text="${medicamento.stockMinimo()}"></span>
+                                </td>
+                                <td class="numero">
+                                    <span class="stock-minimo-badge"
+                                        th:classappend="${medicamento.stockActual() == null or medicamento.stockActual() == 0 ? 'stock-agotado' : (medicamento.stockActual() <= medicamento.stockMinimo() ? 'stock-critico' : 'stock-disponible')}"
+                                        th:text="${medicamento.stockActual() != null ? medicamento.stockActual() : 0}"
+                                        th:title="${medicamento.stockActual() == null or medicamento.stockActual() == 0 ? 'Stock agotado' : (medicamento.stockActual() <= medicamento.stockMinimo() ? 'Stock crítico (en o bajo el mínimo)' : 'Stock disponible y vigente')}">
+                                    </span>
                                 </td>
                                 <td>
                                     <a class="enlace-lotes"

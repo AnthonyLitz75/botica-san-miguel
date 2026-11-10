@@ -52,7 +52,7 @@ Fue desarrollada como proyecto académico del curso **Algoritmos y Estructura de
 ### Ventas y clientes
 
 - **Clientes:** consulta, creación y edición.
-- **Preparación de venta:** armado de una venta en sesión con asignación automática de lotes por FEFO y opción de **deshacer** (disponible como API JSON).
+- **Preparación de venta:** armado de una venta en sesión con asignación automática de lotes por FEFO y opción de **deshacer** (pantalla web en `/ventas/nueva` y API JSON en `/ventas/preparacion`).
 
 ### Alertas
 
@@ -124,7 +124,7 @@ La conexión se define con variables de entorno:
 | :------------ | :-------------------------- | :----------------------------------------------- |
 | `DB_URL`      | URL JDBC de la base         | `jdbc:postgresql://localhost:5432/farmacia_aed`  |
 | `DB_USER`     | Usuario de PostgreSQL       | `postgres`                                       |
-| `DB_PASSWORD` | Contraseña del usuario      | Valor de desarrollo local; define siempre la tuya |
+| `DB_PASSWORD` | Contraseña del usuario (obligatoria) | *(Sin valor por defecto; debe definirse siempre)* |
 | `PORT`        | Puerto del servidor         | `8080`                                           |
 
 <details>
@@ -270,7 +270,6 @@ docker run -p 8080:8080 \
 En desarrollo. Pendiente según el código actual:
 
 - Confirmar la venta: la preparación de venta aún no se guarda en las tablas `venta` y `detalle_venta`.
-- Pantalla web para la preparación de venta; por ahora solo existe la API.
 - Ampliar la colección de Postman a clientes y alertas.
 
 ## Estructura del proyecto
@@ -289,7 +288,7 @@ botica-san-miguel/
 │   │   │   └── dto/           # Formularios y objetos de transferencia
 │   │   └── resources/
 │   │       ├── templates/     # Vistas Thymeleaf por módulo
-│   │       ├── static/        # CSS (propio y Tailwind generado), JS, imágenes e iconos
+│   │       ├── static/        # CSS (propio y Tailwind generado), JS (preparacion-venta.js), imágenes e iconos
 │   │       └── application.properties
 │   └── test/java/             # Pruebas unitarias, de controladores y de persistencia
 ├── scripts/                   # Scripts SQL de tablas y datos de demostración

@@ -67,7 +67,7 @@ public class SeguridadConfiguracion {
 
                 http
                                 .authorizeHttpRequests(autorizacion -> autorizacion
-                                                .requestMatchers("/css/**", "/images/**", "/error").permitAll()
+                                                .requestMatchers("/css/**", "/js/**", "/images/**", "/error").permitAll()
 
                                                 .requestMatchers(
                                                                 HttpMethod.GET,
@@ -139,7 +139,10 @@ public class SeguridadConfiguracion {
                                                 .requestMatchers("/ordenes-compra", "/ordenes-compra/**")
                                                 .denyAll()
 
-                                                .requestMatchers(HttpMethod.GET, "/ventas/preparacion")
+                                                .requestMatchers(
+                                                                HttpMethod.GET,
+                                                                "/ventas/nueva",
+                                                                "/ventas/preparacion")
                                                 .hasAnyRole("ADMINISTRADOR", "VENDEDOR")
                                                 .requestMatchers(HttpMethod.POST, "/ventas/preparacion", "/ventas/preparacion/deshacer")
                                                 .hasAnyRole("ADMINISTRADOR", "VENDEDOR")

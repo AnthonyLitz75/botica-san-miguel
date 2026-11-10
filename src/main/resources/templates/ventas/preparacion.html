@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <title>Preparación de venta | Botica San Miguel</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    <link rel="stylesheet" th:href="@{/css/inventario.css}">
+    <link rel="stylesheet" th:href="@{/css/tailwind.css}">
+</head>
+
+<body class="pagina-inventario">
+    <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
+    <aside th:replace="~{fragmentos/navegacion :: lateral('Ventas')}"></aside>
+    <div class="inventario-area">
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Ventas', 'Ventas')}"></header>
+        <main id="contenido" class="inventario-contenido">
+            <div class="inventario-titulo">
+                <div>
+                    <p class="seccion-etiqueta">VENTAS / MOSTRADOR</p>
+                    <h1>Preparación de venta</h1>
+                </div>
+            </div>
+
+            <div class="aviso-operacion aviso-error" th:if="${#lists.isEmpty(medicamentos)}" role="alert">
+                <span class="icono icono-x" aria-hidden="true"></span>
+                <div>
+                    <p>No hay medicamentos activos disponibles para la venta.</p>
+                </div>
+            </div>
+
+            <section class="card mb-6 p-5 bg-white rounded-xl shadow-sm border border-slate-200"
+                th:unless="${#lists.isEmpty(medicamentos)}">
+                <h2 class="text-sm font-bold uppercase tracking-wider text-slate-700 mb-3 flex items-center gap-2">
+                    <span class="icono icono-plus text-emerald-600" aria-hidden="true"></span>
+                    <span>Agregar medicamento a la venta</span>
+                </h2>
+                <form id="formulario-agregar" class="proveedor-formulario" onsubmit="return false;">
+                    <fieldset>
+                        <legend class="sr-only">Selección de medicamento y cantidad</legend>
+                        <div class="proveedor-campos grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                            <div class="md:col-span-8">
+                                <label for="select-medicamento" class="block text-xs font-semibold text-slate-700 mb-1">
+                                    Medicamento <span class="text-red-500">*</span>
+                                </label>
+                                <select id="select-medicamento" name="idMedicamento" required class="w-full">
+                                    <option value="" disabled selected>-- Seleccione un medicamento --</option>
+                                    <option th:each="m : ${medicamentos}" th:value="${m.idMedicamento()}"
+                                        th:text="${m.codigo() + ' — ' + m.nombre() + ' (S/ ' + #numbers.formatDecimal(m.precioVenta(), 1, 'POINT', 2, 'POINT') + ')'}">
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="input-cantidad" class="block text-xs font-semibold text-slate-700 mb-1">
+                                    Cantidad <span class="text-red-500">*</span>
+                                </label>
+                                <input type="number" id="input-cantidad" name="cantidad" min="1" step="1" value="1"
+                                    required class="w-full">
+                            </div>
+                            <div class="md:col-span-2">
+                                <button type="submit" id="boton-agregar"
+                                    class="inventario-boton boton-principal w-full justify-center">
+                                    <span class="icono icono-plus" aria-hidden="true"></span>
+                                    <span>Agregar</span>
+                                </button>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </section>
+            <!-- Zona de Alertas de Negocio (role="alert") -->
+            <div id="zona-alertas" role="alert" class="aviso-operacion aviso-error hidden mb-4" aria-live="polite">
+                <span class="icono icono-x" aria-hidden="true"></span>
+                <div id="texto-alerta"></div>
+            </div>
+
+            <!-- Contenedor de la Venta en Preparación (US-1, US-3, US-4) -->
+            <section class="card p-5 bg-white rounded-xl shadow-sm border border-slate-200"
+                aria-labelledby="titulo-venta">
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-4 pb-3 border-b border-slate-100">
+                    <div>
+                        <h2 id="titulo-venta"
+                            class="text-sm font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                            <span class="icono icono-clipboard-list text-emerald-600" aria-hidden="true"></span>
+                            <span>Detalle de la venta en curso</span>
+                        </h2>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <button id="boton-deshacer" type="button" disabled
+                            class="inventario-boton boton-secundario text-xs py-1.5 px-3 transition-all duration-150 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
+                            title="Deshacer la última acción realizada (Pila LIFO)">
+                            <span class="icono icono-arrow-left" aria-hidden="true"></span>
+                            <span>Deshacer</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Estado Vacío (CA-1.1) -->
+                <div id="estado-vacio" class="inventario-vacio py-8 text-center">
+                    <span class="icono icono-package mx-auto text-slate-400 mb-2" aria-hidden="true"></span>
+                    <p class="text-sm font-medium text-slate-600">No hay productos en la venta.</p>
+                    <p class="text-xs text-slate-400 mt-1">Selecciona un medicamento y haz clic en "Agregar" para
+                        iniciar la preparación.</p>
+                </div>
+
+                <!-- Contenedor de Tabla de Líneas -->
+                <div id="contenedor-tabla" class="hidden">
+                    <div class="tabla-contenedor inventario-tabla tabla-detalles overflow-x-auto">
+                        <table id="tabla-lineas" class="w-full text-left border-collapse">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Código</th>
+                                    <th scope="col">Medicamento</th>
+                                    <th scope="col" class="text-center">Cantidad</th>
+                                    <th scope="col" class="text-right">P. Unitario</th>
+                                    <th scope="col" class="text-right">Importe</th>
+                                    <th scope="col">Lotes asignados (FEFO)</th>
+                                    <th scope="col" class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cuerpo-lineas">
+                                <!-- Filas generadas dinámicamente por JavaScript sin datos fijos -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Resumen y Total -->
+                    <div class="mt-4 pt-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-4">
+                        <span class="text-xs text-slate-500">
+                            * Los lotes son asignados automáticamente bajo la política FEFO según su fecha de
+                            vencimiento más próxima.
+                        </span>
+                        <div class="flex items-center gap-3 bg-slate-50 px-4 py-2.5 rounded-lg border border-slate-200">
+                            <span class="text-sm font-semibold text-slate-600">Total a pagar:</span>
+                            <span id="total-venta" class="text-lg font-bold text-emerald-700">S/ 0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script th:src="@{/js/preparacion-venta.js}"></script>
+</body>
+
+</html>
