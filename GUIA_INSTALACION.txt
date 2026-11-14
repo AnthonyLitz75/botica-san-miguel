@@ -1,18 +1,18 @@
 BOTICA SAN MIGUEL - GUIA DE INSTALACION Y DEMOSTRACION
 ===================================================
 Dirigida a Windows y PowerShell. Proyecto academico en desarrollo.
-Los scripts SQL ejecutables estan en la carpeta scripts/ del proyecto.
-No ejecuta nada automaticamente. No contiene credenciales reales de PostgreSQL.
+El esquema de la base lo crea Flyway al iniciar la aplicacion, con las
+migraciones de src/main/resources/db/migration. No hay que ejecutar SQL a mano. No contiene credenciales reales de PostgreSQL.
 
 IMPORTANTE
 ----------
 - Use una instalacion local de demostracion, nunca una base con datos reales.
-- Los scripts NO son una copia de la base del autor: crean tablas y datos ficticios.
-- NO los ejecute en la farmacia_aed que ya usa el autor y tiene avances guardados.
+- Las migraciones NO son una copia de la base del autor: crean tablas y datos ficticios.
+- NO inicie la aplicacion contra la farmacia_aed que ya usa el autor y tiene avances.
 - Las cuentas de la aplicacion son PUBLICAS y solo para pruebas locales.
 - No exponga este entorno a internet, ni reutilice las claves de demostracion.
-- Los scripts no usan DROP, DELETE ni TRUNCATE. No sustituyen tablas existentes.
-- El primer script exige que no existan las tablas. El segundo exige tablas vacias.
+- Las migraciones no usan DROP, DELETE ni TRUNCATE. No sustituyen tablas existentes.
+- Los datos demo solo se cargan con el perfil demo y solo si las tablas estan vacias.
 - Lea todas las instrucciones antes de ejecutar comandos.
 - Esta guia no publica el sitio en internet. Cada companero lo ejecuta en su PC.
 
@@ -76,29 +76,25 @@ Si farmacia_aed ya existe con datos, NO la use para esta instalacion:
 - En el paso 5 configure SPRING_DATASOURCE_URL con ese nombre.
 - No borre su base anterior.
 
-4. EJECUTAR LOS SCRIPTS SQL
----------------------------
-Seleccione la base NUEVA, abra Query Tool y compruebe:
-    SELECT current_database();
-El resultado debe ser exactamente el nombre de esa base nueva.
+4. ESQUEMA Y DATOS DE DEMOSTRACION (FLYWAY)
+-------------------------------------------
+No ejecute SQL a mano. Al iniciar la aplicacion (paso 6), Flyway:
+A. Crea la tabla flyway_schema_history para registrar las migraciones.
+B. Aplica en orden las migraciones de src/main/resources/db/migration
+   (V1__esquema_inicial.sql crea las 11 tablas; V2__, V3__... son cambios
+   posteriores). Cada migracion corre en su propia transaccion: si una falla,
+   se revierte y la aplicacion no arranca.
+C. Solo con el perfil demo, carga src/main/resources/db/demo/R__datos_demo.sql.
+   Si alguna tabla ya tiene datos, no inserta nada.
 
-Metodo recomendado:
-A. Abra scripts/01_creacion_tablas.sql mediante Open File en Query Tool.
-B. Ejecute TODO el archivo, sin dejar solo un fragmento seleccionado.
-C. Debe terminar sin errores y crear las 11 tablas.
-D. Abra scripts/02_datos_demo.sql y ejecute TODO el archivo.
-E. Debe terminar sin errores y mostrar las consultas de comprobacion.
+Base creada antes con los scripts manuales 01/02 (sin flyway_schema_history):
+Flyway la marca como version 1 y solo aplica las migraciones posteriores.
+No borra ni recrea tablas.
 
-Use siempre los archivos de la carpeta scripts/: esta guia no incluye copias
-del SQL. Si copia el contenido, copie el archivo completo, no fragmentos.
+Para comprobar lo aplicado, en Query Tool:
+    SELECT version, description, success FROM flyway_schema_history ORDER BY installed_rank;
 
-Cada script usa una transaccion. Si aparece un error:
-- No ejecute el siguiente script.
-- Ejecute ROLLBACK; en Query Tool para cerrar la transaccion fallida.
-- Revise el primer error, la base seleccionada y los permisos.
-- No quite las comprobaciones ni agregue DROP TABLE para forzar la instalacion.
-
-El segundo script instala pgcrypto para generar hashes BCrypt, compatibles
+Los datos demo instalan pgcrypto para generar hashes BCrypt, compatibles
 con el prefijo {bcrypt} de Spring Security. Use el propietario de la base o
 un usuario con permiso CREATE. Si falta la extension, revise la instalacion
 de PostgreSQL. Documentacion:
@@ -156,7 +152,9 @@ Luego compile:
 Si aparece BUILD SUCCESS, la compilacion termino correctamente.
 Esto no confirma por si solo la conexion ni el funcionamiento de la pagina.
 
-Inicie:
+Inicie con los datos de demostracion (primera vez en una base vacia):
+    .\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=demo"
+O sin datos demo:
     .\mvnw.cmd spring-boot:run
 
 Espere el mensaje Started FarmaciaAedApplication y el arranque en puerto 8080.
@@ -229,7 +227,7 @@ Para retirar las credenciales del entorno de esa terminal:
 La base conserva los datos. Para volver a iniciar:
 - Configure otra vez las variables del paso 5.
 - Ejecute spring-boot:run.
-- NO vuelva a ejecutar los scripts de instalacion.
+- Flyway solo aplica las migraciones nuevas; no repite las ya aplicadas.
 
 10. PROBLEMAS FRECUENTES
 -----------------------
@@ -242,14 +240,19 @@ La base conserva los datos. Para volver a iniciar:
 "password authentication failed":
     Revise DB_USER/DB_PASSWORD; configurelas en la terminal que inicia el servidor.
 "relation usuario does not exist":
-    Faltan tablas o ejecuto el SQL en otra base/esquema. Use el esquema public.
+    La aplicacion apunta a otra base/esquema. Use el esquema public y revise
+    flyway_schema_history en la base configurada.
 "function crypt/gen_salt does not exist":
-    Falta pgcrypto o no termino correctamente el segundo script.
-"relation ... already exists" / "Las tablas deben estar vacias":
-    Esta repitiendo instalacion o usando una base con datos. Ejecute ROLLBACK;
-    y revise. No elimine datos para continuar.
+    Falta pgcrypto o el usuario no tiene permiso CREATE en la base.
+"Validate failed" / "Migration checksum mismatch":
+    Se edito una migracion ya aplicada. No edite migraciones aplicadas: cree una
+    nueva V<n>__. No borre flyway_schema_history para forzar el arranque.
+"relation ... already exists" al migrar:
+    La base tiene tablas creadas fuera de Flyway que no coinciden con la version
+    marcada. Use una base vacia o consulte al autor. No elimine datos.
 No inicia sesion:
-    Confirme que el segundo script termino y use una cuenta del paso 7.
+    Confirme que inicio con el perfil demo sobre una base vacia y use una cuenta
+    del paso 7.
     PostgreSQL y la app deben apuntar a la misma base.
 403 Forbidden:
     Confirme el rol. No desactive Spring Security para evadir la restriccion.
@@ -268,11 +271,11 @@ Cambios HTML/CSS no aparecen:
 ------------------------------------------------
 Ejecute desde la carpeta farmacia-aed:
     git status
-    git add GUIA_INSTALACION.txt scripts/01_creacion_tablas.sql scripts/02_datos_demo.sql
+    git add GUIA_INSTALACION.txt src/main/resources/db
     git diff --cached --stat
-    git commit -m "Agregar guia de instalacion y scripts de demostracion"
+    git commit -m "Actualizar guia de instalacion y migraciones"
     git push
 
 Revise los archivos antes de confirmar. Estos comandos no suben una base viva.
 No publique DB_PASSWORD ni datos personales. El repositorio contiene codigo y
-scripts; no aloja la aplicacion. localhost siempre apunta a la PC del visitante.
+migraciones; no aloja la aplicacion. localhost siempre apunta a la PC del visitante.

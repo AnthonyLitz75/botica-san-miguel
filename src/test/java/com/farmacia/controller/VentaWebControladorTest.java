@@ -2,7 +2,13 @@ package com.farmacia.controller;
 
 import com.farmacia.config.SeguridadConfiguracion;
 import com.farmacia.model.Medicamento;
+import com.farmacia.model.ComprobanteVista;
+import com.farmacia.service.ClienteServicio;
 import com.farmacia.service.MedicamentoServicio;
+import com.farmacia.service.VentaServicio;
+import org.springframework.security.access.AccessDeniedException;
+import java.time.LocalDateTime;
+import java.util.Optional;
 import com.farmacia.service.UsuarioDetallesServicio;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,6 +45,12 @@ class VentaWebControladorTest {
 
     @MockitoBean
     private UsuarioDetallesServicio usuarios;
+
+    @MockitoBean
+    private ClienteServicio clienteServicio;
+
+    @MockitoBean
+    private VentaServicio ventaServicio;
 
     @Test
     @DisplayName("Escenario 1: Solicitud anónima a /ventas/nueva redirige a /login")
@@ -93,7 +105,10 @@ class VentaWebControladorTest {
                 .andExpect(content().string(containsString("cuerpo-lineas")))
                 .andExpect(content().string(containsString("total-venta")))
                 .andExpect(content().string(containsString("boton-deshacer")))
-                .andExpect(content().string(containsString("preparacion-venta.js")));
+                .andExpect(content().string(containsString("preparacion-venta.js")))
+                .andExpect(content().string(containsString("select-cliente")))
+                .andExpect(content().string(containsString("Público general")))
+                .andExpect(content().string(containsString("boton-confirmar")));
 
         verify(medicamentoServicio).listarActivos();
     }
@@ -111,5 +126,53 @@ class VentaWebControladorTest {
                 .andExpect(content().string(containsString("No hay medicamentos activos disponibles para la venta.")));
 
         verify(medicamentoServicio).listarActivos();
+    }
+
+    // ------------------------------------------------------------------ spec 003: comprobante
+
+    private ComprobanteVista comprobante() {
+        return new ComprobanteVista(12, "B001-00000012", LocalDateTime.of(2026, 11, 10, 9, 30), 7,
+                "Vendedor Demo", null, null,
+                List.of(new ComprobanteVista.Linea("MED-001", "Paracetamol", "LT-A", 4,
+                        new BigDecimal("8.50"), new BigDecimal("0.00"), new BigDecimal("34.00"))),
+                new BigDecimal("34.00"), new BigDecimal("0.00"), new BigDecimal("34.00"));
+    }
+
+    @Test
+    @DisplayName("CA-3.1: GET /ventas/{id} muestra el comprobante con número, líneas por lote y leyenda interna")
+    void comprobante_muestraLaVenta() throws Exception {
+        when(ventaServicio.obtenerComprobante(12, "vendedor1")).thenReturn(Optional.of(comprobante()));
+
+        mvc.perform(get("/ventas/12").with(user("vendedor1").roles("VENDEDOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("ventas/comprobante"))
+                .andExpect(content().string(containsString("B001-00000012")))
+                .andExpect(content().string(containsString("Público general")))
+                .andExpect(content().string(containsString("LT-A")))
+                .andExpect(content().string(containsString("Comprobante interno")))
+                .andExpect(content().string(containsString("S/ 34.00")))
+                .andExpect(content().string(containsString("window.print()")));
+    }
+
+    @Test
+    @DisplayName("CA-3.4: venta de otro vendedor → 403; inexistente → 404")
+    void comprobante_permisosY404() throws Exception {
+        when(ventaServicio.obtenerComprobante(12, "otro"))
+                .thenThrow(new AccessDeniedException("No puedes ver la venta de otro vendedor"));
+        when(ventaServicio.obtenerComprobante(99, "admin")).thenReturn(Optional.empty());
+
+        mvc.perform(get("/ventas/12").with(user("otro").roles("VENDEDOR")))
+                .andExpect(status().isForbidden());
+        mvc.perform(get("/ventas/99").with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("CA-3.4: Almacenero y Compras no acceden al comprobante")
+    void comprobante_rolesSinPermiso() throws Exception {
+        mvc.perform(get("/ventas/12").with(user("almacen1").roles("ALMACENERO")))
+                .andExpect(status().isForbidden());
+        mvc.perform(get("/ventas/12").with(user("compras1").roles("COMPRAS")))
+                .andExpect(status().isForbidden());
     }
 }

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<!--
+  Página de error común (spec 013). Solo muestra un mensaje en español: nunca la traza,
+  la excepción ni el mensaje interno (server.error.include-* = never).
+-->
+<body>
+    <main th:fragment="pagina(codigo, titulo, mensaje)" class="login-principal" id="contenido">
+        <section class="login-panel" aria-labelledby="titulo-error">
+            <div class="login-identidad">
+                <div class="login-emblema-caja shadow-sm">
+                    <img th:src="@{/images/logo-botica-san-miguel.png}" alt="Logo Botica San Miguel"
+                        class="login-emblema" width="76" height="76">
+                </div>
+                <p class="login-etiqueta tracking-widest text-xs font-semibold"
+                    th:text="|ERROR ${codigo}|">ERROR</p>
+                <h1 id="titulo-error" class="tracking-tight" th:text="${titulo}">Título</h1>
+            </div>
+            <p class="login-aviso login-aviso-error shadow-sm" role="alert">
+                <span class="icono icono-x" aria-hidden="true"></span>
+                <span th:text="${mensaje}">Mensaje</span>
+            </p>
+            <a class="inventario-boton boton-principal w-full justify-center" th:href="@{/}">
+                <span class="icono icono-arrow-left" aria-hidden="true"></span>
+                <span>Volver al inicio</span>
+            </a>
+        </section>
+    </main>
+</body>
+</html>

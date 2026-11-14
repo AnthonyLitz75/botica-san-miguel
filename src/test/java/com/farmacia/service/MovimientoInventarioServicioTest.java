@@ -33,6 +33,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 class MovimientoInventarioServicioTest {
+    /** Auditoría simulada (spec 014). */
+    private final AuditoriaServicio auditoria = org.mockito.Mockito.mock(AuditoriaServicio.class);
 
     private MovimientoInventarioRepositorio movimientoRepositorio;
     private LoteRepositorio loteRepositorio;
@@ -44,7 +46,7 @@ class MovimientoInventarioServicioTest {
         movimientoRepositorio = mock(MovimientoInventarioRepositorio.class);
         loteRepositorio = mock(LoteRepositorio.class);
         usuarioRepositorio = mock(UsuarioRepositorio.class);
-        servicio = new MovimientoInventarioServicio(movimientoRepositorio, loteRepositorio, usuarioRepositorio);
+        servicio = new MovimientoInventarioServicio(movimientoRepositorio, loteRepositorio, usuarioRepositorio, auditoria);
     }
 
     // -------------------------------------------------------------------------

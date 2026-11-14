@@ -1,5 +1,6 @@
 package com.farmacia.service;
 
+import com.farmacia.repository.AbstractRepositorioIntegrationTest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -8,13 +9,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.farmacia.dto.ClienteFormulario;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest
 @Transactional
-class ClienteServicioPersistenciaTest {
+class ClienteServicioPersistenciaTest extends AbstractRepositorioIntegrationTest {
     @Autowired private ClienteServicio servicio;
 
     @Test

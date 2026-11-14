@@ -20,10 +20,11 @@ public class MovimientoInventarioRepositorio {
 
         public List<MovimientoInventario> listar() {
                 String sql = """
-                                SELECT id_movimiento, id_usuario, id_proveedor,
-                                       id_venta, id_orden, tipo, fecha_hora, motivo
-                                FROM movimiento_inventario
-                                ORDER BY fecha_hora DESC, id_movimiento DESC
+                                SELECT m.id_movimiento, m.id_usuario, o.id_proveedor,
+                                       m.id_venta, m.id_orden, m.tipo, m.fecha_hora, m.motivo
+                                FROM movimiento_inventario m
+                                LEFT JOIN orden_compra o ON o.id_orden = m.id_orden
+                                ORDER BY m.fecha_hora DESC, m.id_movimiento DESC
                                 """;
 
                 return jdbcTemplate.query(
@@ -68,10 +69,11 @@ public class MovimientoInventarioRepositorio {
 
         public Optional<MovimientoInventario> buscarPorId(Integer idMovimiento) {
                 String sql = """
-                                SELECT id_movimiento, id_usuario, id_proveedor,
-                                       id_venta, id_orden, tipo, fecha_hora, motivo
-                                FROM movimiento_inventario
-                                WHERE id_movimiento = ?
+                                SELECT m.id_movimiento, m.id_usuario, o.id_proveedor,
+                                       m.id_venta, m.id_orden, m.tipo, m.fecha_hora, m.motivo
+                                FROM movimiento_inventario m
+                                LEFT JOIN orden_compra o ON o.id_orden = m.id_orden
+                                WHERE m.id_movimiento = ?
                                 """;
 
                 List<MovimientoInventario> movimientos = jdbcTemplate.query(
@@ -90,14 +92,17 @@ public class MovimientoInventarioRepositorio {
                 return movimientos.stream().findFirst();
         }
 
-        public Integer registrarEntrada(Integer idUsuario, Integer idProveedor,
-                        Integer idOrden, String motivo) {
+        /**
+         * Registra la cabecera de una recepción de compra. El proveedor no se guarda en el movimiento
+         * (3FN): se obtiene por {@code orden_compra}.
+         */
+        public Integer registrarEntrada(Integer idUsuario, Integer idOrden, String motivo) {
                 String sql = """
-                                INSERT INTO movimiento_inventario (id_usuario, id_proveedor, id_orden, tipo, motivo)
-                                VALUES (?, ?, ?, 'ENTRADA', ?)
+                                INSERT INTO movimiento_inventario (id_usuario, id_orden, tipo, motivo)
+                                VALUES (?, ?, 'ENTRADA', ?)
                                 RETURNING id_movimiento
                                 """;
-                return jdbcTemplate.queryForObject(sql, Integer.class, idUsuario, idProveedor, idOrden, motivo);
+                return jdbcTemplate.queryForObject(sql, Integer.class, idUsuario, idOrden, motivo);
         }
 
         public void registrarDetalleEntrada(Integer idMovimiento, Integer idLote,
@@ -125,6 +130,16 @@ public class MovimientoInventarioRepositorio {
                                 Integer.class,
                                 idUsuario,
                                 motivo);
+        }
+
+        /** Cabecera de la salida que genera una venta confirmada (exactamente una por venta: id_venta es UNIQUE). */
+        public Integer registrarSalidaPorVenta(Integer idUsuario, Integer idVenta, String motivo) {
+                String sql = """
+                                INSERT INTO movimiento_inventario (id_usuario, id_venta, tipo, motivo)
+                                VALUES (?, ?, 'SALIDA', ?)
+                                RETURNING id_movimiento
+                                """;
+                return jdbcTemplate.queryForObject(sql, Integer.class, idUsuario, idVenta, motivo);
         }
 
         public void registrarDetalle(

@@ -33,6 +33,17 @@ class PreparacionVentaControladorTest {
     }
 
     @Test
+    void delegaElDescuentoDeUnaLinea() {
+        var servicio = mock(PreparacionVentaServicio.class);
+        var auth = UsernamePasswordAuthenticationToken.authenticated("vendedor", null, List.of());
+        var vista = new PreparacionVentaVista(List.of(), BigDecimal.ZERO.setScale(2), false);
+        when(servicio.aplicarDescuento("vendedor", 8, new BigDecimal("5.00"))).thenReturn(vista);
+
+        assertSame(vista, new PreparacionVentaControlador(servicio).aplicarDescuento(auth, 8,
+                new com.farmacia.dto.DescuentoLineaFormulario(new BigDecimal("5.00"))));
+    }
+
+    @Test
     void traduceErroresDeReglaDeNegocioARespuesta400() {
         var respuesta = new PreparacionVentaControlador(mock(PreparacionVentaServicio.class))
                 .errorSolicitud(new IllegalArgumentException("Stock insuficiente"));

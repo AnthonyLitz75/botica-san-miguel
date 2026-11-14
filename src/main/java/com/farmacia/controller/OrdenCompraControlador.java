@@ -23,7 +23,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
-import java.time.LocalDate;
 
 @Controller
 @RequestMapping("/ordenes-compra")
@@ -137,7 +136,7 @@ public class OrdenCompraControlador {
                 model.addAttribute("lineas", lineas);
                 model.addAttribute("totalPendiente", lineas.stream()
                         .mapToInt(LineaRecepcionVista::cantidadPendiente).sum());
-                model.addAttribute("minFechaVencimiento", LocalDate.now().plusDays(1));
+                model.addAttribute("minFechaVencimiento", servicio.fechaMinimaVencimientoRecepcion());
                 model.addAttribute("formulario", new RecepcionOrdenFormulario(
                         lineas.stream().map(linea -> new DetalleRecepcionFormulario(
                                 linea.idDetalleOrden(), "", null, null)).toList(), ""));

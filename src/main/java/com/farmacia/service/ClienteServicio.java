@@ -7,13 +7,17 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ClienteServicio {
+    private static final String ENTIDAD = "CLIENTE";
     private final ClienteRepositorio repositorio;
+    private final AuditoriaServicio auditoria;
 
-    public ClienteServicio(ClienteRepositorio repositorio) {
+    public ClienteServicio(ClienteRepositorio repositorio, AuditoriaServicio auditoria) {
         this.repositorio = repositorio;
+        this.auditoria = auditoria;
     }
 
     public List<Cliente> listar(String texto) {
@@ -31,17 +35,23 @@ public class ClienteServicio {
         return repositorio.buscarPorDocumento(limpio.tipoDocumento(), limpio.numeroDocumento());
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public Integer guardar(ClienteFormulario formulario) {
         ClienteFormulario limpio = limpiarDatos(formulario);
         validarDocumento(limpio);
         if (repositorio.existeDocumento(limpio.tipoDocumento(), limpio.numeroDocumento(), null)) {
             throw new DuplicateKeyException("Ya existe un cliente con este documento");
         }
-        return repositorio.guardar(limpio);
+        Integer id = repositorio.guardar(limpio);
+        // Datos personales: la bitácora no guarda documento, nombre ni contacto del cliente.
+        auditoria.registrarCambio(AccionAuditoria.CREAR, ENTIDAD, id, "tipo_documento: " + limpio.tipoDocumento());
+        return id;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public boolean actualizar(Integer id, ClienteFormulario formulario) {
-        if (repositorio.buscarPorId(id).isEmpty()) {
+        var anterior = repositorio.buscarPorId(id);
+        if (anterior.isEmpty()) {
             return false;
         }
         ClienteFormulario limpio = limpiarDatos(formulario);
@@ -49,7 +59,20 @@ public class ClienteServicio {
         if (repositorio.existeDocumento(limpio.tipoDocumento(), limpio.numeroDocumento(), id)) {
             throw new DuplicateKeyException("Ya existe un cliente con este documento");
         }
-        return repositorio.actualizar(id, limpio) == 1;
+        boolean actualizado = repositorio.actualizar(id, limpio) == 1;
+        if (actualizado) {
+            var a = anterior.get();
+            // Datos personales: solo se registran los nombres de los campos modificados.
+            String detalle = new DiferenciaCampos()
+                    .campoSinValores("tipo_documento", a.tipoDocumento(), limpio.tipoDocumento())
+                    .campoSinValores("numero_documento", a.numeroDocumento(), limpio.numeroDocumento())
+                    .campoSinValores("nombre_completo", a.nombreCompleto(), limpio.nombreCompleto())
+                    .campoSinValores("telefono", a.telefono(), limpio.telefono())
+                    .campoSinValores("correo", a.correo(), limpio.correo())
+                    .describir();
+            auditoria.registrarCambio(AccionAuditoria.EDITAR, ENTIDAD, id, "Campos modificados: " + detalle);
+        }
+        return actualizado;
     }
 
     private ClienteFormulario limpiarDatos(ClienteFormulario formulario) {

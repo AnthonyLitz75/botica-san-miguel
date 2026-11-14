@@ -1637,3 +1637,130 @@
     min-width: 680px;
   }
 }
+
+/* ===== Comprobante interno de venta (spec 003, RF-13) ===== */
+.comprobante-ticket {
+  max-width: 34rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  color: #0f172a;
+}
+
+.comprobante-cabecera {
+  text-align: center;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px dashed #94a3b8;
+}
+
+.comprobante-empresa {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--color-primario);
+}
+
+.comprobante-numero {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin: 0.25rem 0;
+}
+
+.comprobante-leyenda,
+.comprobante-pie {
+  font-size: 0.75rem;
+  color: #475569;
+  text-align: center;
+}
+
+.comprobante-datos,
+.comprobante-totales {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0.75rem 0;
+  font-size: 0.875rem;
+}
+
+.comprobante-datos div,
+.comprobante-totales div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.comprobante-datos dt,
+.comprobante-totales dt {
+  color: #475569;
+}
+
+.comprobante-totales {
+  border-top: 1px dashed #94a3b8;
+  padding-top: 0.5rem;
+}
+
+.comprobante-total {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.comprobante-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.comprobante-tabla th,
+.comprobante-tabla td {
+  padding: 0.35rem 0.25rem;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+.comprobante-tabla th {
+  font-weight: 600;
+  color: #334155;
+}
+
+.comprobante-tabla .text-right {
+  text-align: right;
+}
+
+/* Impresión tipo ticket de 80 mm: solo el comprobante, sin menú ni botones. */
+@media print {
+  @page {
+    size: 80mm auto;
+    margin: 4mm;
+  }
+
+  body.pagina-inventario {
+    background: #fff;
+  }
+
+  .inventario-lateral,
+  .inventario-cabecera,
+  .no-imprimir,
+  .saltar-contenido {
+    display: none !important;
+  }
+
+  .inventario-area,
+  .inventario-contenido {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .comprobante-ticket {
+    max-width: none;
+    width: 72mm;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    font-size: 9pt;
+  }
+
+  .comprobante-tabla {
+    font-size: 8pt;
+  }
+}

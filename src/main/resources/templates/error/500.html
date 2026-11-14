@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragmentos/head :: recursos('Ocurrió un problema')}">
+    <title>Ocurrió un problema | Botica San Miguel</title>
+</head>
+
+<body class="pagina-login">
+    <main th:replace="~{fragmentos/error :: pagina('500', 'Ocurrió un problema', 'No pudimos completar la operación. Inténtalo de nuevo en unos minutos; si el problema continúa, avisa al administrador.')}"></main>
+</body>
+
+</html>

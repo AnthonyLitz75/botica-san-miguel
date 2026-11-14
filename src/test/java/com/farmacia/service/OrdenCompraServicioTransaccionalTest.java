@@ -210,7 +210,12 @@ class OrdenCompraServicioTransaccionalTest extends AbstractRepositorioIntegratio
 
         // 3. Verificar movimiento_inventario
         var movimiento = jdbcTemplate.queryForMap(
-                "SELECT * FROM movimiento_inventario WHERE id_orden = ?", idOrden);
+                """
+                SELECT m.*, o.id_proveedor
+                FROM movimiento_inventario m
+                JOIN orden_compra o ON o.id_orden = m.id_orden
+                WHERE m.id_orden = ?
+                """, idOrden);
         assertEquals("ENTRADA", movimiento.get("tipo"));
         assertEquals(usuarioAlmacen.idUsuario(), movimiento.get("id_usuario"));
         assertEquals(proveedor.idProveedor(), movimiento.get("id_proveedor"));

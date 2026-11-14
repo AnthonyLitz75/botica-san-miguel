@@ -4,8 +4,10 @@ import com.farmacia.estructuras.ColaPrioridadLotes;
 import com.farmacia.model.AsignacionLoteFefo;
 import com.farmacia.model.LoteDisponibleVista;
 import com.farmacia.repository.LoteRepositorio;
+import com.farmacia.service.politica.PoliticaSeleccionLotes;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,9 +18,16 @@ import java.util.Set;
 @Service
 public class LotePrioridadServicio {
     private final LoteRepositorio repositorio;
+    private final Clock clock;
+    private final PoliticaSeleccionLotes politica;
 
-    public LotePrioridadServicio(LoteRepositorio repositorio) {
+    /**
+     * @param politica regla de selección de lotes (Strategy); en producción, {@code PoliticaFefo}
+     */
+    public LotePrioridadServicio(LoteRepositorio repositorio, Clock clock, PoliticaSeleccionLotes politica) {
         this.repositorio = repositorio;
+        this.clock = clock;
+        this.politica = politica;
     }
 
     public List<AsignacionLoteFefo> planificarSalida(Integer idMedicamento, Integer cantidad) {
@@ -29,12 +38,10 @@ public class LotePrioridadServicio {
             throw new IllegalArgumentException("La cantidad debe ser mayor que cero");
         }
 
-        var cola = new ColaPrioridadLotes();
-        LocalDate hoy = LocalDate.now();
+        var cola = new ColaPrioridadLotes(politica.orden());
+        LocalDate hoy = LocalDate.now(clock);
         for (var lote : repositorio.listarDisponiblesPorMedicamento(idMedicamento)) {
-            if (idMedicamento.equals(lote.idMedicamento())
-                    && lote.fechaVencimiento() != null && !lote.fechaVencimiento().isBefore(hoy)
-                    && lote.stockActual() != null && lote.stockActual() > 0) {
+            if (idMedicamento.equals(lote.idMedicamento()) && politica.esElegible(lote, hoy)) {
                 cola.agregar(lote);
             }
         }
@@ -54,15 +61,14 @@ public class LotePrioridadServicio {
         return List.copyOf(asignaciones);
     }
 
-    /** Devuelve un identificador prioritario por medicamento usando la misma cola FEFO de las salidas. */
+    /** Devuelve el lote prioritario de cada medicamento usando la misma política y cola de las salidas. */
     public Set<Integer> identificarLotesPrioritarios(List<LoteDisponibleVista> disponibles) {
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = LocalDate.now(clock);
         var colasPorMedicamento = new HashMap<Integer, ColaPrioridadLotes>();
         for (var lote : disponibles) {
-            if (lote != null && lote.idMedicamento() != null && lote.idLote() != null
-                    && lote.fechaVencimiento() != null && !lote.fechaVencimiento().isBefore(hoy)
-                    && lote.stockActual() != null && lote.stockActual() > 0) {
-                colasPorMedicamento.computeIfAbsent(lote.idMedicamento(), ignorado -> new ColaPrioridadLotes())
+            if (lote != null && lote.idMedicamento() != null && politica.esElegible(lote, hoy)) {
+                colasPorMedicamento.computeIfAbsent(lote.idMedicamento(),
+                                ignorado -> new ColaPrioridadLotes(politica.orden()))
                         .agregar(lote);
             }
         }

@@ -21,6 +21,8 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 class OrdenCompraServicioRecepcionTest {
+    /** Auditoría simulada (spec 014). */
+    private final AuditoriaServicio auditoria = org.mockito.Mockito.mock(AuditoriaServicio.class);
     private OrdenCompraRepositorio ordenes;
     private DetalleOrdenCompraRepositorio detalles;
     private UsuarioRepositorio usuarios;
@@ -40,13 +42,13 @@ class OrdenCompraServicioRecepcionTest {
         lotes = mock(LoteRepositorio.class);
         movimientos = mock(MovimientoInventarioRepositorio.class);
         servicio = new OrdenCompraServicio(ordenes, detalles, usuarios, proveedores, medicamentos,
-                lotes, movimientos);
+                lotes, movimientos, java.time.Clock.systemDefaultZone(), auditoria);
     }
 
     @Test
     void registraRecepcionParcialYActualizaEstado() {
         prepararOrden("PENDIENTE", 20, 0);
-        when(movimientos.registrarEntrada(7, 3, 9, "Recepción de compra")).thenReturn(31);
+        when(movimientos.registrarEntrada(7, 9, "Recepción de compra")).thenReturn(31);
         when(ordenes.actualizarEstado(eq(9), anyString())).thenReturn(1);
         when(lotes.registrarOIncrementar(12, "L-2026", LocalDate.now().plusMonths(12), 8)).thenReturn(55);
 
@@ -59,7 +61,7 @@ class OrdenCompraServicioRecepcionTest {
     @Test
     void completaOrdenCuandoSeRecibeElSaldo() {
         prepararOrden("PARCIALMENTE_RECIBIDA", 20, 12);
-        when(movimientos.registrarEntrada(7, 3, 9, "Recepción de compra")).thenReturn(31);
+        when(movimientos.registrarEntrada(7, 9, "Recepción de compra")).thenReturn(31);
         when(lotes.registrarOIncrementar(12, "L-2026", LocalDate.now().plusMonths(12), 8)).thenReturn(55);
         when(ordenes.actualizarEstado(9, "RECIBIDA")).thenReturn(1);
 
@@ -112,6 +114,20 @@ class OrdenCompraServicioRecepcionTest {
         when(usuarios.buscarPorNombreUsuario("compras")).thenReturn(Optional.of(usuario("COMPRAS")));
         assertThrows(IllegalArgumentException.class, () -> servicio.cancelarOrden(9, "compras"));
         verify(ordenes, never()).actualizarEstado(anyInt(), anyString());
+    }
+
+    @Test
+    void elRelojInyectadoDefineElVencimientoMinimoDeUnaRecepcion() {
+        var reloj = java.time.Clock.fixed(java.time.Instant.parse("2026-11-10T15:00:00Z"), java.time.ZoneId.of("UTC"));
+        var conReloj = new OrdenCompraServicio(ordenes, detalles, usuarios, proveedores, medicamentos,
+                lotes, movimientos, reloj, auditoria);
+        prepararOrden("PENDIENTE", 20, 0);
+
+        assertEquals(LocalDate.of(2026, 11, 11), conReloj.fechaMinimaVencimientoRecepcion());
+        var venceHoy = new RecepcionOrdenFormulario(List.of(new DetalleRecepcionFormulario(
+                101, "L-2026", LocalDate.of(2026, 11, 10), 2)), null);
+        assertThrows(IllegalArgumentException.class, () -> conReloj.registrarRecepcion(9, "almacen", venceHoy));
+        verify(movimientos, never()).registrarEntrada(anyInt(), anyInt(), anyString());
     }
 
     private RecepcionOrdenFormulario formulario(int cantidad) {

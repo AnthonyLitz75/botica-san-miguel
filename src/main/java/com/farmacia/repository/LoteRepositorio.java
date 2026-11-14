@@ -63,6 +63,25 @@ public class LoteRepositorio {
                 return lotes.stream().findFirst();
         }
 
+        /**
+         * Descuento atómico para ventas: además del stock exige que el lote siga vigente en {@code hoy}.
+         * Devuelve las filas afectadas (1 si se descontó; 0 si no alcanzó el stock o el lote venció).
+         */
+        public int descontarStockVigente(Integer idLote, Integer cantidad, java.time.LocalDate hoy) {
+                if (cantidad == null || cantidad <= 0) {
+                        throw new IllegalArgumentException(
+                                        "La cantidad debe ser mayor que cero");
+                }
+                String sql = """
+                                UPDATE lote
+                                SET stock_actual = stock_actual - ?
+                                WHERE id_lote = ?
+                                  AND stock_actual >= ?
+                                  AND fecha_vencimiento >= ?
+                                """;
+                return jdbcTemplate.update(sql, cantidad, idLote, cantidad, hoy);
+        }
+
         public int descontarStock(Integer idLote, Integer cantidad) {
                 if (cantidad == null || cantidad <= 0) {
                         throw new IllegalArgumentException(

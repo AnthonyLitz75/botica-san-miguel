@@ -24,6 +24,8 @@ import static org.mockito.Mockito.*;
 
 @DisplayName("Pruebas Unitarias de OrdenCompraServicio")
 class OrdenCompraServicioTest {
+    /** Auditoría simulada (spec 014). */
+    private final AuditoriaServicio auditoria = org.mockito.Mockito.mock(AuditoriaServicio.class);
 
     private OrdenCompraRepositorio ordenRepositorio;
     private DetalleOrdenCompraRepositorio detalleRepositorio;
@@ -52,7 +54,9 @@ class OrdenCompraServicioTest {
                 proveedorRepositorio,
                 medicamentoRepositorio,
                 loteRepositorio,
-                movimientoRepositorio
+                movimientoRepositorio,
+                java.time.Clock.systemDefaultZone(),
+                auditoria
         );
     }
 

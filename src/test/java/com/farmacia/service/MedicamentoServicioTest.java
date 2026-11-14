@@ -34,6 +34,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Pruebas unitarias de MedicamentoServicio")
 class MedicamentoServicioTest {
+    /** Auditoría simulada (spec 014). */
+    private final AuditoriaServicio auditoria = org.mockito.Mockito.mock(AuditoriaServicio.class);
 
     @Mock
     private MedicamentoRepositorio repositorio;
@@ -42,7 +44,7 @@ class MedicamentoServicioTest {
 
     @BeforeEach
     void setUp() {
-        servicio = new MedicamentoServicio(repositorio);
+        servicio = new MedicamentoServicio(repositorio, auditoria);
     }
 
     private Medicamento crearMedicamento(Integer id, String codigo, String nombre,
@@ -286,6 +288,10 @@ class MedicamentoServicioTest {
             assertEquals(new BigDecimal("35.00"), enviado.precioVenta());
             assertEquals(10, enviado.stockMinimo());
 
+            // Spec 014: lee el registro anterior para describir los cambios en la auditoría
+
+            verify(repositorio).buscarPorId(org.mockito.ArgumentMatchers.any());
+
             verifyNoMoreInteractions(repositorio);
         }
 
@@ -311,6 +317,8 @@ class MedicamentoServicioTest {
             // Entonces
             assertFalse(resultado);
             verify(repositorio, times(1)).actualizar(eq(idInexistente), any(MedicamentoFormulario.class));
+            // Spec 014: lee el registro anterior para describir los cambios en la auditoría
+            verify(repositorio).buscarPorId(org.mockito.ArgumentMatchers.any());
             verifyNoMoreInteractions(repositorio);
         }
 
@@ -344,6 +352,10 @@ class MedicamentoServicioTest {
             assertNull(enviado.concentracion());
             assertEquals("FRASCO", enviado.presentacion());
             assertEquals("FRASCO", enviado.unidadControl());
+
+            // Spec 014: lee el registro anterior para describir los cambios en la auditoría
+
+            verify(repositorio).buscarPorId(org.mockito.ArgumentMatchers.any());
 
             verifyNoMoreInteractions(repositorio);
         }

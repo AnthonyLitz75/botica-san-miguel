@@ -60,6 +60,16 @@ public class SeguridadConfiguracion {
                 return http.build();
         }
 
+        /**
+         * Publica AuthorizationDeniedEvent cuando una regla de rutas deniega el acceso; lo escucha
+         * AuditoriaSeguridadOyente (spec 014, CA-2.4).
+         */
+        @Bean
+        public org.springframework.security.authorization.AuthorizationEventPublisher publicadorEventosAutorizacion(
+                        org.springframework.context.ApplicationEventPublisher publicador) {
+                return new org.springframework.security.authorization.SpringAuthorizationEventPublisher(publicador);
+        }
+
         @Bean
         @Order(2)
         public SecurityFilterChain securityFilterChain(HttpSecurity http)
@@ -67,7 +77,11 @@ public class SeguridadConfiguracion {
 
                 http
                                 .authorizeHttpRequests(autorizacion -> autorizacion
-                                                .requestMatchers("/css/**", "/js/**", "/images/**", "/error").permitAll()
+                                                .requestMatchers("/css/**", "/js/**", "/images/**", "/error", "/favicon.ico").permitAll()
+
+                                                // Inicio: redirige a la pantalla principal (spec 013, CA-1.4)
+                                                .requestMatchers(HttpMethod.GET, "/")
+                                                .hasAnyRole("ADMINISTRADOR", "VENDEDOR", "ALMACENERO", "COMPRAS")
 
                                                 .requestMatchers(
                                                                 HttpMethod.GET,
@@ -148,8 +162,20 @@ public class SeguridadConfiguracion {
                                                 .hasAnyRole("ADMINISTRADOR", "VENDEDOR")
                                                 .requestMatchers(HttpMethod.DELETE, "/ventas/preparacion/{idMedicamento:[0-9]+}")
                                                 .hasAnyRole("ADMINISTRADOR", "VENDEDOR")
+                                                // Auditoría (spec 014): solo ADMINISTRADOR
+                                                .requestMatchers(HttpMethod.GET, "/auditoria", "/auditoria.csv")
+                                                .hasRole("ADMINISTRADOR")
 
-                                                .anyRequest().authenticated())
+                                                .requestMatchers(HttpMethod.PUT, "/ventas/preparacion/{idMedicamento:[0-9]+}/descuento")
+                                                .hasAnyRole("ADMINISTRADOR", "VENDEDOR")
+                                                .requestMatchers(HttpMethod.POST, "/ventas/confirmar")
+                                                .hasAnyRole("ADMINISTRADOR", "VENDEDOR")
+                                                .requestMatchers(HttpMethod.GET, "/ventas/{idVenta:[0-9]+}")
+                                                .hasAnyRole("ADMINISTRADOR", "VENDEDOR")
+
+                                                // Seguridad por defecto (spec 013): toda ruta no declarada se deniega.
+                                                // Una ruta nueva debe tener su regla aquí y su caso en MatrizRutasTest.
+                                                .anyRequest().denyAll())
                                 .formLogin(formulario -> formulario
                                                 .loginPage("/login")
                                                 .loginProcessingUrl("/login")

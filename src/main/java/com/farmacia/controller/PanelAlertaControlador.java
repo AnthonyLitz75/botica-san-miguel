@@ -20,6 +20,7 @@ public class PanelAlertaControlador {
     public String consultar(Model model, Authentication autenticacion) {
         model.addAttribute("panel", servicio.consultarAlertas());
         model.addAttribute("reposicion", servicio.necesidadesReposicion());
+        model.addAttribute("diasPorVencer", servicio.diasPorVencer());
         model.addAttribute("puedeCrearOrden", autenticacion.getAuthorities().stream()
                 .anyMatch(autoridad -> autoridad.getAuthority().equals("ROLE_ADMINISTRADOR")
                         || autoridad.getAuthority().equals("ROLE_COMPRAS")));

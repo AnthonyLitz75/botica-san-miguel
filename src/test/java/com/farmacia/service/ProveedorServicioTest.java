@@ -33,6 +33,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ProveedorServicioTest {
+    /** Auditoría simulada (spec 014). */
+    private final AuditoriaServicio auditoria = org.mockito.Mockito.mock(AuditoriaServicio.class);
 
     @Mock
     private ProveedorRepositorio repositorio;
@@ -41,7 +43,7 @@ class ProveedorServicioTest {
 
     @BeforeEach
     void setUp() {
-        servicio = new ProveedorServicio(repositorio);
+        servicio = new ProveedorServicio(repositorio, auditoria);
     }
 
     private Proveedor crearProveedor(Integer id, String ruc, String razonSocial, boolean activo) {

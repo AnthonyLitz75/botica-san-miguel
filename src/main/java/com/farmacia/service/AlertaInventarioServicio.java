@@ -9,21 +9,34 @@ import com.farmacia.repository.MedicamentoRepositorio;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AlertaInventarioServicio {
-    private static final long HORIZONTE_VENCIMIENTO_DIAS = 90;
-
     private final MedicamentoRepositorio medicamentoRepositorio;
     private final LoteRepositorio loteRepositorio;
     private final Clock clock;
+    private final int diasPorVencer;
 
+    /**
+     * @param diasPorVencer horizonte de la alerta "por vencer", configurable con
+     *                      {@code farmacia.alertas.dias-por-vencer} (por defecto 90 días)
+     */
     public AlertaInventarioServicio(MedicamentoRepositorio medicamentoRepositorio,
-            LoteRepositorio loteRepositorio, Clock clock) {
+            LoteRepositorio loteRepositorio, Clock clock,
+            @Value("${farmacia.alertas.dias-por-vencer:90}") int diasPorVencer) {
+        if (diasPorVencer <= 0) {
+            throw new IllegalArgumentException("farmacia.alertas.dias-por-vencer debe ser mayor que cero");
+        }
         this.medicamentoRepositorio = medicamentoRepositorio;
         this.loteRepositorio = loteRepositorio;
         this.clock = clock;
+        this.diasPorVencer = diasPorVencer;
+    }
+
+    public int diasPorVencer() {
+        return diasPorVencer;
     }
 
     public PanelAlertasVista consultarAlertas() {
@@ -33,7 +46,7 @@ public class AlertaInventarioServicio {
                 stock.stream().filter(alerta -> alerta.tipoAlerta().equals("AGOTADO")).toList(),
                 stock.stream().filter(alerta -> alerta.tipoAlerta().equals("STOCK_BAJO")).toList(),
                 loteRepositorio.listarVencidos(hoy),
-                loteRepositorio.listarPorVencer(hoy, hoy.plusDays(HORIZONTE_VENCIMIENTO_DIAS)));
+                loteRepositorio.listarPorVencer(hoy, hoy.plusDays(diasPorVencer)));
     }
 
     public List<AlertaStockVista> alertasStock() {
@@ -56,7 +69,7 @@ public class AlertaInventarioServicio {
 
     public List<AlertaVencimientoVista> listarPorVencer() {
         LocalDate hoy = LocalDate.now(clock);
-        return loteRepositorio.listarPorVencer(hoy, hoy.plusDays(HORIZONTE_VENCIMIENTO_DIAS));
+        return loteRepositorio.listarPorVencer(hoy, hoy.plusDays(diasPorVencer));
     }
 
     private AlertaStockVista crearAlertaStock(ResumenStockInventario resumen) {

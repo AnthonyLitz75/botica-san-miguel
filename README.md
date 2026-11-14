@@ -53,10 +53,22 @@ Fue desarrollada como proyecto académico del curso **Algoritmos y Estructura de
 
 - **Clientes:** consulta, creación y edición.
 - **Preparación de venta:** armado de una venta en sesión con asignación automática de lotes por FEFO y opción de **deshacer** (pantalla web en `/ventas/nueva` y API JSON en `/ventas/preparacion`).
+- **Descuentos por línea:** importe fijo en soles por línea (`0 ≤ descuento ≤ cantidad × precio`), editable en la tabla de la preparación (`PUT /ventas/preparacion/{idMedicamento}/descuento`) y reversible con **deshacer**. Al confirmar, el descuento de cada línea se reparte entre sus lotes en proporción a la cantidad (el último lote absorbe el redondeo) y el comprobante muestra subtotal, descuento y total. La regla de cálculo es una política intercambiable (`PoliticaDescuento`, patrón Strategy).
+- **Confirmación de venta:** `POST /ventas/confirmar` (cliente opcional, por defecto "Público general"). En una sola transacción vuelve a planificar FEFO contra la base, descuenta cada lote con un UPDATE condicional (stock suficiente y lote vigente) en orden ascendente de `id_lote`, y guarda la venta, su detalle por lote (precio congelado) y la salida de inventario. Si el stock cambió o un lote venció, se rechaza completa y la preparación se conserva.
+- **Comprobante interno:** `/ventas/{id}` con número correlativo `B001-00000001` (secuencia de PostgreSQL), una línea por lote y botón **Imprimir** con formato de ticket de 80 mm. El vendedor solo ve sus ventas; el administrador, todas.
 
 ### Alertas
 
-Panel de medicamentos **agotados** o con **stock bajo**, reposición sugerida (descontando lo pendiente de recibir), lotes **vencidos** y lotes **por vencer** en los próximos 90 días.
+Panel de medicamentos **agotados** o con **stock bajo**, reposición sugerida (descontando lo pendiente de recibir), lotes **vencidos** y lotes **por vencer** en los próximos 90 días (configurable con `DIAS_POR_VENCER`).
+
+### Auditoría
+
+Bitácora **de solo inserción** (`/auditoria`, solo ADMINISTRADOR) con filtros por fecha, usuario, acción, entidad y resultado, paginación y exportación CSV. Registra:
+
+- **Accesos:** inicios de sesión correctos y fallidos (con el usuario escrito, nunca la clave), cierres de sesión y accesos denegados por rol (método y ruta).
+- **Cambios de datos:** altas, ediciones (qué campo cambió, antes → después), activaciones y desactivaciones de medicamentos y proveedores; altas y ediciones de clientes (sin guardar sus datos personales); creación, recepción y cancelación de órdenes de compra; otras salidas y ventas confirmadas.
+
+Un trigger impide modificar o borrar eventos incluso con SQL directo. Los cambios de datos se registran **en la misma transacción** que la operación (si esta se revierte, el evento tampoco queda); los accesos, en una transacción propia (quedan aunque la operación falle).
 
 ### Control de acceso (RBAC)
 
@@ -72,6 +84,8 @@ Panel de medicamentos **agotados** o con **stock bajo**, reposición sugerida (d
 | Recibir órdenes de compra                |      Sí       |     Sí     |   No    |    No    |
 | Registrar salidas y consultar movimientos |      Sí       |     Sí     |   No    |    No    |
 | Preparación de venta                     |      Sí       |     No     |   No    |    Sí    |
+| Confirmar venta y ver comprobante        |   Sí (todas)  |     No     |   No    | Sí (las suyas) |
+| Consultar y exportar la auditoría        |      Sí       |     No     |   No    |    No    |
 
 ## Stack tecnológico
 
@@ -80,8 +94,8 @@ Panel de medicamentos **agotados** o con **stock bajo**, reposición sugerida (d
 | **Backend**         | Java 25, Spring Boot 4.1.2, Spring MVC, Spring JDBC, Bean Validation |
 | **Seguridad**       | Spring Security (formulario de acceso para la web y HTTP Basic para la API) |
 | **Vistas**          | Thymeleaf, HTML5, Tailwind CSS 3.4 (más CSS propio) y JavaScript sin frameworks de UI |
-| **Base de datos**   | PostgreSQL 18                                                       |
-| **Pruebas**         | JUnit 5, Spring Test (más de 50 pruebas)                            |
+| **Base de datos**   | PostgreSQL 18, migraciones con Flyway                               |
+| **Pruebas**         | JUnit 5, Spring Test, Testcontainers (376 pruebas)                  |
 | **Herramientas**    | Maven Wrapper, Node.js y npm (compilación de Tailwind), Docker (multi-stage), Postman |
 
 ## Inicio rápido
@@ -95,15 +109,25 @@ Panel de medicamentos **agotados** o con **stock bajo**, reposición sugerida (d
 
 ### 1. Base de datos
 
-Crea una base de datos **nueva** (por ejemplo, `farmacia_aed`) y ejecuta los scripts de la carpeta `scripts/` en este orden:
+Crea una base de datos **vacía** (por ejemplo, `farmacia_aed`). No hace falta ejecutar scripts a mano: el esquema lo crea y actualiza **Flyway** al iniciar la aplicación.
 
-| Script                    | Contenido                                                                                       |
-| :------------------------ | :---------------------------------------------------------------------------------------------- |
-| `01_creacion_tablas.sql`  | Estructura completa: 11 tablas, restricciones e índices. Exige que las tablas no existan.       |
-| `02_datos_demo.sql`       | Datos ficticios: 4 cuentas, 2 medicamentos, 2 proveedores, un lote, un movimiento y una orden. Exige tablas vacías. |
+| Ubicación (`src/main/resources/`)   | Contenido                                                                                       |
+| :---------------------------------- | :---------------------------------------------------------------------------------------------- |
+| `db/migration/V1__esquema_inicial.sql` | Estructura completa: 11 tablas, restricciones y claves. Se aplica siempre.                   |
+| `db/migration/V2__migracion_3fn.sql` | `movimiento_inventario` en 3FN (sin `id_proveedor`: el proveedor se obtiene por la orden), trigger de coherencia movimiento–detalle y 10 índices (`idx_*`, incluido el parcial `idx_lote_fefo`). |
+| `db/migration/V3__secuencia_comprobante.sql` | Secuencia del número de comprobante `B001-########`. |
+| `db/migration/V4__auditoria.sql` | Tabla `auditoria` de solo inserción (trigger que rechaza `UPDATE`/`DELETE`), acciones y resultados de lista cerrada e índices por fecha y usuario. |
+| `db/migration/V<n>__*.sql`          | Cambios posteriores del esquema, en orden de versión. Una migración aplicada nunca se edita.   |
+| `db/demo/R__datos_demo.sql`         | Datos ficticios: 4 cuentas, 2 medicamentos, 2 proveedores, un lote, un movimiento y una orden. **Solo con el perfil `demo`**; no inserta nada si la base ya tiene datos. |
+
+Para cargar también los datos de demostración:
+
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.profiles=demo
+```
 
 > [!IMPORTANT]
-> Los scripts no usan `DROP`, `DELETE` ni `TRUNCATE`. No los ejecutes sobre una base con datos reales. La guía paso a paso está en [`GUIA_INSTALACION.txt`](GUIA_INSTALACION.txt).
+> **Base creada antes con los scripts manuales:** al primer arranque, Flyway la marca como versión 1 (`baseline-on-migrate`) y solo le aplica las migraciones posteriores; no borra ni recrea tablas. Las migraciones aplicadas quedan registradas en la tabla `flyway_schema_history`. La guía paso a paso está en [`GUIA_INSTALACION.txt`](GUIA_INSTALACION.txt).
 
 ### 2. Dependencias de estilos
 
@@ -126,6 +150,7 @@ La conexión se define con variables de entorno:
 | `DB_USER`     | Usuario de PostgreSQL       | `postgres`                                       |
 | `DB_PASSWORD` | Contraseña del usuario (obligatoria) | *(Sin valor por defecto; debe definirse siempre)* |
 | `PORT`        | Puerto del servidor         | `8080`                                           |
+| `DIAS_POR_VENCER` | Horizonte de la alerta "por vencer" (propiedad `farmacia.alertas.dias-por-vencer`) | `90` |
 
 <details>
 <summary><b>Windows (PowerShell)</b></summary>
@@ -215,7 +240,7 @@ El curso se centra en estructuras de datos; estas son las que usa el sistema (pa
 | :------------------------------------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Lista simplemente enlazada** (implementación propia) | `ListaEnlazada`      | Líneas de la preparación de venta, que conservan su orden de ingreso. Permite agregar, buscar, reemplazar y eliminar por criterio.                      |
 | **Pila (LIFO)**                                    | `PilaDeshacer`       | Historial de instantáneas para deshacer cambios en la preparación de venta.                                                                             |
-| **Cola de prioridad**                              | `ColaPrioridadLotes` | Orden FEFO: primero el lote con vencimiento más cercano (desempata por ID). Se usa para planificar salidas e identificar el lote prioritario de cada medicamento. |
+| **Cola de prioridad**                              | `ColaPrioridadLotes` | Orden FEFO: primero el lote con vencimiento más cercano (desempata por ID). El criterio lo aporta la política `PoliticaFefo` (patrón Strategy); se usa para planificar salidas y ventas e identificar el lote prioritario de cada medicamento. |
 
 `PilaDeshacer` se apoya en `ArrayDeque` y `ColaPrioridadLotes` en `PriorityQueue`; `ListaEnlazada` está implementada con nodos propios.
 
@@ -236,7 +261,9 @@ Consulta [`API_POSTMAN.md`](API_POSTMAN.md) y la colección de la carpeta `POSTM
 ## Seguridad
 
 - **Contraseñas:** almacenadas con hash BCrypt (`DelegatingPasswordEncoder`).
-- **Autorización por rol:** cada ruta declara explícitamente los roles permitidos y las rutas no listadas de la API se deniegan por defecto.
+- **Autorización por rol y seguridad por defecto:** cada ruta declara explícitamente los roles permitidos; tanto en la web como en la API, **las rutas no declaradas se deniegan** (403). `MatrizRutasTest` recorre todas las rutas con los cuatro roles y sin sesión, de modo que un cambio accidental de permisos hace fallar las pruebas. Toda ruta nueva debe añadirse a `SeguridadConfiguracion` y a esa prueba.
+- **Errores sin detalles internos:** 403, 404 y 500 usan páginas propias (`templates/error/`) con un mensaje en español y un enlace al inicio; nunca muestran trazas, excepciones ni SQL (`server.error.include-*=never`). La API sigue respondiendo JSON `{ "mensaje": … }`.
+- **Sesión expirada:** la pantalla de venta detecta la sesión vencida (redirección al login, 401 o token CSRF rechazado) y muestra "Tu sesión expiró" con un enlace para volver a entrar, sin bloquear la pantalla.
 - **API sin estado:** sin sesión y con CSRF desactivado solo en `/api/**`; la web mantiene la protección habitual de Spring Security.
 - **Desactivación lógica:** los medicamentos y proveedores no se borran, para conservar el historial.
 - **Contenedor:** la imagen Docker se ejecuta con un usuario sin privilegios.
@@ -248,7 +275,7 @@ npm install   # solo la primera vez
 ./mvnw test
 ```
 
-Incluye pruebas unitarias de las estructuras de datos y de los servicios, y pruebas de controladores. Las pruebas de persistencia (`*PersistenciaTest`) usan `@SpringBootTest` y requieren una base PostgreSQL con los scripts de `scripts/` y las variables de entorno configuradas.
+Incluye pruebas unitarias de las estructuras de datos y de los servicios, y pruebas de controladores. Todas las pruebas de integración y persistencia usan Testcontainers (`postgres:18-alpine`): **requieren Docker en ejecución, pero no una base PostgreSQL local ni las variables `DB_*`**. Flyway crea el esquema en el contenedor con las mismas migraciones que la aplicación, así que las pruebas nunca modifican tu base de desarrollo.
 
 ## Despliegue con Docker
 
@@ -269,7 +296,7 @@ docker run -p 8080:8080 \
 
 En desarrollo. Pendiente según el código actual:
 
-- Confirmar la venta: la preparación de venta aún no se guarda en las tablas `venta` y `detalle_venta`.
+- Historial de ventas y kardex con filtros (spec 005), existencias iniciales (006), gestión de usuarios (007), reportes (008) y árbol de categorías (009).
 - Ampliar la colección de Postman a clientes y alertas.
 
 ## Estructura del proyecto
@@ -289,9 +316,11 @@ botica-san-miguel/
 │   │   └── resources/
 │   │       ├── templates/     # Vistas Thymeleaf por módulo
 │   │       ├── static/        # CSS (propio y Tailwind generado), JS (preparacion-venta.js), imágenes e iconos
-│   │       └── application.properties
+│   │       ├── db/migration/  # Migraciones Flyway del esquema (V1__, V2__, ...)
+│   │       ├── db/demo/       # Datos de demostración (perfil demo)
+│   │       ├── application.properties
+│   │       └── application-demo.properties
 │   └── test/java/             # Pruebas unitarias, de controladores y de persistencia
-├── scripts/                   # Scripts SQL de tablas y datos de demostración
 ├── POSTMAN/                   # Colección de Postman
 ├── API_POSTMAN.md             # Guía de la API de medicamentos
 ├── package.json               # Dependencias de Node y scripts de Tailwind (build:css, watch:css)

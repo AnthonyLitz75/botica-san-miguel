@@ -1,11 +1,11 @@
 package com.farmacia.service;
 
+import com.farmacia.repository.AbstractRepositorioIntegrationTest;
 import com.farmacia.dto.MedicamentoFormulario;
 import java.math.BigDecimal;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,9 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest
 @Transactional
-class MedicamentoServicioPersistenciaTest {
+class MedicamentoServicioPersistenciaTest extends AbstractRepositorioIntegrationTest {
 
     @Autowired
     private MedicamentoServicio servicio;

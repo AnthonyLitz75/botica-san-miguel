@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${'Comprobante ' + comprobante.numeroComprobante() + ' | Botica San Miguel'}">Comprobante | Botica
+        San Miguel</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    <link rel="stylesheet" th:href="@{/css/inventario.css}">
+    <link rel="stylesheet" th:href="@{/css/tailwind.css}">
+</head>
+
+<body class="pagina-inventario">
+    <a class="saltar-contenido no-imprimir" href="#contenido">Ir al contenido</a>
+    <aside th:replace="~{fragmentos/navegacion :: lateral('Ventas')}"></aside>
+    <div class="inventario-area">
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Ventas', 'Ventas')}"></header>
+        <main id="contenido" class="inventario-contenido">
+            <div class="inventario-titulo no-imprimir">
+                <div>
+                    <p class="seccion-etiqueta">VENTAS / COMPROBANTE</p>
+                    <h1>Venta confirmada</h1>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" id="boton-imprimir" class="inventario-boton boton-principal"
+                        onclick="window.print()">
+                        <span class="icono icono-clipboard-list" aria-hidden="true"></span>
+                        <span>Imprimir</span>
+                    </button>
+                    <a class="inventario-boton boton-secundario" th:href="@{/ventas/nueva}">
+                        <span class="icono icono-plus" aria-hidden="true"></span>
+                        <span>Nueva venta</span>
+                    </a>
+                </div>
+            </div>
+
+            <article id="comprobante" class="comprobante-ticket" aria-labelledby="titulo-comprobante">
+                <header class="comprobante-cabecera">
+                    <p class="comprobante-empresa">Botica San Miguel</p>
+                    <h2 id="titulo-comprobante" class="comprobante-numero" th:text="${comprobante.numeroComprobante()}">
+                        B001-00000001</h2>
+                    <p class="comprobante-leyenda">Comprobante interno — no válido como comprobante de pago
+                        electrónico</p>
+                </header>
+
+                <dl class="comprobante-datos">
+                    <div>
+                        <dt>Fecha</dt>
+                        <dd th:text="${#temporals.format(comprobante.fechaHora(), 'dd/MM/yyyy HH:mm')}">10/11/2026 09:00
+                        </dd>
+                    </div>
+                    <div>
+                        <dt>Vendedor</dt>
+                        <dd th:text="${comprobante.vendedor()}">Vendedor</dd>
+                    </div>
+                    <div>
+                        <dt>Cliente</dt>
+                        <dd>
+                            <span th:text="${comprobante.clienteVisible()}">Público general</span>
+                            <span th:if="${comprobante.documentoCliente() != null}"
+                                th:text="|(${comprobante.documentoCliente()})|">(DNI 12345678)</span>
+                        </dd>
+                    </div>
+                </dl>
+
+                <div class="tabla-contenedor overflow-x-auto">
+                    <table class="comprobante-tabla">
+                        <caption class="sr-only">Detalle de la venta por lote</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Medicamento</th>
+                                <th scope="col">Lote</th>
+                                <th scope="col" class="text-right">Cant.</th>
+                                <th scope="col" class="text-right">P. Unit.</th>
+                                <th scope="col" class="text-right">Desc.</th>
+                                <th scope="col" class="text-right">Importe</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="linea : ${comprobante.lineas()}">
+                                <td th:text="${linea.medicamento()}">Paracetamol</td>
+                                <td th:text="${linea.numeroLote()}">LT-A</td>
+                                <td class="text-right" th:text="${linea.cantidad()}">2</td>
+                                <td class="text-right"
+                                    th:text="${#numbers.formatDecimal(linea.precioUnitario(), 1, 'POINT', 2, 'POINT')}">
+                                    8.50</td>
+                                <td class="text-right"
+                                    th:text="${#numbers.formatDecimal(linea.descuentoImporte(), 1, 'POINT', 2, 'POINT')}">
+                                    0.00</td>
+                                <td class="text-right"
+                                    th:text="${#numbers.formatDecimal(linea.importe(), 1, 'POINT', 2, 'POINT')}">17.00
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <dl class="comprobante-totales">
+                    <div>
+                        <dt>Subtotal</dt>
+                        <dd th:text="|S/ ${#numbers.formatDecimal(comprobante.subtotal(), 1, 'POINT', 2, 'POINT')}|">S/
+                            17.00</dd>
+                    </div>
+                    <div>
+                        <dt>Descuento</dt>
+                        <dd
+                            th:text="|S/ ${#numbers.formatDecimal(comprobante.descuentoTotal(), 1, 'POINT', 2, 'POINT')}|">
+                            S/ 0.00</dd>
+                    </div>
+                    <div class="comprobante-total">
+                        <dt>Total</dt>
+                        <dd id="total-comprobante"
+                            th:text="|S/ ${#numbers.formatDecimal(comprobante.total(), 1, 'POINT', 2, 'POINT')}|">S/
+                            17.00</dd>
+                    </div>
+                </dl>
+                <p class="comprobante-pie">Gracias por su compra.</p>
+            </article>
+        </main>
+    </div>
+</body>
+
+</html>

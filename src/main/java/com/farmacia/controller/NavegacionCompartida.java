@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
                 OrdenCompraControlador.class, MovimientoInventarioControlador.class,
                 LoteControlador.class, SalidaInventarioControlador.class,
                 PanelAlertaControlador.class, ClienteWebControlador.class,
-                VentaWebControlador.class
+                VentaWebControlador.class, AuditoriaControlador.class
 })
 public class NavegacionCompartida {
         @ModelAttribute
@@ -46,6 +46,7 @@ public class NavegacionCompartida {
                                 || roles.contains("ROLE_ALMACENERO");
                 modelo.addAttribute("puedeConsultarMovimientos", puedeConsultarMovimientos);
                 modelo.addAttribute("puedeRegistrarSalida", puedeConsultarMovimientos);
+                modelo.addAttribute("puedeConsultarAuditoria", roles.contains("ROLE_ADMINISTRADOR"));
         }
 
 }

@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragmentos/head :: recursos('Acceso denegado')}">
+    <title>Acceso denegado | Botica San Miguel</title>
+</head>
+
+<body class="pagina-login">
+    <main th:replace="~{fragmentos/error :: pagina('403', 'Acceso denegado', 'No tienes permiso para esta acción con tu rol actual, o tu sesión expiró. Vuelve a iniciar sesión; si el problema continúa, consulta al administrador.')}"></main>
+</body>
+
+</html>

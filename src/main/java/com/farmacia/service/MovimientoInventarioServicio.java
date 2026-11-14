@@ -21,14 +21,18 @@ public class MovimientoInventarioServicio {
         private final LoteRepositorio loteRepositorio;
         private final UsuarioRepositorio usuarioRepositorio;
 
+        private final AuditoriaServicio auditoria;
+
         public MovimientoInventarioServicio(
                         MovimientoInventarioRepositorio repositorio,
                         LoteRepositorio loteRepositorio,
-                        UsuarioRepositorio usuarioRepositorio) {
+                        UsuarioRepositorio usuarioRepositorio,
+                        AuditoriaServicio auditoria) {
 
                 this.repositorio = repositorio;
                 this.loteRepositorio = loteRepositorio;
                 this.usuarioRepositorio = usuarioRepositorio;
+                this.auditoria = auditoria;
         }
 
         public List<MovimientoInventario> listar() {
@@ -89,6 +93,9 @@ public class MovimientoInventarioServicio {
                 repositorio.registrarDetalle(
                                 idMovimiento, idLote, formulario.cantidad());
 
+                auditoria.registrarCambio(AccionAuditoria.SALIDA, "LOTE", idLote,
+                                "movimiento: " + idMovimiento + "; cantidad: " + formulario.cantidad()
+                                                + "; motivo: " + formulario.motivo().strip());
                 return idMovimiento;
         }
 }

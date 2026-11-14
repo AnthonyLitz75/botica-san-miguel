@@ -47,7 +47,7 @@ class AlertaInventarioServicioTest {
 
     @BeforeEach
     void setUp() {
-        servicio = new AlertaInventarioServicio(medicamentos, lotes, clock);
+        servicio = new AlertaInventarioServicio(medicamentos, lotes, clock, 90);
     }
 
     private ResumenStockInventario resumen(int id, int stock, int minimo, int pendiente) {
@@ -379,6 +379,24 @@ class AlertaInventarioServicioTest {
             assertTrue(resultado.isEmpty());
             verify(lotes, times(1)).listarPorVencer(hoy, fechaHorizonte90Dias);
             verifyNoMoreInteractions(lotes);
+        }
+
+        @Test
+        @DisplayName("CA-5.2: con farmacia.alertas.dias-por-vencer=30 el horizonte es hoy + 30 días")
+        void usaElHorizonteConfigurado() {
+            var conTreintaDias = new AlertaInventarioServicio(medicamentos, lotes, clock, 30);
+            when(lotes.listarPorVencer(hoy, hoy.plusDays(30))).thenReturn(List.of());
+
+            assertTrue(conTreintaDias.listarPorVencer().isEmpty());
+            assertEquals(30, conTreintaDias.diasPorVencer());
+            verify(lotes).listarPorVencer(hoy, hoy.plusDays(30));
+        }
+
+        @Test
+        @DisplayName("El horizonte configurado debe ser positivo")
+        void rechazaHorizonteNoPositivo() {
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                    () -> new AlertaInventarioServicio(medicamentos, lotes, clock, 0));
         }
     }
 }

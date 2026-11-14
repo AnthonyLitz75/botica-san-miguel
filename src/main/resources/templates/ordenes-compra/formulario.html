@@ -38,11 +38,13 @@
                         <div class="campo-completo">
                             <label for="idProveedor">Razón social del proveedor activo</label>
                             <select id="idProveedor" th:field="*{idProveedor}" required
-                                th:attr="aria-invalid=${#fields.hasErrors('idProveedor')}">
+                                th:attr="aria-invalid=${#fields.hasErrors('idProveedor')},aria-describedby=${#fields.hasErrors('idProveedor') ? 'error-idProveedor' : null}">
                                 <option value="">Seleccionar proveedor</option>
                                 <option th:each="proveedor : ${proveedores}" th:value="${proveedor.idProveedor()}"
                                     th:text="${proveedor.razonSocial()}"></option>
                             </select>
+                            <p class="error" id="error-idProveedor" th:if="${#fields.hasErrors('idProveedor')}"
+                                th:errors="*{idProveedor}"></p>
                             <span class="campo-ayuda">La orden se generará en estado PENDIENTE y no modificará el stock
                                 hasta su recepción.</span>
                         </div>
@@ -55,24 +57,30 @@
                         <div class="campo-completo">
                             <label for="medicamento">Medicamento</label>
                             <select id="medicamento" th:field="*{detalles[0].idMedicamento}" required
-                                th:attr="aria-invalid=${#fields.hasErrors('detalles[0].idMedicamento')}">
+                                th:attr="aria-invalid=${#fields.hasErrors('detalles[0].idMedicamento')},aria-describedby=${#fields.hasErrors('detalles[0].idMedicamento') ? 'error-medicamento' : null}">
                                 <option value="">Seleccionar medicamento del catálogo</option>
                                 <option th:each="medicamento : ${medicamentos}"
                                     th:value="${medicamento.idMedicamento()}"
                                     th:text="${medicamento.codigo() + ' — ' + medicamento.nombre()}"></option>
                             </select>
+                            <p class="error" id="error-medicamento" th:if="${#fields.hasErrors('detalles[0].idMedicamento')}"
+                                th:errors="*{detalles[0].idMedicamento}"></p>
                         </div>
                         <div>
                             <label for="cantidad">Cantidad solicitada</label>
                             <input id="cantidad" type="number" min="1" step="1" placeholder="Ej. 20"
                                 th:field="*{detalles[0].cantidadSolicitada}" required
-                                th:attr="aria-invalid=${#fields.hasErrors('detalles[0].cantidadSolicitada')}">
+                                th:attr="aria-invalid=${#fields.hasErrors('detalles[0].cantidadSolicitada')},aria-describedby=${#fields.hasErrors('detalles[0].cantidadSolicitada') ? 'error-cantidad' : null}">
+                            <p class="error" id="error-cantidad" th:if="${#fields.hasErrors('detalles[0].cantidadSolicitada')}"
+                                th:errors="*{detalles[0].cantidadSolicitada}"></p>
                         </div>
                         <div>
                             <label for="costo">Costo unitario acordado (S/)</label>
                             <input id="costo" type="number" min="0" step="0.01" placeholder="0.00"
                                 th:field="*{detalles[0].costoUnitario}" required
-                                th:attr="aria-invalid=${#fields.hasErrors('detalles[0].costoUnitario')}">
+                                th:attr="aria-invalid=${#fields.hasErrors('detalles[0].costoUnitario')},aria-describedby=${#fields.hasErrors('detalles[0].costoUnitario') ? 'error-costo' : null}">
+                            <p class="error" id="error-costo" th:if="${#fields.hasErrors('detalles[0].costoUnitario')}"
+                                th:errors="*{detalles[0].costoUnitario}"></p>
                         </div>
                         <div class="campo-completo orden-calculo-previo">
                             <span>Importe estimado de la orden:</span>

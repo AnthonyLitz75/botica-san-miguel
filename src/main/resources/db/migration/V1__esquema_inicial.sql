@@ -1,6 +1,6 @@
--- Instalacion nueva: ejecutar una sola vez en una base vacia.
--- No borra ni reemplaza tablas existentes. Ante errores, ejecutar ROLLBACK.
-BEGIN;
+-- V1: esquema inicial (11 tablas, restricciones y claves).
+-- Flyway ejecuta esta migracion dentro de una transaccion: no usar BEGIN/COMMIT.
+-- No modificar una vez aplicada; los cambios van en una nueva migracion V<n>__.
 
 CREATE TABLE usuario (
     id_usuario INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -285,6 +285,3 @@ CREATE TABLE detalle_movimiento (
     CONSTRAINT chk_detalle_movimiento_cantidad
         CHECK (cantidad > 0)
 );
-
-COMMIT;
-

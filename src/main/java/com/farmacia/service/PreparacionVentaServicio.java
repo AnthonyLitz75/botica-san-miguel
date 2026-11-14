@@ -7,6 +7,7 @@ import com.farmacia.model.LineaPreparacionVentaVista;
 import com.farmacia.model.PreparacionVentaVista;
 import com.farmacia.repository.MedicamentoRepositorio;
 import com.farmacia.repository.UsuarioRepositorio;
+import com.farmacia.service.politica.PoliticaDescuento;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.SessionScope;
@@ -21,15 +22,21 @@ public class PreparacionVentaServicio {
     private final MedicamentoRepositorio medicamentoRepositorio;
     private final UsuarioRepositorio usuarioRepositorio;
     private final LotePrioridadServicio lotePrioridadServicio;
+    private final PoliticaDescuento politicaDescuento;
     private final ListaEnlazada<LineaPreparacionVentaVista> detalles = new ListaEnlazada<>();
     private final PilaDeshacer<List<LineaPreparacionVentaVista>> historial = new PilaDeshacer<>();
     private String usuarioPropietario;
 
+    /**
+     * @param politicaDescuento regla de descuento por línea (Strategy); en producción, importe fijo
+     */
     public PreparacionVentaServicio(MedicamentoRepositorio medicamentoRepositorio,
-            UsuarioRepositorio usuarioRepositorio, LotePrioridadServicio lotePrioridadServicio) {
+            UsuarioRepositorio usuarioRepositorio, LotePrioridadServicio lotePrioridadServicio,
+            PoliticaDescuento politicaDescuento) {
         this.medicamentoRepositorio = medicamentoRepositorio;
         this.usuarioRepositorio = usuarioRepositorio;
         this.lotePrioridadServicio = lotePrioridadServicio;
+        this.politicaDescuento = politicaDescuento;
     }
 
     public synchronized PreparacionVentaVista obtener(String nombreUsuario) {
@@ -55,17 +62,41 @@ public class PreparacionVentaServicio {
         } catch (ArithmeticException excepcion) {
             throw new IllegalArgumentException("La cantidad supera el límite permitido", excepcion);
         }
+        // Si llega un descuento reemplaza al anterior; si no, se conserva y se revalida con la nueva cantidad.
+        BigDecimal valorDescuento = formulario.descuento() != null ? formulario.descuento()
+                : anterior == null ? null : anterior.descuento();
+        BigDecimal bruto = medicamento.precioVenta().multiply(BigDecimal.valueOf(cantidad))
+                .setScale(2, RoundingMode.HALF_UP);
+        BigDecimal descuento = politicaDescuento.calcular(bruto, valorDescuento);
         var lotes = lotePrioridadServicio.planificarSalida(formulario.idMedicamento(), cantidad);
         var linea = new LineaPreparacionVentaVista(medicamento.idMedicamento(), medicamento.codigo(),
-                medicamento.nombre(), cantidad, medicamento.precioVenta(),
-                medicamento.precioVenta().multiply(BigDecimal.valueOf(cantidad)).setScale(2, RoundingMode.HALF_UP),
-                lotes);
+                medicamento.nombre(), cantidad, medicamento.precioVenta(), descuento,
+                bruto.subtract(descuento), lotes);
         guardarInstantanea();
         if (anterior == null) {
             detalles.agregar(linea);
         } else {
             detalles.reemplazar(actual -> actual.idMedicamento().equals(medicamento.idMedicamento()), linea);
         }
+        return crearVista();
+    }
+
+    /**
+     * Fija el descuento de una línea ya preparada (spec 004). Guarda una instantánea, de modo que
+     * "Deshacer" restaura el descuento anterior.
+     */
+    public synchronized PreparacionVentaVista aplicarDescuento(String nombreUsuario, Integer idMedicamento,
+            BigDecimal valorDescuento) {
+        validarUsuario(nombreUsuario);
+        var actual = detalles.buscar(linea -> linea.idMedicamento().equals(idMedicamento))
+                .orElseThrow(() -> new IllegalArgumentException("El medicamento no está en la preparación"));
+        BigDecimal bruto = actual.importeBruto();
+        BigDecimal descuento = politicaDescuento.calcular(bruto, valorDescuento);
+        var linea = new LineaPreparacionVentaVista(actual.idMedicamento(), actual.codigo(), actual.nombre(),
+                actual.cantidad(), actual.precioUnitario(), descuento, bruto.subtract(descuento),
+                actual.lotesFefo());
+        guardarInstantanea();
+        detalles.reemplazar(linea2 -> linea2.idMedicamento().equals(idMedicamento), linea);
         return crearVista();
     }
 
@@ -89,6 +120,13 @@ public class PreparacionVentaServicio {
         return crearVista();
     }
 
+    /** Vacía la preparación y su historial de deshacer (tras confirmar la venta). */
+    public synchronized void limpiar(String nombreUsuario) {
+        validarUsuario(nombreUsuario);
+        detalles.limpiar();
+        historial.limpiar();
+    }
+
     private void validarUsuario(String nombreUsuario) {
         var usuario = usuarioRepositorio.buscarPorNombreUsuario(nombreUsuario)
                 .orElseThrow(() -> new AccessDeniedException("Usuario no autorizado"));
@@ -108,8 +146,12 @@ public class PreparacionVentaServicio {
 
     private PreparacionVentaVista crearVista() {
         var lineas = detalles.comoLista();
-        BigDecimal total = lineas.stream().map(LineaPreparacionVentaVista::importe)
-                .reduce(BigDecimal.ZERO.setScale(2), BigDecimal::add);
-        return new PreparacionVentaVista(lineas, total, !historial.estaVacia());
+        BigDecimal cero = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        BigDecimal subtotal = lineas.stream().map(LineaPreparacionVentaVista::importeBruto)
+                .reduce(cero, BigDecimal::add);
+        BigDecimal descuentoTotal = lineas.stream().map(LineaPreparacionVentaVista::descuento)
+                .reduce(cero, BigDecimal::add);
+        return new PreparacionVentaVista(lineas, subtotal, descuentoTotal, subtotal.subtract(descuentoTotal),
+                !historial.estaVacia());
     }
 }

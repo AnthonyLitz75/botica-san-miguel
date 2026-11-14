@@ -95,7 +95,7 @@ class MovimientoInventarioRepositorioTest extends AbstractRepositorioIntegration
         int idOrden = fixtureOrdenCompra(idUsuario, idProveedor);
 
         Integer idMovimiento = movimientoRepositorio.registrarEntrada(
-                idUsuario, idProveedor, idOrden, "Recepción parcial de orden");
+                idUsuario, idOrden, "Recepción parcial de orden");
 
         assertNotNull(idMovimiento);
         assertTrue(idMovimiento > 0);
@@ -106,7 +106,7 @@ class MovimientoInventarioRepositorioTest extends AbstractRepositorioIntegration
         MovimientoInventario mov = optMov.get();
         assertEquals(idMovimiento, mov.idMovimiento());
         assertEquals(idUsuario, mov.idUsuario());
-        assertEquals(idProveedor, mov.idProveedor());
+        assertEquals(idProveedor, mov.idProveedor(), "El proveedor se obtiene por la orden de compra (3FN)");
         assertEquals(idOrden, mov.idOrden());
         assertNull(mov.idVenta(), "Para movimientos de ENTRADA la venta debe ser NULL");
         assertEquals("ENTRADA", mov.tipo());
@@ -120,8 +120,8 @@ class MovimientoInventarioRepositorioTest extends AbstractRepositorioIntegration
         int idUsuario = fixtureUsuario("ALMACENERO");
 
         assertThrows(DataIntegrityViolationException.class,
-                () -> movimientoRepositorio.registrarEntrada(idUsuario, 999_999, 999_999, "Compra Fallida"),
-                "Debe fallar por fk_movimiento_proveedor y fk_movimiento_orden");
+                () -> movimientoRepositorio.registrarEntrada(idUsuario, 999_999, "Compra Fallida"),
+                "Debe fallar por fk_movimiento_orden");
     }
 
     @Test
@@ -134,7 +134,7 @@ class MovimientoInventarioRepositorioTest extends AbstractRepositorioIntegration
         int idLote = fixtureLote(idMed, "LOTE-" + sufijoUnico(), 0);
         int idDetalleOrden = fixtureDetalleOrdenCompra(idOrden, idMed, 50, new BigDecimal("2.00"));
 
-        int idMov = movimientoRepositorio.registrarEntrada(idUsuario, idProveedor, idOrden, "Entrada mercadería");
+        int idMov = movimientoRepositorio.registrarEntrada(idUsuario, idOrden, "Entrada mercadería");
 
         movimientoRepositorio.registrarDetalleEntrada(idMov, idLote, idDetalleOrden, 30);
 
@@ -155,7 +155,7 @@ class MovimientoInventarioRepositorioTest extends AbstractRepositorioIntegration
         int idMed = fixtureMedicamento("MED-" + sufijoUnico(), "Ibuprofeno 400mg");
         int idLote = fixtureLote(idMed, "LOTE-" + sufijoUnico(), 0);
         int idDetalleOrden = fixtureDetalleOrdenCompra(idOrden, idMed, 20, new BigDecimal("3.00"));
-        int idMov = movimientoRepositorio.registrarEntrada(idUsuario, idProveedor, idOrden, "Entrada");
+        int idMov = movimientoRepositorio.registrarEntrada(idUsuario, idOrden, "Entrada");
 
         assertThrows(DataIntegrityViolationException.class,
                 () -> movimientoRepositorio.registrarDetalleEntrada(idMov, idLote, idDetalleOrden, 0),
@@ -189,10 +189,10 @@ class MovimientoInventarioRepositorioTest extends AbstractRepositorioIntegration
 
         // Verificación directa en PostgreSQL
         Boolean fksNulasEnBd = jdbcTemplate.queryForObject("""
-            SELECT id_proveedor IS NULL AND id_venta IS NULL AND id_orden IS NULL
+            SELECT id_venta IS NULL AND id_orden IS NULL
             FROM movimiento_inventario WHERE id_movimiento = ?
             """, Boolean.class, idMovimiento);
-        assertTrue(fksNulasEnBd, "PostgreSQL debe registrar NULL en las 3 columnas de FK opcionales");
+        assertTrue(fksNulasEnBd, "PostgreSQL debe registrar NULL en las columnas de FK opcionales");
     }
 
     @Test

@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragmentos/head :: recursos('Página no encontrada')}">
+    <title>Página no encontrada | Botica San Miguel</title>
+</head>
+
+<body class="pagina-login">
+    <main th:replace="~{fragmentos/error :: pagina('404', 'Página no encontrada', 'La página o el registro que buscas no existe o ya no está disponible.')}"></main>
+</body>
+
+</html>

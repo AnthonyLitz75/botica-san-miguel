@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragmentos/head :: recursos('Auditoría')}">
+    <title>Auditoría | Botica San Miguel</title>
+</head>
+
+<body class="pagina-inventario">
+    <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
+    <aside th:replace="~{fragmentos/navegacion :: lateral('Auditoría')}"></aside>
+    <div class="inventario-area">
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Auditoría', 'Administración')}"></header>
+        <main id="contenido" class="inventario-contenido">
+
+            <div class="inventario-titulo">
+                <div>
+                    <p class="seccion-etiqueta">ADMINISTRACIÓN / TRAZABILIDAD</p>
+                    <h1>Auditoría</h1>
+                </div>
+                <a class="inventario-boton boton-secundario" th:if="${consulta != null}"
+                    th:href="@{/auditoria.csv(desde=${consulta.desde()},hasta=${consulta.hasta()},usuario=${filtro.usuario()},accion=${filtro.accion()},entidad=${filtro.entidad()},resultado=${filtro.resultado()})}">
+                    <span class="icono icono-save" aria-hidden="true"></span>Exportar CSV
+                </a>
+            </div>
+
+            <div class="aviso-operacion aviso-info" role="note">
+                <span class="icono icono-clipboard-list" aria-hidden="true"></span>
+                <div>
+                    <p>Registro de solo lectura: accesos (inicios y cierres de sesión, intentos fallidos y accesos
+                        denegados) y cambios de datos con su responsable. Los eventos no se pueden modificar ni
+                        borrar.</p>
+                </div>
+            </div>
+
+            <form class="inventario-filtros proveedor-formulario" th:action="@{/auditoria}" method="get"
+                th:object="${filtro}" aria-label="Filtros de auditoría">
+                <div class="proveedor-campos grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                        <label for="desde">Desde</label>
+                        <input type="date" id="desde" name="desde"
+                            th:value="${consulta != null ? consulta.desde() : filtro.desde()}">
+                    </div>
+                    <div>
+                        <label for="hasta">Hasta</label>
+                        <input type="date" id="hasta" name="hasta"
+                            th:value="${consulta != null ? consulta.hasta() : filtro.hasta()}">
+                    </div>
+                    <div>
+                        <label for="usuario">Usuario</label>
+                        <input type="text" id="usuario" th:field="*{usuario}" maxlength="50"
+                            placeholder="Nombre de usuario exacto">
+                    </div>
+                    <div>
+                        <label for="accion">Acción</label>
+                        <select id="accion" th:field="*{accion}">
+                            <option value="">Todas</option>
+                            <option th:each="a : ${acciones}" th:value="${a}" th:text="${a}"></option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="entidad">Entidad</label>
+                        <select id="entidad" th:field="*{entidad}">
+                            <option value="">Todas</option>
+                            <option th:each="e : ${entidades}" th:value="${e}" th:text="${e}"></option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="resultado">Resultado</label>
+                        <select id="resultado" th:field="*{resultado}">
+                            <option value="">Todos</option>
+                            <option th:each="r : ${resultados}" th:value="${r}" th:text="${r}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="proveedor-formulario-acciones">
+                    <button class="inventario-boton boton-principal" type="submit">
+                        <span class="icono icono-search" aria-hidden="true"></span>Filtrar
+                    </button>
+                    <a class="inventario-boton boton-secundario" th:href="@{/auditoria}">
+                        <span class="icono icono-x" aria-hidden="true"></span>Limpiar
+                    </a>
+                </div>
+            </form>
+
+            <div class="aviso-operacion aviso-error" th:if="${error}" role="alert">
+                <span class="icono icono-x" aria-hidden="true"></span>
+                <div><p th:text="${error}">Error</p></div>
+            </div>
+
+            <section class="inventario-resultados registro-listado" th:if="${consulta != null}"
+                aria-labelledby="titulo-auditoria">
+                <div class="resultados-cabecera">
+                    <h2 id="titulo-auditoria">
+                        Eventos
+                        <span class="cantidad-resultados" th:text="${consulta.total()}">0</span>
+                    </h2>
+                </div>
+
+                <div class="inventario-vacio" th:if="${#lists.isEmpty(consulta.eventos())}">
+                    <span class="icono icono-circle-check" aria-hidden="true"></span>
+                    <p>No hay eventos para los filtros elegidos.</p>
+                </div>
+
+                <div class="tabla-contenedor inventario-tabla overflow-x-auto"
+                    th:unless="${#lists.isEmpty(consulta.eventos())}">
+                    <table>
+                        <caption class="sr-only">Eventos de auditoría, del más reciente al más antiguo</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Fecha y hora</th>
+                                <th scope="col">Usuario</th>
+                                <th scope="col">Acción</th>
+                                <th scope="col">Entidad</th>
+                                <th scope="col">Id</th>
+                                <th scope="col">Resultado</th>
+                                <th scope="col">Detalle</th>
+                                <th scope="col">IP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="e : ${consulta.eventos()}">
+                                <td th:text="${#temporals.format(e.fechaHora(), 'dd/MM/yyyy HH:mm:ss')}">13/11/2026</td>
+                                <td th:text="${e.nombreUsuario()}">admin</td>
+                                <td th:text="${e.accion()}">EDITAR</td>
+                                <td th:text="${e.entidad()}">MEDICAMENTO</td>
+                                <td th:text="${e.idEntidad()}">1</td>
+                                <td>
+                                    <span class="estado-badge" th:text="${e.resultado()}"
+                                        th:classappend="${e.resultado() == 'EXITO' ? 'estado-activo' : 'estado-inactivo'}">EXITO</span>
+                                </td>
+                                <td th:text="${e.detalle()}">—</td>
+                                <td th:text="${e.ipOrigen()}">—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <nav class="flex items-center justify-between mt-4" aria-label="Paginación"
+                    th:if="${consulta.paginas() > 1}">
+                    <a class="inventario-boton boton-secundario" th:if="${consulta.pagina() > 1}"
+                        th:href="@{/auditoria(desde=${consulta.desde()},hasta=${consulta.hasta()},usuario=${filtro.usuario()},accion=${filtro.accion()},entidad=${filtro.entidad()},resultado=${filtro.resultado()},pagina=${consulta.pagina() - 1})}">Anterior</a>
+                    <span th:text="|Página ${consulta.pagina()} de ${consulta.paginas()}|">Página 1 de 1</span>
+                    <a class="inventario-boton boton-secundario" th:if="${consulta.pagina() < consulta.paginas()}"
+                        th:href="@{/auditoria(desde=${consulta.desde()},hasta=${consulta.hasta()},usuario=${filtro.usuario()},accion=${filtro.accion()},entidad=${filtro.entidad()},resultado=${filtro.resultado()},pagina=${consulta.pagina() + 1})}">Siguiente</a>
+                </nav>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

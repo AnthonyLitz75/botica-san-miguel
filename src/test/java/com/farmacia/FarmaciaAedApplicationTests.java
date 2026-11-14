@@ -1,10 +1,9 @@
 package com.farmacia;
 
+import com.farmacia.repository.AbstractRepositorioIntegrationTest;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class FarmaciaAedApplicationTests {
+class FarmaciaAedApplicationTests extends AbstractRepositorioIntegrationTest {
 
 	@Test
 	void contextLoads() {

@@ -39,6 +39,11 @@
             <span class="icono icono-arrow-left-right" aria-hidden="true"></span>
             <span>Movimientos</span>
         </a>
+        <a th:if="${puedeConsultarAuditoria}" th:href="@{/auditoria}"
+            th:attr="aria-current=${seccion == 'Auditoría' ? 'page' : null}">
+            <span class="icono icono-clipboard-list" aria-hidden="true"></span>
+            <span>Auditoría</span>
+        </a>
     </nav>
 
     <aside th:fragment="lateral(seccion)" class="inventario-lateral" aria-label="Navegación principal">

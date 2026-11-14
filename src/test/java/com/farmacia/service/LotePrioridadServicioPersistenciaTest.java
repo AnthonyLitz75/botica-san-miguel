@@ -1,10 +1,10 @@
 package com.farmacia.service;
 
+import com.farmacia.repository.AbstractRepositorioIntegrationTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.time.LocalDate;
@@ -13,8 +13,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SpringBootTest
-class LotePrioridadServicioPersistenciaTest {
+class LotePrioridadServicioPersistenciaTest extends AbstractRepositorioIntegrationTest {
     @Autowired private JdbcTemplate jdbc;
     @Autowired private LotePrioridadServicio servicio;
     private int medicamentoId;

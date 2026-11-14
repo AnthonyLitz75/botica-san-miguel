@@ -7,15 +7,22 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import com.farmacia.dto.MedicamentoFormulario;
 import java.util.Optional;
+import java.time.Clock;
 import java.time.LocalDate;
 
 @Repository
 public class MedicamentoRepositorio {
 
     private final JdbcTemplate jdbcTemplate;
+    private final Clock clock;
 
-    public MedicamentoRepositorio(JdbcTemplate jdbcTemplate) {
+    /**
+     * El reloj solo fija la fecha de corte del stock vigente (lotes que vencen hoy o después),
+     * que se envía como parámetro en lugar de usar CURRENT_DATE, para que las pruebas sean deterministas.
+     */
+    public MedicamentoRepositorio(JdbcTemplate jdbcTemplate, Clock clock) {
         this.jdbcTemplate = jdbcTemplate;
+        this.clock = clock;
     }
 
     public List<Medicamento> listarActivos() {
@@ -31,7 +38,7 @@ public class MedicamentoRepositorio {
                 SELECT m.id_medicamento, m.codigo, m.nombre, m.concentracion,
                        m.presentacion, m.unidad_control, m.precio_venta,
                        m.stock_minimo, m.activo,
-                       COALESCE(SUM(CASE WHEN l.fecha_vencimiento >= CURRENT_DATE THEN l.stock_actual ELSE 0 END), 0)::INTEGER AS stock_actual
+                       COALESCE(SUM(CASE WHEN l.fecha_vencimiento >= ? THEN l.stock_actual ELSE 0 END), 0)::INTEGER AS stock_actual
                 FROM medicamento m
                 LEFT JOIN lote l ON l.id_medicamento = m.id_medicamento
                 WHERE m.activo = ?
@@ -55,7 +62,7 @@ public class MedicamentoRepositorio {
                 fila.getBigDecimal("precio_venta"),
                 fila.getInt("stock_minimo"),
                 fila.getBoolean("activo"),
-                fila.getInt("stock_actual")), activo, texto, texto);
+                fila.getInt("stock_actual")), LocalDate.now(clock), activo, texto, texto);
     }
 
     public Integer guardar(MedicamentoFormulario medicamentoFormulario) {
@@ -82,7 +89,7 @@ public class MedicamentoRepositorio {
                 SELECT m.id_medicamento, m.codigo, m.nombre, m.concentracion,
                        m.presentacion, m.unidad_control, m.precio_venta,
                        m.stock_minimo, m.activo,
-                       COALESCE(SUM(CASE WHEN l.fecha_vencimiento >= CURRENT_DATE THEN l.stock_actual ELSE 0 END), 0)::INTEGER AS stock_actual
+                       COALESCE(SUM(CASE WHEN l.fecha_vencimiento >= ? THEN l.stock_actual ELSE 0 END), 0)::INTEGER AS stock_actual
                 FROM medicamento m
                 LEFT JOIN lote l ON l.id_medicamento = m.id_medicamento
                 WHERE m.id_medicamento = ?
@@ -104,7 +111,7 @@ public class MedicamentoRepositorio {
                         fila.getInt("stock_minimo"),
                         fila.getBoolean("activo"),
                         fila.getInt("stock_actual")),
-                id);
+                LocalDate.now(clock), id);
 
         return resultados.stream().findFirst();
     }

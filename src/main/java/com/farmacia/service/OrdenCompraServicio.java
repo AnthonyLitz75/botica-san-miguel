@@ -21,6 +21,7 @@ import com.farmacia.dto.RecepcionOrdenFormulario;
 import com.farmacia.dto.DetalleRecepcionFormulario;
 import com.farmacia.repository.LoteRepositorio;
 import com.farmacia.repository.MovimientoInventarioRepositorio;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.function.Function;
@@ -39,6 +40,8 @@ public class OrdenCompraServicio {
         private final MedicamentoRepositorio medicamentoRepositorio;
         private final LoteRepositorio loteRepositorio;
         private final MovimientoInventarioRepositorio movimientoRepositorio;
+        private final Clock clock;
+        private final AuditoriaServicio auditoria;
 
         public OrdenCompraServicio(
                         OrdenCompraRepositorio ordenRepositorio,
@@ -47,7 +50,9 @@ public class OrdenCompraServicio {
                         ProveedorRepositorio proveedorRepositorio,
                         MedicamentoRepositorio medicamentoRepositorio,
                         LoteRepositorio loteRepositorio,
-                        MovimientoInventarioRepositorio movimientoRepositorio) {
+                        MovimientoInventarioRepositorio movimientoRepositorio,
+                        Clock clock,
+                        AuditoriaServicio auditoria) {
 
                 this.ordenRepositorio = ordenRepositorio;
                 this.detalleRepositorio = detalleRepositorio;
@@ -56,6 +61,13 @@ public class OrdenCompraServicio {
                 this.medicamentoRepositorio = medicamentoRepositorio;
                 this.loteRepositorio = loteRepositorio;
                 this.movimientoRepositorio = movimientoRepositorio;
+                this.clock = clock;
+                this.auditoria = auditoria;
+        }
+
+        /** Primer vencimiento aceptado en una recepción: el lote debe vencer después de hoy. */
+        public LocalDate fechaMinimaVencimientoRecepcion() {
+                return LocalDate.now(clock).plusDays(1);
         }
 
         public List<OrdenCompra> listar() {
@@ -205,6 +217,10 @@ public class OrdenCompraServicio {
                                         detalle.costoUnitario());
                 }
 
+                auditoria.registrarCambio(AccionAuditoria.CREAR, "ORDEN_COMPRA", idOrden,
+                                "numero: " + numeroOrden + "; proveedor: " + formulario.idProveedor()
+                                                + "; lineas: " + formulario.detalles().size()
+                                                + "; total_estimado: " + total);
                 return idOrden;
         }
 
@@ -237,7 +253,7 @@ public class OrdenCompraServicio {
                                 || detalle.cantidad() <= 0 || detalle.numeroLote() == null
                                 || detalle.numeroLote().isBlank() || detalle.numeroLote().length() > 50
                                 || detalle.fechaVencimiento() == null
-                                || !detalle.fechaVencimiento().isAfter(LocalDate.now()))
+                                || !detalle.fechaVencimiento().isAfter(LocalDate.now(clock)))
                                 throw new IllegalArgumentException("Revisa lote, vencimiento y cantidad recibida");
                         if (!ids.add(detalle.idDetalleOrden()))
                                 throw new IllegalArgumentException("No repitas una línea de la orden");
@@ -250,8 +266,7 @@ public class OrdenCompraServicio {
                 String motivo = formulario.motivo() == null || formulario.motivo().isBlank()
                         ? "Recepción de compra" : formulario.motivo().strip();
                 if (motivo.length() > 250) throw new IllegalArgumentException("El motivo admite hasta 250 caracteres");
-                int idMovimiento = movimientoRepositorio.registrarEntrada(usuario.idUsuario(),
-                        orden.idProveedor(), idOrden, motivo);
+                int idMovimiento = movimientoRepositorio.registrarEntrada(usuario.idUsuario(), idOrden, motivo);
                 for (var detalle : formulario.detalles()) {
                         var linea = lineas.get(detalle.idDetalleOrden());
                         int idLote = loteRepositorio.registrarOIncrementar(linea.idMedicamento(),
@@ -262,6 +277,9 @@ public class OrdenCompraServicio {
                 String estado = pendienteTotal == 0 ? "RECIBIDA" : "PARCIALMENTE_RECIBIDA";
                 if (ordenRepositorio.actualizarEstado(idOrden, estado) != 1)
                         throw new IllegalStateException("No se pudo actualizar el estado de la orden");
+                int unidades = formulario.detalles().stream().mapToInt(DetalleRecepcionFormulario::cantidad).sum();
+                auditoria.registrarCambio(AccionAuditoria.RECEPCION, "ORDEN_COMPRA", idOrden,
+                                "movimiento: " + idMovimiento + "; unidades: " + unidades + "; estado: " + estado);
         }
 
         @Transactional(rollbackFor = Exception.class)
@@ -277,6 +295,8 @@ public class OrdenCompraServicio {
                 if (tieneRecepciones) throw new IllegalArgumentException("La orden ya tiene recepciones registradas");
                 if (ordenRepositorio.actualizarEstado(idOrden, "CANCELADA") != 1)
                         throw new IllegalStateException("No se pudo cancelar la orden");
+                auditoria.registrarCambio(AccionAuditoria.CANCELAR, "ORDEN_COMPRA", idOrden,
+                                "estado: PENDIENTE → CANCELADA");
         }
 
         private com.farmacia.model.Usuario validarUsuario(String nombreUsuario, String rolRequerido) {

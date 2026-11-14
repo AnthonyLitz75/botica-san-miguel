@@ -2,23 +2,17 @@ package com.farmacia.service;
 
 import com.farmacia.dto.SalidaInventarioFormulario;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import javax.sql.DataSource;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -41,16 +35,7 @@ class MovimientoInventarioServicioTransaccionalTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @BeforeAll
-    static void inicializarEsquema(@Autowired DataSource dataSource) throws Exception {
-        try (var conexion = dataSource.getConnection()) {
-            Resource ddl = new ClassPathResource("scripts/01_creacion_tablas.sql");
-            if (!ddl.exists()) {
-                ddl = new FileSystemResource("scripts/01_creacion_tablas.sql");
-            }
-            ScriptUtils.executeSqlScript(conexion, ddl);
-        }
-    }
+    // El esquema lo crea Flyway al iniciar el contexto (src/main/resources/db/migration).
 
     @AfterEach
     void limpiarTriggerDeSeguridad() {

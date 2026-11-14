@@ -28,11 +28,15 @@
                 </div>
             </div>
 
-            <div class="p-3 mb-4 rounded-lg bg-emerald-50/80 border border-emerald-200 text-xs text-emerald-900 flex items-start gap-2.5 shadow-sm" th:unless="${#lists.isEmpty(lotes)}">
+            <div class="p-3 mb-4 rounded-lg bg-emerald-50/80 border border-emerald-200 text-xs text-emerald-900 flex items-start gap-2.5 shadow-sm"
+                th:unless="${#lists.isEmpty(lotes)}">
                 <span class="icono icono-circle-check text-emerald-600 mt-0.5" aria-hidden="true"></span>
                 <div>
-                    <strong class="font-semibold text-emerald-950">Despacho asistido por Cola de Prioridad (FEFO):</strong>
-                    <span> Los lotes identificados con <strong class="text-emerald-800">★ PRIORITARIO FEFO</strong> tienen la fecha de vencimiento más próxima y deben despacharse primero según la regla <em>First Expired, First Out</em>.</span>
+                    <strong class="font-semibold text-emerald-950">Despacho asistido por Cola de Prioridad
+                        (FEFO):</strong>
+                    <span> Los lotes identificados con <strong class="text-emerald-800">★ PRIORITARIO FEFO</strong>
+                        tienen la fecha de vencimiento más próxima y deben despacharse primero según la regla <em>First
+                            Expired, First Out</em>.</span>
                 </div>
             </div>
 
@@ -61,7 +65,8 @@
                             </select>
                             <span class="campo-ayuda flex items-center gap-1.5 text-xs text-emerald-800 mt-1">
                                 <span class="fefo-indicador" aria-hidden="true"></span>
-                                <span><strong>PRIORITARIO FEFO:</strong> Lote con prioridad temporal #1 según la Cola de Prioridad por menor vencimiento.</span>
+                                <span><strong>PRIORITARIO FEFO:</strong> Lote con prioridad temporal #1 según la Cola de
+                                    Prioridad por menor vencimiento.</span>
                             </span>
                             <p class="error" id="error-idLote" th:if="${#fields.hasErrors('idLote')}"
                                 th:errors="*{idLote}"></p>
@@ -72,13 +77,15 @@
                             <input type="number" id="cantidad" th:field="*{cantidad}" min="1" step="1"
                                 placeholder="Ej. 2" required
                                 th:attr="aria-invalid=${#fields.hasErrors('cantidad')},aria-describedby=${#fields.hasErrors('cantidad') ? 'error-cantidad' : null}">
-                            <span class="campo-ayuda" id="ayuda-stock">Selecciona un lote para verificar existencias.</span>
+                            <span class="campo-ayuda" id="ayuda-stock">Selecciona un lote para verificar
+                                existencias.</span>
                             <p class="error" id="error-cantidad" th:if="${#fields.hasErrors('cantidad')}"
                                 th:errors="*{cantidad}"></p>
                         </div>
 
                         <div>
-                            <span class="campo-etiqueta block mb-2 text-[13px] font-semibold text-[#2c3b35]">Proyección de saldo</span>
+                            <span class="campo-etiqueta block mb-2 text-[13px] font-semibold text-[#2c3b35]">Proyección
+                                de saldo</span>
                             <div class="orden-calculo-previo" id="caja-saldo">
                                 <span>Stock restante:</span>
                                 <strong id="saldo-restante">0</strong>
@@ -98,10 +105,12 @@
                 </fieldset>
 
                 <div class="proveedor-formulario-acciones">
-                    <button type="submit" class="inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md">
+                    <button type="submit"
+                        class="inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md">
                         <span class="icono icono-save" aria-hidden="true"></span>Registrar salida
                     </button>
-                    <a class="inventario-boton boton-secundario transition-all duration-150 active:scale-95" th:href="@{/movimientos}">
+                    <a class="inventario-boton boton-secundario transition-all duration-150 active:scale-95"
+                        th:href="@{/movimientos}">
                         <span class="icono icono-x" aria-hidden="true"></span>Cancelar
                     </a>
                 </div>
@@ -170,4 +179,3 @@
 </body>
 
 </html>
-

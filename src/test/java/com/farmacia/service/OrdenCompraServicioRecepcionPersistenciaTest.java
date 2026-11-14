@@ -1,12 +1,12 @@
 package com.farmacia.service;
 
+import com.farmacia.repository.AbstractRepositorioIntegrationTest;
 import com.farmacia.dto.DetalleRecepcionFormulario;
 import com.farmacia.dto.RecepcionOrdenFormulario;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.time.LocalDate;
@@ -16,8 +16,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-class OrdenCompraServicioRecepcionPersistenciaTest {
+class OrdenCompraServicioRecepcionPersistenciaTest extends AbstractRepositorioIntegrationTest {
     @Autowired private OrdenCompraServicio servicio;
     @Autowired private JdbcTemplate jdbc;
     private int usuarioId;

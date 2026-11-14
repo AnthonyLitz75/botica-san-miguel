@@ -1,5 +1,6 @@
 package com.farmacia.controller;
 
+import com.farmacia.dto.DescuentoLineaFormulario;
 import com.farmacia.dto.PreparacionVentaCambioFormulario;
 import com.farmacia.model.PreparacionVentaVista;
 import com.farmacia.service.PreparacionVentaServicio;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,7 +44,15 @@ public class PreparacionVentaControlador {
         return servicio.retirar(autenticacion.getName(), idMedicamento);
     }
 
-    @PostMapping("/deshacer")
+    /** Fija el descuento (importe en soles) de una línea ya preparada (spec 004). */
+    @PutMapping("/{idMedicamento:[0-9]+}/descuento")
+    public PreparacionVentaVista aplicarDescuento(Authentication autenticacion,
+            @PathVariable("idMedicamento") Integer idMedicamento,
+            @Valid @RequestBody DescuentoLineaFormulario formulario) {
+        return servicio.aplicarDescuento(autenticacion.getName(), idMedicamento, formulario.descuento());
+    }
+
+        @PostMapping("/deshacer")
     public PreparacionVentaVista deshacer(Authentication autenticacion) {
         return servicio.deshacer(autenticacion.getName());
     }
