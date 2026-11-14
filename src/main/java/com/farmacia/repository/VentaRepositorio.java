@@ -114,7 +114,8 @@ public class VentaRepositorio {
      * Lista ventas paginadas con filtros opcionales (spec 005, CA-1.1, 1.2, 1.3,
      * 1.6).
      */
-    @SuppressWarnings("java:S2077") // Consulta con clausulas SQL constantes y parametros posicionales '?' seguros contra SQLi
+    @SuppressWarnings("java:S2077") // Consulta con clausulas SQL constantes y parametros posicionales '?' seguros
+                                    // contra SQLi
     public List<VentaResumenVista> listar(FiltroVentasFormulario filtro, int limite, int offset) {
         List<Object> parametros = new ArrayList<>();
         String sql = """
@@ -136,7 +137,8 @@ public class VentaRepositorio {
     /**
      * Cuenta el total de ventas que cumplen el filtro (spec 005, CA-1.6).
      */
-    @SuppressWarnings("java:S2077") // Consulta con clausulas SQL constantes y parametros posicionales '?' seguros contra SQLi
+    @SuppressWarnings("java:S2077") // Consulta con clausulas SQL constantes y parametros posicionales '?' seguros
+                                    // contra SQLi
     public int contar(FiltroVentasFormulario filtro) {
         List<Object> parametros = new ArrayList<>();
         String sql = "SELECT COUNT(*) FROM venta v" + condiciones(filtro, parametros);
@@ -148,7 +150,8 @@ public class VentaRepositorio {
      * Calcula la suma acumulada de total de todas las ventas del filtro (spec 005,
      * CA-1.5).
      */
-    @SuppressWarnings("java:S2077") // Consulta con clausulas SQL constantes y parametros posicionales '?' seguros contra SQLi
+    @SuppressWarnings("java:S2077") // Consulta con clausulas SQL constantes y parametros posicionales '?' seguros
+                                    // contra SQLi
     public BigDecimal sumarTotal(FiltroVentasFormulario filtro) {
         List<Object> parametros = new ArrayList<>();
         String sql = "SELECT COALESCE(SUM(v.total), 0) FROM venta v" + condiciones(filtro, parametros);
