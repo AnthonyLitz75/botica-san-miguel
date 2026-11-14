@@ -24,6 +24,16 @@
             <span class="icono icono-circle-check" aria-hidden="true"></span>
             <span>Ventas</span>
         </a>
+        <a th:if="${puedeConsultarVentas}" th:href="@{/ventas}"
+            th:attr="aria-current=${seccion == 'Historial de ventas' ? 'page' : null}">
+            <span class="icono icono-clipboard-list" aria-hidden="true"></span>
+            <span>Historial de ventas</span>
+        </a>
+        <a th:if="${puedeVerMisVentas}" th:href="@{/ventas/mias}"
+            th:attr="aria-current=${seccion == 'Mis ventas' ? 'page' : null}">
+            <span class="icono icono-clipboard-list" aria-hidden="true"></span>
+            <span>Mis ventas</span>
+        </a>
         <a th:if="${puedeConsultarProveedores}" th:href="@{/proveedores}"
             th:attr="aria-current=${seccion == 'Proveedores' ? 'page' : null}">
             <span class="icono icono-truck" aria-hidden="true"></span>
@@ -43,6 +53,11 @@
             th:attr="aria-current=${seccion == 'Auditoría' ? 'page' : null}">
             <span class="icono icono-clipboard-list" aria-hidden="true"></span>
             <span>Auditoría</span>
+        </a>
+        <a th:if="${puedeGestionarUsuarios}" th:href="@{/usuarios}"
+            th:attr="aria-current=${seccion == 'Usuarios' ? 'page' : null}">
+            <span class="icono icono-user-round" aria-hidden="true"></span>
+            <span>Usuarios</span>
         </a>
     </nav>
 

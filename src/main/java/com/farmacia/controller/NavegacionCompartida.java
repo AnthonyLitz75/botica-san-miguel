@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
                 OrdenCompraControlador.class, MovimientoInventarioControlador.class,
                 LoteControlador.class, SalidaInventarioControlador.class,
                 PanelAlertaControlador.class, ClienteWebControlador.class,
-                VentaWebControlador.class, AuditoriaControlador.class
+                VentaWebControlador.class, AuditoriaControlador.class,
+                HistorialVentasControlador.class, ExistenciaInicialControlador.class,
+                UsuarioControlador.class
 })
 public class NavegacionCompartida {
         @ModelAttribute
@@ -42,11 +44,14 @@ public class NavegacionCompartida {
                 boolean puedePrepararVenta = roles.contains("ROLE_ADMINISTRADOR")
                                 || roles.contains("ROLE_VENDEDOR");
                 modelo.addAttribute("puedePrepararVenta", puedePrepararVenta);
+                modelo.addAttribute("puedeConsultarVentas", roles.contains("ROLE_ADMINISTRADOR"));
+                modelo.addAttribute("puedeVerMisVentas", roles.contains("ROLE_VENDEDOR"));
                 boolean puedeConsultarMovimientos = roles.contains("ROLE_ADMINISTRADOR")
                                 || roles.contains("ROLE_ALMACENERO");
                 modelo.addAttribute("puedeConsultarMovimientos", puedeConsultarMovimientos);
                 modelo.addAttribute("puedeRegistrarSalida", puedeConsultarMovimientos);
                 modelo.addAttribute("puedeConsultarAuditoria", roles.contains("ROLE_ADMINISTRADOR"));
+                modelo.addAttribute("puedeGestionarUsuarios", roles.contains("ROLE_ADMINISTRADOR"));
         }
 
 }

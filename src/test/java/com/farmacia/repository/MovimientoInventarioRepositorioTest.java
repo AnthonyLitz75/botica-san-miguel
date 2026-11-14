@@ -1,5 +1,6 @@
 package com.farmacia.repository;
 
+import com.farmacia.dto.FiltroMovimientosFormulario;
 import com.farmacia.model.DetalleMovimientoInventario;
 import com.farmacia.model.MovimientoInventario;
 import org.junit.jupiter.api.BeforeEach;
@@ -338,5 +339,195 @@ class MovimientoInventarioRepositorioTest extends AbstractRepositorioIntegration
         assertNotNull(mov.fechaHora(), "El atributo fechaHora no debe ser nulo");
         assertInstanceOf(LocalDateTime.class, mov.fechaHora(), "Debe ser instancia de java.time.LocalDateTime");
         assertTrue(mov.fechaHora().isBefore(LocalDateTime.now().plusMinutes(1)));
+    }
+
+    @Test
+    @DisplayName("CA-2.1: listar con filtros de tipo, fecha y motivo devuelve solo coincidencias ordenadas desc")
+    void listarConFiltro_tipoFechasYMotivo() {
+        int idUsuario = fixtureUsuario("ALMACENERO");
+        LocalDate hoy = LocalDate.now();
+        LocalDate ayer = hoy.minusDays(1);
+
+        // Mov 1: ENTRADA ayer
+        jdbcTemplate.update("""
+            INSERT INTO movimiento_inventario (id_usuario, tipo, fecha_hora, motivo)
+            VALUES (?, 'ENTRADA', ?, 'Recepción inicial')
+            """, idUsuario, ayer.atTime(10, 0));
+
+        // Mov 2: SALIDA hoy por merma
+        jdbcTemplate.update("""
+            INSERT INTO movimiento_inventario (id_usuario, tipo, fecha_hora, motivo)
+            VALUES (?, 'SALIDA', ?, 'Ajuste por merma en almacén')
+            """, idUsuario, hoy.atTime(11, 0));
+
+        // Mov 3: SALIDA hoy por otra razón
+        jdbcTemplate.update("""
+            INSERT INTO movimiento_inventario (id_usuario, tipo, fecha_hora, motivo)
+            VALUES (?, 'SALIDA', ?, 'Ajuste por rotura')
+            """, idUsuario, hoy.atTime(12, 0));
+
+        // Filtro por tipo SALIDA y motivo "merma"
+        var filtro = new FiltroMovimientosFormulario("SALIDA", null, null, "merma", null, null, null, null);
+        List<MovimientoInventario> resultado = movimientoRepositorio.listar(filtro, 20, 0);
+
+        assertEquals(1, resultado.size());
+        assertEquals("SALIDA", resultado.getFirst().tipo());
+        assertTrue(resultado.getFirst().motivo().contains("merma"));
+
+        // Filtro por fecha de ayer
+        var filtroFecha = new FiltroMovimientosFormulario(null, ayer, ayer, null, null, null, null, null);
+        List<MovimientoInventario> resultadoFecha = movimientoRepositorio.listar(filtroFecha, 20, 0);
+
+        assertEquals(1, resultadoFecha.size());
+        assertEquals("ENTRADA", resultadoFecha.getFirst().tipo());
+    }
+
+    @Test
+    @DisplayName("CA-2.2: listar calcula el origen de cada movimiento con CASE en SQL")
+    void listar_calculaColumnaOrigen() {
+        int idUsuario = fixtureUsuario("ALMACENERO");
+        int idProveedor = fixtureProveedor();
+        int idOrden = fixtureOrdenCompra(idUsuario, idProveedor);
+
+        int idVenta = jdbcTemplate.queryForObject("""
+            INSERT INTO venta (id_usuario, subtotal, descuento_total, total, numero_comprobante)
+            VALUES (?, 10.00, 0.00, 10.00, 'B001-00000099') RETURNING id_venta
+            """, Integer.class, idUsuario);
+
+        // 1. ENTRADA con orden = Recepción de compra
+        int m1 = jdbcTemplate.queryForObject("""
+            INSERT INTO movimiento_inventario (id_usuario, id_orden, tipo, motivo)
+            VALUES (?, ?, 'ENTRADA', 'Compra') RETURNING id_movimiento
+            """, Integer.class, idUsuario, idOrden);
+
+        // 2. ENTRADA sin orden = Existencia inicial
+        int m2 = jdbcTemplate.queryForObject("""
+            INSERT INTO movimiento_inventario (id_usuario, tipo, motivo)
+            VALUES (?, 'ENTRADA', 'Inventario inicial') RETURNING id_movimiento
+            """, Integer.class, idUsuario);
+
+        // 3. SALIDA con venta = Venta
+        int m3 = jdbcTemplate.queryForObject("""
+            INSERT INTO movimiento_inventario (id_usuario, id_venta, tipo, motivo)
+            VALUES (?, ?, 'SALIDA', 'Venta confirmada') RETURNING id_movimiento
+            """, Integer.class, idUsuario, idVenta);
+
+        // 4. SALIDA sin venta = Otra salida
+        int m4 = jdbcTemplate.queryForObject("""
+            INSERT INTO movimiento_inventario (id_usuario, tipo, motivo)
+            VALUES (?, 'SALIDA', 'Merma') RETURNING id_movimiento
+            """, Integer.class, idUsuario);
+
+        List<MovimientoInventario> lista = movimientoRepositorio.listar(FiltroMovimientosFormulario.vacio(), 20, 0);
+
+        assertEquals(4, lista.size());
+        MovimientoInventario movVenta = lista.stream().filter(m -> m.idMovimiento().equals(m3)).findFirst().orElseThrow();
+        assertEquals("Venta", movVenta.origen());
+
+        MovimientoInventario movCompra = lista.stream().filter(m -> m.idMovimiento().equals(m1)).findFirst().orElseThrow();
+        assertEquals("Recepción de compra", movCompra.origen());
+
+        MovimientoInventario movInicial = lista.stream().filter(m -> m.idMovimiento().equals(m2)).findFirst().orElseThrow();
+        assertEquals("Existencia inicial", movInicial.origen());
+
+        MovimientoInventario movOtra = lista.stream().filter(m -> m.idMovimiento().equals(m4)).findFirst().orElseThrow();
+        assertEquals("Otra salida", movOtra.origen());
+    }
+
+    @Test
+    @DisplayName("CA-3.1, CA-3.3: filtrar por medicamento y lote calcula cantidad del medicamento sin duplicar filas")
+    void listarConFiltro_medicamentoYLote() {
+        int idUsuario = fixtureUsuario("ALMACENERO");
+        int medA = fixtureMedicamento("MED-A" + sufijoUnico(), "Paracetamol 500mg");
+        int medB = fixtureMedicamento("MED-B" + sufijoUnico(), "Ibuprofeno 400mg");
+
+        int loteA1 = fixtureLote(medA, "LOTE-PAR-01", 100);
+        int loteA2 = fixtureLote(medA, "LOTE-PAR-02", 100);
+        int loteB1 = fixtureLote(medB, "LOTE-IBU-01", 100);
+
+        // Movimiento 1 afecta medA (2 lotes) y medB (1 lote)
+        int mov1 = movimientoRepositorio.registrarSalida(idUsuario, "Salida múltiple");
+        movimientoRepositorio.registrarDetalle(mov1, loteA1, 5);
+        movimientoRepositorio.registrarDetalle(mov1, loteA2, 10);
+        movimientoRepositorio.registrarDetalle(mov1, loteB1, 20);
+
+        // Movimiento 2 afecta solo medB
+        int mov2 = movimientoRepositorio.registrarSalida(idUsuario, "Salida solo ibuprofeno");
+        movimientoRepositorio.registrarDetalle(mov2, loteB1, 8);
+
+        // Filtro por medicamento A: debe devolver solo mov1, exactamente 1 fila, y cantidad = 15 (5 + 10)
+        var filtroMedA = new FiltroMovimientosFormulario(null, null, null, null, medA, null, null, null);
+        List<MovimientoInventario> resultadoMedA = movimientoRepositorio.listar(filtroMedA, 20, 0);
+
+        assertEquals(1, resultadoMedA.size());
+        assertEquals(mov1, resultadoMedA.getFirst().idMovimiento());
+        assertEquals(15, resultadoMedA.getFirst().cantidadMedicamento());
+
+        // Filtro por lote "PAR": debe devolver solo mov1
+        var filtroLote = new FiltroMovimientosFormulario(null, null, null, null, null, "PAR", null, null);
+        List<MovimientoInventario> resultadoLote = movimientoRepositorio.listar(filtroLote, 20, 0);
+
+        assertEquals(1, resultadoLote.size());
+        assertEquals(mov1, resultadoLote.getFirst().idMovimiento());
+    }
+
+    @Test
+    @DisplayName("CA-3.2: filtrar por responsable devuelve solo sus movimientos y mapea el nombre")
+    void listarConFiltro_responsable() {
+        int u1 = fixtureUsuario("ALMACENERO");
+        int u2 = fixtureUsuario("ADMINISTRADOR");
+
+        int m1 = movimientoRepositorio.registrarSalida(u1, "Salida de u1");
+        int m2 = movimientoRepositorio.registrarSalida(u2, "Salida de u2");
+
+        var filtro = new FiltroMovimientosFormulario(null, null, null, null, null, null, u1, null);
+        List<MovimientoInventario> resultado = movimientoRepositorio.listar(filtro, 20, 0);
+
+        assertEquals(1, resultado.size());
+        assertEquals(m1, resultado.getFirst().idMovimiento());
+        assertEquals(u1, resultado.getFirst().idUsuario());
+        assertEquals("Usuario Test", resultado.getFirst().responsable());
+    }
+
+    @Test
+    @DisplayName("CA-3.4: contar y paginación con LIMIT y OFFSET")
+    void contarYPaginacion() {
+        int idUsuario = fixtureUsuario("ALMACENERO");
+        for (int i = 1; i <= 25; i++) {
+            movimientoRepositorio.registrarSalida(idUsuario, "Movimiento #" + i);
+        }
+
+        int total = movimientoRepositorio.contar(FiltroMovimientosFormulario.vacio());
+        assertEquals(25, total);
+
+        List<MovimientoInventario> pag1 = movimientoRepositorio.listar(FiltroMovimientosFormulario.vacio(), 20, 0);
+        assertEquals(20, pag1.size());
+
+        List<MovimientoInventario> pag2 = movimientoRepositorio.listar(FiltroMovimientosFormulario.vacio(), 20, 20);
+        assertEquals(5, pag2.size());
+    }
+
+    @Test
+    @DisplayName("T602 / RF-003: registrarEntradaInicial persiste movimiento ENTRADA sin orden y detalle sin orden")
+    void registrarEntradaInicial_persisteCorrectamenteYDetalleSinOrden() {
+        int idUsuario = fixtureUsuario("ALMACENERO");
+        int idMed = fixtureMedicamento("MED-INI", "Medicamento Inicial");
+        int idLote = fixtureLote(idMed, "LOTE-INI-01", 30);
+
+        Integer idMov = movimientoRepositorio.registrarEntradaInicial(idUsuario, "Existencias iniciales de inventario");
+        assertNotNull(idMov);
+
+        movimientoRepositorio.registrarDetalle(idMov, idLote, 30);
+
+        var movOpt = movimientoRepositorio.buscarPorId(idMov);
+        assertTrue(movOpt.isPresent());
+        assertEquals("ENTRADA", movOpt.get().tipo());
+        assertEquals("Existencia inicial", movOpt.get().origen());
+        assertEquals("Existencias iniciales de inventario", movOpt.get().motivo());
+
+        var detalles = movimientoRepositorio.listarDetalles(idMov);
+        assertEquals(1, detalles.size());
+        assertEquals("LOTE-INI-01", detalles.getFirst().numeroLote());
+        assertEquals(30, detalles.getFirst().cantidad());
     }
 }

@@ -40,8 +40,23 @@
                 <div class="resultados-cabecera"><div><h2 id="titulo-vencidos">Lotes vencidos</h2><p class="alertas-ayuda">Verifica y gestiona estos lotes según el procedimiento de la botica.</p></div><span class="cantidad-resultados alerta-contador-critico" th:text="${#lists.size(panel.vencidos())}">0</span></div>
                 <div class="inventario-vacio" th:if="${#lists.isEmpty(panel.vencidos())}"><span class="icono icono-circle-check" aria-hidden="true"></span><p>No se encontraron lotes vencidos.</p></div>
                 <div class="tabla-contenedor inventario-tabla" th:unless="${#lists.isEmpty(panel.vencidos())}" role="region" aria-label="Lotes vencidos, tabla desplazable">
-                    <table><thead><tr><th scope="col">Medicamento</th><th scope="col">Lote</th><th scope="col">Vencimiento</th><th scope="col" class="numero">Días vencido</th><th scope="col" class="numero">Existencia</th><th scope="col">Alerta</th></tr></thead>
-                    <tbody><tr th:each="lote : ${panel.vencidos()}" class="hover:bg-rose-50/30 transition-colors duration-150"><td><span class="codigo-medicamento" th:text="${lote.codigoMedicamento()}">MED-000</span><strong class="alerta-producto" th:text="${lote.nombreMedicamento()}">Medicamento</strong></td><td th:text="${lote.numeroLote()}">LOTE</td><td th:text="${#temporals.format(lote.fechaVencimiento(), 'dd/MM/yyyy')}">01/01/2026</td><td class="numero"><strong th:text="${-lote.diasParaVencer()}">1</strong></td><td class="numero" th:text="${lote.stockActual() + ' ' + lote.unidadControl()}">0</td><td><span class="alerta-badge alerta-badge-critico">VENCIDO</span></td></tr></tbody></table>
+                    <table><thead><tr><th scope="col">Medicamento</th><th scope="col">Lote</th><th scope="col">Vencimiento</th><th scope="col" class="numero">Días vencido</th><th scope="col" class="numero">Existencia</th><th scope="col">Alerta</th><th scope="col">Acción</th></tr></thead>
+                    <tbody><tr th:each="lote : ${panel.vencidos()}" class="hover:bg-rose-50/30 transition-colors duration-150">
+                        <td><span class="codigo-medicamento" th:text="${lote.codigoMedicamento()}">MED-000</span><strong class="alerta-producto" th:text="${lote.nombreMedicamento()}">Medicamento</strong></td>
+                        <td th:text="${lote.numeroLote()}">LOTE</td>
+                        <td th:text="${#temporals.format(lote.fechaVencimiento(), 'dd/MM/yyyy')}">01/01/2026</td>
+                        <td class="numero"><strong th:text="${-lote.diasParaVencer()}">1</strong></td>
+                        <td class="numero" th:text="${lote.stockActual() + ' ' + lote.unidadControl()}">0</td>
+                        <td><span class="alerta-badge alerta-badge-critico">VENCIDO</span></td>
+                        <td>
+                            <a class="enlace-lotes inline-flex items-center gap-1 font-medium text-rose-700 hover:text-rose-800 transition-colors"
+                               th:if="${puedeRegistrarSalida}"
+                               th:href="@{/lotes/{id}/salida(id=${lote.idLote()}, motivo='Baja por vencimiento')}">
+                                <span class="icono icono-arrow-down" aria-hidden="true"></span>Dar de baja
+                            </a>
+                            <span class="alerta-sin-permiso" th:unless="${puedeRegistrarSalida}">Requiere rol de Almacén</span>
+                        </td>
+                    </tr></tbody></table>
                 </div>
             </section>
 

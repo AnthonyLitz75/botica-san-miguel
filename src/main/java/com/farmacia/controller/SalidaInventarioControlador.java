@@ -75,7 +75,10 @@ public class SalidaInventarioControlador {
         }
 
         @GetMapping("/lotes/{idLote}/salida")
-        public String nuevo(@PathVariable("idLote") Integer idLote, Model model) {
+        public String nuevo(
+                        @PathVariable("idLote") Integer idLote,
+                        @org.springframework.web.bind.annotation.RequestParam(name = "motivo", required = false) String motivo,
+                        Model model) {
                 Lote lote = loteServicio.buscarPorId(idLote)
                                 .orElseThrow(() -> new ResponseStatusException(
                                                 HttpStatus.NOT_FOUND, "Lote no encontrado"));
@@ -85,12 +88,18 @@ public class SalidaInventarioControlador {
                                 .orElseThrow(() -> new ResponseStatusException(
                                                 HttpStatus.NOT_FOUND, "Medicamento no encontrado"));
 
+                String motivoInicial = "";
+                if (motivo != null && !motivo.isBlank()) {
+                        String limpio = motivo.strip();
+                        motivoInicial = limpio.length() > 250 ? limpio.substring(0, 250) : limpio;
+                }
+
                 model.addAttribute("lote", lote);
                 model.addAttribute("medicamento", medicamento);
                 model.addAttribute("lotePrioritario", esLotePrioritario(lote.idLote(), lote.idMedicamento()));
                 model.addAttribute(
                                 "formulario",
-                                new SalidaInventarioFormulario(null, ""));
+                                new SalidaInventarioFormulario(null, motivoInicial));
 
                 return "salidas/formulario";
         }

@@ -24,6 +24,9 @@ public class PanelAlertaControlador {
         model.addAttribute("puedeCrearOrden", autenticacion.getAuthorities().stream()
                 .anyMatch(autoridad -> autoridad.getAuthority().equals("ROLE_ADMINISTRADOR")
                         || autoridad.getAuthority().equals("ROLE_COMPRAS")));
+        model.addAttribute("puedeRegistrarSalida", autenticacion.getAuthorities().stream()
+                .anyMatch(autoridad -> autoridad.getAuthority().equals("ROLE_ADMINISTRADOR")
+                        || autoridad.getAuthority().equals("ROLE_ALMACENERO")));
         return "alertas/listado";
     }
 }

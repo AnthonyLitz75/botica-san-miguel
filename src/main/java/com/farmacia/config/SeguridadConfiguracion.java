@@ -23,6 +23,16 @@ public class SeguridadConfiguracion {
         }
 
         @Bean
+        public org.springframework.security.core.session.SessionRegistry sessionRegistry() {
+                return new org.springframework.security.core.session.SessionRegistryImpl();
+        }
+
+        @Bean
+        public org.springframework.security.web.session.HttpSessionEventPublisher httpSessionEventPublisher() {
+                return new org.springframework.security.web.session.HttpSessionEventPublisher();
+        }
+
+        @Bean
         public Clock clock() {
                 return Clock.systemDefaultZone();
         }
@@ -122,6 +132,10 @@ public class SeguridadConfiguracion {
                                                                 "/lotes/{idLote}/salida")
                                                 .hasAnyRole("ADMINISTRADOR", "ALMACENERO")
 
+                                                // Existencias iniciales (spec 006): solo ADMINISTRADOR y ALMACENERO
+                                                .requestMatchers("/inventario/existencias-iniciales")
+                                                .hasAnyRole("ADMINISTRADOR", "ALMACENERO")
+
                                                 .requestMatchers("/lotes/**")
                                                 .denyAll()
 
@@ -162,9 +176,21 @@ public class SeguridadConfiguracion {
                                                 .hasAnyRole("ADMINISTRADOR", "VENDEDOR")
                                                 .requestMatchers(HttpMethod.DELETE, "/ventas/preparacion/{idMedicamento:[0-9]+}")
                                                 .hasAnyRole("ADMINISTRADOR", "VENDEDOR")
+                                                // Gestión de usuarios (spec 007): solo ADMINISTRADOR
+                                                .requestMatchers("/usuarios", "/usuarios/**")
+                                                .hasRole("ADMINISTRADOR")
+
                                                 // Auditoría (spec 014): solo ADMINISTRADOR
                                                 .requestMatchers(HttpMethod.GET, "/auditoria", "/auditoria.csv")
                                                 .hasRole("ADMINISTRADOR")
+
+                                                // Historial general de ventas (spec 005): solo ADMINISTRADOR
+                                                .requestMatchers(HttpMethod.GET, "/ventas")
+                                                .hasRole("ADMINISTRADOR")
+
+                                                // Mis ventas para el vendedor (spec 005, US-4): solo VENDEDOR
+                                                .requestMatchers(HttpMethod.GET, "/ventas/mias")
+                                                .hasRole("VENDEDOR")
 
                                                 .requestMatchers(HttpMethod.PUT, "/ventas/preparacion/{idMedicamento:[0-9]+}/descuento")
                                                 .hasAnyRole("ADMINISTRADOR", "VENDEDOR")
@@ -184,7 +210,11 @@ public class SeguridadConfiguracion {
                                                 .permitAll())
                                 .logout(salida -> salida
                                                 .logoutSuccessUrl("/login?logout")
-                                                .permitAll());
+                                                .permitAll())
+                                .sessionManagement(sesion -> sesion
+                                                .maximumSessions(-1)
+                                                .sessionRegistry(sessionRegistry())
+                                                .expiredUrl("/login?desactivado"));
 
                 return http.build();
         }

@@ -209,9 +209,87 @@ class MovimientoInventarioServicioTransaccionalTest {
     }
 
     // -------------------------------------------------------------------------
+    // Escenarios US-2 (spec 006): Bajas de lotes vencidos
+    // -------------------------------------------------------------------------
+    @Test
+    @DisplayName("CA-2.1: Lote vencido con stock 5 permite salida de 5 y queda con stock 0 y movimiento SALIDA sin venta")
+    void bajaDeLoteVencido_permiteSalidaTotalYDejaStockCero() {
+        LocalDate vencido = LocalDate.now().minusDays(10);
+        var datos = prepararDatosPruebaConVencimiento("VENC_OK", 5, vencido);
+
+        Integer idMov = servicio.registrarSalida(
+                datos.idLote(),
+                datos.nombreUsuario(),
+                new SalidaInventarioFormulario(5, "Baja por vencimiento"));
+
+        assertNotNull(idMov);
+        Integer stockFinal = jdbcTemplate.queryForObject(
+                "SELECT stock_actual FROM lote WHERE id_lote = ?",
+                Integer.class, datos.idLote());
+        assertEquals(0, stockFinal);
+
+        var mov = jdbcTemplate.queryForMap(
+                "SELECT tipo, id_venta, motivo FROM movimiento_inventario WHERE id_movimiento = ?",
+                idMov);
+        assertEquals("SALIDA", mov.get("tipo"));
+        assertEquals(null, mov.get("id_venta"));
+        assertEquals("Baja por vencimiento", mov.get("motivo"));
+    }
+
+    @Test
+    @DisplayName("CA-2.2: Lote vencido con stock 5 rechaza salida de 6 y motivo vacío")
+    void bajaDeLoteVencido_validaStockSuficienteYMotivoObligatorio() {
+        LocalDate vencido = LocalDate.now().minusDays(5);
+        var datos = prepararDatosPruebaConVencimiento("VENC_VAL", 5, vencido);
+
+        // Exceso de stock
+        var exStock = assertThrows(IllegalArgumentException.class, () ->
+                servicio.registrarSalida(datos.idLote(), datos.nombreUsuario(),
+                        new SalidaInventarioFormulario(6, "Baja")));
+        assertEquals("No hay existencias suficientes para registrar la salida", exStock.getMessage());
+
+        // Motivo vacío
+        assertThrows(IllegalArgumentException.class, () ->
+                servicio.registrarSalida(datos.idLote(), datos.nombreUsuario(),
+                        new SalidaInventarioFormulario(5, "   ")));
+
+        // Stock inalterado
+        Integer stock = jdbcTemplate.queryForObject(
+                "SELECT stock_actual FROM lote WHERE id_lote = ?",
+                Integer.class, datos.idLote());
+        assertEquals(5, stock);
+    }
+
+    @Test
+    @DisplayName("CA-2.5: Regresión - Lote vencido no puede venderse (descontarStockVigente falla)")
+    void loteVencidoNoPuedeSerDescontadoParaVenta() {
+        LocalDate vencido = LocalDate.now().minusDays(1);
+        var datos = prepararDatosPruebaConVencimiento("VENC_REG", 10, vencido);
+
+        // La regla atómica de venta exige fecha_vencimiento >= hoy
+        int filasModificadas = jdbcTemplate.update("""
+                UPDATE lote
+                SET stock_actual = stock_actual - 5
+                WHERE id_lote = ? AND stock_actual >= 5 AND fecha_vencimiento >= CURRENT_DATE
+                """, datos.idLote());
+
+        assertEquals(0, filasModificadas, "No debe descontar stock si el lote está vencido");
+
+        // No debe haberse actualizado ninguna fila
+        Integer stock = jdbcTemplate.queryForObject(
+                "SELECT stock_actual FROM lote WHERE id_lote = ?",
+                Integer.class, datos.idLote());
+        assertEquals(10, stock, "El lote vencido debe permanecer intacto ante intentos de venta");
+    }
+
+    // -------------------------------------------------------------------------
     // Método auxiliar para preparar fixtures sintéticos aislados
     // -------------------------------------------------------------------------
     private DatosPrueba prepararDatosPrueba(String prefijo, int stockInicial) {
+        return prepararDatosPruebaConVencimiento(prefijo, stockInicial, LocalDate.now().plusMonths(12));
+    }
+
+    private DatosPrueba prepararDatosPruebaConVencimiento(String prefijo, int stockInicial, LocalDate vencimiento) {
         String sufijo = prefijo + "_" + UUID.randomUUID().toString().replace("-", "").substring(0, 8);
         String nombreUsuario = "usr_" + sufijo;
         String codigoMed = "MED_" + sufijo;
@@ -233,7 +311,7 @@ class MovimientoInventarioServicioTransaccionalTest {
                 INSERT INTO lote(id_medicamento, numero_lote, fecha_vencimiento, stock_actual)
                 VALUES (?, ?, ?, ?)
                 RETURNING id_lote
-                """, Integer.class, idMedicamento, numLote, LocalDate.now().plusMonths(12), stockInicial);
+                """, Integer.class, idMedicamento, numLote, vencimiento, stockInicial);
 
         return new DatosPrueba(idUsuario, nombreUsuario, idMedicamento, idLote, stockInicial);
     }

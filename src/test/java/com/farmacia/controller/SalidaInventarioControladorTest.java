@@ -214,6 +214,62 @@ class SalidaInventarioControladorTest {
         verify(medicamentoServicio).buscarPorId(1);
     }
 
+    @Test
+    @DisplayName("CA-2.3: GET /lotes/{idLote}/salida?motivo=Baja%20por%20vencimiento precarga motivo en el formulario")
+    void nuevoPorLote_conMotivoParametro_precargaMotivoEnFormulario() throws Exception {
+        var lote = new Lote(5, 1, "LOT-100", LocalDate.now().minusDays(1), 10);
+        var medicamento = new Medicamento(1, "MED-01", "Amoxicilina", "500mg", "Caja", "CAJA", BigDecimal.valueOf(15.0), 5, true);
+
+        when(loteServicio.buscarPorId(5)).thenReturn(Optional.of(lote));
+        when(medicamentoServicio.buscarPorId(1)).thenReturn(Optional.of(medicamento));
+        when(loteServicio.listarDisponiblesPorMedicamento(1)).thenReturn(List.of());
+        when(prioridadServicio.identificarLotesPrioritarios(any())).thenReturn(Set.of());
+
+        mvc.perform(get("/lotes/5/salida")
+                        .param("motivo", "Baja por vencimiento")
+                        .with(user("almacen1").roles("ALMACENERO")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("salidas/formulario"))
+                .andExpect(model().attribute("formulario",
+                        new com.farmacia.dto.SalidaInventarioFormulario(null, "Baja por vencimiento")));
+    }
+
+    @Test
+    @DisplayName("CA-2.4: GET /lotes/{idLote}/salida con rol VENDEDOR retorna 403 Forbidden")
+    void nuevoPorLote_conRolVendedor_retorna403Forbidden() throws Exception {
+        mvc.perform(get("/lotes/5/salida").with(user("vendedor1").roles("VENDEDOR")))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("CA-2.4: GET /lotes/{idLote}/salida con rol COMPRAS retorna 403 Forbidden")
+    void nuevoPorLote_conRolCompras_retorna403Forbidden() throws Exception {
+        mvc.perform(get("/lotes/5/salida").with(user("compras1").roles("COMPRAS")))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("CA-2.4: POST /lotes/{idLote}/salida con rol VENDEDOR retorna 403 Forbidden")
+    void guardarPorLote_conRolVendedor_retorna403Forbidden() throws Exception {
+        mvc.perform(post("/lotes/5/salida")
+                        .with(user("vendedor1").roles("VENDEDOR"))
+                        .with(csrf())
+                        .param("cantidad", "1")
+                        .param("motivo", "Intento no autorizado"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("CA-2.4: POST /lotes/{idLote}/salida con rol COMPRAS retorna 403 Forbidden")
+    void guardarPorLote_conRolCompras_retorna403Forbidden() throws Exception {
+        mvc.perform(post("/lotes/5/salida")
+                        .with(user("compras1").roles("COMPRAS"))
+                        .with(csrf())
+                        .param("cantidad", "1")
+                        .param("motivo", "Intento no autorizado"))
+                .andExpect(status().isForbidden());
+    }
+
     // -------------------------------------------------------------------------
     // 9. GET /lotes/{idLote}/salida lote inexistente: 404
     // -------------------------------------------------------------------------

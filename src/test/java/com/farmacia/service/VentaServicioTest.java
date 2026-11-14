@@ -1,11 +1,13 @@
 package com.farmacia.service;
 
+import com.farmacia.dto.FiltroVentasFormulario;
 import com.farmacia.model.AsignacionLoteFefo;
 import com.farmacia.model.Cliente;
 import com.farmacia.model.ComprobanteVista;
 import com.farmacia.model.DetalleVenta;
 import com.farmacia.model.LineaPreparacionVentaVista;
 import com.farmacia.model.Usuario;
+import com.farmacia.model.VentaResumenVista;
 import com.farmacia.repository.ClienteRepositorio;
 import com.farmacia.repository.LoteRepositorio;
 import com.farmacia.repository.MovimientoInventarioRepositorio;
@@ -39,7 +41,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-/** Spec 003 (US-1, US-2, US-3): reglas de VentaServicio con repositorios simulados. */
+/**
+ * Spec 003 (US-1, US-2, US-3): reglas de VentaServicio con repositorios
+ * simulados.
+ */
 class VentaServicioTest {
     /** Auditoría simulada (spec 014). */
     private final AuditoriaServicio auditoria = org.mockito.Mockito.mock(AuditoriaServicio.class);
@@ -218,6 +223,124 @@ class VentaServicioTest {
         assertThrows(AccessDeniedException.class, () -> servicio.obtenerComprobante(12, "otro"));
         assertTrue(servicio.obtenerComprobante(404, "admin").isEmpty());
         assertEquals("Público general", comprobante.clienteVisible());
+    }
+
+    @Test
+    @DisplayName("CA-1.4: si hasta < desde lanza IllegalArgumentException y no consulta la base")
+    void listarHistorial_rangoInvertido_lanzaExcepcion() {
+        when(usuarios.buscarPorNombreUsuario("admin")).thenReturn(Optional.of(usuario(1, "ADMINISTRADOR")));
+        FiltroVentasFormulario filtroInvertido = new FiltroVentasFormulario(
+                HOY, HOY.minusDays(5), null, null, 1);
+
+        var ex = assertThrows(IllegalArgumentException.class,
+                () -> servicio.listarHistorial("admin", filtroInvertido));
+        assertTrue(ex.getMessage().contains("anterior"));
+        verify(ventas, never()).listar(any(), anyInt(), anyInt());
+        verify(ventas, never()).contar(any());
+    }
+
+    @Test
+    @DisplayName("CA-1.3: sin fechas en el filtro calcula por defecto los últimos 30 días según Clock")
+    void listarHistorial_sinFechas_aplicaUltimos30Dias() {
+        when(usuarios.buscarPorNombreUsuario("admin")).thenReturn(Optional.of(usuario(1, "ADMINISTRADOR")));
+        when(ventas.contar(any())).thenReturn(1);
+        when(ventas.sumarTotal(any())).thenReturn(new BigDecimal("150.00"));
+        var venta = new VentaResumenVista(1, "B001-00000001", HOY.atTime(10, 0), 7, "Vendedor", null,
+                new BigDecimal("150.00"), BigDecimal.ZERO, new BigDecimal("150.00"));
+        when(ventas.listar(any(), eq(20), eq(0))).thenReturn(List.of(venta));
+
+        VentaServicio.Historial resultado = servicio.listarHistorial("admin", FiltroVentasFormulario.vacio());
+
+        assertEquals(HOY, resultado.hasta());
+        assertEquals(HOY.minusDays(30), resultado.desde());
+        assertEquals(1, resultado.total());
+        assertEquals(1, resultado.paginas());
+        assertEquals(1, resultado.pagina());
+        assertEquals(new BigDecimal("150.00"), resultado.totalFiltrado());
+        assertEquals(1, resultado.filas().size());
+    }
+
+    @Test
+    @DisplayName("Seguridad: usuario sin rol ADMINISTRADOR no puede consultar el historial general")
+    void listarHistorial_rolNoAutorizado_lanzaAccessDenied() {
+        when(usuarios.buscarPorNombreUsuario("vendedor")).thenReturn(Optional.of(usuario(7, "VENDEDOR")));
+
+        assertThrows(AccessDeniedException.class,
+                () -> servicio.listarHistorial("vendedor", FiltroVentasFormulario.vacio()));
+        verify(ventas, never()).listar(any(), anyInt(), anyInt());
+    }
+
+    @Test
+    @DisplayName("CA-1.6: cálculo correcto de páginas y offset en paginación")
+    void listarHistorial_calculoPaginacion() {
+        when(usuarios.buscarPorNombreUsuario("admin")).thenReturn(Optional.of(usuario(1, "ADMINISTRADOR")));
+        when(ventas.contar(any())).thenReturn(45);
+        when(ventas.sumarTotal(any())).thenReturn(new BigDecimal("450.00"));
+        when(ventas.listar(any(), eq(20), eq(40))).thenReturn(List.of());
+
+        FiltroVentasFormulario filtro = new FiltroVentasFormulario(HOY.minusDays(10), HOY, null, null, 3);
+        VentaServicio.Historial resultado = servicio.listarHistorial("admin", filtro, 3);
+
+        assertEquals(45, resultado.total());
+        assertEquals(3, resultado.paginas());
+        assertEquals(3, resultado.pagina());
+        verify(ventas).listar(any(), eq(20), eq(40));
+    }
+
+    @Test
+    @DisplayName("CA-4.5: listarMisVentas solo permite rol VENDEDOR, otros roles reciben AccessDeniedException")
+    void listarMisVentas_soloRolVendedor() {
+        when(usuarios.buscarPorNombreUsuario("admin")).thenReturn(Optional.of(usuario(1, "ADMINISTRADOR")));
+        when(usuarios.buscarPorNombreUsuario("almacen")).thenReturn(Optional.of(usuario(2, "ALMACENERO")));
+
+        assertThrows(AccessDeniedException.class, () -> servicio.listarMisVentas("admin", HOY, HOY));
+        assertThrows(AccessDeniedException.class, () -> servicio.listarMisVentas("almacen", HOY, HOY));
+    }
+
+    @Test
+    @DisplayName("CA-4.2: listarMisVentas sin fechas asigna por defecto hoy según Clock")
+    void listarMisVentas_rangoPorDefectoHoy() {
+        when(usuarios.buscarPorNombreUsuario("vendedor")).thenReturn(Optional.of(usuario(7, "VENDEDOR")));
+        when(ventas.listar(any(), anyInt(), anyInt())).thenReturn(List.of());
+
+        var resultado = servicio.listarMisVentas("vendedor", null, null);
+
+        assertEquals(HOY, resultado.desde());
+        assertEquals(HOY, resultado.hasta());
+    }
+
+    @Test
+    @DisplayName("CA-4.2: listarMisVentas con hasta < desde lanza IllegalArgumentException")
+    void listarMisVentas_hastaMenorQueDesde_lanzaExcepcion() {
+        when(usuarios.buscarPorNombreUsuario("vendedor")).thenReturn(Optional.of(usuario(7, "VENDEDOR")));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> servicio.listarMisVentas("vendedor", HOY, HOY.minusDays(1)));
+        verifyNoInteractions(ventas);
+    }
+
+    @Test
+    @DisplayName("CA-4.2: listarMisVentas con rango mayor a 30 días hacia atrás lanza IllegalArgumentException")
+    void listarMisVentas_rangoMayorA30Dias_lanzaExcepcion() {
+        when(usuarios.buscarPorNombreUsuario("vendedor")).thenReturn(Optional.of(usuario(7, "VENDEDOR")));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> servicio.listarMisVentas("vendedor", HOY.minusDays(31), HOY));
+        verifyNoInteractions(ventas);
+    }
+
+    @Test
+    @DisplayName("CA-4.1, CA-4.3: listarMisVentas consulta únicamente las ventas del vendedor autenticado")
+    void listarMisVentas_soloConsultaVendedorAutenticado() {
+        when(usuarios.buscarPorNombreUsuario("vendedor")).thenReturn(Optional.of(usuario(7, "VENDEDOR")));
+        var fila = new VentaResumenVista(10, "B001-00000010", HOY.atTime(11, 0), 7, "Vendedor", null,
+                new BigDecimal("50.00"), BigDecimal.ZERO, new BigDecimal("50.00"));
+        when(ventas.listar(any(FiltroVentasFormulario.class), anyInt(), anyInt())).thenReturn(List.of(fila));
+
+        var resultado = servicio.listarMisVentas("vendedor", HOY, HOY);
+
+        assertEquals(1, resultado.filas().size());
+        assertEquals(10, resultado.filas().getFirst().idVenta());
     }
 
     private static LineaPreparacionVentaVista linea(int idMedicamento, int cantidad) {
