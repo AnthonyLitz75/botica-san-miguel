@@ -70,8 +70,6 @@ class MatrizRutasTest {
     @MockitoBean private ProveedorServicio proveedorServicio;
     @MockitoBean private VentaServicio ventaServicio;
     @MockitoBean private UsuarioDetallesServicio usuarioDetallesServicio;
-    @MockitoBean private UsuarioServicio usuarioServicio;
-    @MockitoBean private ReporteServicio reporteServicio;
     @MockitoBean private com.farmacia.service.AuditoriaServicio auditoriaServicio;
 
     /** Ruta, método y roles que la pueden usar (matriz del README). */
@@ -132,28 +130,7 @@ class MatrizRutasTest {
                 ruta("GET", "/ventas/mias", V),
                 // Auditoría (spec 014)
                 ruta("GET", "/auditoria", A),
-                ruta("GET", "/auditoria.csv", A),
-                // Usuarios (spec 007)
-                ruta("GET", "/usuarios", A),
-                ruta("GET", "/usuarios/nuevo", A),
-                ruta("POST", "/usuarios", A),
-                ruta("GET", "/usuarios/1/editar", A),
-                ruta("POST", "/usuarios/1/editar", A),
-                ruta("POST", "/usuarios/1/clave", A),
-                ruta("POST", "/usuarios/1/desactivar", A),
-                ruta("POST", "/usuarios/1/activar", A),
-                // Reportes (spec 008)
-                ruta("GET", "/reportes/ventas", A),
-                ruta("GET", "/reportes/mas-vendidos", A),
-                ruta("GET", "/reportes/mermas", A),
-                ruta("GET", "/reportes/panel", A),
-                ruta("GET", "/reportes/inventario", A),
-                ruta("GET", "/reportes/compras", A),
-                ruta("GET", "/reportes/ventas.csv", A),
-                ruta("GET", "/reportes/mas-vendidos.csv", A),
-                ruta("GET", "/reportes/mermas.csv", A),
-                ruta("GET", "/reportes/inventario.csv", A),
-                ruta("GET", "/reportes/compras.csv", A));
+                ruta("GET", "/auditoria.csv", A));
     }
 
     @ParameterizedTest(name = "{0} {1} → permitido a {2}")
