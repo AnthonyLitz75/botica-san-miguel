@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragmentos/head :: recursos('Historial de ventas')}">
+    <title>Historial de ventas | Botica San Miguel</title>
+</head>
+
+<body class="pagina-inventario">
+    <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
+    <aside th:replace="~{fragmentos/navegacion :: lateral('Historial de ventas')}"></aside>
+    <div class="inventario-area">
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Historial de ventas', 'Consulta de comprobantes')}"></header>
+        <main id="contenido" class="inventario-contenido">
+
+            <div class="inventario-titulo">
+                <div>
+                    <p class="seccion-etiqueta">VENTAS / HISTORIAL</p>
+                    <h1>Historial de ventas</h1>
+                    <p class="clientes-intro">Consulta las ventas realizadas, montos acumulados y comprobantes emitidos.</p>
+                </div>
+            </div>
+
+            <div class="aviso-operacion aviso-error shadow-sm" th:if="${error != null}" role="alert">
+                <span class="icono icono-circle-alert" aria-hidden="true"></span>
+                <span th:text="${error}">Error en los filtros.</span>
+            </div>
+
+            <section class="alertas-metricas mb-4" aria-label="Resumen de ventas">
+                <article class="alerta-metrica metrica-preventiva">
+                    <span class="alerta-metrica-etiqueta">Monto total filtrado</span>
+                    <strong th:text="${'S/ ' + #numbers.formatDecimal(totalFiltrado, 1, 'COMMA', 2, 'POINT')}">S/ 0.00</strong>
+                    <span th:text="${total + (total == 1 ? ' venta encontrada' : ' ventas encontradas')}">0 ventas</span>
+                </article>
+            </section>
+
+            <form class="inventario-filtros" th:action="@{/ventas}" method="get" role="search" aria-label="Filtros del historial de ventas">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 w-full">
+                    <div>
+                        <label for="desde">Desde</label>
+                        <input type="date" id="desde" name="desde"
+                            th:value="${filtro.desde() != null ? filtro.desde() : desdeEfectivo}">
+                    </div>
+                    <div>
+                        <label for="hasta">Hasta</label>
+                        <input type="date" id="hasta" name="hasta"
+                            th:value="${filtro.hasta() != null ? filtro.hasta() : hastaEfectivo}">
+                    </div>
+                    <div>
+                        <label for="idVendedor">Vendedor</label>
+                        <select id="idVendedor" name="idVendedor">
+                            <option value="">Todos los vendedores</option>
+                            <option th:each="v : ${vendedores}" th:value="${v.idUsuario()}" th:text="${v.nombre()}"
+                                th:selected="${filtro.idVendedor() == v.idUsuario()}"></option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="comprobante">N° Comprobante</label>
+                        <input type="search" id="comprobante" name="comprobante" th:value="${filtro.comprobante()}"
+                            placeholder="B001-0000...">
+                    </div>
+                </div>
+                <div class="filtro-acciones mt-3">
+                    <button class="inventario-boton boton-principal transition-all duration-150 active:scale-95" type="submit">
+                        <span class="icono icono-search" aria-hidden="true"></span>Filtrar
+                    </button>
+                    <a class="inventario-boton boton-secundario transition-all duration-150 active:scale-95" th:href="@{/ventas}">
+                        <span class="icono icono-x" aria-hidden="true"></span>Limpiar
+                    </a>
+                </div>
+            </form>
+
+            <section class="inventario-resultados" aria-labelledby="titulo-ventas">
+                <div class="resultados-cabecera">
+                    <h2 id="titulo-ventas">
+                        Listado de comprobantes
+                        <span class="cantidad-resultados" th:text="${total}">0</span>
+                    </h2>
+                </div>
+
+                <div class="inventario-vacio" th:if="${#lists.isEmpty(filas)}">
+                    <span class="icono icono-circle-check" aria-hidden="true"></span>
+                    <p>No se encontraron ventas para los filtros seleccionados.</p>
+                </div>
+
+                <div class="tabla-contenedor inventario-tabla tabla-ventas" th:unless="${#lists.isEmpty(filas)}"
+                    role="region" aria-label="Historial de ventas, tabla desplazable">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">Comprobante</th>
+                                <th scope="col">Fecha y hora</th>
+                                <th scope="col">Vendedor</th>
+                                <th scope="col">Cliente</th>
+                                <th scope="col" class="numero">Subtotal</th>
+                                <th scope="col" class="numero">Descuento</th>
+                                <th scope="col" class="numero">Total</th>
+                                <th scope="col">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="fila : ${filas}" class="hover:bg-slate-50/80 transition-colors duration-150">
+                                <td>
+                                    <span class="codigo-medicamento font-mono font-semibold"
+                                        th:text="${fila.numeroComprobante()}">B001-00000001</span>
+                                </td>
+                                <td class="fecha-registro"
+                                    th:text="${#temporals.format(fila.fechaHora(), 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</td>
+                                <td th:text="${fila.vendedor()}">Vendedor</td>
+                                <td th:text="${fila.clienteVisible()}">Público general</td>
+                                <td class="numero" th:text="${'S/ ' + #numbers.formatDecimal(fila.subtotal(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</td>
+                                <td class="numero" th:text="${'S/ ' + #numbers.formatDecimal(fila.descuentoTotal(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</td>
+                                <td class="numero">
+                                    <strong class="font-bold text-emerald-700"
+                                        th:text="${'S/ ' + #numbers.formatDecimal(fila.total(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</strong>
+                                </td>
+                                <td>
+                                    <a class="enlace-lotes inline-flex items-center gap-1 font-medium text-emerald-700 hover:text-emerald-800 transition-colors"
+                                        th:href="@{/ventas/{id}(id=${fila.idVenta()})}">
+                                        <span class="icono icono-printer" aria-hidden="true"></span>Ver comprobante
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <nav class="flex items-center justify-between mt-4" aria-label="Paginación" th:if="${paginas > 1}">
+                    <a class="inventario-boton boton-secundario" th:if="${pagina > 1}"
+                        th:href="@{/ventas(desde=${filtro.desde() != null ? filtro.desde() : desdeEfectivo},hasta=${filtro.hasta() != null ? filtro.hasta() : hastaEfectivo},idVendedor=${filtro.idVendedor()},comprobante=${filtro.comprobante()},pagina=${pagina - 1})}">Anterior</a>
+                    <span th:unless="${pagina > 1}"></span>
+                    <span class="text-sm text-slate-600 font-medium" th:text="|Página ${pagina} de ${paginas}|">Página 1 de 1</span>
+                    <a class="inventario-boton boton-secundario" th:if="${pagina < paginas}"
+                        th:href="@{/ventas(desde=${filtro.desde() != null ? filtro.desde() : desdeEfectivo},hasta=${filtro.hasta() != null ? filtro.hasta() : hastaEfectivo},idVendedor=${filtro.idVendedor()},comprobante=${filtro.comprobante()},pagina=${pagina + 1})}">Siguiente</a>
+                    <span th:unless="${pagina < paginas}"></span>
+                </nav>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

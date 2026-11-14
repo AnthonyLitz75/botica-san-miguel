@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragmentos/head :: recursos('Existencias iniciales')}">
+    <title>Existencias iniciales | Botica San Miguel</title>
+</head>
+
+<body class="pagina-inventario">
+    <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
+    <aside th:replace="~{fragmentos/navegacion :: lateral('Movimientos')}"></aside>
+    <div class="inventario-area">
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Existencias iniciales', 'Inventario')}"></header>
+        <main id="contenido" class="inventario-contenido">
+            <div class="inventario-titulo">
+                <div>
+                    <p class="seccion-etiqueta">INVENTARIO / CARGA DE EXISTENCIAS</p>
+                    <h1>Registrar existencias iniciales</h1>
+                </div>
+                <a class="inventario-boton boton-secundario" th:href="@{/movimientos}">
+                    <span class="icono icono-arrow-left" aria-hidden="true"></span>Volver a movimientos
+                </a>
+            </div>
+
+            <div class="aviso-operacion aviso-error shadow-sm" th:if="${error != null}" role="alert">
+                <span class="icono icono-circle-alert" aria-hidden="true"></span>
+                <span th:text="${error}">Error al registrar existencias iniciales.</span>
+            </div>
+
+            <div class="aviso-operacion aviso-info mb-6" role="note">
+                <span class="icono icono-clipboard-list" aria-hidden="true"></span>
+                <div>
+                    <p><strong>Carga inicial de inventario:</strong> Utiliza este formulario para registrar existencias iniciales o ajustes de stock sin requerir una orden de compra. Si el lote ya existe con la misma fecha de vencimiento, marca la casilla <strong>Acumular al lote existente</strong>.</p>
+                </div>
+            </div>
+
+            <form th:action="@{/inventario/existencias-iniciales}" th:object="${formulario}" method="post" class="proveedor-formulario">
+                <div class="aviso-operacion aviso-error" th:if="${#fields.hasGlobalErrors()}" role="alert">
+                    <span class="icono icono-x" aria-hidden="true"></span>
+                    <div>
+                        <p th:each="error : ${#fields.globalErrors()}" th:text="${error}"></p>
+                    </div>
+                </div>
+
+                <fieldset>
+                    <legend>Datos del lote y existencias</legend>
+                    <div class="proveedor-campos">
+                        <div class="campo-completo">
+                            <label for="idMedicamento">Medicamento</label>
+                            <select id="idMedicamento" th:field="*{idMedicamento}" required
+                                th:attr="aria-invalid=${#fields.hasErrors('idMedicamento')},aria-describedby=${#fields.hasErrors('idMedicamento') ? 'error-idMedicamento' : null}">
+                                <option value="">-- Seleccionar medicamento activo --</option>
+                                <option th:each="m : ${medicamentos}" th:value="${m.idMedicamento()}"
+                                    th:text="${m.codigo() + ' - ' + m.nombre() + ' (' + m.unidadControl() + ')'}">
+                                </option>
+                            </select>
+                            <span class="campo-error" id="error-idMedicamento" th:if="${#fields.hasErrors('idMedicamento')}"
+                                th:errors="*{idMedicamento}"></span>
+                        </div>
+
+                        <div>
+                            <label for="numeroLote">N° Lote</label>
+                            <input type="text" id="numeroLote" th:field="*{numeroLote}" maxlength="50" required
+                                placeholder="Ej. LOTE-2026-01"
+                                th:attr="aria-invalid=${#fields.hasErrors('numeroLote')},aria-describedby=${#fields.hasErrors('numeroLote') ? 'error-numeroLote' : null}">
+                            <span class="campo-error" id="error-numeroLote" th:if="${#fields.hasErrors('numeroLote')}"
+                                th:errors="*{numeroLote}"></span>
+                        </div>
+
+                        <div>
+                            <label for="fechaVencimiento">Fecha de vencimiento</label>
+                            <input type="date" id="fechaVencimiento" th:field="*{fechaVencimiento}" required
+                                th:attr="aria-invalid=${#fields.hasErrors('fechaVencimiento')},aria-describedby=${#fields.hasErrors('fechaVencimiento') ? 'error-fechaVencimiento' : null}">
+                            <span class="campo-error" id="error-fechaVencimiento" th:if="${#fields.hasErrors('fechaVencimiento')}"
+                                th:errors="*{fechaVencimiento}"></span>
+                        </div>
+
+                        <div>
+                            <label for="cantidad">Cantidad inicial</label>
+                            <input type="number" id="cantidad" th:field="*{cantidad}" min="1" step="1" required
+                                placeholder="Ej. 50"
+                                th:attr="aria-invalid=${#fields.hasErrors('cantidad')},aria-describedby=${#fields.hasErrors('cantidad') ? 'error-cantidad' : null}">
+                            <span class="campo-error" id="error-cantidad" th:if="${#fields.hasErrors('cantidad')}"
+                                th:errors="*{cantidad}"></span>
+                        </div>
+
+                        <div class="campo-completo">
+                            <label for="motivo">Motivo de registro</label>
+                            <input type="text" id="motivo" th:field="*{motivo}" maxlength="250" required
+                                placeholder="Existencias iniciales"
+                                th:attr="aria-invalid=${#fields.hasErrors('motivo')},aria-describedby=${#fields.hasErrors('motivo') ? 'error-motivo' : null}">
+                            <span class="campo-error" id="error-motivo" th:if="${#fields.hasErrors('motivo')}"
+                                th:errors="*{motivo}"></span>
+                        </div>
+
+                        <div class="campo-completo mt-2">
+                            <label class="inline-flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="confirmarAcumulacion" th:field="*{confirmarAcumulacion}"
+                                    class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                                <span class="text-sm font-medium text-slate-700">Acumular al lote existente si ya existe con la misma fecha de vencimiento</span>
+                            </label>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <div class="proveedor-acciones">
+                    <button type="submit" class="inventario-boton boton-principal transition-all duration-150 active:scale-95">
+                        <span class="icono icono-check" aria-hidden="true"></span>Registrar existencias
+                    </button>
+                    <a th:href="@{/movimientos}" class="inventario-boton boton-secundario transition-all duration-150 active:scale-95">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </main>
+    </div>
+</body>
+
+</html>

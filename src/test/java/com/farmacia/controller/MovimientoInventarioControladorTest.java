@@ -3,6 +3,8 @@ package com.farmacia.controller;
 import com.farmacia.config.SeguridadConfiguracion;
 import com.farmacia.model.DetalleMovimientoInventario;
 import com.farmacia.model.MovimientoInventario;
+import com.farmacia.dto.FiltroMovimientosFormulario;
+import com.farmacia.service.MedicamentoServicio;
 import com.farmacia.service.MovimientoInventarioServicio;
 import com.farmacia.service.UsuarioDetallesServicio;
 import org.junit.jupiter.api.DisplayName;
@@ -19,6 +21,8 @@ import java.util.Optional;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @WebMvcTest(MovimientoInventarioControlador.class)
-@Import(SeguridadConfiguracion.class)
+@Import({SeguridadConfiguracion.class, NavegacionCompartida.class})
 class MovimientoInventarioControladorTest {
 
     @Autowired
@@ -40,6 +44,9 @@ class MovimientoInventarioControladorTest {
 
     @MockitoBean
     private MovimientoInventarioServicio servicio;
+
+    @MockitoBean
+    private MedicamentoServicio medicamentoServicio;
 
     @MockitoBean
     private UsuarioDetallesServicio usuarios;
@@ -170,5 +177,63 @@ class MovimientoInventarioControladorTest {
                 .andExpect(status().isForbidden());
 
         verify(servicio, never()).registrarSalida(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+    }
+
+    // -------------------------------------------------------------------------
+    // Escenarios T508: Filtros, paginación, origen, responsable y cantidad
+    // -------------------------------------------------------------------------
+    @Test
+    @DisplayName("Escenario 8: GET /movimientos con filtros y página invoca servicio.listarKardex")
+    void listar_conFiltrosYPaginacion_invocaListarKardex() throws Exception {
+        var mov = new MovimientoInventario(1, 2, null, null, null, "SALIDA", LocalDateTime.now(), "Merma", "Otra salida", "Carlos Almacén", null);
+        var kardex = new MovimientoInventarioServicio.Kardex(List.of(mov), 25, 2, 2);
+        when(servicio.listarKardex(any(), eq(2))).thenReturn(kardex);
+
+        mvc.perform(get("/movimientos")
+                        .param("tipo", "SALIDA")
+                        .param("pagina", "2")
+                        .with(user("almacen1").roles("ALMACENERO")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("movimientos/listado"))
+                .andExpect(model().attribute("movimientos", hasSize(1)))
+                .andExpect(model().attribute("total", 25))
+                .andExpect(model().attribute("pagina", 2))
+                .andExpect(model().attribute("paginas", 2))
+                .andExpect(model().attributeExists("medicamentos"))
+                .andExpect(model().attributeExists("usuarios"));
+
+        verify(servicio).listarKardex(any(), eq(2));
+    }
+
+    @Test
+    @DisplayName("Escenario 9: GET /movimientos con rango de fechas invertido captura excepción y muestra error")
+    void listar_conRangoFechasInvertido_muestraErrorEnModelo() throws Exception {
+        when(servicio.listarKardex(any(), eq(1)))
+                .thenThrow(new IllegalArgumentException("La fecha final no puede ser anterior a la fecha inicial"));
+
+        mvc.perform(get("/movimientos")
+                        .param("desde", "2026-11-20")
+                        .param("hasta", "2026-11-10")
+                        .with(user("admin1").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("movimientos/listado"))
+                .andExpect(model().attribute("error", "La fecha final no puede ser anterior a la fecha inicial"))
+                .andExpect(model().attribute("movimientos", hasSize(0)))
+                .andExpect(model().attribute("total", 0));
+    }
+
+    @Test
+    @DisplayName("Escenario 10: GET /movimientos con filtro de medicamento muestra cantidad de medicamento")
+    void listar_conFiltroMedicamento_renderizaColumnaCantidad() throws Exception {
+        var mov = new MovimientoInventario(5, 2, 1, null, 10, "ENTRADA", LocalDateTime.now(), "Compra", "Recepción de compra", "Admin", 15);
+        var kardex = new MovimientoInventarioServicio.Kardex(List.of(mov), 1, 1, 1);
+        when(servicio.listarKardex(any(), eq(1))).thenReturn(kardex);
+
+        mvc.perform(get("/movimientos")
+                        .param("idMedicamento", "1")
+                        .with(user("admin1").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("movimientos/listado"))
+                .andExpect(model().attribute("movimientos", hasSize(1)));
     }
 }

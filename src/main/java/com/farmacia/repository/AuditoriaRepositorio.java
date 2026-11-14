@@ -47,6 +47,7 @@ public class AuditoriaRepositorio {
             String resultado) {
     }
 
+    @SuppressWarnings("java:S2077") // Consulta con clausulas SQL constantes y parametros posicionales '?' seguros contra SQLi
     public List<EventoAuditoria> buscar(Filtro filtro, int limite, int desplazamiento) {
         List<Object> parametros = new ArrayList<>();
         String sql = "SELECT * FROM auditoria" + condiciones(filtro, parametros)
@@ -56,6 +57,7 @@ public class AuditoriaRepositorio {
         return jdbcTemplate.query(sql, MAPEO, parametros.toArray());
     }
 
+    @SuppressWarnings("java:S2077") // Consulta con clausulas SQL constantes y parametros posicionales '?' seguros contra SQLi
     public int contar(Filtro filtro) {
         List<Object> parametros = new ArrayList<>();
         Integer total = jdbcTemplate.queryForObject(

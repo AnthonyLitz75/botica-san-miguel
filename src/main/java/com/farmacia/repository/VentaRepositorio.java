@@ -1,12 +1,16 @@
 package com.farmacia.repository;
 
+import com.farmacia.dto.FiltroVentasFormulario;
 import com.farmacia.model.ComprobanteVista;
 import com.farmacia.model.DetalleVenta;
+import com.farmacia.model.VentaResumenVista;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -17,7 +21,10 @@ public class VentaRepositorio {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    /** Siguiente correlativo atómico de la secuencia: B001-00000001, B001-00000002, ... */
+    /**
+     * Siguiente correlativo atómico de la secuencia: B001-00000001, B001-00000002,
+     * ...
+     */
     public String siguienteNumeroComprobante() {
         return jdbcTemplate.queryForObject(
                 "SELECT 'B001-' || lpad(nextval('seq_numero_comprobante')::text, 8, '0')",
@@ -90,5 +97,89 @@ public class VentaRepositorio {
                         fila.getBigDecimal("descuento_total"),
                         fila.getBigDecimal("total")),
                 idVenta).stream().findFirst();
+    }
+
+    private static final RowMapper<VentaResumenVista> MAPEO_RESUMEN = (fila, numero) -> new VentaResumenVista(
+            fila.getInt("id_venta"),
+            fila.getString("numero_comprobante"),
+            fila.getObject("fecha_hora", LocalDateTime.class),
+            fila.getInt("id_usuario"),
+            fila.getString("vendedor"),
+            fila.getString("cliente"),
+            fila.getBigDecimal("subtotal"),
+            fila.getBigDecimal("descuento_total"),
+            fila.getBigDecimal("total"));
+
+    /**
+     * Lista ventas paginadas con filtros opcionales (spec 005, CA-1.1, 1.2, 1.3,
+     * 1.6).
+     */
+    @SuppressWarnings("java:S2077") // Consulta con clausulas SQL constantes y parametros posicionales '?' seguros contra SQLi
+    public List<VentaResumenVista> listar(FiltroVentasFormulario filtro, int limite, int offset) {
+        List<Object> parametros = new ArrayList<>();
+        String sql = """
+                SELECT v.id_venta, v.numero_comprobante, v.fecha_hora, v.id_usuario,
+                       u.nombre AS vendedor, c.nombre_completo AS cliente,
+                       v.subtotal, v.descuento_total, v.total
+                FROM venta v
+                JOIN usuario u ON u.id_usuario = v.id_usuario
+                LEFT JOIN cliente c ON c.id_cliente = v.id_cliente
+                """ + condiciones(filtro, parametros) + """
+                 ORDER BY v.fecha_hora DESC, v.id_venta DESC
+                 LIMIT ? OFFSET ?
+                """;
+        parametros.add(limite);
+        parametros.add(offset);
+        return jdbcTemplate.query(sql, MAPEO_RESUMEN, parametros.toArray());
+    }
+
+    /**
+     * Cuenta el total de ventas que cumplen el filtro (spec 005, CA-1.6).
+     */
+    @SuppressWarnings("java:S2077") // Consulta con clausulas SQL constantes y parametros posicionales '?' seguros contra SQLi
+    public int contar(FiltroVentasFormulario filtro) {
+        List<Object> parametros = new ArrayList<>();
+        String sql = "SELECT COUNT(*) FROM venta v" + condiciones(filtro, parametros);
+        Integer total = jdbcTemplate.queryForObject(sql, Integer.class, parametros.toArray());
+        return total == null ? 0 : total;
+    }
+
+    /**
+     * Calcula la suma acumulada de total de todas las ventas del filtro (spec 005,
+     * CA-1.5).
+     */
+    @SuppressWarnings("java:S2077") // Consulta con clausulas SQL constantes y parametros posicionales '?' seguros contra SQLi
+    public BigDecimal sumarTotal(FiltroVentasFormulario filtro) {
+        List<Object> parametros = new ArrayList<>();
+        String sql = "SELECT COALESCE(SUM(v.total), 0) FROM venta v" + condiciones(filtro, parametros);
+        BigDecimal total = jdbcTemplate.queryForObject(sql, BigDecimal.class, parametros.toArray());
+        return total == null ? BigDecimal.ZERO : total;
+    }
+
+    private static String condiciones(FiltroVentasFormulario filtro, List<Object> parametros) {
+        StringBuilder where = new StringBuilder(" WHERE 1 = 1");
+        if (filtro != null) {
+            if (filtro.desde() != null) {
+                where.append(" AND v.fecha_hora >= ?");
+                parametros.add(filtro.desde().atStartOfDay());
+            }
+            if (filtro.hasta() != null) {
+                where.append(" AND v.fecha_hora < ?");
+                parametros.add(filtro.hasta().plusDays(1).atStartOfDay());
+            }
+            if (filtro.idVendedor() != null) {
+                where.append(" AND v.id_usuario = ?");
+                parametros.add(filtro.idVendedor());
+            }
+            if (tieneTexto(filtro.comprobante())) {
+                where.append(" AND v.numero_comprobante ILIKE ?");
+                parametros.add(filtro.comprobante().strip() + "%");
+            }
+        }
+        return where.toString();
+    }
+
+    private static boolean tieneTexto(String valor) {
+        return valor != null && !valor.isBlank();
     }
 }

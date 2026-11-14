@@ -11,7 +11,9 @@ import com.farmacia.service.MovimientoInventarioServicio;
 import com.farmacia.service.OrdenCompraServicio;
 import com.farmacia.service.PreparacionVentaServicio;
 import com.farmacia.service.ProveedorServicio;
+import com.farmacia.service.ReporteServicio;
 import com.farmacia.service.UsuarioDetallesServicio;
+import com.farmacia.service.UsuarioServicio;
 import com.farmacia.service.VentaServicio;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -68,6 +70,8 @@ class MatrizRutasTest {
     @MockitoBean private ProveedorServicio proveedorServicio;
     @MockitoBean private VentaServicio ventaServicio;
     @MockitoBean private UsuarioDetallesServicio usuarioDetallesServicio;
+    @MockitoBean private UsuarioServicio usuarioServicio;
+    @MockitoBean private ReporteServicio reporteServicio;
     @MockitoBean private com.farmacia.service.AuditoriaServicio auditoriaServicio;
 
     /** Ruta, método y roles que la pueden usar (matriz del README). */
@@ -97,6 +101,8 @@ class MatrizRutasTest {
                 ruta("POST", "/salidas/nueva", A, L),
                 ruta("GET", "/lotes/1/salida", A, L),
                 ruta("POST", "/lotes/1/salida", A, L),
+                ruta("GET", "/inventario/existencias-iniciales", A, L),
+                ruta("POST", "/inventario/existencias-iniciales", A, L),
                 // Alertas y clientes
                 ruta("GET", "/alertas", A, V, L, C),
                 ruta("GET", "/clientes", A, V),
@@ -121,9 +127,33 @@ class MatrizRutasTest {
                 ruta("PUT", "/ventas/preparacion/1/descuento", A, V),
                 ruta("POST", "/ventas/confirmar", A, V),
                 ruta("GET", "/ventas/1", A, V),
+                // Historial de ventas (spec 005)
+                ruta("GET", "/ventas", A),
+                ruta("GET", "/ventas/mias", V),
                 // Auditoría (spec 014)
                 ruta("GET", "/auditoria", A),
-                ruta("GET", "/auditoria.csv", A));
+                ruta("GET", "/auditoria.csv", A),
+                // Usuarios (spec 007)
+                ruta("GET", "/usuarios", A),
+                ruta("GET", "/usuarios/nuevo", A),
+                ruta("POST", "/usuarios", A),
+                ruta("GET", "/usuarios/1/editar", A),
+                ruta("POST", "/usuarios/1/editar", A),
+                ruta("POST", "/usuarios/1/clave", A),
+                ruta("POST", "/usuarios/1/desactivar", A),
+                ruta("POST", "/usuarios/1/activar", A),
+                // Reportes (spec 008)
+                ruta("GET", "/reportes/ventas", A),
+                ruta("GET", "/reportes/mas-vendidos", A),
+                ruta("GET", "/reportes/mermas", A),
+                ruta("GET", "/reportes/panel", A),
+                ruta("GET", "/reportes/inventario", A),
+                ruta("GET", "/reportes/compras", A),
+                ruta("GET", "/reportes/ventas.csv", A),
+                ruta("GET", "/reportes/mas-vendidos.csv", A),
+                ruta("GET", "/reportes/mermas.csv", A),
+                ruta("GET", "/reportes/inventario.csv", A),
+                ruta("GET", "/reportes/compras.csv", A));
     }
 
     @ParameterizedTest(name = "{0} {1} → permitido a {2}")

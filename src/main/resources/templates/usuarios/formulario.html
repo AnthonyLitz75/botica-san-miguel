@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragmentos/head :: recursos(${idUsuario != null ? 'Editar usuario' : 'Nuevo usuario'})}">
+    <title th:text="${idUsuario != null ? 'Editar usuario | Botica San Miguel' : 'Nuevo usuario | Botica San Miguel'}">Usuario | Botica San Miguel</title>
+</head>
+
+<body class="pagina-inventario">
+    <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
+    <aside th:replace="~{fragmentos/navegacion :: lateral('Usuarios')}"></aside>
+    <div class="inventario-area">
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Usuarios', 'Administración')}"></header>
+        <main id="contenido" class="inventario-contenido">
+            <div class="inventario-titulo">
+                <div>
+                    <p class="seccion-etiqueta">ADMINISTRACIÓN / USUARIOS</p>
+                    <h1 th:text="${idUsuario != null ? 'Editar usuario' : 'Nuevo usuario'}">Usuario</h1>
+                </div>
+                <a class="inventario-boton boton-secundario" th:href="@{/usuarios}">
+                    <span class="icono icono-arrow-left" aria-hidden="true"></span>Volver a usuarios
+                </a>
+            </div>
+
+            <form th:action="${idUsuario != null} ? @{/usuarios/{id}/editar(id=${idUsuario})} : @{/usuarios}"
+                th:object="${formulario}" method="post" class="proveedor-formulario">
+
+                <div class="aviso-operacion aviso-error" th:if="${#fields.hasGlobalErrors()}" role="alert">
+                    <span class="icono icono-x" aria-hidden="true"></span>
+                    <div>
+                        <p th:each="error : ${#fields.globalErrors()}" th:text="${error}">Error</p>
+                    </div>
+                </div>
+
+                <fieldset>
+                    <legend>Datos de la cuenta</legend>
+                    <div class="proveedor-campos">
+                        <div>
+                            <label for="nombreUsuario">Nombre de usuario (login)</label>
+                            <input id="nombreUsuario" type="text" th:field="*{nombreUsuario}" maxlength="50"
+                                autocomplete="username" placeholder="Ej. jperez o juan.perez" required
+                                th:readonly="${idUsuario != null}"
+                                th:classappend="${idUsuario != null} ? 'bg-slate-100 cursor-not-allowed' : ''"
+                                th:attr="aria-invalid=${#fields.hasErrors('nombreUsuario')},aria-describedby=${#fields.hasErrors('nombreUsuario') ? 'error-usuario' : 'ayuda-usuario'}">
+                            <span class="campo-ayuda" id="ayuda-usuario" th:if="${idUsuario == null}">Entre 4 y 50 caracteres (letras, números, puntos, guiones).</span>
+                            <span class="campo-ayuda" id="ayuda-usuario-fijo" th:if="${idUsuario != null}">El identificador de usuario no se puede modificar.</span>
+                            <p class="error" id="error-usuario" th:if="${#fields.hasErrors('nombreUsuario')}" th:errors="*{nombreUsuario}"></p>
+                        </div>
+
+                        <div>
+                            <label for="rol">Rol en el sistema</label>
+                            <select id="rol" th:field="*{rol}" required
+                                th:attr="aria-invalid=${#fields.hasErrors('rol')},aria-describedby=${#fields.hasErrors('rol') ? 'error-rol' : null}">
+                                <option th:each="r : ${roles}" th:value="${r}" th:text="${r}">ROL</option>
+                            </select>
+                            <p class="error" id="error-rol" th:if="${#fields.hasErrors('rol')}" th:errors="*{rol}"></p>
+                        </div>
+
+                        <div class="campo-completo">
+                            <label for="nombre">Nombre completo</label>
+                            <input id="nombre" type="text" th:field="*{nombre}" maxlength="100"
+                                autocomplete="name" placeholder="Ej. Juan Carlos Pérez Rojas" required
+                                th:attr="aria-invalid=${#fields.hasErrors('nombre')},aria-describedby=${#fields.hasErrors('nombre') ? 'error-nombre' : null}">
+                            <p class="error" id="error-nombre" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></p>
+                        </div>
+
+                        <div class="campo-completo" th:if="${idUsuario == null}">
+                            <label for="clave">Contraseña inicial</label>
+                            <input id="clave" type="password" th:field="*{clave}" minlength="10" maxlength="100"
+                                autocomplete="new-password" placeholder="Mínimo 10 caracteres con al menos una letra y un número" required
+                                th:attr="aria-invalid=${#fields.hasErrors('clave')},aria-describedby=${#fields.hasErrors('clave') ? 'error-clave' : 'ayuda-clave'}">
+                            <span class="campo-ayuda" id="ayuda-clave">Mínimo 10 caracteres; debe contener letras y números.</span>
+                            <p class="error" id="error-clave" th:if="${#fields.hasErrors('clave')}" th:errors="*{clave}"></p>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <div class="proveedor-formulario-acciones">
+                    <button type="submit"
+                        class="inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md">
+                        <span class="icono icono-save" aria-hidden="true"></span>
+                        <span th:text="${idUsuario != null ? 'Guardar cambios' : 'Registrar usuario'}">Guardar</span>
+                    </button>
+                    <a class="inventario-boton boton-secundario transition-all duration-150 active:scale-95"
+                        th:href="@{/usuarios}">
+                        <span class="icono icono-x" aria-hidden="true"></span>Cancelar
+                    </a>
+                </div>
+            </form>
+        </main>
+    </div>
+    <script th:src="@{/js/formularios.js}" defer></script>
+</body>
+</html>

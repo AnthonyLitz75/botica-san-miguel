@@ -63,6 +63,27 @@ public class LoteRepositorio {
                 return lotes.stream().findFirst();
         }
 
+        public Optional<Lote> buscarPorMedicamentoYNumero(Integer idMedicamento, String numeroLote) {
+                String sql = """
+                                SELECT id_lote, id_medicamento, numero_lote,
+                                       fecha_vencimiento, stock_actual
+                                FROM lote
+                                WHERE id_medicamento = ? AND numero_lote = ?
+                                """;
+
+                List<Lote> lotes = jdbcTemplate.query(
+                                sql,
+                                (fila, numeroFila) -> new Lote(
+                                                fila.getInt("id_lote"),
+                                                fila.getInt("id_medicamento"),
+                                                fila.getString("numero_lote"),
+                                                fila.getObject("fecha_vencimiento", LocalDate.class),
+                                                fila.getInt("stock_actual")),
+                                idMedicamento, numeroLote);
+
+                return lotes.stream().findFirst();
+        }
+
         /**
          * Descuento atómico para ventas: además del stock exige que el lote siga vigente en {@code hoy}.
          * Devuelve las filas afectadas (1 si se descontó; 0 si no alcanzó el stock o el lote venció).

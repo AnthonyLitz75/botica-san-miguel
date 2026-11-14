@@ -23,6 +23,11 @@
                 <span>Usuario o contraseña incorrectos.</span>
             </p>
 
+            <p th:if="${param.desactivado}" class="login-aviso login-aviso-error shadow-sm" role="alert">
+                <span class="icono icono-x" aria-hidden="true"></span>
+                <span>Tu cuenta fue desactivada</span>
+            </p>
+
             <p th:if="${param.logout}" class="login-aviso login-aviso-exito shadow-sm" role="status">
                 <span class="icono icono-circle-check" aria-hidden="true"></span>
                 <span>Cerraste sesión correctamente.</span>

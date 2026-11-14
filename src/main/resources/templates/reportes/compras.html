@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragmentos/head :: recursos('Reporte de estado de compras')}">
+    <title>Reporte de estado de compras | Botica San Miguel</title>
+</head>
+
+<body class="pagina-inventario">
+    <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
+    <aside th:replace="~{fragmentos/navegacion :: lateral('Reportes')}"></aside>
+    <div class="inventario-area">
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Reportes', 'Estado de compras')}"></header>
+        <main id="contenido" class="inventario-contenido">
+
+            <div class="inventario-titulo">
+                <div>
+                    <p class="seccion-etiqueta">REPORTES / GESTIÓN</p>
+                    <h1>Reporte de estado de compras</h1>
+                    <p class="clientes-intro">Seguimiento de órdenes emitidas, unidades solicitadas vs. recibidas, saldos pendientes y montos estimados por estado.</p>
+                </div>
+                <div class="flex gap-2">
+                    <a th:href="@{/reportes/compras.csv(desde=${filtro?.desde()}, hasta=${filtro?.hasta()}, estado=${filtro?.estado()}, idProveedor=${filtro?.idProveedor()})}"
+                        class="inventario-boton boton-secundario text-xs flex items-center gap-1.5 py-2 px-3 shadow-sm hover:shadow transition-all duration-150">
+                        <span class="icono icono-file-text" aria-hidden="true"></span>
+                        <span>Exportar CSV</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Subnavegación de reportes -->
+            <nav class="flex flex-wrap gap-2 mb-4 border-b border-slate-200 pb-2 text-xs font-semibold" aria-label="Secciones de reportes">
+                <a th:href="@{/reportes/ventas}" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Ventas por período</a>
+                <a th:href="@{/reportes/mas-vendidos}" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Más vendidos</a>
+                <a th:href="@{/reportes/mermas}" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Mermas</a>
+                <a th:href="@{/reportes/inventario}" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Inventario</a>
+                <a th:href="@{/reportes/compras}" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white shadow-sm">Estado de compras</a>
+                <a th:href="@{/reportes/panel}" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Panel resumen</a>
+            </nav>
+
+            <div class="aviso-operacion aviso-error shadow-sm mb-4" th:if="${error != null}" role="alert">
+                <span class="icono icono-circle-alert" aria-hidden="true"></span>
+                <span th:text="${error}">Error en los filtros.</span>
+            </div>
+
+            <!-- CA-7.2: Tarjetas de resumen por estado -->
+            <section th:if="${resumen != null}" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4" aria-label="Resumen por estado">
+                <article class="p-3 bg-white rounded-lg border border-slate-200 shadow-sm">
+                    <span class="text-xs font-bold text-slate-500 uppercase block mb-1">Total órdenes</span>
+                    <strong class="text-xl font-bold text-slate-800" th:text="${resumen.totalOrdenes()}">0</strong>
+                    <span class="text-xs text-slate-500 block mt-1" th:text="${'S/ ' + #numbers.formatDecimal(resumen.montoTotal(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</span>
+                </article>
+                <article class="p-3 bg-white rounded-lg border border-slate-200 shadow-sm">
+                    <span class="text-xs font-bold text-amber-600 uppercase block mb-1">Pendientes</span>
+                    <strong class="text-xl font-bold text-slate-800" th:text="${resumen.totalesPorEstado().get('PENDIENTE').cantidad()}">0</strong>
+                    <span class="text-xs text-slate-500 block mt-1" th:text="${'S/ ' + #numbers.formatDecimal(resumen.totalesPorEstado().get('PENDIENTE').monto(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</span>
+                </article>
+                <article class="p-3 bg-white rounded-lg border border-slate-200 shadow-sm">
+                    <span class="text-xs font-bold text-blue-600 uppercase block mb-1">Parciales</span>
+                    <strong class="text-xl font-bold text-slate-800" th:text="${resumen.totalesPorEstado().get('PARCIALMENTE_RECIBIDA').cantidad()}">0</strong>
+                    <span class="text-xs text-slate-500 block mt-1" th:text="${'S/ ' + #numbers.formatDecimal(resumen.totalesPorEstado().get('PARCIALMENTE_RECIBIDA').monto(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</span>
+                </article>
+                <article class="p-3 bg-white rounded-lg border border-slate-200 shadow-sm">
+                    <span class="text-xs font-bold text-emerald-600 uppercase block mb-1">Recibidas</span>
+                    <strong class="text-xl font-bold text-slate-800" th:text="${resumen.totalesPorEstado().get('RECIBIDA').cantidad()}">0</strong>
+                    <span class="text-xs text-slate-500 block mt-1" th:text="${'S/ ' + #numbers.formatDecimal(resumen.totalesPorEstado().get('RECIBIDA').monto(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</span>
+                </article>
+                <article class="p-3 bg-white rounded-lg border border-slate-200 shadow-sm">
+                    <span class="text-xs font-bold text-slate-500 uppercase block mb-1">Canceladas</span>
+                    <strong class="text-xl font-bold text-slate-800" th:text="${resumen.totalesPorEstado().get('CANCELADA').cantidad()}">0</strong>
+                    <span class="text-xs text-slate-500 block mt-1" th:text="${'S/ ' + #numbers.formatDecimal(resumen.totalesPorEstado().get('CANCELADA').monto(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</span>
+                </article>
+            </section>
+
+            <!-- Filtros: fechas, estado, proveedor -->
+            <form class="inventario-filtros mb-4" th:action="@{/reportes/compras}" method="get" role="search" aria-label="Filtro de compras">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 w-full">
+                    <div>
+                        <label for="desde">Desde</label>
+                        <input type="date" id="desde" name="desde" th:value="${filtro?.desde()}">
+                    </div>
+                    <div>
+                        <label for="hasta">Hasta</label>
+                        <input type="date" id="hasta" name="hasta" th:value="${filtro?.hasta()}">
+                    </div>
+                    <div>
+                        <label for="estado">Estado</label>
+                        <select id="estado" name="estado" class="form-input">
+                            <option value="" th:selected="${filtro?.estado() == null or filtro?.estado() == ''}">Todos los estados</option>
+                            <option value="PENDIENTE" th:selected="${filtro?.estado() == 'PENDIENTE'}">Pendiente</option>
+                            <option value="PARCIALMENTE_RECIBIDA" th:selected="${filtro?.estado() == 'PARCIALMENTE_RECIBIDA'}">Parcialmente recibida</option>
+                            <option value="RECIBIDA" th:selected="${filtro?.estado() == 'RECIBIDA'}">Recibida</option>
+                            <option value="CANCELADA" th:selected="${filtro?.estado() == 'CANCELADA'}">Cancelada</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="idProveedor">Proveedor</label>
+                        <select id="idProveedor" name="idProveedor" class="form-input">
+                            <option value="" th:selected="${filtro?.idProveedor() == null}">Todos los proveedores</option>
+                            <option th:each="p : ${proveedores}"
+                                    th:value="${p.idProveedor()}"
+                                    th:text="${p.razonSocial()}"
+                                    th:selected="${filtro?.idProveedor() != null and filtro?.idProveedor() == p.idProveedor()}">Proveedor</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="inventario-boton boton-principal w-full">
+                            <span class="icono icono-search" aria-hidden="true"></span>Filtrar
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="inventario-tabla-contenedor shadow-sm">
+                <table class="inventario-tabla" aria-label="Listado de órdenes de compra">
+                    <thead>
+                        <tr>
+                            <th scope="col">Nº Orden</th>
+                            <th scope="col">Fecha emisión</th>
+                            <th scope="col">Proveedor</th>
+                            <th scope="col" class="text-center">Estado</th>
+                            <th scope="col" class="text-right">Total estimado</th>
+                            <th scope="col" class="text-right">Solicitadas</th>
+                            <th scope="col" class="text-right">Recibidas</th>
+                            <th scope="col" class="text-right">Pendientes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(reporte)}">
+                            <td colspan="8" class="text-center py-6 text-slate-500">
+                                No se encontraron órdenes de compra en el período o con los filtros seleccionados.
+                            </td>
+                        </tr>
+                        <tr th:each="o : ${reporte}">
+                            <td class="font-mono text-xs font-semibold text-slate-800" th:text="${o.numeroOrden()}">OC-2026-0001</td>
+                            <td class="text-xs text-slate-600" th:text="${#temporals.format(o.fechaEmision(), 'dd/MM/yyyy')}">10/11/2026</td>
+                            <td class="font-medium text-slate-700" th:text="${o.proveedor()}">Droguería San Jorge</td>
+                            <td class="text-center">
+                                <span th:if="${o.estado() == 'PENDIENTE'}" class="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">PENDIENTE</span>
+                                <span th:if="${o.estado() == 'PARCIALMENTE_RECIBIDA'}" class="px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">PARCIAL</span>
+                                <span th:if="${o.estado() == 'RECIBIDA'}" class="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">RECIBIDA</span>
+                                <span th:if="${o.estado() == 'CANCELADA'}" class="px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">CANCELADA</span>
+                            </td>
+                            <td class="text-right font-semibold text-slate-800"
+                                th:text="${'S/ ' + #numbers.formatDecimal(o.totalEstimado(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</td>
+                            <td class="text-right text-slate-700" th:text="${o.unidadesSolicitadas()}">100</td>
+                            <td class="text-right font-medium text-emerald-700" th:text="${o.unidadesRecibidas()}">40</td>
+                            <td class="text-right font-medium"
+                                th:classappend="${o.unidadesPendientes() > 0 ? 'text-amber-600 font-semibold' : 'text-slate-400'}"
+                                th:text="${o.unidadesPendientes()}">60</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </main>
+    </div>
+</body>
+
+</html>

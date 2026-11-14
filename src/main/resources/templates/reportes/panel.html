@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragmentos/head :: recursos('Panel resumen de gestión')}">
+    <title>Panel resumen de gestión | Botica San Miguel</title>
+</head>
+
+<body class="pagina-inventario">
+    <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
+    <aside th:replace="~{fragmentos/navegacion :: lateral('Reportes')}"></aside>
+    <div class="inventario-area">
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Reportes', 'Panel resumen')}"></header>
+        <main id="contenido" class="inventario-contenido">
+
+            <div class="inventario-titulo">
+                <div>
+                    <p class="seccion-etiqueta">REPORTES / GESTIÓN</p>
+                    <h1>Panel resumen de gestión</h1>
+                    <p class="clientes-intro">Indicadores clave de rendimiento comercial y estado crítico de existencias para la administración.</p>
+                </div>
+            </div>
+
+            <!-- Subnavegación de reportes -->
+            <nav class="flex flex-wrap gap-2 mb-6 border-b border-slate-200 pb-2 text-xs font-semibold" aria-label="Secciones de reportes">
+                <a th:href="@{/reportes/ventas}" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Ventas por período</a>
+                <a th:href="@{/reportes/mas-vendidos}" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Más vendidos</a>
+                <a th:href="@{/reportes/mermas}" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Mermas</a>
+                <a th:href="@{/reportes/inventario}" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Inventario</a>
+                <a th:href="@{/reportes/compras}" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Estado de compras</a>
+                <a th:href="@{/reportes/panel}" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white shadow-sm">Panel resumen</a>
+            </nav>
+
+            <div th:if="${resumen != null}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <!-- Tarjeta 1: Ventas del mes -->
+                <div class="p-6 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Ventas del mes</span>
+                            <span class="p-2 bg-emerald-50 text-emerald-700 rounded-lg">
+                                <span class="icono icono-chart-bar" aria-hidden="true"></span>
+                            </span>
+                        </div>
+                        <p class="text-3xl font-extrabold text-slate-800" th:text="${'S/ ' + #numbers.formatDecimal(resumen.totalMes(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</p>
+                    </div>
+                    <div class="pt-4 mt-4 border-t border-slate-100 text-xs text-slate-500 flex justify-between items-center">
+                        <span>Total de transacciones:</span>
+                        <strong class="font-bold text-slate-700 text-sm" th:text="${resumen.cantidadVentasMes() + ' ventas'}">0 ventas</strong>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 2: Ticket promedio -->
+                <div class="p-6 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Ticket promedio</span>
+                            <span class="p-2 bg-blue-50 text-blue-700 rounded-lg">
+                                <span class="icono icono-credit-card" aria-hidden="true"></span>
+                            </span>
+                        </div>
+                        <p class="text-3xl font-extrabold text-slate-800" th:text="${'S/ ' + #numbers.formatDecimal(resumen.ticketPromedio(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</p>
+                    </div>
+                    <div class="pt-4 mt-4 border-t border-slate-100 text-xs text-slate-500 flex justify-between items-center">
+                        <span>Importe neto promedio por venta:</span>
+                        <span class="text-slate-600 font-medium">Mes en curso</span>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 3: Alertas de Stock -->
+                <div class="p-6 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Alertas de Stock</span>
+                            <span class="p-2 bg-rose-50 text-rose-700 rounded-lg">
+                                <span class="icono icono-package" aria-hidden="true"></span>
+                            </span>
+                        </div>
+                        <p class="text-3xl font-extrabold text-rose-600" th:text="${resumen.medicamentosAlertaStock()}">0</p>
+                    </div>
+                    <div class="pt-4 mt-4 border-t border-slate-100 text-xs text-slate-500 flex justify-between items-center">
+                        <span>Medicamentos bajo mínimo o agotados</span>
+                        <a th:href="@{/alertas}" class="text-emerald-700 hover:underline font-semibold">Ver alertas &rarr;</a>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 4: Lotes por vencer -->
+                <div class="p-6 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Vencimientos próximos</span>
+                            <span class="p-2 bg-amber-50 text-amber-700 rounded-lg">
+                                <span class="icono icono-clock" aria-hidden="true"></span>
+                            </span>
+                        </div>
+                        <p class="text-3xl font-extrabold text-amber-600" th:text="${resumen.lotesPorVencer()}">0</p>
+                    </div>
+                    <div class="pt-4 mt-4 border-t border-slate-100 text-xs text-slate-500 flex justify-between items-center">
+                        <span th:text="${'Lotes a vencer en ' + resumen.diasPorVencer() + ' días'}">Próximos a vencer</span>
+                        <a th:href="@{/alertas}" class="text-emerald-700 hover:underline font-semibold">Ver lotes &rarr;</a>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 5: Acceso rápido a reportes detallados -->
+                <div class="p-6 bg-gradient-to-br from-emerald-700 to-teal-800 text-white rounded-xl shadow-sm flex flex-col justify-between md:col-span-2">
+                    <div>
+                        <h3 class="text-lg font-bold mb-1">Reportes detallados para la toma de decisiones</h3>
+                        <p class="text-xs text-emerald-100 mb-4">Exporta registros consolidados en formato CSV compatible con hojas de cálculo y herramientas analíticas.</p>
+                        <div class="flex flex-wrap gap-2 text-xs">
+                            <a th:href="@{/reportes/ventas}" class="px-3 py-1.5 rounded bg-white/20 hover:bg-white/30 text-white font-medium transition-all">Reporte de ventas</a>
+                            <a th:href="@{/reportes/mas-vendidos}" class="px-3 py-1.5 rounded bg-white/20 hover:bg-white/30 text-white font-medium transition-all">Ranking de rotación</a>
+                            <a th:href="@{/reportes/mermas}" class="px-3 py-1.5 rounded bg-white/20 hover:bg-white/30 text-white font-medium transition-all">Mermas y bajas</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+</body>
+</html>

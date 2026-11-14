@@ -229,6 +229,26 @@ class VentaServicioPersistenciaTest extends AbstractRepositorioIntegrationTest {
                 BigDecimal.class, resultado.idVenta()));
     }
 
+    @Test
+    @DisplayName("CA-4.1, CA-4.3: listarMisVentas con persistencia real devuelve únicamente las ventas del vendedor autenticado")
+    void listarMisVentas_aislamientoPorVendedor() {
+        int idOtroVendedor = jdbcTemplate.queryForObject("""
+                INSERT INTO usuario(nombre, nombre_usuario, clave_hash, rol)
+                VALUES ('Otro Vendedor', 'vendedor_otro', 'x', 'VENDEDOR') RETURNING id_usuario
+                """, Integer.class);
+
+        int lote = lote("X", hoy.plusDays(30), 50);
+
+        var ventaP = servicio.confirmar("vendedor_p", null, List.of(linea(2)));
+        var ventaOtro = servicio.confirmar("vendedor_otro", null, List.of(linea(3)));
+
+        var misVentas = servicio.listarMisVentas("vendedor_p", hoy, hoy);
+
+        assertEquals(1, misVentas.filas().size());
+        assertEquals(ventaP.idVenta(), misVentas.filas().getFirst().idVenta());
+        assertEquals("B001-", misVentas.filas().getFirst().numeroComprobante().substring(0, 5));
+    }
+
     private LineaPreparacionVentaVista linea(int cantidad) {
         return new LineaPreparacionVentaVista(idMedicamento, "MED", "Paracetamol", cantidad, PRECIO,
                 PRECIO.multiply(BigDecimal.valueOf(cantidad)), List.of());

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragmentos/head :: recursos('Mis ventas')}">
+    <title>Mis ventas | Botica San Miguel</title>
+</head>
+
+<body class="pagina-inventario">
+    <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
+    <aside th:replace="~{fragmentos/navegacion :: lateral('Mis ventas')}"></aside>
+    <div class="inventario-area">
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Mis ventas', 'Ventas')}"></header>
+        <main id="contenido" class="inventario-contenido">
+
+            <div class="inventario-titulo">
+                <div>
+                    <p class="seccion-etiqueta">VENTAS / MIS REGISTROS</p>
+                    <h1>Mis ventas recientes</h1>
+                    <p class="clientes-intro">Consulta y reimprime los comprobantes de las ventas que registraste.</p>
+                </div>
+            </div>
+
+            <div class="aviso-operacion aviso-error shadow-sm" th:if="${error != null}" role="alert">
+                <span class="icono icono-circle-alert" aria-hidden="true"></span>
+                <span th:text="${error}">Error en el rango de fechas.</span>
+            </div>
+
+            <div class="aviso-operacion aviso-info shadow-sm" role="note">
+                <span class="icono icono-clipboard-list" aria-hidden="true"></span>
+                <div>
+                    <p>Visualiza tus ventas registradas para reimprimir boletas. Por defecto muestra las de hoy (puedes consultar hasta 30 días hacia atrás).</p>
+                </div>
+            </div>
+
+            <form class="inventario-filtros" th:action="@{/ventas/mias}" method="get" role="search" aria-label="Filtro de fechas de mis ventas">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-lg">
+                    <div>
+                        <label for="desde">Desde</label>
+                        <input type="date" id="desde" name="desde" th:value="${desde}">
+                    </div>
+                    <div>
+                        <label for="hasta">Hasta</label>
+                        <input type="date" id="hasta" name="hasta" th:value="${hasta}">
+                    </div>
+                </div>
+                <div class="filtro-acciones mt-3">
+                    <button class="inventario-boton boton-principal transition-all duration-150 active:scale-95" type="submit">
+                        <span class="icono icono-search" aria-hidden="true"></span>Filtrar
+                    </button>
+                    <a class="inventario-boton boton-secundario transition-all duration-150 active:scale-95" th:href="@{/ventas/mias}">
+                        <span class="icono icono-x" aria-hidden="true"></span>Limpiar
+                    </a>
+                </div>
+            </form>
+
+            <section class="inventario-resultados" aria-labelledby="titulo-mis-ventas">
+                <div class="resultados-cabecera">
+                    <h2 id="titulo-mis-ventas">
+                        Comprobantes emitidos
+                        <span class="cantidad-resultados" th:text="${#lists.size(filas)}">0</span>
+                    </h2>
+                </div>
+
+                <div class="inventario-vacio" th:if="${#lists.isEmpty(filas)}">
+                    <span class="icono icono-circle-check" aria-hidden="true"></span>
+                    <p>No registraste ventas en este periodo.</p>
+                </div>
+
+                <div class="tabla-contenedor inventario-tabla tabla-mis-ventas" th:unless="${#lists.isEmpty(filas)}"
+                    role="region" aria-label="Mis ventas, tabla desplazable">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">Comprobante</th>
+                                <th scope="col">Fecha y hora</th>
+                                <th scope="col">Cliente</th>
+                                <th scope="col" class="numero">Total</th>
+                                <th scope="col">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="fila : ${filas}" class="hover:bg-slate-50/80 transition-colors duration-150">
+                                <td>
+                                    <span class="codigo-medicamento font-mono font-semibold"
+                                        th:text="${fila.numeroComprobante()}">B001-00000001</span>
+                                </td>
+                                <td class="fecha-registro"
+                                    th:text="${#temporals.format(fila.fechaHora(), 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</td>
+                                <td th:text="${fila.clienteVisible()}">Público general</td>
+                                <td class="numero">
+                                    <strong class="font-bold text-emerald-700"
+                                        th:text="${'S/ ' + #numbers.formatDecimal(fila.total(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</strong>
+                                </td>
+                                <td>
+                                    <a class="enlace-lotes inline-flex items-center gap-1 font-medium text-emerald-700 hover:text-emerald-800 transition-colors"
+                                        th:href="@{/ventas/{id}(id=${fila.idVenta()})}">
+                                        <span class="icono icono-printer" aria-hidden="true"></span>Ver / Imprimir
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="resultados-pie text-xs text-slate-500"
+                    th:text="${#lists.size(filas)} + (${#lists.size(filas) == 1} ? ' venta registrada' : ' ventas registradas')">
+                    0 ventas registradas
+                </p>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

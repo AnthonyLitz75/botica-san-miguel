@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragmentos/head :: recursos('Reporte de inventario')}">
+    <title>Reporte de inventario | Botica San Miguel</title>
+</head>
+
+<body class="pagina-inventario">
+    <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
+    <aside th:replace="~{fragmentos/navegacion :: lateral('Reportes')}"></aside>
+    <div class="inventario-area">
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Reportes', 'Inventario')}"></header>
+        <main id="contenido" class="inventario-contenido">
+
+            <div class="inventario-titulo">
+                <div>
+                    <p class="seccion-etiqueta">REPORTES / GESTIÓN</p>
+                    <h1>Reporte de inventario</h1>
+                    <p class="clientes-intro">Estado de existencias vigentes y vencidas por medicamento, control de stock mínimo y detalle de lotes.</p>
+                </div>
+                <div class="flex gap-2">
+                    <a th:href="@{/reportes/inventario.csv(estado=${estadoSeleccionado})}"
+                        class="inventario-boton boton-secundario text-xs flex items-center gap-1.5 py-2 px-3 shadow-sm hover:shadow transition-all duration-150">
+                        <span class="icono icono-file-text" aria-hidden="true"></span>
+                        <span>Exportar CSV</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Subnavegación de reportes -->
+            <nav class="flex flex-wrap gap-2 mb-4 border-b border-slate-200 pb-2 text-xs font-semibold" aria-label="Secciones de reportes">
+                <a th:href="@{/reportes/ventas}" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Ventas por período</a>
+                <a th:href="@{/reportes/mas-vendidos}" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Más vendidos</a>
+                <a th:href="@{/reportes/mermas}" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Mermas</a>
+                <a th:href="@{/reportes/inventario}" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white shadow-sm">Inventario</a>
+                <a th:href="@{/reportes/compras}" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Estado de compras</a>
+                <a th:href="@{/reportes/panel}" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Panel resumen</a>
+            </nav>
+
+            <section class="alertas-metricas mb-4" aria-label="Métricas de inventario">
+                <article class="alerta-metrica metrica-preventiva">
+                    <span class="alerta-metrica-etiqueta">Stock disponible total</span>
+                    <strong th:text="${totalDisponible}">0</strong>
+                    <span>Unidades vigentes en almacén</span>
+                </article>
+                <article class="alerta-metrica metrica-critica">
+                    <span class="alerta-metrica-etiqueta">Stock vencido total</span>
+                    <strong th:text="${totalVencido}">0</strong>
+                    <span>Unidades vencidas no disponibles</span>
+                </article>
+                <article class="alerta-metrica metrica-info">
+                    <span class="alerta-metrica-etiqueta">Medicamentos en alerta</span>
+                    <strong class="text-amber-600" th:text="${totalAlertas}">0</strong>
+                    <span>Bajo stock mínimo o agotados</span>
+                </article>
+            </section>
+
+            <!-- Filtro de estado -->
+            <form class="inventario-filtros mb-4" th:action="@{/reportes/inventario}" method="get" role="search" aria-label="Filtro de estado de inventario">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
+                    <div>
+                        <label for="estado">Estado de existencias</label>
+                        <select id="estado" name="estado" class="form-input">
+                            <option value="" th:selected="${estadoSeleccionado == ''}">Todos los estados</option>
+                            <option value="OK" th:selected="${estadoSeleccionado == 'OK'}">OK (Stock suficiente)</option>
+                            <option value="STOCK_BAJO" th:selected="${estadoSeleccionado == 'STOCK_BAJO'}">STOCK BAJO (Menor o igual al mínimo)</option>
+                            <option value="AGOTADO" th:selected="${estadoSeleccionado == 'AGOTADO'}">AGOTADO (Sin stock disponible)</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="inventario-boton boton-principal w-full">
+                            <span class="icono icono-search" aria-hidden="true"></span>Filtrar
+                        </button>
+                    </div>
+                    <div class="flex items-end">
+                        <a th:href="@{/reportes/inventario}" class="inventario-boton boton-secundario w-full text-center">
+                            Limpiar filtro
+                        </a>
+                    </div>
+                </div>
+            </form>
+
+            <div class="inventario-tabla-contenedor shadow-sm">
+                <table class="inventario-tabla" aria-label="Listado de existencias de inventario">
+                    <thead>
+                        <tr>
+                            <th scope="col">Código</th>
+                            <th scope="col">Medicamento</th>
+                            <th scope="col">Unidad</th>
+                            <th scope="col" class="text-right">Stock disp.</th>
+                            <th scope="col" class="text-right">Stock venc.</th>
+                            <th scope="col" class="text-right">Stock mín.</th>
+                            <th scope="col" class="text-center">Estado</th>
+                            <th scope="col">Lotes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(reporte)}">
+                            <td colspan="8" class="text-center py-6 text-slate-500">
+                                No se encontraron medicamentos con el criterio seleccionado.
+                            </td>
+                        </tr>
+                        <tr th:each="item : ${reporte}">
+                            <td class="font-mono text-xs text-slate-600" th:text="${item.codigo()}">MED-001</td>
+                            <td class="font-medium text-slate-800" th:text="${item.nombre()}">Paracetamol</td>
+                            <td class="text-xs text-slate-500" th:text="${item.unidadControl()}">TABLETA</td>
+                            <td class="text-right font-semibold"
+                                th:classappend="${item.stockDisponible() == 0 ? 'text-rose-600' : (item.stockDisponible() <= item.stockMinimo() ? 'text-amber-600' : 'text-slate-700')}"
+                                th:text="${item.stockDisponible()}">10</td>
+                            <td class="text-right font-semibold"
+                                th:classappend="${item.stockVencido() > 0 ? 'text-rose-600 font-bold' : 'text-slate-400'}"
+                                th:text="${item.stockVencido()}">0</td>
+                            <td class="text-right text-slate-600" th:text="${item.stockMinimo()}">10</td>
+                            <td class="text-center">
+                                <span th:if="${item.estado() == 'OK'}" class="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">OK</span>
+                                <span th:if="${item.estado() == 'STOCK_BAJO'}" class="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">STOCK BAJO</span>
+                                <span th:if="${item.estado() == 'AGOTADO'}" class="px-2 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800">AGOTADO</span>
+                            </td>
+                            <td>
+                                <details th:if="${!#lists.isEmpty(item.lotes())}" class="text-xs group">
+                                    <summary class="cursor-pointer text-emerald-700 hover:text-emerald-900 font-semibold focus:outline-none">
+                                        Ver lotes (<span th:text="${#lists.size(item.lotes())}">0</span>)
+                                    </summary>
+                                    <div class="mt-2 p-2 bg-slate-50 rounded border border-slate-200">
+                                        <table class="w-full text-xs">
+                                            <thead>
+                                                <tr class="text-slate-500 border-b border-slate-200 text-left">
+                                                    <th class="py-1">Nº Lote</th>
+                                                    <th class="py-1">Vencimiento</th>
+                                                    <th class="py-1 text-right">Stock</th>
+                                                    <th class="py-1 text-right">Días p/vencer</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="l : ${item.lotes()}" class="border-b border-slate-100 last:border-none">
+                                                    <td class="py-1 font-mono text-slate-700" th:text="${l.numeroLote()}">LOT-001</td>
+                                                    <td class="py-1 text-slate-600" th:text="${#temporals.format(l.fechaVencimiento(), 'dd/MM/yyyy')}">31/12/2026</td>
+                                                    <td class="py-1 text-right font-medium text-slate-800" th:text="${l.stockActual()}">10</td>
+                                                    <td class="py-1 text-right"
+                                                        th:classappend="${l.diasParaVencer() < 0 ? 'text-rose-600 font-bold' : (l.diasParaVencer() <= 90 ? 'text-amber-600 font-semibold' : 'text-slate-600')}"
+                                                        th:text="${l.diasParaVencer() < 0 ? 'VENCIDO' : (l.diasParaVencer() + ' d')}">45 d</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </details>
+                                <span th:if="${#lists.isEmpty(item.lotes())}" class="text-xs text-slate-400 italic">Sin lotes activos</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </main>
+    </div>
+</body>
+
+</html>

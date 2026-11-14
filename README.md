@@ -41,8 +41,9 @@ Fue desarrollada como proyecto académico del curso **Algoritmos y Estructura de
 
 - **Medicamentos:** consulta, creación, edición, activación y desactivación sin borrar el historial.
 - **Lotes y existencias:** consulta de lotes por medicamento, con indicador del **lote prioritario FEFO** (primero en vencer, primero en salir).
-- **Salidas de inventario:** registro desde un lote o mediante un formulario de salida directa, con validación de existencias.
-- **Movimientos:** historial de entradas y salidas con el detalle de cada operación.
+- **Existencias iniciales:** registro directo de stock inicial de lotes sin orden de compra (`/inventario/existencias-iniciales`, ADMINISTRADOR y ALMACENERO), con motivo, validación de lote duplicado (RN-04) y opción de confirmar acumulación de existencias en lotes preexistentes con la misma fecha de vencimiento.
+- **Salidas de inventario:** registro desde un lote o mediante un formulario de salida directa, con validación de existencias. Incluye la opción de dar de baja lotes vencidos directamente desde el panel de alertas con motivo precargado (`?motivo=Baja por vencimiento`).
+- **Movimientos y Kardex:** historial de entradas y salidas (`/movimientos`, ADMINISTRADOR y ALMACENERO) con filtros avanzados por tipo (`ENTRADA`/`SALIDA`), fechas, motivo, medicamento, número de lote y usuario responsable, columna de origen calculada (`Recepción de compra`, `Existencia inicial`, `Venta`, `Otra salida`), cantidad afectada y paginación (20 por página).
 
 ### Compras y proveedores
 
@@ -56,6 +57,8 @@ Fue desarrollada como proyecto académico del curso **Algoritmos y Estructura de
 - **Descuentos por línea:** importe fijo en soles por línea (`0 ≤ descuento ≤ cantidad × precio`), editable en la tabla de la preparación (`PUT /ventas/preparacion/{idMedicamento}/descuento`) y reversible con **deshacer**. Al confirmar, el descuento de cada línea se reparte entre sus lotes en proporción a la cantidad (el último lote absorbe el redondeo) y el comprobante muestra subtotal, descuento y total. La regla de cálculo es una política intercambiable (`PoliticaDescuento`, patrón Strategy).
 - **Confirmación de venta:** `POST /ventas/confirmar` (cliente opcional, por defecto "Público general"). En una sola transacción vuelve a planificar FEFO contra la base, descuenta cada lote con un UPDATE condicional (stock suficiente y lote vigente) en orden ascendente de `id_lote`, y guarda la venta, su detalle por lote (precio congelado) y la salida de inventario. Si el stock cambió o un lote venció, se rechaza completa y la preparación se conserva.
 - **Comprobante interno:** `/ventas/{id}` con número correlativo `B001-00000001` (secuencia de PostgreSQL), una línea por lote y botón **Imprimir** con formato de ticket de 80 mm. El vendedor solo ve sus ventas; el administrador, todas.
+- **Historial de ventas:** `/ventas` (solo ADMINISTRADOR) con filtros por fecha (últimos 30 días por defecto), vendedor y número de comprobante, paginación (20 por página), suma total acumulada y enlaces directos a cada comprobante.
+- **Mis ventas:** `/ventas/mias` (solo VENDEDOR) para consultar y reimprimir comprobantes propios de hasta los últimos 30 días, sin totales del período.
 
 ### Alertas
 
@@ -66,9 +69,27 @@ Panel de medicamentos **agotados** o con **stock bajo**, reposición sugerida (d
 Bitácora **de solo inserción** (`/auditoria`, solo ADMINISTRADOR) con filtros por fecha, usuario, acción, entidad y resultado, paginación y exportación CSV. Registra:
 
 - **Accesos:** inicios de sesión correctos y fallidos (con el usuario escrito, nunca la clave), cierres de sesión y accesos denegados por rol (método y ruta).
-- **Cambios de datos:** altas, ediciones (qué campo cambió, antes → después), activaciones y desactivaciones de medicamentos y proveedores; altas y ediciones de clientes (sin guardar sus datos personales); creación, recepción y cancelación de órdenes de compra; otras salidas y ventas confirmadas.
+- **Cambios de datos:** altas, ediciones (qué campo cambió, antes → después), activaciones y desactivaciones de medicamentos y proveedores; altas y ediciones de clientes (sin guardar sus datos personales); creación, recepción y cancelación de órdenes de compra; otras salidas y ventas confirmadas; altas, ediciones, cambios de rol, restablecimiento de contraseñas, activaciones y desactivaciones de usuarios (sin incluir contraseñas ni hashes).
 
 Un trigger impide modificar o borrar eventos incluso con SQL directo. Los cambios de datos se registran **en la misma transacción** que la operación (si esta se revierte, el evento tampoco queda); los accesos, en una transacción propia (quedan aunque la operación falle).
+
+### Usuarios y seguridad
+
+- **Gestión de usuarios:** mantenimiento integral (`/usuarios`, solo ADMINISTRADOR) para dar de alta y editar usuarios asignando roles (`ADMINISTRADOR`, `VENDEDOR`, `ALMACENERO`, `COMPRAS`).
+- **Control de estados y reglas:** activación y desactivación de usuarios conservando el historial. Protección estricta que impide desactivar o cambiar de rol al último administrador activo, e impide desactivarse a uno mismo (RN-18).
+- **Restablecimiento de contraseñas:** cambio seguro de contraseñas sin exponer claves ni hashes en las vistas (`CA-4.2`), con validación de complejidad (≥ 10 caracteres alfanuméricos).
+- **Invalidación inmediata de sesiones:** al desactivar una cuenta o alterar el rol, `SessionRegistry` invalida la sesión activa en el acto, rechazando su siguiente petición protegida y redirigiendo al login con aviso (`CA-5.1`, `CA-5.2`).
+
+### Reportes de gestión y exportación CSV
+
+Módulo gerencial exclusivo para el rol `ADMINISTRADOR` (`/reportes`), con visualización interactiva y descarga en formato CSV bajo norma RFC 4180 (con escape estricto de comas, comillas, saltos de línea y mitigación de inyección de fórmulas) y registro obligatorio del evento de auditoría `EXPORTAR`:
+
+- **Ventas por período (`/reportes/ventas`):** consolidado diario con cantidad de transacciones, subtotal, descuentos acumulados y total neto. Rango configurable (por defecto últimos 30 días, validación contra rangos invertidos o superiores a 366 días).
+- **Medicamentos más vendidos (`/reportes/mas-vendidos`):** ranking de rotación ordenado por unidades vendidas descendente (agregando ventas multi-lote) y nombre ascendente, con límite configurable (10 por defecto).
+- **Mermas de inventario (`/reportes/mermas`):** unidades dadas de baja por salidas sin venta asociadas en el período, agrupadas por medicamento.
+- **Inventario actual (`/reportes/inventario`):** estado de existencias activas discriminando stock disponible (lotes vigentes según reloj del sistema), stock vencido y stock mínimo, con cálculo dinámico de semáforo (`OK`, `STOCK_BAJO`, `AGOTADO`), filtro por estado y detalle expandible de lotes por medicamento (número de lote, fecha de vencimiento, stock actual y días restantes para vencer).
+- **Estado de compras (`/reportes/compras`):** seguimiento integral de órdenes de compra con cálculo de unidades solicitadas, recibidas (a través de movimientos de entrada) y saldos pendientes, filtrable por rango de fechas, estado de la orden y proveedor, complementado con tarjetas métricas de consolidado por estado.
+- **Panel resumen (`/reportes/panel`):** tablero ejecutivo con volumen de ventas mensual en soles y transacciones, ticket promedio, medicamentos en alerta de stock y lotes por vencer reutilizando el motor `AlertaInventarioServicio`.
 
 ### Control de acceso (RBAC)
 
@@ -82,10 +103,15 @@ Un trigger impide modificar o borrar eventos incluso con SQL directo. Los cambio
 | Consultar órdenes de compra              |      Sí       |     Sí     |   Sí    |    No    |
 | Crear y cancelar órdenes de compra       |      Sí       |     No     |   Sí    |    No    |
 | Recibir órdenes de compra                |      Sí       |     Sí     |   No    |    No    |
+| Existencias iniciales                    |      Sí       |     Sí     |   No    |    No    |
 | Registrar salidas y consultar movimientos |      Sí       |     Sí     |   No    |    No    |
 | Preparación de venta                     |      Sí       |     No     |   No    |    Sí    |
 | Confirmar venta y ver comprobante        |   Sí (todas)  |     No     |   No    | Sí (las suyas) |
+| Historial general de ventas (`/ventas`)  |      Sí       |     No     |   No    |    No    |
+| Mis ventas (`/ventas/mias`)              |      No       |     No     |   No    | Sí (las suyas) |
+| Gestión de usuarios (`/usuarios`)        |      Sí       |     No     |   No    |    No    |
 | Consultar y exportar la auditoría        |      Sí       |     No     |   No    |    No    |
+| Reportes gerenciales y CSV (`/reportes`) |      Sí       |     No     |   No    |    No    |
 
 ## Stack tecnológico
 

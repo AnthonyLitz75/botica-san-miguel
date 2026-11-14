@@ -17,10 +17,21 @@
                     <p class="seccion-etiqueta">INVENTARIO / TRAZABILIDAD</p>
                     <h1>Movimientos de inventario</h1>
                 </div>
-                <a class="inventario-boton boton-principal" th:if="${puedeRegistrarSalida}"
-                    th:href="@{/salidas/nueva}">
-                    <span class="icono icono-plus" aria-hidden="true"></span>Registrar salida
-                </a>
+                <div class="flex items-center gap-2" th:if="${puedeRegistrarSalida}">
+                    <a class="inventario-boton boton-secundario transition-all duration-150 active:scale-95"
+                        th:href="@{/inventario/existencias-iniciales}">
+                        <span class="icono icono-plus" aria-hidden="true"></span>Existencias iniciales
+                    </a>
+                    <a class="inventario-boton boton-principal transition-all duration-150 active:scale-95"
+                        th:href="@{/salidas/nueva}">
+                        <span class="icono icono-plus" aria-hidden="true"></span>Registrar salida
+                    </a>
+                </div>
+            </div>
+
+            <div class="aviso-operacion aviso-error shadow-sm" th:if="${error != null}" role="alert">
+                <span class="icono icono-circle-alert" aria-hidden="true"></span>
+                <span th:text="${error}">Error en los filtros.</span>
             </div>
 
             <div class="aviso-operacion aviso-info" role="note">
@@ -30,11 +41,68 @@
                 </div>
             </div>
 
+            <form class="inventario-filtros mb-6" th:action="@{/movimientos}" method="get" role="search" aria-label="Filtros del kardex de inventario">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 w-full">
+                    <div>
+                        <label for="tipo">Tipo</label>
+                        <select id="tipo" name="tipo">
+                            <option value="">Todos los tipos</option>
+                            <option value="ENTRADA" th:selected="${filtro != null and filtro.tipo() == 'ENTRADA'}">ENTRADA</option>
+                            <option value="SALIDA" th:selected="${filtro != null and filtro.tipo() == 'SALIDA'}">SALIDA</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="desde">Desde</label>
+                        <input type="date" id="desde" name="desde" th:value="${filtro != null ? filtro.desde() : null}">
+                    </div>
+                    <div>
+                        <label for="hasta">Hasta</label>
+                        <input type="date" id="hasta" name="hasta" th:value="${filtro != null ? filtro.hasta() : null}">
+                    </div>
+                    <div>
+                        <label for="motivo">Motivo</label>
+                        <input type="search" id="motivo" name="motivo" th:value="${filtro != null ? filtro.motivo() : null}"
+                            placeholder="Buscar en motivo...">
+                    </div>
+                    <div>
+                        <label for="idMedicamento">Medicamento</label>
+                        <select id="idMedicamento" name="idMedicamento">
+                            <option value="">Todos los medicamentos</option>
+                            <option th:each="m : ${medicamentos}" th:value="${m.idMedicamento()}"
+                                th:text="${m.codigo() + ' - ' + m.nombre()}"
+                                th:selected="${filtro != null and filtro.idMedicamento() == m.idMedicamento()}"></option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="numeroLote">N° Lote</label>
+                        <input type="search" id="numeroLote" name="numeroLote" th:value="${filtro != null ? filtro.numeroLote() : null}"
+                            placeholder="Buscar lote...">
+                    </div>
+                    <div>
+                        <label for="idUsuario">Responsable</label>
+                        <select id="idUsuario" name="idUsuario">
+                            <option value="">Todos los responsables</option>
+                            <option th:each="u : ${usuarios}" th:value="${u.idUsuario()}"
+                                th:text="${u.nombre() + ' (' + u.rol() + ')'}"
+                                th:selected="${filtro != null and filtro.idUsuario() == u.idUsuario()}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filtro-acciones mt-3">
+                    <button class="inventario-boton boton-principal transition-all duration-150 active:scale-95" type="submit">
+                        <span class="icono icono-search" aria-hidden="true"></span>Filtrar
+                    </button>
+                    <a class="inventario-boton boton-secundario transition-all duration-150 active:scale-95" th:href="@{/movimientos}">
+                        <span class="icono icono-x" aria-hidden="true"></span>Limpiar
+                    </a>
+                </div>
+            </form>
+
             <section class="inventario-resultados registro-listado" aria-labelledby="titulo-resultados">
                 <div class="resultados-cabecera">
                     <h2 id="titulo-resultados">
                         Historial de movimientos
-                        <span class="cantidad-resultados" th:text="${#lists.size(movimientos)}"></span>
+                        <span class="cantidad-resultados" th:text="${total != null ? total : #lists.size(movimientos)}"></span>
                     </h2>
                 </div>
 
@@ -52,8 +120,10 @@
                                 <th scope="col">ID</th>
                                 <th scope="col">Fecha y hora</th>
                                 <th scope="col">Tipo</th>
+                                <th scope="col">Origen</th>
                                 <th scope="col">Responsable</th>
                                 <th scope="col">Motivo</th>
+                                <th scope="col" th:if="${filtro != null and filtro.idMedicamento() != null}">Cantidad</th>
                                 <th scope="col">Detalle</th>
                             </tr>
                         </thead>
@@ -72,10 +142,16 @@
                                         th:text="${movimiento.tipo()}"></span>
                                 </td>
                                 <td>
+                                    <span class="text-sm font-medium text-slate-700"
+                                        th:text="${movimiento.origen() != null ? movimiento.origen() : '-'}"></span>
+                                </td>
+                                <td>
                                     <span class="unidad-medicamento"
-                                        th:text="${'Usuario #' + movimiento.idUsuario()}"></span>
+                                        th:text="${movimiento.responsable() != null ? movimiento.responsable() : ('Usuario #' + movimiento.idUsuario())}"></span>
                                 </td>
                                 <td class="motivo-movimiento" th:text="${movimiento.motivo()}"></td>
+                                <td th:if="${filtro != null and filtro.idMedicamento() != null}" class="font-semibold text-slate-800"
+                                    th:text="${movimiento.cantidadMedicamento() != null ? movimiento.cantidadMedicamento() : '-'}"></td>
                                 <td>
                                     <a class="enlace-lotes"
                                         th:href="@{/movimientos/{id}(id=${movimiento.idMovimiento()})}">
@@ -87,8 +163,18 @@
                     </table>
                 </div>
 
+                <nav class="flex items-center justify-between mt-4" aria-label="Paginación" th:if="${paginas != null and paginas > 1}">
+                    <a class="inventario-boton boton-secundario" th:if="${pagina > 1}"
+                        th:href="@{/movimientos(tipo=${filtro != null ? filtro.tipo() : null},desde=${filtro != null ? filtro.desde() : null},hasta=${filtro != null ? filtro.hasta() : null},motivo=${filtro != null ? filtro.motivo() : null},idMedicamento=${filtro != null ? filtro.idMedicamento() : null},numeroLote=${filtro != null ? filtro.numeroLote() : null},idUsuario=${filtro != null ? filtro.idUsuario() : null},pagina=${pagina - 1})}">Anterior</a>
+                    <span th:unless="${pagina > 1}"></span>
+                    <span class="text-sm text-slate-600 font-medium" th:text="|Página ${pagina} de ${paginas}|">Página 1 de 1</span>
+                    <a class="inventario-boton boton-secundario" th:if="${pagina < paginas}"
+                        th:href="@{/movimientos(tipo=${filtro != null ? filtro.tipo() : null},desde=${filtro != null ? filtro.desde() : null},hasta=${filtro != null ? filtro.hasta() : null},motivo=${filtro != null ? filtro.motivo() : null},idMedicamento=${filtro != null ? filtro.idMedicamento() : null},numeroLote=${filtro != null ? filtro.numeroLote() : null},idUsuario=${filtro != null ? filtro.idUsuario() : null},pagina=${pagina + 1})}">Siguiente</a>
+                    <span th:unless="${pagina < paginas}"></span>
+                </nav>
+
                 <p class="resultados-pie"
-                    th:text="${#lists.size(movimientos)} + (${#lists.size(movimientos) == 1} ? ' movimiento registrado' : ' movimientos registrados')">
+                    th:text="${(total != null ? total : #lists.size(movimientos)) + ((total != null ? total : #lists.size(movimientos)) == 1 ? ' movimiento registrado' : ' movimientos registrados')}">
                 </p>
             </section>
         </main>
