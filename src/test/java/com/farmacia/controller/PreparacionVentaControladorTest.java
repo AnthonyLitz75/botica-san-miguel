@@ -44,6 +44,30 @@ class PreparacionVentaControladorTest {
     }
 
     @Test
+    void delegaLaModificacionDeCantidadDeUnaLinea() {
+        var servicio = mock(PreparacionVentaServicio.class);
+        var auth = UsernamePasswordAuthenticationToken.authenticated("vendedor", null, List.of());
+        var vista = new PreparacionVentaVista(List.of(), BigDecimal.ZERO.setScale(2), false);
+        when(servicio.modificarCantidad("vendedor", 8, 3)).thenReturn(vista);
+
+        assertSame(vista, new PreparacionVentaControlador(servicio).modificarCantidad(auth, 8,
+                new com.farmacia.dto.CantidadLineaFormulario(3)));
+        verify(servicio).modificarCantidad("vendedor", 8, 3);
+    }
+
+    @Test
+    void delegaLaLimpiezaDeLaPreparacion() {
+        var servicio = mock(PreparacionVentaServicio.class);
+        var controlador = new PreparacionVentaControlador(servicio);
+        var auth = UsernamePasswordAuthenticationToken.authenticated("vendedor", null, List.of());
+        var vista = new PreparacionVentaVista(List.of(), BigDecimal.ZERO.setScale(2), false);
+        when(servicio.obtener("vendedor")).thenReturn(vista);
+
+        assertSame(vista, controlador.limpiar(auth));
+        verify(servicio).limpiar("vendedor");
+    }
+
+    @Test
     void traduceErroresDeReglaDeNegocioARespuesta400() {
         var respuesta = new PreparacionVentaControlador(mock(PreparacionVentaServicio.class))
                 .errorSolicitud(new IllegalArgumentException("Stock insuficiente"));

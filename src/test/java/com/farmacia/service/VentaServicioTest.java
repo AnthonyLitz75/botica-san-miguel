@@ -343,6 +343,26 @@ class VentaServicioTest {
         assertEquals(10, resultado.filas().getFirst().idVenta());
     }
 
+    @Test
+    @DisplayName("CA-8.3 (Escenario 14): un lote vence durante la preparación; al confirmar, re-planifica FEFO con otro lote vigente")
+    void escenario14_cuandoLoteVenceDurantePreparacion_replanificaFefoConLoteVigente() {
+        // En la sesión el vendedor tenía asignado un lote que caducó antes de confirmar.
+        // Al confirmar, VentaServicio vuelve a planificar con lotePrioridadServicio (la base manda):
+        // lotePrioridadServicio descarta el lote caducado y asigna el siguiente lote vigente (id 12).
+        when(prioridad.planificarSalida(5, 2)).thenReturn(List.of(tramo(12, 10, 2)));
+        when(lotes.descontarStockVigente(12, 2, HOY)).thenReturn(1);
+
+        var confirmada = servicio.confirmar("vendedor", null, List.of(linea(5, 2)));
+
+        assertEquals(12, confirmada.idVenta());
+        assertEquals("B001-00000012", confirmada.numeroComprobante());
+        // Verifica que se descontó y despachó con el lote vigente real (id 12)
+        verify(lotes).descontarStockVigente(12, 2, HOY);
+        verify(ventas).insertarDetalle(12, new DetalleVenta(12, 2, PRECIO, new BigDecimal("0.00"),
+                PRECIO.multiply(BigDecimal.valueOf(2))));
+        verify(movimientos).registrarDetalle(40, 12, 2);
+    }
+
     private static LineaPreparacionVentaVista linea(int idMedicamento, int cantidad) {
         return new LineaPreparacionVentaVista(idMedicamento, "MED-001", "Paracetamol", cantidad, PRECIO,
                 PRECIO.multiply(BigDecimal.valueOf(cantidad)), List.of());

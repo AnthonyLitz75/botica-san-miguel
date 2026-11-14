@@ -11,63 +11,70 @@
     <div class="inventario-area">
         <header th:replace="~{fragmentos/navegacion :: cabecera('Proveedores', 'Compras')}"></header>
         <main id="contenido" class="inventario-contenido">
-            <div class="inventario-titulo">
+            <div class="head">
                 <div>
-                    <p class="seccion-etiqueta">COMPRAS / DIRECTORIO</p>
+                    <div class="eyebrow seccion-etiqueta">Compras / Directorio</div>
                     <h1>Proveedores</h1>
+                    <div class="sub">Laboratorios y distribuidoras a los que compras.</div>
                 </div>
-                <a class="inventario-boton boton-principal" th:if="${puedeGestionarProveedores}"
-                    th:href="@{/proveedores/nuevo}">
-                    <span class="icono icono-plus" aria-hidden="true"></span>Nuevo proveedor
-                </a>
-            </div>
-
-            <form class="inventario-filtros" th:action="@{/proveedores}" method="get" role="search">
-                <div class="filtro-busqueda">
-                    <label for="buscar">RUC o razón social</label>
-                    <div class="entrada-busqueda">
-                        <span class="icono icono-search" aria-hidden="true"></span>
-                        <input type="search" id="buscar" name="buscar" th:value="${buscar}"
-                            placeholder="Buscar por RUC (11 dígitos) o razón social">
-                    </div>
-                </div>
-                <div class="filtro-estado">
-                    <label for="activo">Estado</label>
-                    <select id="activo" name="activo">
-                        <option value="true" th:selected="${activo}">Activos</option>
-                        <option value="false" th:selected="${!activo}">Inactivos</option>
-                    </select>
-                </div>
-                <div class="filtro-acciones">
-                    <button class="inventario-boton boton-principal" type="submit">
-                        <span class="icono icono-search" aria-hidden="true"></span>Buscar
-                    </button>
-                    <a class="inventario-boton boton-secundario" th:href="@{/proveedores(activo=${activo})}">
-                        <span class="icono icono-x" aria-hidden="true"></span>Limpiar
+                <div class="row items-center" th:if="${puedeGestionarProveedores}">
+                    <a class="btn p inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md"
+                        th:href="@{/proveedores/nuevo}" data-modal-open="modal-nuevo-proveedor">
+                        <svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>
+                        <span>Nuevo proveedor</span>
                     </a>
                 </div>
-            </form>
+            </div>
+
+            <div class="card pad mb-5">
+                <form class="row inventario-filtros" th:action="@{/proveedores}" method="get" role="search" style="margin:0">
+                    <div style="flex:1">
+                        <label for="buscar">RUC o razón social</label>
+                        <div class="inp grow entrada-busqueda">
+                            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                            <input type="search" id="buscar" name="buscar" th:value="${buscar}"
+                                placeholder="Buscar por RUC (11 dígitos) o razón social"
+                                class="w-full bg-transparent border-0 outline-none text-sm text-ink font-medium">
+                        </div>
+                    </div>
+                    <div style="width:200px" class="filtro-estado">
+                        <label for="activo">Estado</label>
+                        <div class="inp">
+                            <select id="activo" name="activo" class="w-full bg-transparent border-0 outline-none text-sm text-ink font-semibold cursor-pointer">
+                                <option value="true" th:selected="${activo}">Activos</option>
+                                <option value="false" th:selected="${!activo}">Inactivos</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn p inventario-boton boton-principal" type="submit">
+                        <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        <span>Buscar</span>
+                    </button>
+                    <a class="btn s inventario-boton boton-secundario" th:href="@{/proveedores(activo=${activo})}">
+                        <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                        <span>Limpiar</span>
+                    </a>
+                </form>
+            </div>
 
             <section class="inventario-resultados" aria-labelledby="titulo-resultados">
-                <div class="resultados-cabecera">
-                    <h2 id="titulo-resultados">
-                        Listado de proveedores
-                        <span class="cantidad-resultados" th:text="${#lists.size(proveedores)}"></span>
-                    </h2>
-                    <span class="estado-listado" th:classappend="${!activo} ? 'estado-inactivo'"
-                        th:text="${activo} ? 'Activos' : 'Inactivos'"></span>
+                <div class="sec">
+                    <h2 id="titulo-resultados">Listado de proveedores</h2>
+                    <span class="cnt cantidad-resultados" th:text="${#lists.size(proveedores)}">0</span>
+                    <span class="badge ml-2 estado-listado" th:classappend="${activo} ? 't-ok' : 't-rose estado-inactivo'"
+                        th:text="${activo} ? 'Activos' : 'Inactivos'">Activos</span>
                 </div>
 
-                <div class="inventario-vacio" th:if="${#lists.isEmpty(proveedores)}">
-                    <span class="icono icono-truck" aria-hidden="true"></span>
-                    <p
+                <div class="card pad text-center inventario-vacio" th:if="${#lists.isEmpty(proveedores)}">
+                    <svg class="mx-auto mb-3 text-ink-3/40" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
+                    <p class="text-ink-2 font-medium"
                         th:text="${#strings.isEmpty(#strings.trim(buscar)) ? (activo ? 'No hay proveedores activos registrados.' : 'No hay proveedores inactivos registrados.') : 'No se encontraron proveedores para esta búsqueda.'}">
+                        No se encontraron proveedores.
                     </p>
                 </div>
 
-                <div class="tabla-contenedor inventario-tabla tabla-proveedores"
-                    th:unless="${#lists.isEmpty(proveedores)}" role="region"
-                    aria-label="Proveedores, tabla desplazable">
+                <div class="card overflow-hidden tabla-contenedor inventario-tabla tabla-proveedores"
+                    th:unless="${#lists.isEmpty(proveedores)}" role="region" aria-label="Proveedores, tabla desplazable">
                     <table>
                         <thead>
                             <tr>
@@ -76,47 +83,51 @@
                                 <th scope="col">Teléfono</th>
                                 <th scope="col">Correo</th>
                                 <th scope="col">Dirección</th>
-                                <th scope="col" th:if="${puedeGestionarProveedores}">Acciones</th>
+                                <th scope="col">Estado</th>
+                                <th scope="col" class="r" th:if="${puedeGestionarProveedores}">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="proveedor : ${proveedores}">
                                 <td>
-                                    <span class="codigo-medicamento" th:text="${proveedor.ruc()}"></span>
+                                    <span class="mono codigo-medicamento font-bold text-pine-700" th:text="${proveedor.ruc()}">20512345678</span>
                                 </td>
-                                <td class="nombre-medicamento" th:text="${proveedor.razonSocial()}"></td>
+                                <td>
+                                    <div class="font-bold text-ink nombre-medicamento" th:text="${proveedor.razonSocial()}">Droguería Farmaperú S.A.C.</div>
+                                </td>
                                 <td class="telefono-proveedor"
-                                    th:text="${#strings.isEmpty(proveedor.telefono()) ? '—' : proveedor.telefono()}">
+                                    th:text="${#strings.isEmpty(proveedor.telefono()) ? '—' : proveedor.telefono()}">—</td>
+                                <td class="contacto-proveedor text-ink-3"
+                                    th:text="${#strings.isEmpty(proveedor.correo()) ? '—' : proveedor.correo()}">—</td>
+                                <td class="contacto-proveedor text-ink-3"
+                                    th:text="${#strings.isEmpty(proveedor.direccion()) ? '—' : proveedor.direccion()}">—</td>
+                                <td>
+                                    <span class="badge" th:classappend="${proveedor.activo()} ? 't-ok' : 't-rose'"
+                                        th:text="${proveedor.activo()} ? 'ACTIVO' : 'INACTIVO'">ACTIVO</span>
                                 </td>
-                                <td class="contacto-proveedor"
-                                    th:text="${#strings.isEmpty(proveedor.correo()) ? '—' : proveedor.correo()}">
-                                </td>
-                                <td class="contacto-proveedor"
-                                    th:text="${#strings.isEmpty(proveedor.direccion()) ? '—' : proveedor.direccion()}">
-                                </td>
-                                <td th:if="${puedeGestionarProveedores}">
-                                    <div class="inventario-acciones">
-                                        <a class="boton-icono"
+                                <td class="r" th:if="${puedeGestionarProveedores}">
+                                    <div class="inline-flex gap-1.5 inventario-acciones">
+                                        <a class="ibtn boton-icono"
                                             th:href="@{/proveedores/{id}/editar(id=${proveedor.idProveedor()})}"
                                             title="Editar proveedor"
                                             th:attr="aria-label=${'Editar ' + proveedor.razonSocial()}">
-                                            <span class="icono icono-pencil" aria-hidden="true"></span>
+                                            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
                                         </a>
                                         <form method="post" th:if="${proveedor.activo()}"
                                             th:action="@{/proveedores/{id}/desactivar(id=${proveedor.idProveedor()})}"
-                                            onsubmit="return confirm('¿Desactivar este proveedor? Se conservará su historial.');">
-                                            <button class="boton-icono accion-desactivar" type="submit"
+                                            onsubmit="return confirm('¿Desactivar este proveedor? Se conservará su historial.');" style="margin:0">
+                                            <button class="ibtn dng boton-icono accion-desactivar" type="submit"
                                                 title="Desactivar proveedor"
                                                 th:attr="aria-label=${'Desactivar ' + proveedor.razonSocial()}">
-                                                <span class="icono icono-circle-minus" aria-hidden="true"></span>
+                                                <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>
                                             </button>
                                         </form>
                                         <form method="post" th:unless="${proveedor.activo()}"
                                             th:action="@{/proveedores/{id}/activar(id=${proveedor.idProveedor()})}"
-                                            onsubmit="return confirm('¿Activar este proveedor?');">
-                                            <button class="boton-icono" type="submit" title="Activar proveedor"
+                                            onsubmit="return confirm('¿Activar este proveedor?');" style="margin:0">
+                                            <button class="ibtn boton-icono text-ok" type="submit" title="Activar proveedor"
                                                 th:attr="aria-label=${'Activar ' + proveedor.razonSocial()}">
-                                                <span class="icono icono-circle-check" aria-hidden="true"></span>
+                                                <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
                                             </button>
                                         </form>
                                     </div>
@@ -126,12 +137,80 @@
                     </table>
                 </div>
 
-                <p class="resultados-pie"
+                <div class="lbl mt-3 resultados-pie"
                     th:text="${#lists.size(proveedores)} + (${#lists.size(proveedores) == 1} ? ' proveedor encontrado' : ' proveedores encontrados')">
-                </p>
+                    0 proveedores encontrados
+                </div>
             </section>
         </main>
     </div>
+
+    <!-- Modal Nuevo Proveedor (Spec 015 - Boceto 15) -->
+    <div id="modal-nuevo-proveedor" class="ov" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-proveedor">
+        <div class="md">
+            <div class="mh">
+                <div class="fi2">
+                    <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
+                </div>
+                <div style="flex:1">
+                    <h3 id="titulo-modal-proveedor">Nuevo proveedor</h3>
+                    <p>Laboratorio o distribuidora. El RUC debe tener 11 dígitos numéricos.</p>
+                </div>
+                <button type="button" class="ibtn btn-cerrar-modal" aria-label="Cerrar modal">
+                    <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <form th:action="@{/proveedores}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <div class="mb">
+                    <div>
+                        <label for="modal-ruc">RUC <span class="req">*</span></label>
+                        <div class="inp">
+                            <svg class="ico text-ink-3" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+                            <input id="modal-ruc" name="ruc" type="text" inputmode="numeric" maxlength="11" autocomplete="off" placeholder="Ej. 20100070970" required data-valida="ruc" class="w-full bg-transparent border-0 outline-none text-sm text-ink font-semibold font-mono">
+                        </div>
+                        <div class="help" data-help-for="modal-ruc">11 dígitos numéricos</div>
+                    </div>
+                    <div>
+                        <label for="modal-razonSocial">Razón social <span class="req">*</span></label>
+                        <div class="inp">
+                            <input id="modal-razonSocial" name="razonSocial" type="text" maxlength="150" autocomplete="organization" placeholder="Ej. Laboratorios Medifarma" required class="w-full bg-transparent border-0 outline-none text-sm text-ink font-semibold">
+                        </div>
+                        <div class="help">Nombre registrado en SUNAT</div>
+                    </div>
+                    <div>
+                        <label for="modal-telefono-prov">Teléfono</label>
+                        <div class="inp">
+                            <svg class="ico text-ink-3" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                            <input id="modal-telefono-prov" name="telefono" type="tel" maxlength="20" autocomplete="tel" placeholder="Ej. 01 425-8900" class="w-full bg-transparent border-0 outline-none text-sm text-ink font-medium">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="modal-correo-prov">Correo electrónico</label>
+                        <div class="inp">
+                            <svg class="ico text-ink-3" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                            <input id="modal-correo-prov" name="correo" type="email" maxlength="150" autocomplete="email" placeholder="ventas@laboratorio.com.pe" class="w-full bg-transparent border-0 outline-none text-sm text-ink font-medium">
+                        </div>
+                    </div>
+                    <div class="full">
+                        <label for="modal-direccion">Dirección fiscal o almacén</label>
+                        <div class="inp">
+                            <svg class="ico text-ink-3" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                            <input id="modal-direccion" name="direccion" type="text" maxlength="200" placeholder="Ej. Av. Argentina 2250, Callao" class="w-full bg-transparent border-0 outline-none text-sm text-ink font-medium">
+                        </div>
+                    </div>
+                </div>
+                <div class="mf">
+                    <button type="button" class="btn s btn-cerrar-modal">Cancelar</button>
+                    <button type="submit" class="btn p">
+                        <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                        <span>Guardar proveedor</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script th:src="@{/js/modales.js}" defer></script>
 </body>
 
 </html>

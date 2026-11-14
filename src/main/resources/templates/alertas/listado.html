@@ -8,64 +8,214 @@
     <aside th:replace="~{fragmentos/navegacion :: lateral('Alertas')}"></aside>
     <div class="inventario-area">
         <header th:replace="~{fragmentos/navegacion :: cabecera('Alertas', 'Inventario')}"></header>
-        <main id="contenido" class="inventario-contenido panel-alertas">
-            <div class="inventario-titulo"><div>
-                <p class="seccion-etiqueta">INVENTARIO / SEGUIMIENTO</p><h1>Alertas de inventario</h1>
-                <p class="alertas-intro">Revisa existencias críticas y lotes que requieren atención.</p>
-            </div><a class="inventario-boton boton-secundario transition-transform duration-150 active:scale-95 hover:shadow-sm" th:href="@{/medicamentos}"><span class="icono icono-pill" aria-hidden="true"></span>Ver medicamentos</a></div>
+        <main id="contenido" class="page panel-alertas">
+            <div class="head">
+                <div>
+                    <div class="eyebrow">INVENTARIO / SEGUIMIENTO</div>
+                    <h1 class="text-3xl font-extrabold tracking-tight text-ink">Alertas de inventario</h1>
+                    <div class="sub">Revisa existencias críticas y lotes que requieren atención.</div>
+                </div>
+                <div class="row" style="align-items:center">
+                    <a class="btn s" th:href="@{/medicamentos}">
+                        <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>
+                        Ver medicamentos
+                    </a>
+                </div>
+            </div>
 
-            <section class="alertas-metricas" aria-label="Resumen de alertas">
-                <article class="alerta-metrica metrica-critica transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-red-300 cursor-default"><span class="alerta-metrica-etiqueta">Agotados</span><strong th:text="${#lists.size(panel.agotados())}">0</strong><span>medicamentos sin stock disponible</span></article>
-                <article class="alerta-metrica metrica-preventiva transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-amber-300 cursor-default"><span class="alerta-metrica-etiqueta">Stock bajo</span><strong th:text="${#lists.size(panel.stockBajo())}">0</strong><span>en o por debajo del mínimo</span></article>
-                <article class="alerta-metrica metrica-preventiva transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-amber-300 cursor-default"><span class="alerta-metrica-etiqueta">Por vencer</span><strong th:text="${#lists.size(panel.porVencer())}">0</strong><span>lotes dentro de los próximos 90 días</span></article>
-                <article class="alerta-metrica metrica-critica transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-red-300 cursor-default"><span class="alerta-metrica-etiqueta">Vencidos</span><strong th:text="${#lists.size(panel.vencidos())}">0</strong><span>lotes que requieren revisión</span></article>
+            <!-- KPIs de Alertas -->
+            <section class="kpis alertas-metricas" aria-label="Resumen de alertas">
+                <article class="card kpi alerta-metrica metrica-critica">
+                    <div class="ic t-rose">
+                        <svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/></svg>
+                    </div>
+                    <div>
+                        <div class="t alerta-metrica-etiqueta">Agotados</div>
+                        <div class="n" th:text="${#lists.size(panel.agotados())}">0</div>
+                        <div class="d">medicamentos sin stock disponible</div>
+                    </div>
+                </article>
+
+                <article class="card kpi alerta-metrica metrica-preventiva">
+                    <div class="ic t-amber">
+                        <svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg>
+                    </div>
+                    <div>
+                        <div class="t alerta-metrica-etiqueta">Stock bajo</div>
+                        <div class="n" th:text="${#lists.size(panel.stockBajo())}">0</div>
+                        <div class="d">en o por debajo del mínimo</div>
+                    </div>
+                </article>
+
+                <article class="card kpi alerta-metrica metrica-preventiva">
+                    <div class="ic t-amber">
+                        <svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                    </div>
+                    <div>
+                        <div class="t alerta-metrica-etiqueta">Por vencer</div>
+                        <div class="n" th:text="${#lists.size(panel.porVencer())}">0</div>
+                        <div class="d">lotes dentro de los próximos 90 días</div>
+                    </div>
+                </article>
+
+                <article class="card kpi alerta-metrica metrica-critica">
+                    <div class="ic t-rose">
+                        <svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>
+                    </div>
+                    <div>
+                        <div class="t alerta-metrica-etiqueta">Vencidos</div>
+                        <div class="n" th:text="${#lists.size(panel.vencidos())}">0</div>
+                        <div class="d">lotes que requieren baja</div>
+                    </div>
+                </article>
             </section>
 
+            <!-- 1. Necesidades de Reposición -->
             <section class="alertas-seccion inventario-resultados" aria-labelledby="titulo-reposicion">
-                <div class="resultados-cabecera"><div><h2 id="titulo-reposicion">Necesidades de reposición</h2><p class="alertas-ayuda">La cantidad sugerida descuenta unidades pendientes de recibir.</p></div><span class="cantidad-resultados" th:text="${#lists.size(reposicion)}">0</span></div>
-                <div class="inventario-vacio" th:if="${#lists.isEmpty(reposicion)}"><span class="icono icono-circle-check" aria-hidden="true"></span><p>No hay necesidades de reposición pendientes.</p></div>
-                <div class="tabla-contenedor inventario-tabla" th:unless="${#lists.isEmpty(reposicion)}" role="region" aria-label="Necesidades de reposición, tabla desplazable">
-                    <table><thead><tr><th scope="col">Medicamento</th><th scope="col" class="numero">Disponible</th><th scope="col" class="numero">Mínimo</th><th scope="col" class="numero">Pendiente</th><th scope="col" class="numero">Sugerido</th><th scope="col">Estado</th><th scope="col">Acción</th></tr></thead>
-                    <tbody><tr th:each="item : ${reposicion}" class="hover:bg-emerald-50/30 transition-colors duration-150">
-                        <td><span class="codigo-medicamento" th:text="${item.codigoMedicamento()}">MED-000</span><strong class="alerta-producto" th:text="${item.nombreMedicamento()}">Medicamento</strong></td>
-                        <td class="numero" th:text="${item.stockDisponible() + ' ' + item.unidadControl()}">0</td><td class="numero" th:text="${item.stockMinimo()}">0</td><td class="numero" th:text="${item.pendienteRecibir()}">0</td>
-                        <td class="numero"><strong class="alerta-cantidad" th:text="${item.cantidadSugerida() + ' ' + item.unidadControl()}">0</strong></td>
-                        <td><span class="alerta-badge" th:classappend="${item.tipoAlerta() == 'AGOTADO' ? ' alerta-badge-critico' : ' alerta-badge-preventivo'}" th:text="${item.tipoAlerta() == 'AGOTADO' ? 'AGOTADO' : 'STOCK BAJO'}">STOCK BAJO</span></td>
-                        <td><a class="enlace-lotes inline-flex items-center gap-1 font-medium text-emerald-700 hover:text-emerald-800 transition-colors" th:if="${puedeCrearOrden}" th:href="@{/ordenes-compra/nuevo(medicamentoId=${item.idMedicamento()}, cantidad=${item.cantidadSugerida()})}"><span class="icono icono-plus" aria-hidden="true"></span>Crear orden</a><span class="alerta-sin-permiso" th:unless="${puedeCrearOrden}">Requiere rol de Compras</span></td>
-                    </tr></tbody></table>
+                <div class="sec">
+                    <h2 id="titulo-reposicion">Necesidades de reposición</h2>
+                    <span class="cnt cantidad-resultados" th:text="${#lists.size(reposicion)}">0</span>
+                    <span class="lbl">La cantidad sugerida descuenta unidades pendientes de recibir.</span>
+                </div>
+
+                <div class="card pad inventario-vacio text-center" th:if="${#lists.isEmpty(reposicion)}">
+                    <p class="text-ink-2 font-medium">No hay necesidades de reposición pendientes.</p>
+                </div>
+
+                <div class="card overflow-x-auto tabla-contenedor inventario-tabla" th:unless="${#lists.isEmpty(reposicion)}" role="region" aria-label="Necesidades de reposición, tabla desplazable">
+                    <table class="w-full">
+                        <thead>
+                            <tr>
+                                <th scope="col">Medicamento</th>
+                                <th scope="col" class="r">Disponible</th>
+                                <th scope="col" class="r">Mínimo</th>
+                                <th scope="col" class="r">Pendiente</th>
+                                <th scope="col" class="r">Sugerido</th>
+                                <th scope="col">Estado</th>
+                                <th scope="col" class="r">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="item : ${reposicion}">
+                                <td>
+                                    <span class="mono codigo-medicamento" th:text="${item.codigoMedicamento()}">MED-000</span>
+                                    <div><b class="alerta-producto" th:text="${item.nombreMedicamento()}">Medicamento</b></div>
+                                </td>
+                                <td class="r" th:text="${item.stockDisponible() + ' ' + item.unidadControl()}">0</td>
+                                <td class="r" th:text="${item.stockMinimo()}">0</td>
+                                <td class="r" th:text="${item.pendienteRecibir()}">0</td>
+                                <td class="r"><b class="alerta-cantidad text-pine-700" th:text="${item.cantidadSugerida() + ' ' + item.unidadControl()}">0</b></td>
+                                <td>
+                                    <span class="badge alerta-badge" th:classappend="${item.tipoAlerta() == 'AGOTADO' ? 't-rose alerta-badge-critico' : 't-amber alerta-badge-preventivo'}" th:text="${item.tipoAlerta() == 'AGOTADO' ? 'AGOTADO' : 'STOCK BAJO'}">STOCK BAJO</span>
+                                </td>
+                                <td class="r">
+                                    <a class="lnk enlace-lotes" th:if="${puedeCrearOrden}" th:href="@{/ordenes-compra/nuevo(medicamentoId=${item.idMedicamento()}, cantidad=${item.cantidadSugerida()})}">
+                                        <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>
+                                        Crear orden
+                                    </a>
+                                    <span class="alerta-sin-permiso text-xs text-ink-3 font-semibold" th:unless="${puedeCrearOrden}">Requiere rol de Compras</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </section>
 
+            <!-- 2. Lotes Vencidos -->
             <section class="alertas-seccion inventario-resultados" aria-labelledby="titulo-vencidos">
-                <div class="resultados-cabecera"><div><h2 id="titulo-vencidos">Lotes vencidos</h2><p class="alertas-ayuda">Verifica y gestiona estos lotes según el procedimiento de la botica.</p></div><span class="cantidad-resultados alerta-contador-critico" th:text="${#lists.size(panel.vencidos())}">0</span></div>
-                <div class="inventario-vacio" th:if="${#lists.isEmpty(panel.vencidos())}"><span class="icono icono-circle-check" aria-hidden="true"></span><p>No se encontraron lotes vencidos.</p></div>
-                <div class="tabla-contenedor inventario-tabla" th:unless="${#lists.isEmpty(panel.vencidos())}" role="region" aria-label="Lotes vencidos, tabla desplazable">
-                    <table><thead><tr><th scope="col">Medicamento</th><th scope="col">Lote</th><th scope="col">Vencimiento</th><th scope="col" class="numero">Días vencido</th><th scope="col" class="numero">Existencia</th><th scope="col">Alerta</th><th scope="col">Acción</th></tr></thead>
-                    <tbody><tr th:each="lote : ${panel.vencidos()}" class="hover:bg-rose-50/30 transition-colors duration-150">
-                        <td><span class="codigo-medicamento" th:text="${lote.codigoMedicamento()}">MED-000</span><strong class="alerta-producto" th:text="${lote.nombreMedicamento()}">Medicamento</strong></td>
-                        <td th:text="${lote.numeroLote()}">LOTE</td>
-                        <td th:text="${#temporals.format(lote.fechaVencimiento(), 'dd/MM/yyyy')}">01/01/2026</td>
-                        <td class="numero"><strong th:text="${-lote.diasParaVencer()}">1</strong></td>
-                        <td class="numero" th:text="${lote.stockActual() + ' ' + lote.unidadControl()}">0</td>
-                        <td><span class="alerta-badge alerta-badge-critico">VENCIDO</span></td>
-                        <td>
-                            <a class="enlace-lotes inline-flex items-center gap-1 font-medium text-rose-700 hover:text-rose-800 transition-colors"
-                               th:if="${puedeRegistrarSalida}"
-                               th:href="@{/lotes/{id}/salida(id=${lote.idLote()}, motivo='Baja por vencimiento')}">
-                                <span class="icono icono-arrow-down" aria-hidden="true"></span>Dar de baja
-                            </a>
-                            <span class="alerta-sin-permiso" th:unless="${puedeRegistrarSalida}">Requiere rol de Almacén</span>
-                        </td>
-                    </tr></tbody></table>
+                <div class="sec">
+                    <h2 id="titulo-vencidos">Lotes vencidos</h2>
+                    <span class="cnt critico alerta-contador-critico" th:text="${#lists.size(panel.vencidos())}">0</span>
+                    <span class="lbl">Verifica y gestiona estos lotes según el procedimiento de la botica.</span>
+                </div>
+
+                <div class="card pad inventario-vacio text-center" th:if="${#lists.isEmpty(panel.vencidos())}">
+                    <p class="text-ink-2 font-medium">No se encontraron lotes vencidos.</p>
+                </div>
+
+                <div class="card overflow-x-auto tabla-contenedor inventario-tabla" th:unless="${#lists.isEmpty(panel.vencidos())}" role="region" aria-label="Lotes vencidos, tabla desplazable">
+                    <table class="w-full">
+                        <thead>
+                            <tr>
+                                <th scope="col">Medicamento</th>
+                                <th scope="col">Lote</th>
+                                <th scope="col">Vencimiento</th>
+                                <th scope="col" class="r">Días vencido</th>
+                                <th scope="col" class="r">Existencia</th>
+                                <th scope="col">Alerta</th>
+                                <th scope="col" class="r">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="lote : ${panel.vencidos()}">
+                                <td>
+                                    <span class="mono codigo-medicamento" th:text="${lote.codigoMedicamento()}">MED-000</span>
+                                    <div><b class="alerta-producto" th:text="${lote.nombreMedicamento()}">Medicamento</b></div>
+                                </td>
+                                <td><span class="mono" th:text="${lote.numeroLote()}">LOTE</span></td>
+                                <td th:text="${#temporals.format(lote.fechaVencimiento(), 'dd/MM/yyyy')}">01/01/2026</td>
+                                <td class="r"><b class="text-rose font-bold" th:text="${-lote.diasParaVencer()}">1</b></td>
+                                <td class="r" th:text="${lote.stockActual() + ' ' + lote.unidadControl()}">0</td>
+                                <td><span class="badge t-rose alerta-badge alerta-badge-critico">VENCIDO</span></td>
+                                <td class="r">
+                                    <a class="btn d enlace-lotes text-xs py-1.5 px-3"
+                                       th:if="${puedeRegistrarSalida}"
+                                       th:href="@{/lotes/{id}/salida(id=${lote.idLote()}, motivo='Baja por vencimiento')}">
+                                        <svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+                                        Dar de baja
+                                    </a>
+                                    <span class="alerta-sin-permiso text-xs text-ink-3 font-semibold" th:unless="${puedeRegistrarSalida}">Requiere rol de Almacén</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </section>
 
+            <!-- 3. Próximos a Vencer (Horizonte 90 días, FEFO) -->
             <section class="alertas-seccion inventario-resultados" aria-labelledby="titulo-por-vencer">
-                <div class="resultados-cabecera"><div><h2 id="titulo-por-vencer">Próximos a vencer</h2><p class="alertas-ayuda" th:text="|Lotes con fecha de vencimiento hasta ${diasPorVencer} días desde hoy.|">Lotes con fecha de vencimiento hasta 90 días desde hoy.</p></div><span class="cantidad-resultados alerta-contador-preventivo" th:text="${#lists.size(panel.porVencer())}">0</span></div>
-                <div class="inventario-vacio" th:if="${#lists.isEmpty(panel.porVencer())}"><span class="icono icono-circle-check" aria-hidden="true"></span><p th:text="|No hay lotes próximos a vencer en los siguientes ${diasPorVencer} días.|">No hay lotes próximos a vencer en los siguientes 90 días.</p></div>
-                <div class="tabla-contenedor inventario-tabla" th:unless="${#lists.isEmpty(panel.porVencer())}" role="region" aria-label="Lotes próximos a vencer, tabla desplazable">
-                    <table><thead><tr><th scope="col">Medicamento</th><th scope="col">Lote</th><th scope="col">Vencimiento</th><th scope="col" class="numero">Días restantes</th><th scope="col" class="numero">Existencia</th><th scope="col">Prioridad</th></tr></thead>
-                    <tbody><tr th:each="lote : ${panel.porVencer()}" class="hover:bg-amber-50/30 transition-colors duration-150"><td><span class="codigo-medicamento" th:text="${lote.codigoMedicamento()}">MED-000</span><strong class="alerta-producto" th:text="${lote.nombreMedicamento()}">Medicamento</strong></td><td th:text="${lote.numeroLote()}">LOTE</td><td th:text="${#temporals.format(lote.fechaVencimiento(), 'dd/MM/yyyy')}">01/01/2026</td><td class="numero"><strong th:text="${lote.diasParaVencer()}">30</strong></td><td class="numero" th:text="${lote.stockActual() + ' ' + lote.unidadControl()}">0</td><td><span class="alerta-badge alerta-badge-preventivo">REVISAR</span></td></tr></tbody></table>
+                <div class="sec">
+                    <h2 id="titulo-por-vencer">Próximos a vencer</h2>
+                    <span class="cnt preventivo alerta-contador-preventivo" th:text="${#lists.size(panel.porVencer())}">0</span>
+                    <span class="lbl" th:text="|Horizonte de ${diasPorVencer} días · ordenados por fecha de caducidad (FEFO).|">Horizonte de 90 días · ordenados por fecha.</span>
+                </div>
+
+                <div class="card pad inventario-vacio text-center" th:if="${#lists.isEmpty(panel.porVencer())}">
+                    <p class="text-ink-2 font-medium" th:text="|No hay lotes próximos a vencer en los siguientes ${diasPorVencer} días.|">No hay lotes próximos a vencer.</p>
+                </div>
+
+                <div class="card overflow-x-auto tabla-contenedor inventario-tabla" th:unless="${#lists.isEmpty(panel.porVencer())}" role="region" aria-label="Lotes próximos a vencer, tabla desplazable">
+                    <table class="w-full">
+                        <thead>
+                            <tr>
+                                <th scope="col">Lote</th>
+                                <th scope="col">Medicamento</th>
+                                <th scope="col">Vence en</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col" class="r">Stock</th>
+                                <th scope="col">Prioridad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="lote : ${panel.porVencer()}">
+                                <td><span class="mono" th:text="${lote.numeroLote()}">LOTE</span></td>
+                                <td>
+                                    <span class="mono codigo-medicamento" th:text="${lote.codigoMedicamento()}">MED-000</span>
+                                    <div><b class="alerta-producto" th:text="${lote.nombreMedicamento()}">Medicamento</b></div>
+                                </td>
+                                <td>
+                                    <b th:text="|${lote.diasParaVencer()} días|">30 días</b>
+                                </td>
+                                <td th:text="${#temporals.format(lote.fechaVencimiento(), 'dd/MM/yyyy')}">01/01/2026</td>
+                                <td class="r" th:text="${lote.stockActual() + ' ' + lote.unidadControl()}">0</td>
+                                <td>
+                                    <span class="badge alerta-badge alerta-badge-preventivo"
+                                          th:classappend="${lote.diasParaVencer() <= 30 ? 't-rose' : 't-amber'}"
+                                          th:text="${lote.diasParaVencer() <= 30 ? 'URGENTE' : 'ATENCIÓN'}">REVISAR</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </section>
         </main>

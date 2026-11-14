@@ -372,6 +372,350 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "GET - Listar clientes",
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "admin_demo",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "AdminDemo2026!",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/clientes",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "clientes"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Buscar cliente por texto",
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "vendedor_demo",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "VendedorDemo2026!",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/clientes?buscar=Carlos",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "clientes"
+          ],
+          "query": [
+            {
+              "key": "buscar",
+              "value": "Carlos"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST - Registrar nuevo cliente",
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "vendedor_demo",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "VendedorDemo2026!",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"tipoDocumento\": \"DNI\",\r\n  \"numeroDocumento\": \"45678901\",\r\n  \"nombreCompleto\": \"Carlos Sanchez Gomez\",\r\n  \"telefono\": \"987654321\",\r\n  \"correo\": \"carlos@example.com\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/clientes",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "clientes"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PUT - Actualizar cliente",
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "admin_demo",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "AdminDemo2026!",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"tipoDocumento\": \"DNI\",\r\n  \"numeroDocumento\": \"45678901\",\r\n  \"nombreCompleto\": \"Carlos Sanchez Gomez Actualizado\",\r\n  \"telefono\": \"999888777\",\r\n  \"correo\": \"carlos.nuevo@example.com\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/clientes/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "clientes",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Panel consolidado de alertas",
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "admin_demo",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "AdminDemo2026!",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/alertas",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "alertas"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Alertas de stock (Agotados y Críticos)",
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "almacen_demo",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "FarmaciaDemo2026!",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/alertas/stock",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "alertas",
+            "stock"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Necesidades de reposición",
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "compras_demo",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "ComprasDemo2026!",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/alertas/reposicion",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "alertas",
+            "reposicion"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Lotes vencidos",
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "almacen_demo",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "FarmaciaDemo2026!",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/alertas/vencidos",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "alertas",
+            "vencidos"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Lotes por vencer (90 días)",
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "admin_demo",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "AdminDemo2026!",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/alertas/por-vencer",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "alertas",
+            "por-vencer"
+          ]
+        }
+      },
+      "response": []
     }
   ]
 }

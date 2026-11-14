@@ -12,101 +12,126 @@
         <header th:replace="~{fragmentos/navegacion :: cabecera('Mis ventas', 'Ventas')}"></header>
         <main id="contenido" class="inventario-contenido">
 
-            <div class="inventario-titulo">
+            <div class="head">
                 <div>
-                    <p class="seccion-etiqueta">VENTAS / MIS REGISTROS</p>
+                    <div class="eyebrow">VENTAS / MIS REGISTROS</div>
                     <h1>Mis ventas recientes</h1>
-                    <p class="clientes-intro">Consulta y reimprime los comprobantes de las ventas que registraste.</p>
+                    <div class="sub">Consulta y reimprime los comprobantes de las ventas que registraste en los últimos 30 días.</div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <a th:href="@{/ventas/nueva}" class="btn p">
+                        <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5v14"/>
+                        </svg>
+                        <span>Nueva venta</span>
+                    </a>
                 </div>
             </div>
 
-            <div class="aviso-operacion aviso-error shadow-sm" th:if="${error != null}" role="alert">
+            <div class="aviso-operacion aviso-error shadow-sm mb-4" th:if="${error != null}" role="alert">
                 <span class="icono icono-circle-alert" aria-hidden="true"></span>
                 <span th:text="${error}">Error en el rango de fechas.</span>
             </div>
 
-            <div class="aviso-operacion aviso-info shadow-sm" role="note">
-                <span class="icono icono-clipboard-list" aria-hidden="true"></span>
-                <div>
-                    <p>Visualiza tus ventas registradas para reimprimir boletas. Por defecto muestra las de hoy (puedes consultar hasta 30 días hacia atrás).</p>
-                </div>
+            <!-- Nota informativa -->
+            <div class="note">
+                <svg class="ico flex-none" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+                </svg>
+                <span>Visualiza tus ventas registradas para reimprimir boletas. Por defecto muestra las de hoy (puedes consultar hasta 30 días hacia atrás).</span>
             </div>
 
-            <form class="inventario-filtros" th:action="@{/ventas/mias}" method="get" role="search" aria-label="Filtro de fechas de mis ventas">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-lg">
-                    <div>
-                        <label for="desde">Desde</label>
-                        <input type="date" id="desde" name="desde" th:value="${desde}">
+            <!-- Filtros de Fecha -->
+            <div class="card pad mb-6">
+                <form th:action="@{/ventas/mias}" method="get" role="search" aria-label="Filtro de fechas de mis ventas">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        <div>
+                            <label for="desde">Desde</label>
+                            <div class="inp">
+                                <svg class="ico text-ink-3 flex-none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+                                </svg>
+                                <input type="date" id="desde" name="desde" th:value="${desde}" class="w-full bg-transparent border-0 focus:outline-none text-ink font-semibold">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="hasta">Hasta</label>
+                            <div class="inp">
+                                <svg class="ico text-ink-3 flex-none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+                                </svg>
+                                <input type="date" id="hasta" name="hasta" th:value="${hasta}" class="w-full bg-transparent border-0 focus:outline-none text-ink font-semibold">
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="btn p" type="submit">
+                                <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path d="M22 3H2l8 9.46V19l4 2v-8.54z"/>
+                                </svg>
+                                <span>Filtrar</span>
+                            </button>
+                            <a class="btn s" th:href="@{/ventas/mias}">
+                                <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path d="M18 6 6 18M6 6l12 12"/>
+                                </svg>
+                                <span>Limpiar</span>
+                            </a>
+                        </div>
                     </div>
-                    <div>
-                        <label for="hasta">Hasta</label>
-                        <input type="date" id="hasta" name="hasta" th:value="${hasta}">
-                    </div>
-                </div>
-                <div class="filtro-acciones mt-3">
-                    <button class="inventario-boton boton-principal transition-all duration-150 active:scale-95" type="submit">
-                        <span class="icono icono-search" aria-hidden="true"></span>Filtrar
-                    </button>
-                    <a class="inventario-boton boton-secundario transition-all duration-150 active:scale-95" th:href="@{/ventas/mias}">
-                        <span class="icono icono-x" aria-hidden="true"></span>Limpiar
-                    </a>
-                </div>
-            </form>
+                </form>
+            </div>
 
-            <section class="inventario-resultados" aria-labelledby="titulo-mis-ventas">
-                <div class="resultados-cabecera">
-                    <h2 id="titulo-mis-ventas">
-                        Comprobantes emitidos
-                        <span class="cantidad-resultados" th:text="${#lists.size(filas)}">0</span>
-                    </h2>
-                </div>
+            <!-- Listado de Comprobantes emitidos -->
+            <div class="sec">
+                <h2>Comprobantes emitidos</h2>
+                <span class="cnt" th:text="${#lists.size(filas)}">0</span>
+            </div>
 
-                <div class="inventario-vacio" th:if="${#lists.isEmpty(filas)}">
-                    <span class="icono icono-circle-check" aria-hidden="true"></span>
-                    <p>No registraste ventas en este periodo.</p>
-                </div>
+            <div class="card pad text-center py-12" th:if="${#lists.isEmpty(filas)}">
+                <svg class="mx-auto text-slate-300 mb-2" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>
+                </svg>
+                <p class="text-sm font-semibold text-ink-2">No registraste ventas en este periodo.</p>
+            </div>
 
-                <div class="tabla-contenedor inventario-tabla tabla-mis-ventas" th:unless="${#lists.isEmpty(filas)}"
-                    role="region" aria-label="Mis ventas, tabla desplazable">
+            <div class="card overflow-hidden" th:unless="${#lists.isEmpty(filas)}">
+                <div class="overflow-x-auto">
                     <table>
                         <thead>
                             <tr>
                                 <th scope="col">Comprobante</th>
                                 <th scope="col">Fecha y hora</th>
                                 <th scope="col">Cliente</th>
-                                <th scope="col" class="numero">Total</th>
-                                <th scope="col">Acción</th>
+                                <th scope="col" class="r">Total</th>
+                                <th scope="col" class="c">Estado</th>
+                                <th scope="col" class="r">Acción</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="fila : ${filas}" class="hover:bg-slate-50/80 transition-colors duration-150">
+                            <tr th:each="fila : ${filas}">
                                 <td>
-                                    <span class="codigo-medicamento font-mono font-semibold"
-                                        th:text="${fila.numeroComprobante()}">B001-00000001</span>
+                                    <span class="mono" th:text="${fila.numeroComprobante()}">B001-00000001</span>
                                 </td>
-                                <td class="fecha-registro"
-                                    th:text="${#temporals.format(fila.fechaHora(), 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</td>
-                                <td th:text="${fila.clienteVisible()}">Público general</td>
-                                <td class="numero">
-                                    <strong class="font-bold text-emerald-700"
-                                        th:text="${'S/ ' + #numbers.formatDecimal(fila.total(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</strong>
+                                <td class="text-xs text-ink-2" th:text="${#temporals.format(fila.fechaHora(), 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</td>
+                                <td class="text-xs font-medium text-ink-2" th:text="${fila.clienteVisible()}">Público general</td>
+                                <td class="r font-bold text-ink" th:text="${'S/ ' + #numbers.formatDecimal(fila.total(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</td>
+                                <td class="c">
+                                    <span class="badge t-ok">EMITIDA</span>
                                 </td>
-                                <td>
-                                    <a class="enlace-lotes inline-flex items-center gap-1 font-medium text-emerald-700 hover:text-emerald-800 transition-colors"
-                                        th:href="@{/ventas/{id}(id=${fila.idVenta()})}">
-                                        <span class="icono icono-printer" aria-hidden="true"></span>Ver / Imprimir
+                                <td class="r">
+                                    <a class="lnk" th:href="@{/ventas/{id}(id=${fila.idVenta()})}" title="Ver e imprimir ticket">
+                                        <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                                            <path d="M6 9V3h12v6"/><rect x="6" y="14" width="12" height="8"/>
+                                        </svg>
+                                        <span>Reimprimir</span>
                                     </a>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-
-                <p class="resultados-pie text-xs text-slate-500"
-                    th:text="${#lists.size(filas)} + (${#lists.size(filas) == 1} ? ' venta registrada' : ' ventas registradas')">
-                    0 ventas registradas
-                </p>
-            </section>
+            </div>
         </main>
     </div>
 </body>

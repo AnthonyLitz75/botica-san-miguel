@@ -39,19 +39,4 @@ public class VentaControlador {
         preparacionServicio.limpiar(usuario);
         return resultado;
     }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<PreparacionVentaControlador.ErrorVista> errorNegocio(IllegalArgumentException excepcion) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new PreparacionVentaControlador.ErrorVista(excepcion.getMessage()));
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<PreparacionVentaControlador.ErrorVista> errorValidacion(
-            MethodArgumentNotValidException excepcion) {
-        String mensaje = excepcion.getBindingResult().getFieldErrors().stream()
-                .map(error -> error.getDefaultMessage()).findFirst().orElse("Solicitud inválida");
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new PreparacionVentaControlador.ErrorVista(mensaje));
-    }
 }

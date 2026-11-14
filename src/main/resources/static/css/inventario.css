@@ -1764,3 +1764,528 @@
     font-size: 8pt;
   }
 }
+
+/* ==========================================================================
+   MODALES DE CREACIÓN Y OPERACIONES (SPEC 015 - BOCETOS 14 A 19)
+   ========================================================================== */
+.ov {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 42, 36, 0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 48px 16px;
+  overflow-y: auto;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.ov.activo,
+.ov.on {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.md {
+  width: 100%;
+  max-width: 620px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  margin: auto 0;
+  transform: translateY(-16px) scale(0.98);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ov.activo .md,
+.ov.on .md {
+  transform: translateY(0) scale(1);
+}
+
+.md .mh {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 22px 26px 16px;
+  border-bottom: 1px solid var(--line, #dfe6e3);
+}
+
+.md .mh .fi2 {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--pine-50, #e9f4f0);
+  color: var(--pine-700, #166a55);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+
+.md .mh h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink, #10201b);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.md .mh p {
+  color: var(--ink-3, #5b6d66);
+  font-size: 13px;
+  margin-top: 2px;
+  margin-bottom: 0;
+}
+
+.md .mb {
+  padding: 20px 26px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 16px;
+}
+
+.md .mb .full {
+  grid-column: 1 / -1;
+}
+
+.md .mf {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 26px;
+  background: #f7f9f8;
+  border-top: 1px solid var(--line, #dfe6e3);
+}
+
+.req {
+  color: var(--rose, #be123c);
+}
+
+.inp.err {
+  border-color: var(--rose, #be123c);
+  background: #fff8f9;
+  box-shadow: 0 0 0 3px rgba(190, 18, 60, 0.1);
+}
+
+.inp.ok2 {
+  border-color: #34d399;
+}
+
+.help {
+  font-size: 12px;
+  color: var(--ink-3, #5b6d66);
+  margin-top: 5px;
+}
+
+.help.e {
+  color: var(--rose, #be123c);
+  font-weight: 600;
+}
+
+.inp.ta {
+  height: 84px;
+  align-items: flex-start;
+  padding-top: 10px;
+}
+
+.chk {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 13.5px;
+  color: var(--ink-2, #33463f);
+}
+
+.chk i {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: var(--pine-700, #166a55);
+  display: inline-grid;
+  place-items: center;
+  color: #ffffff;
+}
+
+@media (max-width: 640px) {
+  .md .mb {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   CAJA / POS: BUSCADOR DE MEDICAMENTOS Y SUGERENCIAS FLOTANTES (.sugg)
+   ========================================================================== */
+.sugg {
+  margin-top: 8px;
+  border: 1px solid var(--line, #dfe6e3);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.sugg .o {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #edf1ef;
+  transition: background 0.15s ease;
+  user-select: none;
+}
+
+.sugg .o:last-child {
+  border: 0;
+}
+
+.sugg .o.hi,
+.sugg .o:hover:not([style*="not-allowed"]) {
+  background: var(--pine-50, #e9f4f0);
+}
+
+.sugg .o b {
+  font-size: 14px;
+  color: var(--ink, #10201b);
+}
+
+.sugg .o small {
+  color: var(--ink-3, #5b6d66);
+  display: block;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.num {
+  display: inline-grid;
+  place-items: center;
+  min-width: 34px;
+  height: 28px;
+  border-radius: 8px;
+  font-weight: 700;
+  background: #f1f4f3;
+  border: 1px solid var(--line, #dfe6e3);
+  font-size: 13px;
+}
+
+.num.bad {
+  background: var(--rose-bg, #ffe4e6);
+  color: var(--rose, #be123c);
+  border-color: #fecdd3;
+}
+
+.num.ok {
+  background: var(--ok-bg, #d1fae5);
+  color: var(--ok, #047857);
+  border-color: #a7f3d0;
+}
+
+.num.low {
+  background: var(--amber-bg, #fef3c7);
+  color: var(--amber, #b45309);
+  border-color: #fde68a;
+}
+
+.chip.mono {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--pine-700, #166a55);
+  font-weight: 700;
+  background: #eef2f0;
+  border-radius: 6px;
+  padding: 3px 8px;
+}
+
+/* ==========================================================================
+   CANASTA DE VENTA: TABLA COMPACTA, STEPPER, FEFO Y BOTÓN ACCIÓN
+   ========================================================================== */
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #cfd8d4;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.stepper span {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  color: var(--ink-2, #33463f);
+  background: #f7f9f8;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  user-select: none;
+}
+
+.stepper span:hover {
+  background: #edf1ef;
+}
+
+.stepper b {
+  width: 44px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink, #10201b);
+}
+
+.fefo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  font-size: 12px;
+  color: var(--ink-3, #5b6d66);
+  margin-top: 4px;
+}
+
+.fefo i {
+  font-style: normal;
+  background: var(--pine-50, #e9f4f0);
+  color: var(--pine-700, #166a55);
+  border-radius: 6px;
+  padding: 1px 7px;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+.btn-editar-descuento {
+  cursor: pointer;
+  text-decoration: underline dashed rgba(0, 0, 0, 0.2);
+  transition: color 0.15s ease;
+}
+
+.btn-editar-descuento:hover {
+  color: var(--pine-700, #166a55);
+}
+
+.ibtn {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line, #dfe6e3);
+  border-radius: 9px;
+  display: inline-grid;
+  place-items: center;
+  color: var(--ink-2, #33463f);
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ibtn.dng {
+  color: var(--rose, #be123c);
+  border-color: #fecdd3;
+}
+
+.ibtn.dng:hover {
+  background: var(--rose-bg, #ffe4e6);
+  border-color: var(--rose, #be123c);
+}
+
+/* ==========================================================================
+   PANEL LATERAL: TARJETA DE CLIENTE (.cli) Y BADGES SEMÁNTICOS
+   ========================================================================== */
+.cli {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: var(--pine-50, #e9f4f0);
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 10px;
+}
+
+.cli .av {
+  background: #fff;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--pine-700, #166a55);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+.cli b {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ink, #10201b);
+  line-height: 1.2;
+}
+
+.cli .lbl {
+  font-size: 12px;
+  color: var(--ink-3, #5b6d66);
+  margin-top: 2px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 3px 10px;
+  letter-spacing: 0.02em;
+}
+
+.badge:before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.t-ok {
+  background: var(--ok-bg, #d1fae5);
+  color: var(--ok, #047857);
+}
+
+.t-blue {
+  background: var(--blue-bg, #e0ecff);
+  color: var(--blue, #1d4ed8);
+}
+
+/* ==========================================================================
+   PANEL LATERAL: SELECTOR DE PAGO SEGMENTADO (.seg) Y DESGLOSE TOTALES (.sum)
+   ========================================================================== */
+.seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.seg div {
+  border: 1px solid #cfd8d4;
+  border-radius: 10px;
+  padding: 10px 6px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink-2, #33463f);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  user-select: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: #fff;
+}
+
+.seg div:hover:not(.on) {
+  background: #f7f9f8;
+}
+
+.seg div.on {
+  border-color: var(--pine-700, #166a55);
+  background: var(--pine-50, #e9f4f0);
+  color: var(--pine-800, #143a31);
+  box-shadow: inset 0 0 0 1px var(--pine-700, #166a55);
+}
+
+.sum .ln {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  color: var(--ink-2, #33463f);
+  font-size: 13.5px;
+}
+
+.sum .tot {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-top: 2px dashed var(--line, #dfe6e3);
+  margin-top: 10px;
+  padding-top: 14px;
+}
+
+.sum .tot b {
+  font-size: 38px;
+  letter-spacing: -0.02em;
+  color: var(--pine-800, #143a31);
+  line-height: 1;
+}
+
+/* ==========================================================================
+   BOTONES DE ACCIÓN DE CAJA Y LEYENDA INFORMATIVA (Boceto 01)
+   ========================================================================== */
+.btn.lg {
+  padding: 16px 20px;
+  font-size: 17px;
+  border-radius: 12px;
+  width: 100%;
+  justify-content: center;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  transition: all 0.15s ease;
+}
+
+.btn.p.lg {
+  background: var(--pine-700, #166a55);
+  color: #fff;
+}
+
+.btn.p.lg:hover:not(:disabled) {
+  background: var(--pine-800, #125443);
+  box-shadow: 0 4px 12px rgba(22, 106, 85, 0.25);
+}
+
+.btn.p.lg:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn.s {
+  background: #fff;
+  color: var(--ink-2, #33463f);
+  border: 1px solid #cfd8d4;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 13.5px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.btn.s:hover {
+  background: #f7f9f8;
+  border-color: #bec9c4;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--ink-3, #5b6d66);
+  text-align: center;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+
+
+
+

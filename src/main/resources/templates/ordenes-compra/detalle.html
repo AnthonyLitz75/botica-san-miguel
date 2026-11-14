@@ -12,102 +12,113 @@
         <header th:replace="~{fragmentos/navegacion :: cabecera('Órdenes de compra', 'Compras')}"></header>
         <main id="contenido" class="inventario-contenido">
 
-            <div class="inventario-titulo">
+            <div class="head">
                 <div>
-                    <p class="seccion-etiqueta">COMPRAS / ABASTECIMIENTO</p>
+                    <div class="eyebrow seccion-etiqueta">Compras / Abastecimiento</div>
                     <h1 th:text="${'Orden ' + orden.numeroOrden()}">Detalle de orden de compra</h1>
+                    <div class="sub">Datos de cabecera, proveedor asignado y medicamentos solicitados.</div>
                 </div>
-                <a class="inventario-boton boton-secundario" th:href="@{/ordenes-compra}">
-                    <span class="icono icono-arrow-left" aria-hidden="true"></span>Volver a órdenes
-                </a>
+                <div class="row items-center">
+                    <a class="btn s inventario-boton boton-secundario" th:href="@{/ordenes-compra}">
+                        <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                        <span>Volver a órdenes</span>
+                    </a>
+                </div>
             </div>
 
-            <dl class="resumen-registro">
-                <div>
-                    <dt>Número de orden</dt>
-                    <dd><span class="codigo-medicamento" th:text="${orden.numeroOrden()}"></span></dd>
-                </div>
-                <div>
-                    <dt>Fecha y hora de emisión</dt>
-                    <dd class="fecha-registro" th:text="${#temporals.format(orden.fechaHora(), 'dd/MM/yyyy HH:mm')}">
-                    </dd>
-                </div>
-                <div>
-                    <dt>Estado actual</dt>
-                    <dd>
-                        <span class="estado-registro"
-                            th:classappend="${orden.estado() == 'CANCELADA' ? 'estado-cancelado' : (orden.estado() == 'RECIBIDA' ? 'estado-recibido' : (orden.estado() == 'PARCIALMENTE_RECIBIDA' ? 'estado-parcial' : ''))}"
-                            th:text="${#strings.replace(orden.estado(), '_', ' ')}"></span>
-                    </dd>
-                </div>
-                <div class="resumen-dos-columnas">
-                    <dt>Proveedor asignado</dt>
-                    <dd class="nombre-medicamento" th:text="${proveedor.razonSocial()}"></dd>
-                </div>
-                <div>
-                    <dt>Total estimado</dt>
-                    <dd class="importe-resumen">
-                        <span class="moneda-simbolo">S/</span>
-                        <span th:text="${#numbers.formatDecimal(orden.totalEstimado(), 1, 'NONE', 2, 'POINT')}"></span>
-                    </dd>
-                </div>
-                <div class="resumen-amplio">
-                    <dt>Observaciones</dt>
-                    <dd
-                        th:text="${#strings.isEmpty(orden.observaciones()) ? 'Sin observaciones registradas.' : orden.observaciones()}">
-                    </dd>
-                </div>
-            </dl>
-
-            <div class="aviso-operacion aviso-exito shadow-sm" th:if="${mensaje != null}" role="status">
-                <span class="icono icono-circle-check" aria-hidden="true"></span>
-                <span th:text="${mensaje}"></span>
-            </div>
-            <div class="aviso-operacion aviso-error shadow-sm" th:if="${error != null}" role="alert">
-                <span class="icono icono-x" aria-hidden="true"></span>
-                <span th:text="${error}"></span>
+            <!-- Resumen de la Orden en Tarjeta Moderna -->
+            <div class="card pad mb-5">
+                <dl class="resumen-registro grid grid-cols-1 md:grid-cols-4 gap-5">
+                    <div>
+                        <dt class="lbl uppercase tracking-wider font-bold">Número de orden</dt>
+                        <dd class="mt-1"><span class="mono codigo-medicamento text-base font-bold text-pine-700" th:text="${orden.numeroOrden()}">OC-2026-0001</span></dd>
+                    </div>
+                    <div>
+                        <dt class="lbl uppercase tracking-wider font-bold">Fecha y hora de emisión</dt>
+                        <dd class="fecha-registro mt-1 text-sm font-semibold text-ink" th:text="${#temporals.format(orden.fechaHora(), 'dd/MM/yyyy HH:mm')}">
+                            12/11/2026 09:20
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="lbl uppercase tracking-wider font-bold">Estado actual</dt>
+                        <dd class="mt-1">
+                            <span class="badge estado-registro"
+                                th:classappend="${orden.estado() == 'RECIBIDA' ? 't-ok estado-recibido' : (orden.estado() == 'PARCIALMENTE_RECIBIDA' ? 't-amber estado-parcial' : (orden.estado() == 'CANCELADA' ? 't-rose estado-cancelado' : 't-blue'))}"
+                                th:text="${orden.estado() == 'PARCIALMENTE_RECIBIDA' ? 'PARCIAL' : #strings.replace(orden.estado(), '_', ' ')}">
+                                PENDIENTE
+                            </span>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="lbl uppercase tracking-wider font-bold">Total estimado</dt>
+                        <dd class="importe-resumen mt-1 text-xl font-extrabold text-pine-800">
+                            <span class="moneda-simbolo">S/ </span>
+                            <span th:text="${#numbers.formatDecimal(orden.totalEstimado(), 1, 'NONE', 2, 'POINT')}">1,240.00</span>
+                        </dd>
+                    </div>
+                    <div class="md:col-span-2 resumen-dos-columnas pt-3 border-t border-line">
+                        <dt class="lbl uppercase tracking-wider font-bold">Proveedor asignado</dt>
+                        <dd class="nombre-medicamento mt-1 font-bold text-ink" th:text="${proveedor.razonSocial()}">Droguería Farmaperú S.A.C.</dd>
+                    </div>
+                    <div class="md:col-span-2 resumen-amplio pt-3 border-t border-line">
+                        <dt class="lbl uppercase tracking-wider font-bold">Observaciones</dt>
+                        <dd class="mt-1 text-sm text-ink-3"
+                            th:text="${#strings.isEmpty(orden.observaciones()) ? 'Sin observaciones registradas.' : orden.observaciones()}">
+                            Sin observaciones registradas.
+                        </dd>
+                    </div>
+                </dl>
             </div>
 
-            <div class="orden-acciones" th:if="${puedeRecibir || puedeCancelar}">
-                <a class="inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md" th:if="${puedeRecibir}"
+            <div class="note aviso-operacion aviso-exito mb-4" th:if="${mensaje != null}" role="status">
+                <svg class="ico text-pine-700 flex-none" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                <span th:text="${mensaje}">Operación completada exitosamente.</span>
+            </div>
+            <div class="note aviso-operacion aviso-error mb-4" th:if="${error != null}" role="alert" style="background:#fff8f9;border-color:#fecdd3;color:#be123c">
+                <svg class="ico flex-none" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg>
+                <span th:text="${error}">Ha ocurrido un error.</span>
+            </div>
+
+            <div class="orden-acciones flex gap-3 mb-5" th:if="${puedeRecibir || puedeCancelar}">
+                <a class="btn p inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md" th:if="${puedeRecibir}"
                     th:href="@{/ordenes-compra/{id}/recepcion(id=${orden.idOrden()})}">
-                    <span class="icono icono-package" aria-hidden="true"></span>Registrar recepción
+                    <svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg>
+                    <span>Registrar recepción</span>
                 </a>
                 <button th:if="${puedeCancelar}" id="btn-abrir-modal-cancelar" type="button"
-                    class="inventario-boton boton-peligro transition-all duration-150 active:scale-95 hover:shadow-md">
-                    <span class="icono icono-x" aria-hidden="true"></span>Cancelar orden
+                    class="btn d boton-peligro transition-all duration-150 active:scale-95 hover:shadow-md">
+                    <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>
+                    <span>Cancelar orden</span>
                 </button>
             </div>
 
             <!-- Modal de confirmación accesible con HTML5 dialog y Tailwind CSS -->
             <dialog id="modal-cancelar" th:if="${puedeCancelar}"
-                class="rounded-2xl p-0 shadow-2xl max-w-md w-full border border-slate-200 bg-white backdrop:bg-slate-900/60 backdrop:backdrop-blur-sm m-auto text-slate-800">
+                class="rounded-2xl p-0 shadow-2xl max-w-md w-full border border-line bg-white backdrop:bg-pine-900/60 backdrop:backdrop-blur-sm m-auto text-ink">
                 <div class="p-6">
                     <div class="flex items-center gap-3 mb-4">
-                        <div class="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center text-rose-600 flex-shrink-0">
+                        <div class="w-12 h-12 rounded-xl bg-rose-50 flex items-center justify-center text-rose-600 flex-shrink-0">
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-lg font-bold text-slate-900 m-0">¿Cancelar orden de compra?</h3>
-                            <p class="text-xs text-slate-500 font-medium m-0">Esta acción es irreversible</p>
+                            <h3 class="text-lg font-bold text-ink m-0">¿Cancelar orden de compra?</h3>
+                            <p class="text-xs text-ink-3 font-medium m-0">Esta acción es irreversible</p>
                         </div>
                     </div>
 
-                    <p class="text-sm text-slate-600 leading-relaxed mb-6">
-                        Estás a punto de cancelar la orden <strong class="text-slate-900 font-semibold" th:text="${orden.numeroOrden()}">OC-0000</strong>. Una vez confirmada, no se podrán registrar recepciones ni ingresos a inventario de esta orden.
+                    <p class="text-sm text-ink-2 leading-relaxed mb-6">
+                        Estás a punto de cancelar la orden <strong class="text-ink font-semibold" th:text="${orden.numeroOrden()}">OC-0000</strong>. Una vez confirmada, no se podrán registrar recepciones ni ingresos a inventario de esta orden.
                     </p>
 
-                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-                        <button type="button" id="btn-cerrar-modal"
-                            class="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors duration-150 active:scale-95">
+                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-line">
+                        <button type="button" id="btn-cerrar-modal" class="btn s">
                             Volver sin cancelar
                         </button>
-                        <form method="post" th:action="@{/ordenes-compra/{id}/cancelar(id=${orden.idOrden()})}">
-                            <button type="submit"
-                                class="px-4 py-2 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-sm transition-all duration-150 active:scale-95 flex items-center gap-1.5">
-                                <span class="icono icono-x" aria-hidden="true"></span>
+                        <form method="post" th:action="@{/ordenes-compra/{id}/cancelar(id=${orden.idOrden()})}" style="margin:0">
+                            <button type="submit" class="btn d flex items-center gap-1.5">
+                                <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
                                 <span>Sí, cancelar orden</span>
                             </button>
                         </form>
@@ -116,19 +127,17 @@
             </dialog>
 
             <section class="inventario-resultados" aria-labelledby="titulo-detalle">
-                <div class="resultados-cabecera">
-                    <h2 id="titulo-detalle">
-                        Medicamentos solicitados
-                        <span class="cantidad-resultados" th:text="${#lists.size(detalles)}"></span>
-                    </h2>
+                <div class="sec">
+                    <h2 id="titulo-detalle">Medicamentos solicitados</h2>
+                    <span class="cnt cantidad-resultados" th:text="${#lists.size(detalles)}">0</span>
                 </div>
 
-                <div class="inventario-vacio" th:if="${#lists.isEmpty(detalles)}">
-                    <span class="icono icono-package" aria-hidden="true"></span>
-                    <p>Esta orden no tiene medicamentos registrados.</p>
+                <div class="card pad text-center inventario-vacio" th:if="${#lists.isEmpty(detalles)}">
+                    <svg class="mx-auto mb-3 text-ink-3/40" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>
+                    <p class="text-ink-2 font-medium">Esta orden no tiene medicamentos registrados.</p>
                 </div>
 
-                <div class="tabla-contenedor inventario-tabla tabla-detalles" th:unless="${#lists.isEmpty(detalles)}"
+                <div class="card overflow-hidden tabla-contenedor inventario-tabla tabla-detalles" th:unless="${#lists.isEmpty(detalles)}"
                     role="region" aria-label="Detalle de orden, tabla desplazable">
                     <table>
                         <thead>
@@ -136,39 +145,40 @@
                                 <th scope="col">Código</th>
                                 <th scope="col">Medicamento</th>
                                 <th scope="col">Unidad</th>
-                                <th scope="col" class="numero">Solicitada</th>
-                                <th scope="col" class="numero">Progreso recibido</th>
-                                <th scope="col" class="numero">Pendiente</th>
-                                <th scope="col" class="numero">Costo unitario (S/)</th>
-                                <th scope="col" class="numero">Importe estimado (S/)</th>
+                                <th scope="col" class="c">Solicitada</th>
+                                <th scope="col" class="c">Progreso recibido</th>
+                                <th scope="col" class="c">Pendiente</th>
+                                <th scope="col" class="r">Costo unitario</th>
+                                <th scope="col" class="r">Importe estimado</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="detalle : ${detalles}" class="hover:bg-slate-50/80 transition-colors duration-150">
+                            <tr th:each="detalle : ${detalles}">
                                 <td>
-                                    <span class="codigo-medicamento" th:text="${detalle.codigoMedicamento()}"></span>
+                                    <span class="mono codigo-medicamento" th:text="${detalle.codigoMedicamento()}">MED-001</span>
                                 </td>
-                                <td class="nombre-medicamento" th:text="${detalle.nombreMedicamento()}"></td>
                                 <td>
-                                    <span class="unidad-medicamento" th:text="${detalle.unidadControl()}"></span>
+                                    <div class="font-bold text-ink nombre-medicamento" th:text="${detalle.nombreMedicamento()}">Amoxicilina 500mg</div>
                                 </td>
-                                <td class="numero" th:text="${detalle.cantidadSolicitada()}"></td>
-                                <td class="numero">
-                                    <span th:text="${detalle.cantidadRecibida() + ' / ' + detalle.cantidadSolicitada()}"></span>
+                                <td>
+                                    <span class="unidad-medicamento text-xs font-semibold text-ink-3" th:text="${detalle.unidadControl()}">TABLETA</span>
                                 </td>
-                                <td class="numero">
-                                    <span class="cantidad-pendiente" th:classappend="${detalle.cantidadPendiente() == 0 ? 'sin-pendiente' : ''}"
-                                        th:text="${detalle.cantidadPendiente()}"></span>
+                                <td class="c font-bold text-ink" th:text="${detalle.cantidadSolicitada()}">50</td>
+                                <td class="c">
+                                    <span class="font-semibold text-ink" th:text="${detalle.cantidadRecibida() + ' / ' + detalle.cantidadSolicitada()}">30 / 50</span>
                                 </td>
-                                <td class="numero">
-                                    <span class="moneda-simbolo">S/</span>
-                                    <span
-                                        th:text="${#numbers.formatDecimal(detalle.costoUnitario(), 1, 'NONE', 2, 'POINT')}"></span>
+                                <td class="c">
+                                    <span class="num cantidad-pendiente font-bold"
+                                        th:classappend="${detalle.cantidadPendiente() == 0 ? 'ok sin-pendiente' : 'low'}"
+                                        th:text="${detalle.cantidadPendiente()}">20</span>
                                 </td>
-                                <td class="numero nombre-medicamento">
-                                    <span class="moneda-simbolo">S/</span>
-                                    <span
-                                        th:text="${#numbers.formatDecimal(detalle.importeEstimado(), 1, 'NONE', 2, 'POINT')}"></span>
+                                <td class="r">
+                                    <span class="moneda-simbolo">S/ </span>
+                                    <span th:text="${#numbers.formatDecimal(detalle.costoUnitario(), 1, 'NONE', 2, 'POINT')}">1.50</span>
+                                </td>
+                                <td class="r font-bold text-ink nombre-medicamento">
+                                    <span class="moneda-simbolo">S/ </span>
+                                    <span th:text="${#numbers.formatDecimal(detalle.importeEstimado(), 1, 'NONE', 2, 'POINT')}">75.00</span>
                                 </td>
                             </tr>
                         </tbody>

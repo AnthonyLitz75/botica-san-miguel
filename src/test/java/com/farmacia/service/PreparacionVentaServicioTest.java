@@ -276,6 +276,28 @@ class PreparacionVentaServicioTest {
                 () -> servicio.aplicarDescuento("vendedor", 10, new BigDecimal("1.00")));
     }
 
+    @Test
+    void modificarCantidadActualizaLotesYPermiteDeshacer() {
+        var medicamentos = mock(MedicamentoRepositorio.class);
+        var usuarios = usuarioRepo();
+        var prioridad = mock(LotePrioridadServicio.class);
+        when(medicamentos.buscarPorId(5)).thenReturn(Optional.of(medicamento()));
+        when(prioridad.planificarSalida(eq(5), anyInt())).thenAnswer(inv ->
+                List.of(new AsignacionLoteFefo(8, "LT-8", LocalDate.now().plusDays(10), 9, inv.getArgument(1))));
+        var servicio = servicio(medicamentos, usuarios, prioridad);
+
+        servicio.agregar("vendedor", new PreparacionVentaCambioFormulario(5, 2));
+        var modificada = servicio.modificarCantidad("vendedor", 5, 4);
+        assertEquals(4, modificada.detalles().getFirst().cantidad());
+
+        var deshecha = servicio.deshacer("vendedor");
+        assertEquals(2, deshecha.detalles().getFirst().cantidad());
+
+        // Modificar a 0 retira la línea
+        var retirada = servicio.modificarCantidad("vendedor", 5, 0);
+        assertTrue(retirada.detalles().isEmpty());
+    }
+
     private PreparacionVentaServicio servicio(MedicamentoRepositorio medicamentos,
             UsuarioRepositorio usuarios, LotePrioridadServicio prioridad) {
         return new PreparacionVentaServicio(medicamentos, usuarios, prioridad, new DescuentoImporteFijo());

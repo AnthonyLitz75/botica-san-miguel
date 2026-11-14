@@ -181,7 +181,7 @@ public class SeguridadConfiguracion {
                                                 .hasAnyRole("ADMINISTRADOR", "VENDEDOR")
                                                 .requestMatchers(HttpMethod.POST, "/ventas/preparacion", "/ventas/preparacion/deshacer")
                                                 .hasAnyRole("ADMINISTRADOR", "VENDEDOR")
-                                                .requestMatchers(HttpMethod.DELETE, "/ventas/preparacion/{idMedicamento:[0-9]+}")
+                                                .requestMatchers(HttpMethod.DELETE, "/ventas/preparacion", "/ventas/preparacion/{idMedicamento:[0-9]+}")
                                                 .hasAnyRole("ADMINISTRADOR", "VENDEDOR")
                                                 // Gestión de usuarios (spec 007): solo ADMINISTRADOR
                                                 .requestMatchers("/usuarios", "/usuarios/**")

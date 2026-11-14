@@ -160,7 +160,7 @@ O sin datos demo:
 Espere el mensaje Started FarmaciaAedApplication y el arranque en puerto 8080.
 El proceso permanece abierto mientras la web funciona; esto es normal.
 En el navegador abra:
-    http://localhost:8080/login
+    http://localhost:8080/acceso/login
 
 No abra login.html como archivo: necesita el servidor Spring Boot y Thymeleaf.
 La computadora debe mantener PostgreSQL y la aplicacion funcionando.
@@ -169,7 +169,7 @@ Si 8080 esta ocupado por otra aplicacion, no cierre procesos desconocidos.
 Antes de iniciar, puede elegir otro puerto:
     $env:SERVER_PORT = "8081"
     .\mvnw.cmd spring-boot:run
-Entonces abra http://localhost:8081/login.
+Entonces abra http://localhost:8081/acceso/login.
 
 7. CUENTAS PUBLICAS DE DEMOSTRACION
 ----------------------------------
@@ -187,33 +187,35 @@ Los hashes se guardan en usuario.clave_hash; no en texto plano en la base.
 Para cambiar de rol, cierre sesion antes de entrar con otra cuenta.
 Algunas paginas estan restringidas: un 403 puede ser esperado segun el rol.
 
-8. PRUEBAS BASICAS
------------------
+8. PRUEBAS BASICAS POR ROL
+--------------------------
 Administrador:
-- Iniciar sesion y consultar medicamentos, proveedores y ordenes.
-- Revisar el detalle de OC-DEMO-001: 10 x 5.00 = 50.00.
+- Iniciar sesion y consultar medicamentos, categorias jerarquicas (/categorias), proveedores y ordenes.
+- Gestionar usuarios del sistema en /usuarios (crear, editar, activar/desactivar).
+- Consultar reportes gerenciales en /reportes y descargar consolidados en formato CSV.
+- Revisar la bitacora de auditoria inmutable en /auditoria y exportar eventos en CSV.
+- Revisar el historial completo de ventas en /ventas y reimprimir comprobantes.
 
 Almacenero:
-- Medicamentos > Paracetamol > Ver lotes: deben aparecer 30 cajas.
-- Consultar movimientos y ver la entrada inicial.
-- Registrar salida de 2 cajas con motivo "Salida de demostracion".
-- El stock debe bajar a 28 y debe aparecer un movimiento SALIDA de 2.
-- Intentar una salida mayor que el stock: debe rechazarse sin descontar.
-- No repita la salida valida esperando siempre 28: cada salida cambia el stock.
+- Medicamentos > Paracetamol > Ver lotes: deben aparecer las existencias con el indicador "Prioridad FEFO".
+- Recepcion de compras: registrar recepciones parciales o totales ingresando numero de lote y vencimiento.
+- Registrar existencias iniciales en /inventario/existencias-iniciales.
+- Registrar salidas de inventario y consultar el kardex completo de movimientos.
+- Salidas por merma: dar de baja lotes vencidos directamente desde el panel de alertas.
 
 Compras:
-- Crear una orden con proveedor y medicamento activos.
-- Verificar importe = cantidad x costo unitario.
-- Comprobar que guardar una orden pendiente no modifica el stock.
+- Crear ordenes de compra con proveedor y medicamento activos.
+- Verificar calculo automatico de total estimado = cantidad x costo unitario.
+- Cancelar ordenes pendientes sin recepciones registradas.
+- Analizar necesidades de reposicion en /alertas/reposicion.
 
 Vendedor:
-- Consultar medicamentos y lotes.
-- No debe tener permiso para registrar una salida de inventario.
-
-La confirmacion de ventas (registro en las tablas venta y detalle_venta) y la
-pantalla web de preparacion de venta estan pendientes: por ahora la
-preparacion de venta solo existe como API. La existencia de sus tablas no
-significa que haya interfaz.
+- Mantenimiento y consulta de clientes en /clientes.
+- Preparacion de venta en /ventas/nueva con asignacion automatica de lotes por vencimiento (FEFO).
+- Probar la estructura de pila LIFO con el boton "Deshacer" para revertir cambios en memoria.
+- Aplicar descuentos por linea en soles.
+- Confirmar la venta: emite el comprobante interno B001-XXXXXXXX con formato de ticket termico y descuenta el stock real.
+- Consultar sus ventas del dia en /ventas/mis-ventas.
 
 9. DETENER Y VOLVER A INICIAR
 ----------------------------

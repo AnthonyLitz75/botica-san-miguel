@@ -1,11 +1,15 @@
 package com.farmacia;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
 public class VerificacionBaseDatos implements CommandLineRunner {
+
+    private static final Logger log = LoggerFactory.getLogger(VerificacionBaseDatos.class);
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -19,6 +23,6 @@ public class VerificacionBaseDatos implements CommandLineRunner {
                 "SELECT current_database()",
                 String.class);
 
-        System.out.println("Conexion PostgreSQL correcta: " + baseDatos);
+        log.info("Conexion PostgreSQL correcta: {}", baseDatos);
     }
 }

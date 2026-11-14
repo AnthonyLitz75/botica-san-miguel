@@ -11,110 +11,122 @@
     <div class="inventario-area">
         <header th:replace="~{fragmentos/navegacion :: cabecera('Movimientos', 'Inventario')}"></header>
         <main id="contenido" class="inventario-contenido">
-            <div class="inventario-titulo">
+            <div class="head">
                 <div>
-                    <p class="seccion-etiqueta">INVENTARIO / CONTROL DE EXISTENCIAS</p>
+                    <div class="eyebrow seccion-etiqueta">Inventario / Control de existencias</div>
                     <h1>Registrar salida de inventario</h1>
+                    <div class="sub">Mermas, deterioros o ajustes. Descuenta del lote indicado.</div>
                 </div>
-                <a class="inventario-boton boton-secundario" th:href="@{/movimientos}">
-                    <span class="icono icono-arrow-left" aria-hidden="true"></span>Volver a movimientos
-                </a>
-            </div>
-
-            <div class="aviso-operacion aviso-error" th:if="${#lists.isEmpty(lotes)}" role="alert">
-                <span class="icono icono-x" aria-hidden="true"></span>
-                <div>
-                    <p>No hay lotes con existencias disponibles actualmente para registrar salidas.</p>
-                </div>
-            </div>
-
-            <div class="p-3 mb-4 rounded-lg bg-emerald-50/80 border border-emerald-200 text-xs text-emerald-900 flex items-start gap-2.5 shadow-sm"
-                th:unless="${#lists.isEmpty(lotes)}">
-                <span class="icono icono-circle-check text-emerald-600 mt-0.5" aria-hidden="true"></span>
-                <div>
-                    <strong class="font-semibold text-emerald-950">Despacho asistido por Cola de Prioridad
-                        (FEFO):</strong>
-                    <span> Los lotes identificados con <strong class="text-emerald-800">★ PRIORITARIO FEFO</strong>
-                        tienen la fecha de vencimiento más próxima y deben despacharse primero según la regla <em>First
-                            Expired, First Out</em>.</span>
-                </div>
-            </div>
-
-            <form th:unless="${#lists.isEmpty(lotes)}" th:action="@{/salidas/nueva}" th:object="${formulario}"
-                method="post" class="proveedor-formulario">
-
-                <div class="aviso-operacion aviso-error" th:if="${#fields.hasGlobalErrors()}" role="alert">
-                    <span class="icono icono-x" aria-hidden="true"></span>
-                    <div>
-                        <p th:each="error : ${#fields.globalErrors()}" th:text="${error}"></p>
-                    </div>
-                </div>
-
-                <fieldset>
-                    <legend>Datos del descargo de inventario</legend>
-                    <div class="proveedor-campos">
-                        <div class="campo-completo">
-                            <label for="idLote">Lote y medicamento</label>
-                            <select id="idLote" th:field="*{idLote}" required
-                                th:attr="aria-invalid=${#fields.hasErrors('idLote')},aria-describedby=${#fields.hasErrors('idLote') ? 'error-idLote' : null}">
-                                <option value="">-- Seleccionar lote con existencias --</option>
-                                <option th:each="item : ${lotes}" th:value="${item.idLote()}"
-                                    th:attr="data-stock=${item.stockActual()},data-unidad=${item.unidadControl()},data-prioritario=${idsLotesPrioritarios.contains(item.idLote())}"
-                                    th:text="${(idsLotesPrioritarios.contains(item.idLote()) ? '★ PRIORITARIO FEFO — ' : '') + item.nombreMedicamento() + ' (' + item.codigoMedicamento() + ') — Lote: ' + item.numeroLote() + ' | Stock: ' + item.stockActual() + ' ' + item.unidadControl() + ' | Vence: ' + #temporals.format(item.fechaVencimiento(), 'dd/MM/yyyy')}">
-                                </option>
-                            </select>
-                            <span class="campo-ayuda flex items-center gap-1.5 text-xs text-emerald-800 mt-1">
-                                <span class="fefo-indicador" aria-hidden="true"></span>
-                                <span><strong>PRIORITARIO FEFO:</strong> Lote con prioridad temporal #1 según la Cola de
-                                    Prioridad por menor vencimiento.</span>
-                            </span>
-                            <p class="error" id="error-idLote" th:if="${#fields.hasErrors('idLote')}"
-                                th:errors="*{idLote}"></p>
-                        </div>
-
-                        <div>
-                            <label for="cantidad">Cantidad a retirar</label>
-                            <input type="number" id="cantidad" th:field="*{cantidad}" min="1" step="1"
-                                placeholder="Ej. 2" required
-                                th:attr="aria-invalid=${#fields.hasErrors('cantidad')},aria-describedby=${#fields.hasErrors('cantidad') ? 'error-cantidad' : null}">
-                            <span class="campo-ayuda" id="ayuda-stock">Selecciona un lote para verificar
-                                existencias.</span>
-                            <p class="error" id="error-cantidad" th:if="${#fields.hasErrors('cantidad')}"
-                                th:errors="*{cantidad}"></p>
-                        </div>
-
-                        <div>
-                            <span class="campo-etiqueta block mb-2 text-[13px] font-semibold text-[#2c3b35]">Proyección
-                                de saldo</span>
-                            <div class="orden-calculo-previo" id="caja-saldo">
-                                <span>Stock restante:</span>
-                                <strong id="saldo-restante">0</strong>
-                            </div>
-                            <span class="campo-ayuda">Se descontará inmediatamente del lote seleccionado.</span>
-                        </div>
-
-                        <div class="campo-completo">
-                            <label for="motivo">Motivo de la salida</label>
-                            <textarea id="motivo" th:field="*{motivo}" maxlength="250" rows="3"
-                                placeholder="Ej. Merma por rotura, producto vencido, ajuste de inventario..." required
-                                th:attr="aria-invalid=${#fields.hasErrors('motivo')},aria-describedby=${#fields.hasErrors('motivo') ? 'error-motivo' : null}"></textarea>
-                            <p class="error" id="error-motivo" th:if="${#fields.hasErrors('motivo')}"
-                                th:errors="*{motivo}"></p>
-                        </div>
-                    </div>
-                </fieldset>
-
-                <div class="proveedor-formulario-acciones">
-                    <button type="submit"
-                        class="inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md">
-                        <span class="icono icono-save" aria-hidden="true"></span>Registrar salida
-                    </button>
-                    <a class="inventario-boton boton-secundario transition-all duration-150 active:scale-95"
-                        th:href="@{/movimientos}">
-                        <span class="icono icono-x" aria-hidden="true"></span>Cancelar
+                <div class="row items-center">
+                    <a class="btn s inventario-boton boton-secundario" th:href="@{/movimientos}">
+                        <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                        <span>Volver a movimientos</span>
                     </a>
                 </div>
-            </form>
+            </div>
+
+            <div class="card pad text-center inventario-vacio mb-5" th:if="${#lists.isEmpty(lotes)}" role="alert">
+                <svg class="mx-auto mb-3 text-rose-500" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg>
+                <p class="text-ink-2 font-bold">No hay lotes con existencias disponibles actualmente para registrar salidas.</p>
+            </div>
+
+            <div class="note mb-4" th:unless="${#lists.isEmpty(lotes)}" style="background:#eef7f4;border-color:#bfe0d5;color:#134e40">
+                <svg class="ico flex-none text-pine-700" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                <div class="text-xs">
+                    <strong>Despacho asistido por Cola de Prioridad (FEFO):</strong>
+                    <span> Los lotes identificados con <strong class="text-pine-800">★ PRIORITARIO FEFO</strong> tienen la fecha de vencimiento más próxima y deben despacharse primero según la regla <em>First Expired, First Out</em>.</span>
+                </div>
+            </div>
+
+            <div class="max-w-2xl" th:unless="${#lists.isEmpty(lotes)}">
+                <form th:action="@{/salidas/nueva}" th:object="${formulario}"
+                    method="post" class="card pad proveedor-formulario space-y-6">
+
+                    <div class="note aviso-operacion aviso-error" th:if="${#fields.hasGlobalErrors()}" role="alert" style="background:#fff8f9;border-color:#fecdd3;color:#be123c">
+                        <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg>
+                        <div>
+                            <p th:each="error : ${#fields.globalErrors()}" th:text="${error}">Error</p>
+                        </div>
+                    </div>
+
+                    <fieldset class="border-0 p-0 m-0">
+                        <legend class="text-xs uppercase tracking-wider font-bold text-pine-700 mb-4 pb-2 border-b border-line w-full">
+                            Datos del descargo de inventario
+                        </legend>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2">
+                                <label for="idLote">Lote y medicamento <span class="text-rose-600">*</span></label>
+                                <div class="inp" th:classappend="${#fields.hasErrors('idLote') ? 'err border-rose-400 bg-rose-50/30' : ''}">
+                                    <select id="idLote" th:field="*{idLote}" required
+                                        class="w-full bg-transparent border-0 outline-none text-sm text-ink font-semibold cursor-pointer"
+                                        th:attr="aria-invalid=${#fields.hasErrors('idLote')},aria-describedby=${#fields.hasErrors('idLote') ? 'error-idLote' : null}">
+                                        <option value="">-- Seleccionar lote con existencias --</option>
+                                        <option th:each="item : ${lotes}" th:value="${item.idLote()}"
+                                            th:attr="data-stock=${item.stockActual()},data-unidad=${item.unidadControl()},data-prioritario=${idsLotesPrioritarios.contains(item.idLote())}"
+                                            th:text="${(idsLotesPrioritarios.contains(item.idLote()) ? '★ PRIORITARIO FEFO — ' : '') + item.nombreMedicamento() + ' (' + item.codigoMedicamento() + ') — Lote: ' + item.numeroLote() + ' | Stock: ' + item.stockActual() + ' ' + item.unidadControl() + ' | Vence: ' + #temporals.format(item.fechaVencimiento(), 'dd/MM/yyyy')}">
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="lbl mt-1 campo-ayuda flex items-center gap-1.5 text-pine-800">
+                                    <span class="fefo-indicador" aria-hidden="true"></span>
+                                    <span><strong>PRIORITARIO FEFO:</strong> Lote con prioridad temporal #1 según la Cola de Prioridad por menor vencimiento.</span>
+                                </div>
+                                <p class="error text-xs text-rose-600 font-semibold mt-1" id="error-idLote"
+                                    th:if="${#fields.hasErrors('idLote')}" th:errors="*{idLote}"></p>
+                            </div>
+
+                            <div>
+                                <label for="cantidad">Cantidad a retirar <span class="text-rose-600">*</span></label>
+                                <div class="inp" th:classappend="${#fields.hasErrors('cantidad') ? 'err border-rose-400 bg-rose-50/30' : ''}">
+                                    <input type="number" id="cantidad" th:field="*{cantidad}" min="1" step="1"
+                                        placeholder="Ej. 2" required
+                                        class="w-full bg-transparent border-0 outline-none text-sm text-ink font-semibold"
+                                        th:attr="aria-invalid=${#fields.hasErrors('cantidad')},aria-describedby=${#fields.hasErrors('cantidad') ? 'error-cantidad' : null}">
+                                </div>
+                                <div class="lbl mt-1 campo-ayuda" id="ayuda-stock">Selecciona un lote para verificar existencias.</div>
+                                <p class="error text-xs text-rose-600 font-semibold mt-1" id="error-cantidad"
+                                    th:if="${#fields.hasErrors('cantidad')}" th:errors="*{cantidad}"></p>
+                            </div>
+
+                            <div>
+                                <span class="lbl uppercase tracking-wider font-bold block mb-1">Proyección de saldo</span>
+                                <div class="card pad py-2 px-3 bg-pine-50/50 border border-pine-100 flex items-center justify-between orden-calculo-previo" id="caja-saldo">
+                                    <span class="text-xs font-semibold text-ink-2">Stock restante:</span>
+                                    <strong id="saldo-restante" class="text-lg font-bold text-pine-800">0</strong>
+                                </div>
+                                <div class="lbl mt-1 campo-ayuda">Se descontará inmediatamente del lote seleccionado.</div>
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label for="motivo">Motivo de la salida <span class="text-rose-600">*</span></label>
+                                <textarea id="motivo" th:field="*{motivo}" maxlength="250" rows="3"
+                                    placeholder="Ej. Merma por rotura, producto vencido, ajuste de inventario..." required
+                                    class="w-full p-3 rounded-xl border border-line bg-white text-sm text-ink focus:outline-none focus:ring-2 focus:ring-pine-700/20"
+                                    th:attr="aria-invalid=${#fields.hasErrors('motivo')},aria-describedby=${#fields.hasErrors('motivo') ? 'error-motivo' : null}"></textarea>
+                                <p class="error text-xs text-rose-600 font-semibold mt-1" id="error-motivo"
+                                    th:if="${#fields.hasErrors('motivo')}" th:errors="*{motivo}"></p>
+                            </div>
+
+                            <div class="md:col-span-2 note" style="background:#fffbeb;border-color:#fde68a;color:#92400e">
+                                <svg class="ico flex-none text-amber-600" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/></svg>
+                                <span class="text-xs font-medium">Esta acción es irreversible y quedará registrada de forma inmutable en la bitácora de Auditoría.</span>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <div class="pt-4 border-t border-line flex justify-end gap-3 proveedor-formulario-acciones">
+                        <a class="btn s inventario-boton boton-secundario" th:href="@{/movimientos}">
+                            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                            <span>Cancelar</span>
+                        </a>
+                        <button type="submit"
+                            class="btn p inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md">
+                            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                            <span>Registrar salida</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </main>
     </div>
 
@@ -156,13 +168,13 @@
             saldoRestante.textContent = selectLote.value ? `${restante} ${unidad}` : "0";
 
             if (selectLote.value && (restante < 0 || retiro <= 0)) {
-                cajaSaldo.style.background = "#fef3f2";
-                cajaSaldo.style.borderColor = "#fecdca";
-                saldoRestante.style.color = "#b42318";
+                cajaSaldo.style.background = "#fff8f9";
+                cajaSaldo.style.borderColor = "#fecdd3";
+                saldoRestante.style.color = "#be123c";
             } else if (selectLote.value) {
-                cajaSaldo.style.background = "#f0f7f4";
-                cajaSaldo.style.borderColor = "#cce3d9";
-                saldoRestante.style.color = "#156552";
+                cajaSaldo.style.background = "#e9f4f0";
+                cajaSaldo.style.borderColor = "#d3ebe3";
+                saldoRestante.style.color = "#166a55";
             } else {
                 cajaSaldo.style.background = "";
                 cajaSaldo.style.borderColor = "";

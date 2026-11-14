@@ -4,8 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:text="${'Comprobante ' + comprobante.numeroComprobante() + ' | Botica San Miguel'}">Comprobante | Botica
-        San Miguel</title>
+    <title th:text="${'Comprobante ' + comprobante.numeroComprobante() + ' | Botica San Miguel'}">Comprobante | Botica San Miguel</title>
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
     <link rel="stylesheet" th:href="@{/css/inventario.css}">
     <link rel="stylesheet" th:href="@{/css/tailwind.css}">
@@ -15,108 +14,155 @@
     <a class="saltar-contenido no-imprimir" href="#contenido">Ir al contenido</a>
     <aside th:replace="~{fragmentos/navegacion :: lateral('Ventas')}"></aside>
     <div class="inventario-area">
-        <header th:replace="~{fragmentos/navegacion :: cabecera('Ventas', 'Ventas')}"></header>
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Ventas', 'Comprobante')}"></header>
         <main id="contenido" class="inventario-contenido">
-            <div class="inventario-titulo no-imprimir">
+            <!-- Barra superior no imprimible con botones de acción rápida -->
+            <div class="head no-imprimir">
                 <div>
-                    <p class="seccion-etiqueta">VENTAS / COMPROBANTE</p>
+                    <div class="eyebrow">VENTAS / COMPROBANTE</div>
                     <h1>Venta confirmada</h1>
+                    <div class="sub">Comprobante emitido con correlativo formal y asignación de lotes FEFO.</div>
                 </div>
-                <div class="flex flex-wrap gap-2">
-                    <button type="button" id="boton-imprimir" class="inventario-boton boton-principal"
-                        onclick="window.print()">
-                        <span class="icono icono-clipboard-list" aria-hidden="true"></span>
-                        <span>Imprimir</span>
+                <div class="flex items-center gap-3">
+                    <button type="button" id="boton-imprimir" class="btn p" onclick="window.print()">
+                        <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                            <path d="M6 14h12v8H6z"/>
+                        </svg>
+                        <span>Imprimir ticket (80 mm)</span>
                     </button>
-                    <a class="inventario-boton boton-secundario" th:href="@{/ventas/nueva}">
-                        <span class="icono icono-plus" aria-hidden="true"></span>
+                    <a class="btn s" th:href="@{/ventas/nueva}">
+                        <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5v14"/>
+                        </svg>
                         <span>Nueva venta</span>
+                    </a>
+                    <a class="btn s" th:href="@{/ventas/historial}">
+                        <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/>
+                            <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/>
+                        </svg>
+                        <span>Historial</span>
                     </a>
                 </div>
             </div>
 
-            <article id="comprobante" class="comprobante-ticket" aria-labelledby="titulo-comprobante">
-                <header class="comprobante-cabecera">
-                    <p class="comprobante-empresa">Botica San Miguel</p>
-                    <h2 id="titulo-comprobante" class="comprobante-numero" th:text="${comprobante.numeroComprobante()}">
-                        B001-00000001</h2>
-                    <p class="comprobante-leyenda">Comprobante interno — no válido como comprobante de pago
-                        electrónico</p>
-                </header>
+            <!-- Escenario con Ticket Térmico y Panel Informativo (Boceto 02) -->
+            <div class="stage">
+                <!-- Ticket Térmico de 80 mm -->
+                <article id="comprobante" class="ticket comprobante-ticket" aria-labelledby="titulo-comprobante">
+                    <!-- Cabecera de Ticket -->
+                    <div class="ctr">
+                        <div class="big">BOTICA SAN MIGUEL</div>
+                        <div>RUC: 20601234567</div>
+                        <div>Av. Universitaria 1234 - Lima</div>
+                        <hr>
+                        <b>BOLETA DE VENTA ELECTRÓNICA</b><br>
+                        <span id="titulo-comprobante" class="font-bold text-base tracking-wider" th:text="${comprobante.numeroComprobante()}">B001-00000001</span>
+                    </div>
+                    <hr>
 
-                <dl class="comprobante-datos">
-                    <div>
-                        <dt>Fecha</dt>
-                        <dd th:text="${#temporals.format(comprobante.fechaHora(), 'dd/MM/yyyy HH:mm')}">10/11/2026 09:00
-                        </dd>
+                    <!-- Metadatos de la Venta -->
+                    <div class="l">
+                        <span>FECHA</span>
+                        <span th:text="${#temporals.format(comprobante.fechaHora(), 'dd/MM/yyyy HH:mm')}">14/11/2026 10:45</span>
                     </div>
-                    <div>
-                        <dt>Vendedor</dt>
-                        <dd th:text="${comprobante.vendedor()}">Vendedor</dd>
+                    <div class="l">
+                        <span>VENDEDOR</span>
+                        <span th:text="${comprobante.vendedor()}">vendedor_demo</span>
                     </div>
-                    <div>
-                        <dt>Cliente</dt>
-                        <dd>
-                            <span th:text="${comprobante.clienteVisible()}">Público general</span>
-                            <span th:if="${comprobante.documentoCliente() != null}"
-                                th:text="|(${comprobante.documentoCliente()})|">(DNI 12345678)</span>
-                        </dd>
+                    <div class="l">
+                        <span>CLIENTE</span>
+                        <span th:text="${comprobante.clienteVisible()}">Público general</span>
                     </div>
-                </dl>
+                    <div class="l" th:if="${comprobante.documentoCliente() != null}">
+                        <span>DOC</span>
+                        <span th:text="${comprobante.documentoCliente()}">DNI 12345678</span>
+                    </div>
+                    <hr>
 
-                <div class="tabla-contenedor overflow-x-auto">
-                    <table class="comprobante-tabla">
-                        <caption class="sr-only">Detalle de la venta por lote</caption>
-                        <thead>
-                            <tr>
-                                <th scope="col">Medicamento</th>
-                                <th scope="col">Lote</th>
-                                <th scope="col" class="text-right">Cant.</th>
-                                <th scope="col" class="text-right">P. Unit.</th>
-                                <th scope="col" class="text-right">Desc.</th>
-                                <th scope="col" class="text-right">Importe</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="linea : ${comprobante.lineas()}">
-                                <td th:text="${linea.medicamento()}">Paracetamol</td>
-                                <td th:text="${linea.numeroLote()}">LT-A</td>
-                                <td class="text-right" th:text="${linea.cantidad()}">2</td>
-                                <td class="text-right"
-                                    th:text="${#numbers.formatDecimal(linea.precioUnitario(), 1, 'POINT', 2, 'POINT')}">
-                                    8.50</td>
-                                <td class="text-right"
-                                    th:text="${#numbers.formatDecimal(linea.descuentoImporte(), 1, 'POINT', 2, 'POINT')}">
-                                    0.00</td>
-                                <td class="text-right"
-                                    th:text="${#numbers.formatDecimal(linea.importe(), 1, 'POINT', 2, 'POINT')}">17.00
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <!-- Detalle de Productos y Lotes -->
+                    <div class="l font-bold mb-1">
+                        <span>CANT DESCRIPCIÓN</span>
+                        <span>IMPORTE</span>
+                    </div>
+                    <hr>
+
+                    <div class="space-y-2 mb-2">
+                        <div th:each="linea : ${comprobante.lineas()}" class="border-b border-dashed border-slate-200 pb-1.5 last:border-b-0 last:pb-0">
+                            <div class="l">
+                                <span>
+                                    <b th:text="${linea.cantidad()}">2</b>
+                                    <span th:text="${' ' + linea.medicamento()}"> Paracetamol 500 mg</span>
+                                </span>
+                                <span class="font-bold" th:text="${'S/ ' + #numbers.formatDecimal(linea.importe(), 1, 'POINT', 2, 'POINT')}">20.00</span>
+                            </div>
+                            <div class="l text-[11px] text-slate-600">
+                                <span th:text="${'   P.U. S/ ' + #numbers.formatDecimal(linea.precioUnitario(), 1, 'POINT', 2, 'POINT') + (linea.descuentoImporte() > 0 ? (' · dcto -S/ ' + #numbers.formatDecimal(linea.descuentoImporte(), 1, 'POINT', 2, 'POINT')) : '')}">
+                                    P.U. S/ 10.00
+                                </span>
+                            </div>
+                            <div class="text-[11px] text-slate-500 font-mono">
+                                <span th:text="${'   Lote ' + linea.numeroLote()}">   Lote LOT-A</span>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+
+                    <!-- Totales -->
+                    <div class="l">
+                        <span>SUBTOTAL</span>
+                        <span th:text="|S/ ${#numbers.formatDecimal(comprobante.subtotal(), 1, 'POINT', 2, 'POINT')}|">S/ 58.50</span>
+                    </div>
+                    <div class="l" th:if="${comprobante.descuentoTotal() > 0}">
+                        <span>DESCUENTO</span>
+                        <span class="text-rose-600" th:text="|- S/ ${#numbers.formatDecimal(comprobante.descuentoTotal(), 1, 'POINT', 2, 'POINT')}|">- S/ 2.00</span>
+                    </div>
+                    <div class="l big mt-1 pt-1 border-t border-dashed border-slate-400">
+                        <span>TOTAL</span>
+                        <span id="total-comprobante" th:text="|S/ ${#numbers.formatDecimal(comprobante.total(), 1, 'POINT', 2, 'POINT')}|">S/ 56.50</span>
+                    </div>
+                    <hr>
+
+                    <!-- Pie de Ticket y QR Simulado -->
+                    <div class="ctr">
+                        <div class="qr" aria-hidden="true"></div>
+                        <div class="mt-2 text-xs text-slate-700">
+                            <div>¡Gracias por su preferencia!</div>
+                            <div>Conserve su boleta para cualquier consulta.</div>
+                            <div class="text-[10px] text-slate-500 mt-1">Comprobante interno · No válido como factura fiscal</div>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Panel Informativo Lateral (no imprimible) -->
+                <div class="ann no-imprimir">
+                    <div class="eyebrow mb-1">Impresión térmica</div>
+                    <h3>Ticket estándar 80 mm</h3>
+                    <ul class="space-y-2 text-xs text-ink-2">
+                        <li><b>Impresión limpia:</b> Se emite sin menú, navegación lateral ni botones de acción (regla <code>@media print</code>).</li>
+                        <li><b>Trazabilidad por lote:</b> Desglosa el lote de origen y vencimiento asignado bajo política FEFO para el cliente.</li>
+                        <li><b>Correlativo formal:</b> Formato institucional <code>B001-XXXXXXXX</code> auditable en el sistema.</li>
+                        <li><b>Código QR correlativo:</b> Permite verificación rápida desde mostrador para auditoría e historial.</li>
+                    </ul>
+
+                    <div class="card pad mt-6 bg-slate-50 border-slate-200">
+                        <div class="flex items-center gap-2 font-bold text-xs text-ink-2 mb-2">
+                            <svg class="ico text-pine-700" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+                            </svg>
+                            <span>Atajos de mostrador</span>
+                        </div>
+                        <p class="text-xs text-ink-3 mb-3">Presiona <kbd class="kbd">Ctrl + P</kbd> o el botón <b>Imprimir</b> para enviar el ticket directamente a la impresora térmica seleccionada.</p>
+                        <a th:href="@{/ventas/nueva}" class="btn p w-full justify-center text-xs">
+                            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+                            </svg>
+                            <span>Iniciar siguiente venta</span>
+                        </a>
+                    </div>
                 </div>
-
-                <dl class="comprobante-totales">
-                    <div>
-                        <dt>Subtotal</dt>
-                        <dd th:text="|S/ ${#numbers.formatDecimal(comprobante.subtotal(), 1, 'POINT', 2, 'POINT')}|">S/
-                            17.00</dd>
-                    </div>
-                    <div>
-                        <dt>Descuento</dt>
-                        <dd
-                            th:text="|S/ ${#numbers.formatDecimal(comprobante.descuentoTotal(), 1, 'POINT', 2, 'POINT')}|">
-                            S/ 0.00</dd>
-                    </div>
-                    <div class="comprobante-total">
-                        <dt>Total</dt>
-                        <dd id="total-comprobante"
-                            th:text="|S/ ${#numbers.formatDecimal(comprobante.total(), 1, 'POINT', 2, 'POINT')}|">S/
-                            17.00</dd>
-                    </div>
-                </dl>
-                <p class="comprobante-pie">Gracias por su compra.</p>
-            </article>
+            </div>
         </main>
     </div>
 </body>

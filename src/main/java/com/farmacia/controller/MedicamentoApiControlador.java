@@ -76,20 +76,4 @@ public class MedicamentoApiControlador {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Medicamento no encontrado"));
     }
-
-    @ExceptionHandler(DuplicateKeyException.class)
-    public ResponseEntity<Map<String, String>> codigoDuplicado() {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(Map.of("error", "Ya existe un medicamento con este codigo"));
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> datosInvalidos(
-            MethodArgumentNotValidException excepcion) {
-        Map<String, String> campos = new LinkedHashMap<>();
-        excepcion.getBindingResult().getFieldErrors()
-                .forEach(error -> campos.putIfAbsent(error.getField(), error.getDefaultMessage()));
-        return ResponseEntity.badRequest()
-                .body(Map.of("error", "Datos invalidos", "campos", campos));
-    }
 }

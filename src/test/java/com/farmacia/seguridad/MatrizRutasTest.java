@@ -134,6 +134,28 @@ class MatrizRutasTest {
                 // Auditoría (spec 014)
                 ruta("GET", "/auditoria", A),
                 ruta("GET", "/auditoria.csv", A),
+                // Usuarios (spec 007)
+                ruta("GET", "/usuarios", A),
+                ruta("GET", "/usuarios/nuevo", A),
+                ruta("POST", "/usuarios", A),
+                ruta("GET", "/usuarios/1/editar", A),
+                ruta("POST", "/usuarios/1/editar", A),
+                ruta("POST", "/usuarios/1/clave", A),
+                ruta("POST", "/usuarios/1/desactivar", A),
+                ruta("POST", "/usuarios/1/activar", A),
+                // Reportes (spec 008)
+                ruta("GET", "/reportes", A),
+                ruta("GET", "/reportes/ventas", A),
+                ruta("GET", "/reportes/ventas.csv", A),
+                ruta("GET", "/reportes/mas-vendidos", A),
+                ruta("GET", "/reportes/mas-vendidos.csv", A),
+                ruta("GET", "/reportes/mermas", A),
+                ruta("GET", "/reportes/mermas.csv", A),
+                ruta("GET", "/reportes/inventario", A),
+                ruta("GET", "/reportes/inventario.csv", A),
+                ruta("GET", "/reportes/compras", A),
+                ruta("GET", "/reportes/compras.csv", A),
+                ruta("GET", "/reportes/panel", A),
                 // Categorías (spec 009)
                 ruta("GET", "/categorias", A, V, L, C),
                 ruta("GET", "/categorias/nueva", A),

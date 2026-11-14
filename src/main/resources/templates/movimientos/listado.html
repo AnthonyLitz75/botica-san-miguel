@@ -12,108 +12,128 @@
         <header th:replace="~{fragmentos/navegacion :: cabecera('Movimientos', 'Inventario')}"></header>
         <main id="contenido" class="inventario-contenido">
 
-            <div class="inventario-titulo">
+            <div class="head">
                 <div>
-                    <p class="seccion-etiqueta">INVENTARIO / TRAZABILIDAD</p>
+                    <div class="eyebrow seccion-etiqueta">Inventario / Trazabilidad</div>
                     <h1>Movimientos de inventario</h1>
+                    <div class="sub">Kardex de entradas y salidas de existencias por lote.</div>
                 </div>
-                <div class="flex items-center gap-2" th:if="${puedeRegistrarSalida}">
-                    <a class="inventario-boton boton-secundario transition-all duration-150 active:scale-95"
+                <div class="row items-center" th:if="${puedeRegistrarSalida}">
+                    <a class="btn s inventario-boton boton-secundario transition-all duration-150 active:scale-95"
                         th:href="@{/inventario/existencias-iniciales}">
-                        <span class="icono icono-plus" aria-hidden="true"></span>Existencias iniciales
+                        <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>
+                        <span>Existencias iniciales</span>
                     </a>
-                    <a class="inventario-boton boton-principal transition-all duration-150 active:scale-95"
+                    <a class="btn p inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md"
                         th:href="@{/salidas/nueva}">
-                        <span class="icono icono-plus" aria-hidden="true"></span>Registrar salida
+                        <svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>
+                        <span>Registrar salida</span>
                     </a>
                 </div>
             </div>
 
-            <div class="aviso-operacion aviso-error shadow-sm" th:if="${error != null}" role="alert">
-                <span class="icono icono-circle-alert" aria-hidden="true"></span>
+            <div class="note aviso-operacion aviso-error mb-4" th:if="${error != null}" role="alert" style="background:#fff8f9;border-color:#fecdd3;color:#be123c">
+                <svg class="ico flex-none" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
                 <span th:text="${error}">Error en los filtros.</span>
             </div>
 
-            <div class="aviso-operacion aviso-info" role="note">
-                <span class="icono icono-clipboard-list" aria-hidden="true"></span>
-                <div>
-                    <p><strong>Control de existencias:</strong> Las <strong>entradas</strong> se generan de forma automática al recibir órdenes de compra. Para registrar mermas, deterioros o ajustes de stock, haz clic en <strong>Registrar salida</strong> o desde los lotes de cada medicamento.</p>
-                </div>
+            <div class="note aviso-operacion aviso-info mb-5" role="note">
+                <svg class="ico flex-none text-pine-700" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/></svg>
+                <span><b>Control de existencias:</b> las entradas se generan automáticamente al recibir órdenes de compra. Para mermas, deterioros o ajustes usa <b>Registrar salida</b>.</span>
             </div>
 
-            <form class="inventario-filtros mb-6" th:action="@{/movimientos}" method="get" role="search" aria-label="Filtros del kardex de inventario">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 w-full">
-                    <div>
-                        <label for="tipo">Tipo</label>
-                        <select id="tipo" name="tipo">
-                            <option value="">Todos los tipos</option>
-                            <option value="ENTRADA" th:selected="${filtro != null and filtro.tipo() == 'ENTRADA'}">ENTRADA</option>
-                            <option value="SALIDA" th:selected="${filtro != null and filtro.tipo() == 'SALIDA'}">SALIDA</option>
-                        </select>
+            <div class="card pad mb-5">
+                <form class="inventario-filtros" th:action="@{/movimientos}" method="get" role="search" aria-label="Filtros del kardex de inventario">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 w-full">
+                        <div>
+                            <label for="tipo">Tipo</label>
+                            <div class="inp">
+                                <select id="tipo" name="tipo" class="w-full bg-transparent border-0 outline-none text-sm text-ink font-semibold cursor-pointer">
+                                    <option value="">Todos los tipos</option>
+                                    <option value="ENTRADA" th:selected="${filtro != null and filtro.tipo() == 'ENTRADA'}">ENTRADA</option>
+                                    <option value="SALIDA" th:selected="${filtro != null and filtro.tipo() == 'SALIDA'}">SALIDA</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="desde">Desde</label>
+                            <div class="inp">
+                                <input type="date" id="desde" name="desde" th:value="${filtro != null ? filtro.desde() : null}"
+                                    class="w-full bg-transparent border-0 outline-none text-sm text-ink font-medium">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="hasta">Hasta</label>
+                            <div class="inp">
+                                <input type="date" id="hasta" name="hasta" th:value="${filtro != null ? filtro.hasta() : null}"
+                                    class="w-full bg-transparent border-0 outline-none text-sm text-ink font-medium">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="motivo">Motivo</label>
+                            <div class="inp">
+                                <input type="search" id="motivo" name="motivo" th:value="${filtro != null ? filtro.motivo() : null}"
+                                    placeholder="Buscar en motivo..."
+                                    class="w-full bg-transparent border-0 outline-none text-sm text-ink font-medium">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="idMedicamento">Medicamento</label>
+                            <div class="inp">
+                                <select id="idMedicamento" name="idMedicamento" class="w-full bg-transparent border-0 outline-none text-sm text-ink font-semibold cursor-pointer">
+                                    <option value="">Todos los medicamentos</option>
+                                    <option th:each="m : ${medicamentos}" th:value="${m.idMedicamento()}"
+                                        th:text="${m.codigo() + ' - ' + m.nombre()}"
+                                        th:selected="${filtro != null and filtro.idMedicamento() == m.idMedicamento()}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="numeroLote">N° Lote</label>
+                            <div class="inp">
+                                <input type="search" id="numeroLote" name="numeroLote" th:value="${filtro != null ? filtro.numeroLote() : null}"
+                                    placeholder="Buscar lote..."
+                                    class="w-full bg-transparent border-0 outline-none text-sm text-ink font-medium font-mono">
+                            </div>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label for="idUsuario">Responsable</label>
+                            <div class="inp">
+                                <select id="idUsuario" name="idUsuario" class="w-full bg-transparent border-0 outline-none text-sm text-ink font-semibold cursor-pointer">
+                                    <option value="">Todos los responsables</option>
+                                    <option th:each="u : ${usuarios}" th:value="${u.idUsuario()}"
+                                        th:text="${u.nombre() + ' (' + u.rol() + ')'}"
+                                        th:selected="${filtro != null and filtro.idUsuario() == u.idUsuario()}"></option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label for="desde">Desde</label>
-                        <input type="date" id="desde" name="desde" th:value="${filtro != null ? filtro.desde() : null}">
+                    <div class="filtro-acciones flex gap-2 justify-end mt-4 pt-3 border-t border-line">
+                        <button class="btn p inventario-boton boton-principal transition-all duration-150 active:scale-95" type="submit">
+                            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 3H2l8 9.46V19l4 2v-8.54z"/></svg>
+                            <span>Filtrar</span>
+                        </button>
+                        <a class="btn s inventario-boton boton-secundario transition-all duration-150 active:scale-95" th:href="@{/movimientos}">
+                            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                            <span>Limpiar</span>
+                        </a>
                     </div>
-                    <div>
-                        <label for="hasta">Hasta</label>
-                        <input type="date" id="hasta" name="hasta" th:value="${filtro != null ? filtro.hasta() : null}">
-                    </div>
-                    <div>
-                        <label for="motivo">Motivo</label>
-                        <input type="search" id="motivo" name="motivo" th:value="${filtro != null ? filtro.motivo() : null}"
-                            placeholder="Buscar en motivo...">
-                    </div>
-                    <div>
-                        <label for="idMedicamento">Medicamento</label>
-                        <select id="idMedicamento" name="idMedicamento">
-                            <option value="">Todos los medicamentos</option>
-                            <option th:each="m : ${medicamentos}" th:value="${m.idMedicamento()}"
-                                th:text="${m.codigo() + ' - ' + m.nombre()}"
-                                th:selected="${filtro != null and filtro.idMedicamento() == m.idMedicamento()}"></option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="numeroLote">N° Lote</label>
-                        <input type="search" id="numeroLote" name="numeroLote" th:value="${filtro != null ? filtro.numeroLote() : null}"
-                            placeholder="Buscar lote...">
-                    </div>
-                    <div>
-                        <label for="idUsuario">Responsable</label>
-                        <select id="idUsuario" name="idUsuario">
-                            <option value="">Todos los responsables</option>
-                            <option th:each="u : ${usuarios}" th:value="${u.idUsuario()}"
-                                th:text="${u.nombre() + ' (' + u.rol() + ')'}"
-                                th:selected="${filtro != null and filtro.idUsuario() == u.idUsuario()}"></option>
-                        </select>
-                    </div>
-                </div>
-                <div class="filtro-acciones mt-3">
-                    <button class="inventario-boton boton-principal transition-all duration-150 active:scale-95" type="submit">
-                        <span class="icono icono-search" aria-hidden="true"></span>Filtrar
-                    </button>
-                    <a class="inventario-boton boton-secundario transition-all duration-150 active:scale-95" th:href="@{/movimientos}">
-                        <span class="icono icono-x" aria-hidden="true"></span>Limpiar
-                    </a>
-                </div>
-            </form>
+                </form>
+            </div>
 
             <section class="inventario-resultados registro-listado" aria-labelledby="titulo-resultados">
-                <div class="resultados-cabecera">
-                    <h2 id="titulo-resultados">
-                        Historial de movimientos
-                        <span class="cantidad-resultados" th:text="${total != null ? total : #lists.size(movimientos)}"></span>
-                    </h2>
+                <div class="sec">
+                    <h2 id="titulo-resultados">Historial de movimientos</h2>
+                    <span class="cnt cantidad-resultados" th:text="${total != null ? total : #lists.size(movimientos)}">0</span>
                 </div>
 
-                <div class="inventario-vacio" th:if="${#lists.isEmpty(movimientos)}">
-                    <span class="icono icono-arrow-left-right" aria-hidden="true"></span>
-                    <p>No hay movimientos de inventario registrados.</p>
+                <div class="card pad text-center inventario-vacio" th:if="${#lists.isEmpty(movimientos)}">
+                    <svg class="mx-auto mb-3 text-ink-3/40" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg>
+                    <p class="text-ink-2 font-medium">No hay movimientos de inventario registrados.</p>
                 </div>
 
-                <div class="tabla-contenedor inventario-tabla tabla-movimientos"
-                    th:unless="${#lists.isEmpty(movimientos)}" role="region"
-                    aria-label="Movimientos, tabla desplazable">
+                <div class="card overflow-hidden tabla-contenedor inventario-tabla tabla-movimientos"
+                    th:unless="${#lists.isEmpty(movimientos)}" role="region" aria-label="Movimientos, tabla desplazable">
                     <table>
                         <thead>
                             <tr>
@@ -123,39 +143,43 @@
                                 <th scope="col">Origen</th>
                                 <th scope="col">Responsable</th>
                                 <th scope="col">Motivo</th>
-                                <th scope="col" th:if="${filtro != null and filtro.idMedicamento() != null}">Cantidad</th>
-                                <th scope="col">Detalle</th>
+                                <th scope="col" class="c" th:if="${filtro != null and filtro.idMedicamento() != null}">Cantidad</th>
+                                <th scope="col" class="r">Detalle</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="movimiento : ${movimientos}">
                                 <td>
-                                    <span class="codigo-medicamento"
-                                        th:text="${'#' + movimiento.idMovimiento()}"></span>
+                                    <span class="mono codigo-medicamento font-bold text-pine-700"
+                                        th:text="${'#' + movimiento.idMovimiento()}">#1</span>
                                 </td>
-                                <td class="fecha-registro"
+                                <td class="fecha-registro text-ink-2"
                                     th:text="${#temporals.format(movimiento.fechaHora(), 'dd/MM/yyyy HH:mm')}">
+                                    14/11/2026 09:50
                                 </td>
                                 <td>
-                                    <span class="tipo-movimiento"
-                                        th:classappend="${movimiento.tipo() == 'SALIDA'} ? 'tipo-salida'"
-                                        th:text="${movimiento.tipo()}"></span>
+                                    <span class="badge tipo-movimiento"
+                                        th:classappend="${movimiento.tipo() == 'SALIDA'} ? 't-blue tipo-salida' : 't-ok'"
+                                        th:text="${movimiento.tipo()}">SALIDA</span>
                                 </td>
                                 <td>
-                                    <span class="text-sm font-medium text-slate-700"
-                                        th:text="${movimiento.origen() != null ? movimiento.origen() : '-'}"></span>
+                                    <b class="text-ink text-sm"
+                                        th:text="${movimiento.origen() != null ? movimiento.origen() : '-'}">Venta B001-00000040</b>
                                 </td>
                                 <td>
-                                    <span class="unidad-medicamento"
-                                        th:text="${movimiento.responsable() != null ? movimiento.responsable() : ('Usuario #' + movimiento.idUsuario())}"></span>
+                                    <span class="chip unidad-medicamento font-medium"
+                                        th:text="${movimiento.responsable() != null ? movimiento.responsable() : ('Usuario #' + movimiento.idUsuario())}">
+                                        vendedor_demo
+                                    </span>
                                 </td>
-                                <td class="motivo-movimiento" th:text="${movimiento.motivo()}"></td>
-                                <td th:if="${filtro != null and filtro.idMedicamento() != null}" class="font-semibold text-slate-800"
+                                <td class="motivo-movimiento text-ink-2" th:text="${movimiento.motivo()}">Venta a cliente</td>
+                                <td th:if="${filtro != null and filtro.idMedicamento() != null}" class="c font-bold text-ink"
                                     th:text="${movimiento.cantidadMedicamento() != null ? movimiento.cantidadMedicamento() : '-'}"></td>
-                                <td>
-                                    <a class="enlace-lotes"
+                                <td class="r">
+                                    <a class="lnk enlace-lotes transition-transform duration-150 hover:scale-105"
                                         th:href="@{/movimientos/{id}(id=${movimiento.idMovimiento()})}">
-                                        <span class="icono icono-clipboard-list" aria-hidden="true"></span>Ver detalle
+                                        <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/></svg>
+                                        <span>Ver detalle</span>
                                     </a>
                                 </td>
                             </tr>
@@ -164,18 +188,19 @@
                 </div>
 
                 <nav class="flex items-center justify-between mt-4" aria-label="Paginación" th:if="${paginas != null and paginas > 1}">
-                    <a class="inventario-boton boton-secundario" th:if="${pagina > 1}"
+                    <a class="btn s inventario-boton boton-secundario" th:if="${pagina > 1}"
                         th:href="@{/movimientos(tipo=${filtro != null ? filtro.tipo() : null},desde=${filtro != null ? filtro.desde() : null},hasta=${filtro != null ? filtro.hasta() : null},motivo=${filtro != null ? filtro.motivo() : null},idMedicamento=${filtro != null ? filtro.idMedicamento() : null},numeroLote=${filtro != null ? filtro.numeroLote() : null},idUsuario=${filtro != null ? filtro.idUsuario() : null},pagina=${pagina - 1})}">Anterior</a>
                     <span th:unless="${pagina > 1}"></span>
-                    <span class="text-sm text-slate-600 font-medium" th:text="|Página ${pagina} de ${paginas}|">Página 1 de 1</span>
-                    <a class="inventario-boton boton-secundario" th:if="${pagina < paginas}"
+                    <span class="text-sm text-ink-3 font-semibold" th:text="|Página ${pagina} de ${paginas}|">Página 1 de 1</span>
+                    <a class="btn s inventario-boton boton-secundario" th:if="${pagina < paginas}"
                         th:href="@{/movimientos(tipo=${filtro != null ? filtro.tipo() : null},desde=${filtro != null ? filtro.desde() : null},hasta=${filtro != null ? filtro.hasta() : null},motivo=${filtro != null ? filtro.motivo() : null},idMedicamento=${filtro != null ? filtro.idMedicamento() : null},numeroLote=${filtro != null ? filtro.numeroLote() : null},idUsuario=${filtro != null ? filtro.idUsuario() : null},pagina=${pagina + 1})}">Siguiente</a>
                     <span th:unless="${pagina < paginas}"></span>
                 </nav>
 
-                <p class="resultados-pie"
+                <div class="lbl mt-3 resultados-pie"
                     th:text="${(total != null ? total : #lists.size(movimientos)) + ((total != null ? total : #lists.size(movimientos)) == 1 ? ' movimiento registrado' : ' movimientos registrados')}">
-                </p>
+                    0 movimientos registrados
+                </div>
             </section>
         </main>
     </div>

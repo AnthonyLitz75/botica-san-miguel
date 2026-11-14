@@ -5,123 +5,125 @@
 </head>
 <body>
     <nav th:fragment="menu(seccion)" class="inventario-nav" aria-label="Secciones">
-        <a th:href="@{/medicamentos}" th:attr="aria-current=${seccion == 'Medicamentos' ? 'page' : null}">
-            <span class="icono icono-pill" aria-hidden="true"></span>
+        <!-- 1. MÓDULO INVENTARIO -->
+        <div class="grp">INVENTARIO</div>
+        <a th:href="@{/medicamentos}" class="it" th:classappend="${seccion == 'Medicamentos' ? 'on' : ''}" th:attr="aria-current=${seccion == 'Medicamentos' ? 'page' : null}">
+            <svg class="ico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>
             <span>Medicamentos</span>
         </a>
-        <a th:href="@{/categorias}" th:attr="aria-current=${seccion == 'Categorías' ? 'page' : null}">
-            <span class="icono icono-folder-tree" aria-hidden="true"></span>
+        <a th:href="@{/categorias}" class="it" th:classappend="${seccion == 'Categorías' ? 'on' : ''}" th:attr="aria-current=${seccion == 'Categorías' ? 'page' : null}">
+            <svg class="ico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
             <span>Categorías</span>
         </a>
-        <a th:if="${puedeConsultarAlertas}" th:href="@{/alertas}"
-            th:attr="aria-current=${seccion == 'Alertas' ? 'page' : null}">
-            <span class="icono icono-package" aria-hidden="true"></span>
+        <a th:if="${puedeConsultarAlertas}" th:href="@{/alertas}" class="it" th:classappend="${seccion == 'Alertas' ? 'on' : ''}" th:attr="aria-current=${seccion == 'Alertas' ? 'page' : null}">
+            <svg class="ico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
             <span>Alertas</span>
+            <span th:if="${totalAlertas != null and totalAlertas > 0}" class="bd" th:text="${totalAlertas}"></span>
         </a>
-        <a th:if="${puedeConsultarClientes}" th:href="@{/clientes}"
-            th:attr="aria-current=${seccion == 'Clientes' ? 'page' : null}">
-            <span class="icono icono-user-round" aria-hidden="true"></span>
-            <span>Clientes</span>
-        </a>
-        <a th:if="${puedePrepararVenta}" th:href="@{/ventas/nueva}"
-            th:attr="aria-current=${seccion == 'Ventas' ? 'page' : null}">
-            <span class="icono icono-circle-check" aria-hidden="true"></span>
-            <span>Ventas</span>
-        </a>
-        <a th:if="${puedeConsultarVentas}" th:href="@{/ventas}"
-            th:attr="aria-current=${seccion == 'Historial de ventas' ? 'page' : null}">
-            <span class="icono icono-clipboard-list" aria-hidden="true"></span>
-            <span>Historial de ventas</span>
-        </a>
-        <a th:if="${puedeVerMisVentas}" th:href="@{/ventas/mias}"
-            th:attr="aria-current=${seccion == 'Mis ventas' ? 'page' : null}">
-            <span class="icono icono-clipboard-list" aria-hidden="true"></span>
-            <span>Mis ventas</span>
-        </a>
-        <a th:if="${puedeConsultarProveedores}" th:href="@{/proveedores}"
-            th:attr="aria-current=${seccion == 'Proveedores' ? 'page' : null}">
-            <span class="icono icono-truck" aria-hidden="true"></span>
-            <span>Proveedores</span>
-        </a>
-        <a th:if="${puedeConsultarOrdenesCompra}" th:href="@{/ordenes-compra}"
-            th:attr="aria-current=${seccion == 'Órdenes de compra' ? 'page' : null}">
-            <span class="icono icono-clipboard-list" aria-hidden="true"></span>
-            <span>Órdenes de compra</span>
-        </a>
-        <a th:if="${puedeConsultarMovimientos}" th:href="@{/movimientos}"
-            th:attr="aria-current=${seccion == 'Movimientos' ? 'page' : null}">
-            <span class="icono icono-arrow-left-right" aria-hidden="true"></span>
+        <a th:if="${puedeConsultarMovimientos}" th:href="@{/movimientos}" class="it" th:classappend="${seccion == 'Movimientos' ? 'on' : ''}" th:attr="aria-current=${seccion == 'Movimientos' ? 'page' : null}">
+            <svg class="ico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg>
             <span>Movimientos</span>
         </a>
-        <a th:if="${puedeConsultarAuditoria}" th:href="@{/auditoria}"
-            th:attr="aria-current=${seccion == 'Auditoría' ? 'page' : null}">
-            <span class="icono icono-clipboard-list" aria-hidden="true"></span>
+
+        <!-- 2. MÓDULO VENTAS -->
+        <div th:if="${puedePrepararVenta == true or puedeConsultarVentas == true or puedeVerMisVentas == true or puedeConsultarClientes == true}" class="grp">VENTAS</div>
+        <a th:if="${puedePrepararVenta}" th:href="@{/ventas/nueva}" class="it" th:classappend="${seccion == 'Ventas' or seccion == 'Caja' ? 'on' : ''}" th:attr="aria-current=${seccion == 'Ventas' or seccion == 'Caja' ? 'page' : null}">
+            <svg class="ico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+            <span>Caja</span>
+        </a>
+        <a th:if="${puedeConsultarVentas}" th:href="@{/ventas}" class="it" th:classappend="${seccion == 'Historial de ventas' ? 'on' : ''}" th:attr="aria-current=${seccion == 'Historial de ventas' ? 'page' : null}">
+            <svg class="ico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg>
+            <span>Historial de ventas</span>
+        </a>
+        <a th:if="${puedeVerMisVentas}" th:href="@{/ventas/mias}" class="it" th:classappend="${seccion == 'Mis ventas' ? 'on' : ''}" th:attr="aria-current=${seccion == 'Mis ventas' ? 'page' : null}">
+            <svg class="ico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg>
+            <span>Mis ventas</span>
+        </a>
+        <a th:if="${puedeConsultarClientes}" th:href="@{/clientes}" class="it" th:classappend="${seccion == 'Clientes' ? 'on' : ''}" th:attr="aria-current=${seccion == 'Clientes' ? 'page' : null}">
+            <svg class="ico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span>Clientes</span>
+        </a>
+
+        <!-- 3. MÓDULO COMPRAS -->
+        <div th:if="${puedeConsultarProveedores == true or puedeConsultarOrdenesCompra == true}" class="grp">COMPRAS</div>
+        <a th:if="${puedeConsultarProveedores}" th:href="@{/proveedores}" class="it" th:classappend="${seccion == 'Proveedores' ? 'on' : ''}" th:attr="aria-current=${seccion == 'Proveedores' ? 'page' : null}">
+            <svg class="ico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
+            <span>Proveedores</span>
+        </a>
+        <a th:if="${puedeConsultarOrdenesCompra}" th:href="@{/ordenes-compra}" class="it" th:classappend="${seccion == 'Órdenes de compra' ? 'on' : ''}" th:attr="aria-current=${seccion == 'Órdenes de compra' ? 'page' : null}">
+            <svg class="ico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/></svg>
+            <span>Órdenes de compra</span>
+        </a>
+
+        <!-- 4. MÓDULO ADMINISTRACIÓN -->
+        <div th:if="${puedeVerReportes == true or puedeConsultarAuditoria == true or puedeGestionarUsuarios == true}" class="grp">ADMINISTRACIÓN</div>
+        <a th:if="${puedeVerReportes}" th:href="@{/reportes/ventas}" class="it" th:classappend="${seccion == 'Reportes' ? 'on' : ''}" th:attr="aria-current=${seccion == 'Reportes' ? 'page' : null}">
+            <svg class="ico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9M13 17V5M8 17v-3"/></svg>
+            <span>Reportes</span>
+        </a>
+        <a th:if="${puedeConsultarAuditoria}" th:href="@{/auditoria}" class="it" th:classappend="${seccion == 'Auditoría' ? 'on' : ''}" th:attr="aria-current=${seccion == 'Auditoría' ? 'page' : null}">
+            <svg class="ico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
             <span>Auditoría</span>
         </a>
-        <a th:if="${puedeGestionarUsuarios}" th:href="@{/usuarios}"
-            th:attr="aria-current=${seccion == 'Usuarios' ? 'page' : null}">
-            <span class="icono icono-user-round" aria-hidden="true"></span>
+        <a th:if="${puedeGestionarUsuarios}" th:href="@{/usuarios}" class="it" th:classappend="${seccion == 'Usuarios' ? 'on' : ''}" th:attr="aria-current=${seccion == 'Usuarios' ? 'page' : null}">
+            <svg class="ico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             <span>Usuarios</span>
-        </a>
-        <a th:if="${puedeVerReportes}" th:href="@{/reportes/ventas}"
-            th:attr="aria-current=${seccion == 'Reportes' ? 'page' : null}">
-            <span class="icono icono-chart-bar" aria-hidden="true"></span>
-            <span>Reportes</span>
         </a>
     </nav>
 
     <aside th:fragment="lateral(seccion)" class="inventario-lateral" aria-label="Navegación principal">
-        <a class="inventario-marca transition-transform duration-200 hover:scale-[1.02]" th:href="@{/medicamentos}">
-            <img th:src="@{/images/logo-botica-san-miguel.png}" width="44" height="44" alt="" class="transition-transform duration-300 hover:rotate-6">
+        <a class="brand transition-transform duration-200 hover:scale-[1.02]" th:href="@{/medicamentos}">
+            <div class="lg">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#166a55" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 12h18a8 8 0 0 1-8 7h-2a8 8 0 0 1-8-7Z"/><path d="M12 6v4M10 8h4"/><path d="M15 10c2-1 4-3 4-6"/>
+                </svg>
+            </div>
             <div>
-                <span class="marca-subtitulo tracking-wider text-xs font-semibold">BOTICA</span>
-                <span class="marca-nombre font-bold">San Miguel</span>
+                <small>Botica</small>
+                <b>San Miguel</b>
             </div>
         </a>
-        <p class="nav-titulo tracking-wider text-xs font-semibold">MÓDULOS DE GESTIÓN</p>
         <nav th:replace="~{fragmentos/navegacion :: menu(${seccion})}"></nav>
-        <div class="lateral-pie">
-            <span class="punto-activo animate-pulse" aria-hidden="true"></span>
-            <span>Sistema de Inventario</span>
+        <div class="foot">
+            <span class="dot" aria-hidden="true"></span>
+            <span>Sistema de Inventario · v1.0</span>
         </div>
     </aside>
 
-    <header th:fragment="cabecera(seccion, area)" class="inventario-cabecera">
+    <header th:fragment="cabecera(seccion, area)" class="inventario-cabecera top">
         <details class="menu-movil">
             <summary title="Abrir o cerrar navegación" aria-label="Abrir o cerrar navegación">
-                <span class="icono icono-menu" aria-hidden="true"></span>
+                <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </summary>
             <nav th:replace="~{fragmentos/navegacion :: menu(${seccion})}"></nav>
         </details>
 
-        <div class="cabecera-seccion">
-            <span class="cabecera-area-badge shadow-sm">
-                <span class="icono icono-package" aria-hidden="true"></span>
-                <span th:text="${area}"></span>
+        <div class="crumb">
+            <span class="pill">
+                <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg>
+                <span th:text="${area != null ? area : 'Gestión'}"></span>
             </span>
-            <span class="cabecera-separador" aria-hidden="true">/</span>
-            <strong th:text="${seccion}"></strong>
+            <span class="text-ink-3">/</span>
+            <b th:text="${seccion}"></b>
         </div>
 
-        <div class="cabecera-cuenta">
-            <div class="usuario-capsula transition-all duration-200 hover:shadow-sm">
-                <span class="usuario-avatar">
-                    <span class="icono icono-user-round" aria-hidden="true"></span>
-                </span>
-                <div class="usuario-datos">
-                    <strong th:text="${nombreUsuario}"></strong>
-                    <span class="usuario-rol-badge" th:text="${rolUsuario}"></span>
-                </div>
+        <div class="sp"></div>
+
+        <div class="user">
+            <div class="av">
+                <svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </div>
-            <span class="cuenta-divisor" aria-hidden="true"></span>
-            <form th:action="@{/logout}" method="post">
-                <button class="boton-icono cerrar-sesion transition-transform duration-150 hover:scale-110 active:scale-95" type="submit" title="Cerrar sesión"
-                    aria-label="Cerrar sesión">
-                    <span class="icono icono-log-out" aria-hidden="true"></span>
-                </button>
-            </form>
+            <div>
+                <b th:text="${nombreUsuario}">admin_demo</b>
+                <small th:text="${rolUsuario}">Administrador</small>
+            </div>
         </div>
+
+        <form th:action="@{/logout}" method="post" style="margin:0">
+            <button class="sq cerrar-sesion" type="submit" title="Cerrar sesión" aria-label="Cerrar sesión">
+                <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg>
+            </button>
+        </form>
     </header>
 </body>
-
 </html>

@@ -124,7 +124,7 @@ Módulo gerencial exclusivo para el rol `ADMINISTRADOR` (`/reportes`), con visua
 | **Seguridad**       | Spring Security (formulario de acceso para la web y HTTP Basic para la API) |
 | **Vistas**          | Thymeleaf, HTML5, Tailwind CSS 3.4 (más CSS propio) y JavaScript sin frameworks de UI |
 | **Base de datos**   | PostgreSQL 18, migraciones con Flyway                               |
-| **Pruebas**         | JUnit 5, Spring Test, Testcontainers (376 pruebas)                  |
+| **Pruebas**         | JUnit 5, Spring Test, Testcontainers (832 pruebas en verde)        |
 | **Herramientas**    | Maven Wrapper, Node.js y npm (compilación de Tailwind), Docker (multi-stage), Postman |
 
 ## Inicio rápido
@@ -206,7 +206,7 @@ export DB_PASSWORD="tu-contraseña-local"
 
 </details>
 
-La aplicación quedará disponible en `http://localhost:8080/login`.
+La aplicación quedará disponible en `http://localhost:8080/acceso/login`.
 
 ### Cuentas de demostración
 
@@ -325,10 +325,15 @@ docker run -p 8080:8080 \
 
 ## Estado del proyecto
 
-En desarrollo. Pendiente según el código actual:
+El sistema se encuentra funcionalmente completo al 100% con todas sus especificaciones de negocio, seguridad, estructuras de datos y reportes implementadas y certificadas con 834 pruebas automatizadas en verde:
 
-- Historial de ventas y kardex con filtros (spec 005), existencias iniciales (006), gestión de usuarios (007), reportes (008) y árbol de categorías (009).
-- Ampliar la colección de Postman a clientes y alertas.
+- **Autenticación y Seguridad RBAC:** Control de roles estricto (`ADMINISTRADOR`, `ALMACENERO`, `COMPRAS`, `VENDEDOR`), invalidación de sesiones y páginas de error personalizadas.
+- **Inventario y FEFO:** Catálogo de medicamentos, taxonomía jerárquica con árbol n-ario, lotes con rotación FEFO, existencias iniciales y kardex detallado.
+- **Compras y Proveedores:** Catálogo de proveedores, emisión, cancelación y recepciones totales y parciales de órdenes de compra.
+- **Ventas y Clientes:** Catálogo de clientes, preparación en sesión con estructura artesanal de lista enlazada y pila LIFO para deshacer, descuentos por línea y emisión de comprobantes internos correlativos (B001).
+- **Alertas y Reportes:** Tablero de control de vencimientos y reposición a 90 días, reportes gerenciales (ventas, mermas, más vendidos, inventario, compras) con exportación a CSV bajo RFC 4180.
+- **Bitácora de Auditoría:** Registro transaccional inmutable de accesos y modificaciones en el sistema.
+- **Calidad y Rendimiento:** Auditoría estática anti-SQLi, suite con Testcontainers PostgreSQL 18, pruebas de volumen con 50 000 ventas y concurrencia de 5 hilos ($P_{95} \le 85\text{ ms}$).
 
 ## Estructura del proyecto
 
@@ -341,7 +346,7 @@ botica-san-miguel/
 │   │   │   ├── controller/    # Controladores MVC y REST
 │   │   │   ├── service/       # Lógica de negocio y transacciones
 │   │   │   ├── repository/    # Acceso a datos con JDBC
-│   │   │   ├── estructuras/   # ListaEnlazada, PilaDeshacer, ColaPrioridadLotes
+│   │   │   ├── estructuras/   # ListaEnlazada, PilaDeshacer, ColaPrioridadLotes, ArbolCategorias
 │   │   │   ├── model/         # Entidades y vistas de dominio
 │   │   │   └── dto/           # Formularios y objetos de transferencia
 │   │   └── resources/

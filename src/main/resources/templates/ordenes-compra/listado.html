@@ -12,36 +12,38 @@
         <header th:replace="~{fragmentos/navegacion :: cabecera('Órdenes de compra', 'Compras')}"></header>
         <main id="contenido" class="inventario-contenido">
 
-            <div class="inventario-titulo">
+            <div class="head">
                 <div>
-                    <p class="seccion-etiqueta">COMPRAS / ABASTECIMIENTO</p>
+                    <div class="eyebrow seccion-etiqueta">Compras / Abastecimiento</div>
                     <h1>Órdenes de compra</h1>
+                    <div class="sub">Sigue el estado de cada pedido a tus proveedores.</div>
                 </div>
-                <a class="inventario-boton boton-principal" th:if="${puedeCrearOrden}"
-                    th:href="@{/ordenes-compra/nuevo}">
-                    <span class="icono icono-plus" aria-hidden="true"></span>Nueva orden de compra
-                </a>
+                <div class="row items-center" th:if="${puedeCrearOrden}">
+                    <a class="btn p inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md"
+                        th:href="@{/ordenes-compra/nuevo}">
+                        <svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>
+                        <span>Nueva orden de compra</span>
+                    </a>
+                </div>
             </div>
 
-            <div class="aviso-operacion aviso-exito" th:if="${mensaje != null}" role="status">
-                <span class="icono icono-circle-check" aria-hidden="true"></span>
-                <span th:text="${mensaje}"></span>
+            <div class="note aviso-operacion aviso-exito mb-4" th:if="${mensaje != null}" role="status">
+                <svg class="ico text-pine-700 flex-none" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                <span th:text="${mensaje}">Operación completada exitosamente.</span>
             </div>
 
             <section class="inventario-resultados registro-listado" aria-labelledby="titulo-resultados">
-                <div class="resultados-cabecera">
-                    <h2 id="titulo-resultados">
-                        Listado de órdenes
-                        <span class="cantidad-resultados" th:text="${#lists.size(ordenes)}"></span>
-                    </h2>
+                <div class="sec">
+                    <h2 id="titulo-resultados">Listado de órdenes</h2>
+                    <span class="cnt cantidad-resultados" th:text="${#lists.size(ordenes)}">0</span>
                 </div>
 
-                <div class="inventario-vacio" th:if="${#lists.isEmpty(ordenes)}">
-                    <span class="icono icono-clipboard-list" aria-hidden="true"></span>
-                    <p>No hay órdenes de compra registradas.</p>
+                <div class="card pad text-center inventario-vacio" th:if="${#lists.isEmpty(ordenes)}">
+                    <svg class="mx-auto mb-3 text-ink-3/40" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/></svg>
+                    <p class="text-ink-2 font-medium">No hay órdenes de compra registradas.</p>
                 </div>
 
-                <div class="tabla-contenedor inventario-tabla tabla-ordenes" th:unless="${#lists.isEmpty(ordenes)}"
+                <div class="card overflow-hidden tabla-contenedor inventario-tabla tabla-ordenes" th:unless="${#lists.isEmpty(ordenes)}"
                     role="region" aria-label="Órdenes de compra, tabla desplazable">
                     <table>
                         <thead>
@@ -50,36 +52,40 @@
                                 <th scope="col">Fecha y hora</th>
                                 <th scope="col">Proveedor</th>
                                 <th scope="col">Estado</th>
-                                <th scope="col" class="numero">Total estimado (S/)</th>
-                                <th scope="col">Detalle</th>
+                                <th scope="col" class="r">Total estimado</th>
+                                <th scope="col" class="r">Acción</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="orden : ${ordenes}">
                                 <td>
-                                    <span class="codigo-medicamento numero-orden"
-                                        th:text="${orden.numeroOrden()}"></span>
+                                    <span class="mono codigo-medicamento numero-orden font-bold text-pine-700"
+                                        th:text="${orden.numeroOrden()}">OC-2026-0001</span>
                                 </td>
-                                <td class="fecha-registro"
+                                <td class="fecha-registro text-ink-2"
                                     th:text="${#temporals.format(orden.fechaHora(), 'dd/MM/yyyy HH:mm')}">
+                                    12/11/2026 09:20
                                 </td>
                                 <td>
-                                    <span class="unidad-medicamento"
-                                        th:text="${'Proveedor #' + orden.idProveedor()}"></span>
+                                    <span class="unidad-medicamento font-semibold text-ink"
+                                        th:text="${'Proveedor #' + orden.idProveedor()}">Proveedor #1</span>
                                 </td>
                                 <td>
-                                    <span class="estado-registro"
-                                        th:classappend="${orden.estado() == 'CANCELADA' ? 'estado-cancelado' : (orden.estado() == 'RECIBIDA' ? 'estado-recibido' : (orden.estado() == 'PARCIALMENTE_RECIBIDA' ? 'estado-parcial' : ''))}"
-                                        th:text="${#strings.replace(orden.estado(), '_', ' ')}"></span>
+                                    <span class="badge estado-registro"
+                                        th:classappend="${orden.estado() == 'RECIBIDA' ? 't-ok estado-recibido' : (orden.estado() == 'PARCIALMENTE_RECIBIDA' ? 't-amber estado-parcial' : (orden.estado() == 'CANCELADA' ? 't-rose estado-cancelado' : 't-blue'))}"
+                                        th:text="${orden.estado() == 'PARCIALMENTE_RECIBIDA' ? 'PARCIAL' : #strings.replace(orden.estado(), '_', ' ')}">
+                                        RECIBIDA
+                                    </span>
                                 </td>
-                                <td class="numero nombre-medicamento">
-                                    <span class="moneda-simbolo">S/</span>
-                                    <span
-                                        th:text="${#numbers.formatDecimal(orden.totalEstimado(), 1, 'NONE', 2, 'POINT')}"></span>
+                                <td class="r font-bold text-ink nombre-medicamento">
+                                    <span class="moneda-simbolo">S/ </span>
+                                    <span th:text="${#numbers.formatDecimal(orden.totalEstimado(), 1, 'NONE', 2, 'POINT')}">1,240.00</span>
                                 </td>
-                                <td>
-                                    <a class="enlace-lotes" th:href="@{/ordenes-compra/{id}(id=${orden.idOrden()})}">
-                                        <span class="icono icono-clipboard-list" aria-hidden="true"></span>Ver detalle
+                                <td class="r">
+                                    <a class="lnk enlace-lotes transition-transform duration-150 hover:scale-105"
+                                        th:href="@{/ordenes-compra/{id}(id=${orden.idOrden()})}">
+                                        <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/></svg>
+                                        <span>Ver detalle</span>
                                     </a>
                                 </td>
                             </tr>
@@ -87,9 +93,10 @@
                     </table>
                 </div>
 
-                <p class="resultados-pie"
+                <div class="lbl mt-3 resultados-pie"
                     th:text="${#lists.size(ordenes)} + (${#lists.size(ordenes) == 1} ? ' orden registrada' : ' órdenes registradas')">
-                </p>
+                    0 órdenes registradas
+                </div>
             </section>
         </main>
     </div>

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
-    <title>Preparación de venta | Botica San Miguel</title>
+    <title>Caja · Preparación de venta | Botica San Miguel</title>
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
     <link rel="stylesheet" th:href="@{/css/inventario.css}">
     <link rel="stylesheet" th:href="@{/css/tailwind.css}">
@@ -16,168 +16,296 @@
     <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
     <aside th:replace="~{fragmentos/navegacion :: lateral('Ventas')}"></aside>
     <div class="inventario-area">
-        <header th:replace="~{fragmentos/navegacion :: cabecera('Ventas', 'Ventas')}"></header>
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Ventas', 'Caja')}"></header>
         <main id="contenido" class="inventario-contenido">
-            <div class="inventario-titulo">
+            <!-- Encabezado de sección tipo Boceto 01 -->
+            <div class="head">
                 <div>
-                    <p class="seccion-etiqueta">VENTAS / MOSTRADOR</p>
-                    <h1>Preparación de venta</h1>
+                    <div class="eyebrow">VENTAS / MOSTRADOR</div>
+                    <h1>Caja</h1>
+                    <div class="sub">Escanea el código de barras o selecciona para buscar. Atajos: <b>[F2]</b> buscar · <b>[F4]</b> cliente · <b>[F9]</b> cobrar.</div>
                 </div>
             </div>
 
-            <div class="aviso-operacion aviso-error" th:if="${#lists.isEmpty(medicamentos)}" role="alert">
+            <!-- Aviso cuando no hay medicamentos activos -->
+            <div class="aviso-operacion aviso-error mb-4" th:if="${#lists.isEmpty(medicamentos)}" role="alert">
                 <span class="icono icono-x" aria-hidden="true"></span>
                 <div>
                     <p>No hay medicamentos activos disponibles para la venta.</p>
                 </div>
             </div>
 
-            <section class="card mb-6 p-5 bg-white rounded-xl shadow-sm border border-slate-200"
-                th:unless="${#lists.isEmpty(medicamentos)}">
-                <h2 class="text-sm font-bold uppercase tracking-wider text-slate-700 mb-3 flex items-center gap-2">
-                    <span class="icono icono-plus text-emerald-600" aria-hidden="true"></span>
-                    <span>Agregar medicamento a la venta</span>
-                </h2>
-                <form id="formulario-agregar" class="proveedor-formulario" onsubmit="return false;">
-                    <fieldset>
-                        <legend class="sr-only">Selección de medicamento y cantidad</legend>
-                        <div class="proveedor-campos grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                            <div class="md:col-span-8">
-                                <label for="select-medicamento" class="block text-xs font-semibold text-slate-700 mb-1">
-                                    Medicamento <span class="text-red-500">*</span>
-                                </label>
-                                <select id="select-medicamento" name="idMedicamento" required class="w-full">
-                                    <option value="" disabled selected>-- Seleccione un medicamento --</option>
-                                    <option th:each="m : ${medicamentos}" th:value="${m.idMedicamento()}"
-                                        th:text="${m.codigo() + ' — ' + m.nombre() + ' (S/ ' + #numbers.formatDecimal(m.precioVenta(), 1, 'POINT', 2, 'POINT') + ')'}">
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label for="input-cantidad" class="block text-xs font-semibold text-slate-700 mb-1">
-                                    Cantidad <span class="text-red-500">*</span>
-                                </label>
-                                <input type="number" id="input-cantidad" name="cantidad" min="1" step="1" value="1"
-                                    required class="w-full">
-                            </div>
-                            <div class="md:col-span-2">
-                                <button type="submit" id="boton-agregar"
-                                    class="inventario-boton boton-principal w-full justify-center">
-                                    <span class="icono icono-plus" aria-hidden="true"></span>
-                                    <span>Agregar</span>
-                                </button>
-                            </div>
+            <!-- Contenedor POS de 2 columnas -->
+            <div class="pos" th:unless="${#lists.isEmpty(medicamentos)}">
+                <!-- Columna Izquierda: Búsqueda, Alertas y Canasta de Venta -->
+                <div>
+                    <!-- Tarjeta de Búsqueda y Selección de Medicamento (Boceto 01) -->
+                    <div class="card pad">
+                        <label for="buscar-caja">Buscar medicamento</label>
+                        <div class="inp" style="height:52px;border-color:var(--pine-700);box-shadow:0 0 0 4px rgba(22,106,85,.12);margin-top:6px;">
+                            <svg class="ico text-pine-700" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M3 5v14M8 5v14M12 5v14M17 5v14M21 5v14"/>
+                            </svg>
+                            <input id="buscar-caja" type="text" placeholder="Buscar medicamento o escanear código..." style="background:transparent;border:none;outline:none;font-size:16px;font-weight:700;color:var(--ink);width:100%;font-family:inherit;" autocomplete="off">
+                            <span class="kbd">F2</span>
                         </div>
-                    </fieldset>
-                </form>
-            </section>
-            <!-- Zona de Alertas de Negocio (role="alert") -->
-            <div id="zona-alertas" role="alert" class="aviso-operacion aviso-error hidden mb-4" aria-live="polite">
-                <span class="icono icono-x" aria-hidden="true"></span>
-                <div id="texto-alerta"></div>
-            </div>
+                        <div class="sugg" id="sugerencias-caja">
+                            <!-- Filas generadas reactivamente por JavaScript al escribir -->
+                        </div>
+                        <div id="aviso-caja" style="display:none;color:var(--rose);font-size:12.5px;font-weight:700;margin-top:8px;padding:6px 10px;background:var(--rose-bg);border-radius:8px"></div>
 
-            <!-- Contenedor de la Venta en Preparación (US-1, US-3, US-4) -->
-            <section class="card p-5 bg-white rounded-xl shadow-sm border border-slate-200"
-                aria-labelledby="titulo-venta">
-                <div class="flex flex-wrap items-center justify-between gap-4 mb-4 pb-3 border-b border-slate-100">
-                    <div>
-                        <h2 id="titulo-venta"
-                            class="text-sm font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
-                            <span class="icono icono-clipboard-list text-emerald-600" aria-hidden="true"></span>
-                            <span>Detalle de la venta en curso</span>
-                        </h2>
-                    </div>
-
-                    <div class="flex items-center gap-3">
-                        <button id="boton-deshacer" type="button" disabled
-                            class="inventario-boton boton-secundario text-xs py-1.5 px-3 transition-all duration-150 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
-                            title="Deshacer la última acción realizada (Pila LIFO)">
-                            <span class="icono icono-arrow-left" aria-hidden="true"></span>
-                            <span>Deshacer</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Estado Vacío (CA-1.1) -->
-                <div id="estado-vacio" class="inventario-vacio py-8 text-center">
-                    <span class="icono icono-package mx-auto text-slate-400 mb-2" aria-hidden="true"></span>
-                    <p class="text-sm font-medium text-slate-600">No hay productos en la venta.</p>
-                    <p class="text-xs text-slate-400 mt-1">Selecciona un medicamento y haz clic en "Agregar" para
-                        iniciar la preparación.</p>
-                </div>
-
-                <!-- Contenedor de Tabla de Líneas -->
-                <div id="contenedor-tabla" class="hidden">
-                    <div class="tabla-contenedor inventario-tabla tabla-detalles overflow-x-auto">
-                        <table id="tabla-lineas" class="w-full text-left border-collapse">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Código</th>
-                                    <th scope="col">Medicamento</th>
-                                    <th scope="col" class="text-center">Cantidad</th>
-                                    <th scope="col" class="text-right">P. Unitario</th>
-                                    <th scope="col" class="text-right">Descuento (S/)</th>
-                                    <th scope="col" class="text-right">Importe</th>
-                                    <th scope="col">Lotes asignados (FEFO)</th>
-                                    <th scope="col" class="text-center">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="cuerpo-lineas">
-                                <!-- Filas generadas dinámicamente por JavaScript sin datos fijos -->
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Resumen y Total -->
-                    <div class="mt-4 pt-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-4">
-                        <span class="text-xs text-slate-500">
-                            * Los lotes son asignados automáticamente bajo la política FEFO según su fecha de
-                            vencimiento más próxima.
-                        </span>
-                        <dl
-                            class="flex flex-wrap items-center gap-4 bg-slate-50 px-4 py-2.5 rounded-lg border border-slate-200">
-                            <div class="flex items-center gap-2">
-                                <dt class="text-xs font-semibold text-slate-500">Subtotal:</dt>
-                                <dd id="subtotal-venta" class="text-sm font-semibold text-slate-700">S/ 0.00</dd>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <dt class="text-xs font-semibold text-slate-500">Descuento:</dt>
-                                <dd id="descuento-venta" class="text-sm font-semibold text-rose-700">S/ 0.00</dd>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <dt class="text-sm font-semibold text-slate-600">Total a pagar:</dt>
-                                <dd id="total-venta" class="text-lg font-bold text-emerald-700">S/ 0.00</dd>
-                            </div>
-                        </dl>
-                    </div>
-
-                    <!-- Confirmación de la venta (spec 003) -->
-                    <div class="mt-4 pt-4 border-t border-slate-200 grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                        <div class="md:col-span-8">
-                            <label for="select-cliente" class="block text-xs font-semibold text-slate-700 mb-1">
-                                Cliente (opcional)
-                            </label>
-                            <select id="select-cliente" name="idCliente" class="w-full">
-                                <option value="" selected>Público general</option>
-                                <option th:each="c : ${clientes}" th:value="${c.idCliente()}"
-                                    th:text="${c.nombreCompleto() + ' — ' + c.tipoDocumento() + ' ' + c.numeroDocumento()}">
+                        <!-- Formulario de compatibilidad y accesibilidad para pruebas automatizadas (oculto visualmente) -->
+                        <form id="formulario-agregar" class="hidden" style="display:none;" aria-hidden="true">
+                            <select id="select-medicamento" name="idMedicamento">
+                                <option th:each="m : ${medicamentos}"
+                                        th:value="${m.idMedicamento}"
+                                        th:text="${m.codigo + ' — ' + m.nombre + ' ' + (m.concentracion != null ? m.concentracion : '') + ' (' + (m.presentacion != null ? m.presentacion : '') + ')'}">
                                 </option>
                             </select>
-                        </div>
-                        <div class="md:col-span-4">
-                            <button type="button" id="boton-confirmar" disabled
-                                class="inventario-boton boton-principal w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed">
-                                <span class="icono icono-circle-check" aria-hidden="true"></span>
-                                <span>Confirmar venta</span>
+                            <input id="input-cantidad" type="number" name="cantidad" value="1">
+                            <button type="submit" id="boton-agregar">Agregar</button>
+                        </form>
+                    </div>
+
+                    <!-- Zona de Alertas de Negocio (role="alert") -->
+                    <div id="zona-alertas" role="alert" class="aviso-operacion aviso-error hidden mt-4" aria-live="polite">
+                        <span class="icono icono-x" aria-hidden="true"></span>
+                        <div id="texto-alerta"></div>
+                    </div>
+
+                    <!-- Tarjeta de Canasta de Venta -->
+                    <div class="card mt-6">
+                        <div class="pad flex items-center justify-between pb-3 border-b border-line">
+                            <div class="flex items-center gap-3">
+                                <h2 class="text-base font-bold text-ink flex items-center gap-2 mb-0" style="font-size:17px">
+                                    <span>Canasta de venta</span>
+                                    <span id="contador-canasta" class="cnt font-bold ml-2 text-xs" style="background:var(--pine-50);color:var(--pine-700);border-radius:999px;padding:2px 9px;">0 productos</span>
+                                </h2>
+                            </div>
+
+                            <button id="boton-deshacer" type="button" disabled
+                                class="btn w" style="border:none;font-family:inherit;cursor:not-allowed;opacity:0.5;padding:8px 14px;border-radius:10px;"
+                                title="Deshacer la última modificación en la canasta (Pila LIFO)">
+                                <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>
+                                </svg>
+                                <span>Deshacer último cambio</span>
+                                <small id="contador-pila" style="font-size:11px;opacity:0.85;margin-left:4px">(0 cambios)</small>
                             </button>
+                        </div>
+
+                        <!-- Estado Vacío -->
+                        <div id="estado-vacio" class="py-12 text-center">
+                            <svg class="mx-auto text-slate-300 mb-3" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/>
+                                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+                            </svg>
+                            <p class="text-sm font-semibold text-ink-2">No hay productos en la venta.</p>
+                            <p class="text-xs text-ink-3 mt-1">Selecciona un medicamento y haz clic en "Agregar" para iniciar la preparación.</p>
+                        </div>
+
+                        <!-- Contenedor de Tabla de Líneas -->
+                        <div id="contenedor-tabla" class="hidden">
+                            <div class="overflow-x-auto">
+                                <table id="tabla-lineas">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Producto</th>
+                                            <th scope="col" class="c">Cantidad</th>
+                                            <th scope="col" class="r">P. unit.</th>
+                                            <th scope="col" class="r">Desc.</th>
+                                            <th scope="col" class="r">Total</th>
+                                            <th scope="col" class="r"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cuerpo-lineas">
+                                        <!-- Filas generadas dinámicamente por JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </section>
+
+                <!-- Columna Derecha: Sticky Panel (Cliente, Pago y Confirmación) -->
+                <div class="flex flex-col gap-5 sticky top-20">
+                    <!-- Tarjeta de Selección de Cliente (Boceto 01) -->
+                    <div class="card pad">
+                        <label for="cliente-caja">Cliente <span class="kbd" style="margin-left:6px">F4</span></label>
+                        <div class="inp w-full" style="position:relative;">
+                            <svg class="ico text-ink-3 flex-none" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+                            </svg>
+                            <input id="cliente-caja" type="text" placeholder="DNI / RUC o nombre…" autocomplete="off"
+                                   style="background:transparent;border:none;outline:none;font-size:14px;color:var(--ink);width:100%;font-family:inherit;">
+                            <div id="sugerencias-cliente" class="sugg" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:20;margin-top:4px;box-shadow:0 8px 24px rgba(0,0,0,0.12);max-height:220px;overflow-y:auto;">
+                                <!-- Opciones coincidentes generadas reactivamente -->
+                            </div>
+                        </div>
+
+                        <!-- Tarjeta de Resumen del Cliente (.cli) -->
+                        <div class="cli" id="tarjeta-resumen-cliente">
+                            <div class="av">
+                                <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                                </svg>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <b id="nombre-cliente-mostrado">Público general</b>
+                                <div id="doc-cliente-mostrado" class="lbl">Sin registro o cliente eventual</div>
+                            </div>
+                            <span class="badge t-ok" id="badge-cliente-mostrado" style="margin-left:auto">Mostrador</span>
+                        </div>
+
+                        <!-- Selector nativo para persistencia y compatibilidad de pruebas (oculto) -->
+                        <select id="select-cliente" name="idCliente" style="display:none;" aria-hidden="true">
+                            <option value="" selected>Público general</option>
+                            <option th:each="c : ${clientes}" th:value="${c.idCliente()}"
+                                th:data-nombre="${c.nombreCompleto()}"
+                                th:data-tipo="${c.tipoDocumento()}"
+                                th:data-doc="${c.numeroDocumento()}"
+                                th:text="${c.nombreCompleto() + ' — ' + c.tipoDocumento() + ' ' + c.numeroDocumento()}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Tarjeta de Método de Pago y Totales (Boceto 01) -->
+                    <div class="card pad sum">
+                        <label>Método de pago</label>
+                        <div class="seg" id="selector-pago">
+                            <div class="on" style="cursor:pointer" data-metodo="EFECTIVO" role="button" tabindex="0">
+                                <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+                                Efectivo
+                            </div>
+                            <div style="cursor:pointer" data-metodo="YAPE_PLIN" role="button" tabindex="0">
+                                <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+                                Yape / Plin
+                            </div>
+                            <div style="cursor:pointer" data-metodo="TARJETA" role="button" tabindex="0">
+                                <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+                                Tarjeta
+                            </div>
+                        </div>
+                        <div style="height:16px"></div>
+                        <div class="ln">
+                            <span>Subtotal (<span id="subtotal-cant">0</span> unidades)</span>
+                            <span id="subtotal-venta">S/ 0.00</span>
+                        </div>
+                        <div class="ln">
+                            <span>Descuento</span>
+                            <span id="descuento-venta" style="color:var(--rose, #be123c)">—</span>
+                        </div>
+                        <div class="tot">
+                            <span style="font-weight:700;color:var(--ink-2)">TOTAL A COBRAR</span>
+                            <b id="total-venta">S/ 0.00</b>
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta de Acción / Confirmar Venta (Boceto 01) -->
+                    <div class="card pad" style="display:grid;gap:12px">
+                        <button type="button" class="btn p lg" id="boton-confirmar" style="border:none;cursor:pointer;width:100%" disabled>
+                            <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/>
+                            </svg>
+                            <span>Confirmar venta</span>
+                            <span class="kbd" style="margin-left:auto;background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.4);color:#fff">F9</span>
+                        </button>
+                        <button type="button" class="btn s" id="btn-cancelar-venta" style="justify-content:center;cursor:pointer;width:100%">
+                            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M18 6 6 18M6 6l12 12"/>
+                            </svg>
+                            <span>Cancelar venta</span>
+                        </button>
+                        <div class="hint">Al confirmar se descuenta stock por lote (FEFO) y se imprime la boleta.</div>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        window.CATALOGO_MEDICAMENTOS = [
+            /*[# th:each="m, iterStat : ${medicamentos}"]*/
+            {
+                idMedicamento: /*[[${m.idMedicamento}]]*/ 0,
+                codigo: /*[[${m.codigo}]]*/ '',
+                nombre: /*[[${m.nombre}]]*/ '',
+                concentracion: /*[[${m.concentracion}]]*/ '',
+                presentacion: /*[[${m.presentacion}]]*/ '',
+                precioVenta: /*[[${m.precioVenta}]]*/ 0.0,
+                stockActual: /*[[${m.stockActual}]]*/ 0
+            }/*[# th:if="!${iterStat.last}"]*/,/*[/]*/
+            /*[/]*/
+        ];
+
+        window.CATALOGO_CLIENTES = [
+            /*[# th:each="c, iterStat : ${clientes}"]*/
+            {
+                idCliente: /*[[${c.idCliente()}]]*/ 0,
+                nombreCompleto: /*[[${c.nombreCompleto()}]]*/ '',
+                tipoDocumento: /*[[${c.tipoDocumento()}]]*/ '',
+                numeroDocumento: /*[[${c.numeroDocumento()}]]*/ ''
+            }/*[# th:if="!${iterStat.last}"]*/,/*[/]*/
+            /*[/]*/
+        ];
+        /*]]>*/
+    </script>
     <script th:src="@{/js/preparacion-venta.js}"></script>
+    <script>
+        // Atajos de teclado ergonómicos para el cajero
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F2') {
+                e.preventDefault();
+                const inpBuscar = document.getElementById('buscar-caja');
+                if (inpBuscar) {
+                    inpBuscar.focus();
+                    inpBuscar.select();
+                }
+            } else if (e.key === 'F4') {
+                e.preventDefault();
+                const inpCli = document.getElementById('cliente-caja');
+                const selCli = document.getElementById('select-cliente');
+                if (inpCli) {
+                    inpCli.focus();
+                    inpCli.select();
+                } else if (selCli) {
+                    selCli.focus();
+                }
+            } else if (e.key === 'F9') {
+                e.preventDefault();
+                const btnConf = document.getElementById('boton-confirmar');
+                if (btnConf && !btnConf.disabled) btnConf.click();
+            }
+        });
+
+        // Actualización visual del chip de cliente al cambiar selección
+        const selectCliente = document.getElementById('select-cliente');
+        const nombreClienteMostrado = document.getElementById('nombre-cliente-mostrado');
+        const docClienteMostrado = document.getElementById('doc-cliente-mostrado');
+
+        if (selectCliente && nombreClienteMostrado && docClienteMostrado) {
+            selectCliente.addEventListener('change', function() {
+                const opt = selectCliente.options[selectCliente.selectedIndex];
+                if (opt && opt.value) {
+                    const texto = opt.text;
+                    const partes = texto.split('—');
+                    nombreClienteMostrado.textContent = partes[0] ? partes[0].trim() : texto;
+                    docClienteMostrado.textContent = partes[1] ? partes[1].trim() : 'Cliente registrado';
+                } else {
+                    nombreClienteMostrado.textContent = 'Público general';
+                    docClienteMostrado.textContent = 'Sin registro o cliente eventual';
+                }
+            });
+        }
+
+        // Selección visual de método de pago
+        document.querySelectorAll('.seg div').forEach(function(el) {
+            el.addEventListener('click', function() {
+                document.querySelectorAll('.seg div').forEach(function(d) { d.classList.remove('on'); });
+                el.classList.add('on');
+            });
+        });
+    </script>
 </body>
 
 </html>

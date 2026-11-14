@@ -100,6 +100,35 @@ public class PreparacionVentaServicio {
         return crearVista();
     }
 
+    /**
+     * Modifica directamente la cantidad de una línea ya preparada.
+     * Si la cantidad es 0 o menor, retira la línea. Si es mayor que 0, re-planifica con FEFO.
+     * Registra una instantánea en la pila LIFO para permitir deshacer.
+     */
+    public synchronized PreparacionVentaVista modificarCantidad(String nombreUsuario, Integer idMedicamento,
+            int nuevaCantidad) {
+        validarUsuario(nombreUsuario);
+        if (nuevaCantidad <= 0) {
+            return retirar(nombreUsuario, idMedicamento);
+        }
+        var medicamento = medicamentoRepositorio.buscarPorId(idMedicamento)
+                .filter(m -> m.activo())
+                .orElseThrow(() -> new IllegalArgumentException("Medicamento no encontrado o inactivo"));
+        var anterior = detalles.buscar(linea -> linea.idMedicamento().equals(idMedicamento))
+                .orElseThrow(() -> new IllegalArgumentException("El medicamento no está en la preparación"));
+        BigDecimal valorDescuento = anterior.descuento();
+        BigDecimal bruto = medicamento.precioVenta().multiply(BigDecimal.valueOf(nuevaCantidad))
+                .setScale(2, RoundingMode.HALF_UP);
+        BigDecimal descuento = politicaDescuento.calcular(bruto, valorDescuento);
+        var lotes = lotePrioridadServicio.planificarSalida(idMedicamento, nuevaCantidad);
+        var linea = new LineaPreparacionVentaVista(medicamento.idMedicamento(), medicamento.codigo(),
+                medicamento.nombre(), nuevaCantidad, medicamento.precioVenta(), descuento,
+                bruto.subtract(descuento), lotes);
+        guardarInstantanea();
+        detalles.reemplazar(actual -> actual.idMedicamento().equals(idMedicamento), linea);
+        return crearVista();
+    }
+
     public synchronized PreparacionVentaVista retirar(String nombreUsuario, Integer idMedicamento) {
         validarUsuario(nombreUsuario);
         if (idMedicamento == null

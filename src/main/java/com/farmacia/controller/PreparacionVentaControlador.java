@@ -1,5 +1,6 @@
 package com.farmacia.controller;
 
+import com.farmacia.dto.CantidadLineaFormulario;
 import com.farmacia.dto.DescuentoLineaFormulario;
 import com.farmacia.dto.PreparacionVentaCambioFormulario;
 import com.farmacia.model.PreparacionVentaVista;
@@ -44,12 +45,27 @@ public class PreparacionVentaControlador {
         return servicio.retirar(autenticacion.getName(), idMedicamento);
     }
 
+    /** Vacía y reinicia toda la preparación activa del vendedor. */
+    @DeleteMapping
+    public PreparacionVentaVista limpiar(Authentication autenticacion) {
+        servicio.limpiar(autenticacion.getName());
+        return servicio.obtener(autenticacion.getName());
+    }
+
     /** Fija el descuento (importe en soles) de una línea ya preparada (spec 004). */
     @PutMapping("/{idMedicamento:[0-9]+}/descuento")
     public PreparacionVentaVista aplicarDescuento(Authentication autenticacion,
             @PathVariable("idMedicamento") Integer idMedicamento,
             @Valid @RequestBody DescuentoLineaFormulario formulario) {
         return servicio.aplicarDescuento(autenticacion.getName(), idMedicamento, formulario.descuento());
+    }
+
+    /** Modifica directamente la cantidad de una línea ya preparada (stepper + / -). */
+    @PutMapping("/{idMedicamento:[0-9]+}/cantidad")
+    public PreparacionVentaVista modificarCantidad(Authentication autenticacion,
+            @PathVariable("idMedicamento") Integer idMedicamento,
+            @Valid @RequestBody CantidadLineaFormulario formulario) {
+        return servicio.modificarCantidad(autenticacion.getName(), idMedicamento, formulario.cantidad());
     }
 
         @PostMapping("/deshacer")

@@ -12,98 +12,124 @@
         <header th:replace="~{fragmentos/navegacion :: cabecera('Órdenes de compra', 'Compras')}"></header>
         <main id="contenido" class="inventario-contenido">
 
-            <div class="inventario-titulo">
+            <div class="head">
                 <div>
-                    <p class="seccion-etiqueta">COMPRAS / SOLICITUD DE ABASTECIMIENTO</p>
+                    <div class="eyebrow seccion-etiqueta">Compras / Solicitud de abastecimiento</div>
                     <h1>Nueva orden de compra</h1>
+                    <div class="sub">Emite una solicitud de compra formal a proveedores activos.</div>
                 </div>
-                <a class="inventario-boton boton-secundario" th:href="@{/ordenes-compra}">
-                    <span class="icono icono-arrow-left" aria-hidden="true"></span>Volver a órdenes
-                </a>
-            </div>
-
-            <form th:action="@{/ordenes-compra}" method="post" th:object="${formulario}"
-                class="proveedor-formulario orden-formulario">
-
-                <div class="aviso-operacion aviso-error" th:if="${#fields.hasAnyErrors()}" role="alert">
-                    <span class="icono icono-x" aria-hidden="true"></span>
-                    <div>
-                        <p th:each="error : ${#fields.allErrors()}" th:text="${error}"></p>
-                    </div>
-                </div>
-
-                <fieldset>
-                    <legend>Datos del proveedor</legend>
-                    <div class="proveedor-campos">
-                        <div class="campo-completo">
-                            <label for="idProveedor">Razón social del proveedor activo</label>
-                            <select id="idProveedor" th:field="*{idProveedor}" required
-                                th:attr="aria-invalid=${#fields.hasErrors('idProveedor')},aria-describedby=${#fields.hasErrors('idProveedor') ? 'error-idProveedor' : null}">
-                                <option value="">Seleccionar proveedor</option>
-                                <option th:each="proveedor : ${proveedores}" th:value="${proveedor.idProveedor()}"
-                                    th:text="${proveedor.razonSocial()}"></option>
-                            </select>
-                            <p class="error" id="error-idProveedor" th:if="${#fields.hasErrors('idProveedor')}"
-                                th:errors="*{idProveedor}"></p>
-                            <span class="campo-ayuda">La orden se generará en estado PENDIENTE y no modificará el stock
-                                hasta su recepción.</span>
-                        </div>
-                    </div>
-                </fieldset>
-
-                <fieldset>
-                    <legend>Detalle del medicamento solicitado</legend>
-                    <div class="proveedor-campos">
-                        <div class="campo-completo">
-                            <label for="medicamento">Medicamento</label>
-                            <select id="medicamento" th:field="*{detalles[0].idMedicamento}" required
-                                th:attr="aria-invalid=${#fields.hasErrors('detalles[0].idMedicamento')},aria-describedby=${#fields.hasErrors('detalles[0].idMedicamento') ? 'error-medicamento' : null}">
-                                <option value="">Seleccionar medicamento del catálogo</option>
-                                <option th:each="medicamento : ${medicamentos}"
-                                    th:value="${medicamento.idMedicamento()}"
-                                    th:text="${medicamento.codigo() + ' — ' + medicamento.nombre()}"></option>
-                            </select>
-                            <p class="error" id="error-medicamento" th:if="${#fields.hasErrors('detalles[0].idMedicamento')}"
-                                th:errors="*{detalles[0].idMedicamento}"></p>
-                        </div>
-                        <div>
-                            <label for="cantidad">Cantidad solicitada</label>
-                            <input id="cantidad" type="number" min="1" step="1" placeholder="Ej. 20"
-                                th:field="*{detalles[0].cantidadSolicitada}" required
-                                th:attr="aria-invalid=${#fields.hasErrors('detalles[0].cantidadSolicitada')},aria-describedby=${#fields.hasErrors('detalles[0].cantidadSolicitada') ? 'error-cantidad' : null}">
-                            <p class="error" id="error-cantidad" th:if="${#fields.hasErrors('detalles[0].cantidadSolicitada')}"
-                                th:errors="*{detalles[0].cantidadSolicitada}"></p>
-                        </div>
-                        <div>
-                            <label for="costo">Costo unitario acordado (S/)</label>
-                            <input id="costo" type="number" min="0" step="0.01" placeholder="0.00"
-                                th:field="*{detalles[0].costoUnitario}" required
-                                th:attr="aria-invalid=${#fields.hasErrors('detalles[0].costoUnitario')},aria-describedby=${#fields.hasErrors('detalles[0].costoUnitario') ? 'error-costo' : null}">
-                            <p class="error" id="error-costo" th:if="${#fields.hasErrors('detalles[0].costoUnitario')}"
-                                th:errors="*{detalles[0].costoUnitario}"></p>
-                        </div>
-                        <div class="campo-completo orden-calculo-previo">
-                            <span>Importe estimado de la orden:</span>
-                            <strong id="importe-previo">S/ 0.00</strong>
-                        </div>
-                        <div class="campo-completo">
-                            <label for="observaciones">Observaciones <span
-                                    class="campo-opcional">(opcional)</span></label>
-                            <textarea id="observaciones" th:field="*{observaciones}" maxlength="500" rows="3"
-                                placeholder="Condiciones de entrega, plazo acordado o notas para almacén..."></textarea>
-                        </div>
-                    </div>
-                </fieldset>
-
-                <div class="proveedor-formulario-acciones">
-                    <button class="inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md" type="submit">
-                        <span class="icono icono-save" aria-hidden="true"></span>Guardar orden
-                    </button>
-                    <a class="inventario-boton boton-secundario transition-all duration-150 active:scale-95" th:href="@{/ordenes-compra}">
-                        <span class="icono icono-x" aria-hidden="true"></span>Cancelar
+                <div class="row items-center">
+                    <a class="btn s inventario-boton boton-secundario" th:href="@{/ordenes-compra}">
+                        <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                        <span>Volver a órdenes</span>
                     </a>
                 </div>
-            </form>
+            </div>
+
+            <div class="max-w-3xl">
+                <form th:action="@{/ordenes-compra}" method="post" th:object="${formulario}"
+                    class="card pad proveedor-formulario orden-formulario space-y-6">
+
+                    <div class="note aviso-operacion aviso-error" th:if="${#fields.hasAnyErrors()}" role="alert" style="background:#fff8f9;border-color:#fecdd3;color:#be123c">
+                        <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg>
+                        <div>
+                            <p th:each="error : ${#fields.allErrors()}" th:text="${error}">Error en el formulario.</p>
+                        </div>
+                    </div>
+
+                    <fieldset class="border-0 p-0 m-0">
+                        <legend class="text-xs uppercase tracking-wider font-bold text-pine-700 mb-4 pb-2 border-b border-line w-full">
+                            Datos del proveedor
+                        </legend>
+                        <div>
+                            <label for="idProveedor">Razón social del proveedor activo <span class="text-rose-600">*</span></label>
+                            <div class="inp" th:classappend="${#fields.hasErrors('idProveedor') ? 'err border-rose-400 bg-rose-50/30' : ''}">
+                                <select id="idProveedor" th:field="*{idProveedor}" required
+                                    class="w-full bg-transparent border-0 outline-none text-sm text-ink font-semibold cursor-pointer"
+                                    th:attr="aria-invalid=${#fields.hasErrors('idProveedor')},aria-describedby=${#fields.hasErrors('idProveedor') ? 'error-idProveedor' : null}">
+                                    <option value="">Seleccionar proveedor activo</option>
+                                    <option th:each="proveedor : ${proveedores}" th:value="${proveedor.idProveedor()}"
+                                        th:text="${proveedor.razonSocial()}">Distribuidora Farmacéutica S.A.C.</option>
+                                </select>
+                            </div>
+                            <div class="lbl mt-1 campo-ayuda">La orden se generará en estado PENDIENTE y no modificará el stock hasta su recepción.</div>
+                            <p class="error text-xs text-rose-600 font-semibold mt-1" id="error-idProveedor"
+                                th:if="${#fields.hasErrors('idProveedor')}" th:errors="*{idProveedor}"></p>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="border-0 p-0 m-0">
+                        <legend class="text-xs uppercase tracking-wider font-bold text-pine-700 mb-4 pb-2 border-b border-line w-full">
+                            Detalle del medicamento solicitado
+                        </legend>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2">
+                                <label for="medicamento">Medicamento <span class="text-rose-600">*</span></label>
+                                <div class="inp" th:classappend="${#fields.hasErrors('detalles[0].idMedicamento') ? 'err border-rose-400 bg-rose-50/30' : ''}">
+                                    <select id="medicamento" th:field="*{detalles[0].idMedicamento}" required
+                                        class="w-full bg-transparent border-0 outline-none text-sm text-ink font-semibold cursor-pointer"
+                                        th:attr="aria-invalid=${#fields.hasErrors('detalles[0].idMedicamento')},aria-describedby=${#fields.hasErrors('detalles[0].idMedicamento') ? 'error-medicamento' : null}">
+                                        <option value="">Seleccionar medicamento del catálogo</option>
+                                        <option th:each="medicamento : ${medicamentos}"
+                                            th:value="${medicamento.idMedicamento()}"
+                                            th:text="${medicamento.codigo() + ' — ' + medicamento.nombre()}">MED-001 — Paracetamol</option>
+                                    </select>
+                                </div>
+                                <p class="error text-xs text-rose-600 font-semibold mt-1" id="error-medicamento"
+                                    th:if="${#fields.hasErrors('detalles[0].idMedicamento')}" th:errors="*{detalles[0].idMedicamento}"></p>
+                            </div>
+
+                            <div>
+                                <label for="cantidad">Cantidad solicitada <span class="text-rose-600">*</span></label>
+                                <div class="inp" th:classappend="${#fields.hasErrors('detalles[0].cantidadSolicitada') ? 'err border-rose-400 bg-rose-50/30' : ''}">
+                                    <input id="cantidad" type="number" min="1" step="1" placeholder="Ej. 20"
+                                        th:field="*{detalles[0].cantidadSolicitada}" required
+                                        class="w-full bg-transparent border-0 outline-none text-sm text-ink font-semibold"
+                                        th:attr="aria-invalid=${#fields.hasErrors('detalles[0].cantidadSolicitada')},aria-describedby=${#fields.hasErrors('detalles[0].cantidadSolicitada') ? 'error-cantidad' : null}">
+                                </div>
+                                <p class="error text-xs text-rose-600 font-semibold mt-1" id="error-cantidad"
+                                    th:if="${#fields.hasErrors('detalles[0].cantidadSolicitada')}" th:errors="*{detalles[0].cantidadSolicitada}"></p>
+                            </div>
+
+                            <div>
+                                <label for="costo">Costo unitario acordado (S/) <span class="text-rose-600">*</span></label>
+                                <div class="inp" th:classappend="${#fields.hasErrors('detalles[0].costoUnitario') ? 'err border-rose-400 bg-rose-50/30' : ''}">
+                                    <span class="text-xs font-bold text-ink-3">S/</span>
+                                    <input id="costo" type="number" min="0" step="0.01" placeholder="0.00"
+                                        th:field="*{detalles[0].costoUnitario}" required
+                                        class="w-full bg-transparent border-0 outline-none text-sm text-ink font-semibold"
+                                        th:attr="aria-invalid=${#fields.hasErrors('detalles[0].costoUnitario')},aria-describedby=${#fields.hasErrors('detalles[0].costoUnitario') ? 'error-costo' : null}">
+                                </div>
+                                <p class="error text-xs text-rose-600 font-semibold mt-1" id="error-costo"
+                                    th:if="${#fields.hasErrors('detalles[0].costoUnitario')}" th:errors="*{detalles[0].costoUnitario}"></p>
+                            </div>
+
+                            <div class="md:col-span-2 card pad bg-pine-50/60 border border-pine-100 flex items-center justify-between orden-calculo-previo">
+                                <span class="text-sm font-semibold text-pine-900">Importe estimado de la orden:</span>
+                                <strong id="importe-previo" class="text-2xl font-extrabold text-pine-800">S/ 0.00</strong>
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label for="observaciones">Observaciones <span class="campo-opcional text-ink-3 font-normal">(opcional)</span></label>
+                                <textarea id="observaciones" th:field="*{observaciones}" maxlength="500" rows="3"
+                                    placeholder="Condiciones de entrega, plazo acordado o notas para almacén..."
+                                    class="w-full p-3 rounded-xl border border-line bg-white text-sm text-ink focus:outline-none focus:ring-2 focus:ring-pine-700/20"></textarea>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <div class="pt-4 border-t border-line flex justify-end gap-3 proveedor-formulario-acciones">
+                        <a class="btn s inventario-boton boton-secundario" th:href="@{/ordenes-compra}">
+                            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                            <span>Cancelar</span>
+                        </a>
+                        <button class="btn p inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md" type="submit">
+                            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                            <span>Guardar orden</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </main>
     </div>
 

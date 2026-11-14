@@ -58,23 +58,4 @@ public class ClienteControlador {
         }
         return detalle(id);
     }
-
-    @ExceptionHandler(DuplicateKeyException.class)
-    public ResponseEntity<Map<String, String>> documentoDuplicado() {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(Map.of("error", "Ya existe un cliente con este documento"));
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, String>> documentoInvalido(IllegalArgumentException excepcion) {
-        return ResponseEntity.badRequest().body(Map.of("error", excepcion.getMessage()));
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> datosInvalidos(MethodArgumentNotValidException excepcion) {
-        Map<String, String> campos = new LinkedHashMap<>();
-        excepcion.getBindingResult().getFieldErrors()
-                .forEach(error -> campos.putIfAbsent(error.getField(), error.getDefaultMessage()));
-        return ResponseEntity.badRequest().body(Map.of("error", "Datos inválidos", "campos", campos));
-    }
 }

@@ -11,83 +11,126 @@
     <div class="inventario-area">
         <header th:replace="~{fragmentos/navegacion :: cabecera('Usuarios', 'Administración')}"></header>
         <main id="contenido" class="inventario-contenido">
-            <div class="inventario-titulo">
+
+            <div class="head">
                 <div>
-                    <p class="seccion-etiqueta">ADMINISTRACIÓN / USUARIOS</p>
+                    <div class="eyebrow">ADMINISTRACIÓN / USUARIOS</div>
                     <h1 th:text="${idUsuario != null ? 'Editar usuario' : 'Nuevo usuario'}">Usuario</h1>
+                    <div class="sub">Cuenta de acceso para el personal. El rol define los módulos y permisos visibles.</div>
                 </div>
-                <a class="inventario-boton boton-secundario" th:href="@{/usuarios}">
-                    <span class="icono icono-arrow-left" aria-hidden="true"></span>Volver a usuarios
-                </a>
-            </div>
-
-            <form th:action="${idUsuario != null} ? @{/usuarios/{id}/editar(id=${idUsuario})} : @{/usuarios}"
-                th:object="${formulario}" method="post" class="proveedor-formulario">
-
-                <div class="aviso-operacion aviso-error" th:if="${#fields.hasGlobalErrors()}" role="alert">
-                    <span class="icono icono-x" aria-hidden="true"></span>
-                    <div>
-                        <p th:each="error : ${#fields.globalErrors()}" th:text="${error}">Error</p>
-                    </div>
-                </div>
-
-                <fieldset>
-                    <legend>Datos de la cuenta</legend>
-                    <div class="proveedor-campos">
-                        <div>
-                            <label for="nombreUsuario">Nombre de usuario (login)</label>
-                            <input id="nombreUsuario" type="text" th:field="*{nombreUsuario}" maxlength="50"
-                                autocomplete="username" placeholder="Ej. jperez o juan.perez" required
-                                th:readonly="${idUsuario != null}"
-                                th:classappend="${idUsuario != null} ? 'bg-slate-100 cursor-not-allowed' : ''"
-                                th:attr="aria-invalid=${#fields.hasErrors('nombreUsuario')},aria-describedby=${#fields.hasErrors('nombreUsuario') ? 'error-usuario' : 'ayuda-usuario'}">
-                            <span class="campo-ayuda" id="ayuda-usuario" th:if="${idUsuario == null}">Entre 4 y 50 caracteres (letras, números, puntos, guiones).</span>
-                            <span class="campo-ayuda" id="ayuda-usuario-fijo" th:if="${idUsuario != null}">El identificador de usuario no se puede modificar.</span>
-                            <p class="error" id="error-usuario" th:if="${#fields.hasErrors('nombreUsuario')}" th:errors="*{nombreUsuario}"></p>
-                        </div>
-
-                        <div>
-                            <label for="rol">Rol en el sistema</label>
-                            <select id="rol" th:field="*{rol}" required
-                                th:attr="aria-invalid=${#fields.hasErrors('rol')},aria-describedby=${#fields.hasErrors('rol') ? 'error-rol' : null}">
-                                <option th:each="r : ${roles}" th:value="${r}" th:text="${r}">ROL</option>
-                            </select>
-                            <p class="error" id="error-rol" th:if="${#fields.hasErrors('rol')}" th:errors="*{rol}"></p>
-                        </div>
-
-                        <div class="campo-completo">
-                            <label for="nombre">Nombre completo</label>
-                            <input id="nombre" type="text" th:field="*{nombre}" maxlength="100"
-                                autocomplete="name" placeholder="Ej. Juan Carlos Pérez Rojas" required
-                                th:attr="aria-invalid=${#fields.hasErrors('nombre')},aria-describedby=${#fields.hasErrors('nombre') ? 'error-nombre' : null}">
-                            <p class="error" id="error-nombre" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></p>
-                        </div>
-
-                        <div class="campo-completo" th:if="${idUsuario == null}">
-                            <label for="clave">Contraseña inicial</label>
-                            <input id="clave" type="password" th:field="*{clave}" minlength="10" maxlength="100"
-                                autocomplete="new-password" placeholder="Mínimo 10 caracteres con al menos una letra y un número" required
-                                th:attr="aria-invalid=${#fields.hasErrors('clave')},aria-describedby=${#fields.hasErrors('clave') ? 'error-clave' : 'ayuda-clave'}">
-                            <span class="campo-ayuda" id="ayuda-clave">Mínimo 10 caracteres; debe contener letras y números.</span>
-                            <p class="error" id="error-clave" th:if="${#fields.hasErrors('clave')}" th:errors="*{clave}"></p>
-                        </div>
-                    </div>
-                </fieldset>
-
-                <div class="proveedor-formulario-acciones">
-                    <button type="submit"
-                        class="inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md">
-                        <span class="icono icono-save" aria-hidden="true"></span>
-                        <span th:text="${idUsuario != null ? 'Guardar cambios' : 'Registrar usuario'}">Guardar</span>
-                    </button>
-                    <a class="inventario-boton boton-secundario transition-all duration-150 active:scale-95"
-                        th:href="@{/usuarios}">
-                        <span class="icono icono-x" aria-hidden="true"></span>Cancelar
+                <div class="flex items-center gap-3">
+                    <a class="btn s" th:href="@{/usuarios}">
+                        <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M19 12H5M12 19l-7-7 7-7"/>
+                        </svg>
+                        <span>Volver a usuarios</span>
                     </a>
                 </div>
-            </form>
+            </div>
+
+            <div class="max-w-2xl">
+                <form th:action="${idUsuario != null} ? @{/usuarios/{id}/editar(id=${idUsuario})} : @{/usuarios}"
+                    th:object="${formulario}" method="post" class="card pad">
+
+                    <div class="aviso-operacion aviso-error mb-4" th:if="${#fields.hasGlobalErrors()}" role="alert">
+                        <span class="icono icono-x" aria-hidden="true"></span>
+                        <div>
+                            <p th:each="error : ${#fields.globalErrors()}" th:text="${error}">Error en el formulario.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 pb-4 mb-4 border-b border-line">
+                        <div class="w-10 h-10 rounded-xl bg-pine-50 text-pine-700 grid place-items-center flex-none">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-base font-bold text-ink mb-0.5" th:text="${idUsuario != null ? 'Modificar datos de usuario' : 'Datos de la nueva cuenta'}">Cuenta</h2>
+                            <p class="text-xs text-ink-3 mb-0">Completa los campos obligatorios para el acceso.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Nombre de usuario -->
+                        <div>
+                            <label for="nombreUsuario">Usuario (login) <span class="text-rose-600">*</span></label>
+                            <div class="inp" th:classappend="${#fields.hasErrors('nombreUsuario')} ? 'err' : ''">
+                                <svg class="ico text-ink-3 flex-none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                                </svg>
+                                <input id="nombreUsuario" type="text" th:field="*{nombreUsuario}" maxlength="50"
+                                    autocomplete="username" placeholder="Ej. jperez o vendedor_02" required
+                                    th:readonly="${idUsuario != null}"
+                                    class="w-full bg-transparent border-0 focus:outline-none text-ink text-sm font-semibold"
+                                    th:classappend="${idUsuario != null} ? 'opacity-60 cursor-not-allowed' : ''"
+                                    th:attr="aria-invalid=${#fields.hasErrors('nombreUsuario')},aria-describedby=${#fields.hasErrors('nombreUsuario') ? 'error-usuario' : 'ayuda-usuario'}">
+                            </div>
+                            <span class="block text-[11px] text-ink-3 mt-1" id="ayuda-usuario" th:if="${idUsuario == null}">Sin espacios · único en el sistema.</span>
+                            <span class="block text-[11px] text-ink-3 mt-1" id="ayuda-usuario-fijo" th:if="${idUsuario != null}">El identificador de usuario no se puede modificar.</span>
+                            <p class="text-xs text-rose-600 font-semibold mt-1" id="error-usuario" th:if="${#fields.hasErrors('nombreUsuario')}" th:errors="*{nombreUsuario}"></p>
+                        </div>
+
+                        <!-- Rol -->
+                        <div>
+                            <label for="rol">Rol en el sistema <span class="text-rose-600">*</span></label>
+                            <div class="inp" th:classappend="${#fields.hasErrors('rol')} ? 'err' : ''">
+                                <select id="rol" th:field="*{rol}" required
+                                    class="w-full bg-transparent border-0 focus:outline-none text-ink text-sm font-semibold cursor-pointer"
+                                    th:attr="aria-invalid=${#fields.hasErrors('rol')},aria-describedby=${#fields.hasErrors('rol') ? 'error-rol' : null}">
+                                    <option th:each="r : ${roles}" th:value="${r}" th:text="${r}">ROL</option>
+                                </select>
+                            </div>
+                            <span class="block text-[11px] text-ink-3 mt-1">Define los módulos y permisos visibles.</span>
+                            <p class="text-xs text-rose-600 font-semibold mt-1" id="error-rol" th:if="${#fields.hasErrors('rol')}" th:errors="*{rol}"></p>
+                        </div>
+
+                        <!-- Nombre completo -->
+                        <div class="md:col-span-2">
+                            <label for="nombre">Nombre completo del personal <span class="text-rose-600">*</span></label>
+                            <div class="inp" th:classappend="${#fields.hasErrors('nombre')} ? 'err' : ''">
+                                <input id="nombre" type="text" th:field="*{nombre}" maxlength="100"
+                                    autocomplete="name" placeholder="Ej. Carla Mendoza Ríos" required
+                                    class="w-full bg-transparent border-0 focus:outline-none text-ink text-sm font-medium"
+                                    th:attr="aria-invalid=${#fields.hasErrors('nombre')},aria-describedby=${#fields.hasErrors('nombre') ? 'error-nombre' : null}">
+                            </div>
+                            <p class="text-xs text-rose-600 font-semibold mt-1" id="error-nombre" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></p>
+                        </div>
+
+                        <!-- Contraseña inicial (solo en creación) -->
+                        <div class="md:col-span-2" th:if="${idUsuario == null}">
+                            <label for="clave">Contraseña inicial <span class="text-rose-600">*</span></label>
+                            <div class="inp" th:classappend="${#fields.hasErrors('clave')} ? 'err' : ''">
+                                <svg class="ico text-ink-3 flex-none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                </svg>
+                                <input id="clave" type="password" th:field="*{clave}" minlength="10" maxlength="100"
+                                    autocomplete="new-password" placeholder="Mínimo 10 caracteres con letras y números" required
+                                    class="w-full bg-transparent border-0 focus:outline-none text-ink text-sm"
+                                    th:attr="aria-invalid=${#fields.hasErrors('clave')},aria-describedby=${#fields.hasErrors('clave') ? 'error-clave' : 'ayuda-clave'}">
+                            </div>
+                            <span class="block text-[11px] text-ink-3 mt-1" id="ayuda-clave">Mínimo 10 caracteres; debe contener letras y números.</span>
+                            <p class="text-xs text-rose-600 font-semibold mt-1" id="error-clave" th:if="${#fields.hasErrors('clave')}" th:errors="*{clave}"></p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-line">
+                        <a class="btn s" th:href="@{/usuarios}">
+                            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M18 6 6 18M6 6l12 12"/>
+                            </svg>
+                            <span>Cancelar</span>
+                        </a>
+                        <button type="submit" class="btn p">
+                            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+                            </svg>
+                            <span th:text="${idUsuario != null ? 'Guardar cambios' : 'Crear usuario'}">Crear usuario</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </main>
     </div>
-    <script th:src="@{/js/formularios.js}" defer></script>
 </body>
 </html>
