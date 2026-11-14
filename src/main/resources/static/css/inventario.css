@@ -1730,7 +1730,7 @@
 /* Impresión tipo ticket de 80 mm: solo el comprobante, sin menú ni botones. */
 @media print {
   @page {
-    size: 80mm auto;
+    size: auto;
     margin: 4mm;
   }
 

@@ -164,6 +164,17 @@ class EsquemaModeloPersistenciaTest extends AbstractRepositorioIntegrationTest {
         assertTrue(definicionFefo.contains("WHERE (stock_actual > 0)"), definicionFefo);
     }
 
+    @Test
+    @DisplayName("CA-4.2: existen los índices de V5 para categorías (idx_medicamento_categoria y uq_categoria_padre_nombre)")
+    void existenIndicesDeCategorias() {
+        List<String> existentes = jdbcTemplate.queryForList("""
+                SELECT indexname FROM pg_indexes
+                WHERE schemaname = 'public'
+                """, String.class);
+        assertTrue(existentes.contains("idx_medicamento_categoria"), "Falta idx_medicamento_categoria: " + existentes);
+        assertTrue(existentes.contains("uq_categoria_padre_nombre"), "Falta uq_categoria_padre_nombre: " + existentes);
+    }
+
     // ---------------------------------------------------------------- auxiliares
 
     private int insertarMedicamento(String codigo) {

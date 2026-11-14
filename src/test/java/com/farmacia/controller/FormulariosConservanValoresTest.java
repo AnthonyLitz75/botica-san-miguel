@@ -43,6 +43,7 @@ class FormulariosConservanValoresTest {
     @MockitoBean private LoteServicio loteServicio;
     @MockitoBean private MovimientoInventarioServicio movimientoServicio;
     @MockitoBean private LotePrioridadServicio prioridadServicio;
+    @MockitoBean private com.farmacia.service.CategoriaServicio categoriaServicio;
     @MockitoBean private UsuarioDetallesServicio usuarios;
 
     @Test

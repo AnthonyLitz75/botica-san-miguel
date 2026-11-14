@@ -60,6 +60,14 @@ class MedicamentoRepositorioTest extends AbstractRepositorioIntegrationTest {
                 """, Integer.class, idMedicamento, numeroLote, fechaVencimiento, stockActual);
     }
 
+    private Integer insertarCategoriaAuxiliar(String nombre, Integer idPadre) {
+        return jdbcTemplate.queryForObject("""
+                INSERT INTO categoria (nombre, id_padre, activo)
+                VALUES (?, ?, TRUE)
+                RETURNING id_categoria
+                """, Integer.class, nombre, idPadre);
+    }
+
     @Test
     @DisplayName("MR-01: guardar persiste entidad completa y buscarPorId recupera todos los campos")
     void guardar_persisteEntidadCompletaYBuscarPorIdRecuperaDatos() {
@@ -315,5 +323,126 @@ class MedicamentoRepositorioTest extends AbstractRepositorioIntegrationTest {
         assertEquals(0, resMed2.stockDisponible(), "Sin lotes, stock disponible debe ser 0");
         assertEquals(30, resMed2.stockMinimo());
         assertEquals(0, resMed2.pendienteRecibir(), "Sin órdenes, pendiente de recibir debe ser 0");
+    }
+
+    @Test
+    @DisplayName("MR-11: guardar y buscarPorId gestionan id_categoria opcional (CA-3.3)")
+    void guardarYBuscarPorId_conYSinCategoria() {
+        Integer idCat = insertarCategoriaAuxiliar("Analgésicos Test", null);
+
+        // Con categoría
+        MedicamentoFormulario formConCat = new MedicamentoFormulario(
+                generarCodigoUnico(), "Paracetamol Cat", "500 mg", "TABLETA", "CAJA",
+                new BigDecimal("5.00"), 10, idCat
+        );
+        Integer idConCat = medicamentoRepositorio.guardar(formConCat);
+        Medicamento medConCat = medicamentoRepositorio.buscarPorId(idConCat).orElseThrow();
+        assertEquals(idCat, medConCat.idCategoria(), "Debe persistir y recuperar la categoría asignada");
+
+        // Sin categoría (null)
+        MedicamentoFormulario formSinCat = new MedicamentoFormulario(
+                generarCodigoUnico(), "Paracetamol Sin Cat", "500 mg", "TABLETA", "CAJA",
+                new BigDecimal("5.00"), 10, null
+        );
+        Integer idSinCat = medicamentoRepositorio.guardar(formSinCat);
+        Medicamento medSinCat = medicamentoRepositorio.buscarPorId(idSinCat).orElseThrow();
+        assertNull(medSinCat.idCategoria(), "Debe permitir categoría nula sin romper el modelo");
+    }
+
+    @Test
+    @DisplayName("MR-12: sumarStockDisponiblePorCategorias suma solo lotes vigentes de medicamentos activos en la rama (CA-3.1)")
+    void sumarStockDisponiblePorCategorias_sumaLotesVigentesDeMedicamentosActivos() {
+        Integer raiz = insertarCategoriaAuxiliar("Analgésicos", null);
+        Integer subcat = insertarCategoriaAuxiliar("Antiinflamatorios", raiz);
+        Integer otra = insertarCategoriaAuxiliar("Antibióticos", null);
+
+        LocalDate hoy = LocalDate.now();
+
+        // Med 1 en raíz: 20 vigentes + 10 vencidos
+        Integer med1 = medicamentoRepositorio.guardar(new MedicamentoFormulario(
+                generarCodigoUnico(), "Aspirina", "500 mg", "TABLETA", "CAJA", new BigDecimal("5.00"), 10, raiz
+        ));
+        insertarLoteAuxiliar(med1, "L-VIG-A", hoy.plusMonths(3), 20);
+        insertarLoteAuxiliar(med1, "L-VENC-A", hoy.minusDays(1), 10);
+
+        // Med 2 en subcategoría: 15 vigentes
+        Integer med2 = medicamentoRepositorio.guardar(new MedicamentoFormulario(
+                generarCodigoUnico(), "Ibuprofeno", "400 mg", "TABLETA", "CAJA", new BigDecimal("8.00"), 10, subcat
+        ));
+        insertarLoteAuxiliar(med2, "L-VIG-B", hoy.plusMonths(6), 15);
+
+        // Med 3 en otra categoría (no debe sumarse): 50 vigentes
+        Integer med3 = medicamentoRepositorio.guardar(new MedicamentoFormulario(
+                generarCodigoUnico(), "Amoxicilina", "500 mg", "CAPSULA", "CAJA", new BigDecimal("15.00"), 10, otra
+        ));
+        insertarLoteAuxiliar(med3, "L-VIG-C", hoy.plusMonths(6), 50);
+
+        // Med 4 inactivo en subcategoría (no debe sumarse): 100 vigentes
+        Integer med4 = medicamentoRepositorio.guardar(new MedicamentoFormulario(
+                generarCodigoUnico(), "Ketoprofeno Inactivo", "100 mg", "TABLETA", "CAJA", new BigDecimal("12.00"), 10, subcat
+        ));
+        insertarLoteAuxiliar(med4, "L-VIG-D", hoy.plusMonths(6), 100);
+        medicamentoRepositorio.desactivar(med4);
+
+        int totalRama = medicamentoRepositorio.sumarStockDisponiblePorCategorias(List.of(raiz, subcat), hoy);
+        assertEquals(35, totalRama, "Debe ser 20 (med1) + 15 (med2) = 35");
+
+        // Lista vacía retorna 0
+        assertEquals(0, medicamentoRepositorio.sumarStockDisponiblePorCategorias(List.of(), hoy));
+    }
+
+    @Test
+    @DisplayName("MR-13: buscarPorEstadoYCategorias filtra medicamentos por categoría y texto (CA-3.2)")
+    void buscarPorEstadoYCategorias_filtraPorCategoriasYTexto() {
+        Integer raiz = insertarCategoriaAuxiliar("Cardiología", null);
+        Integer subcat = insertarCategoriaAuxiliar("Antihipertensivos", raiz);
+        Integer otra = insertarCategoriaAuxiliar("Gastroenterología", null);
+
+        Integer m1 = medicamentoRepositorio.guardar(new MedicamentoFormulario(
+                "MED-CARD-1", "Losartán 50mg", "50 mg", "TABLETA", "CAJA", new BigDecimal("10.00"), 10, raiz
+        ));
+        Integer m2 = medicamentoRepositorio.guardar(new MedicamentoFormulario(
+                "MED-CARD-2", "Enalapril 20mg", "20 mg", "TABLETA", "CAJA", new BigDecimal("12.00"), 10, subcat
+        ));
+        Integer m3 = medicamentoRepositorio.guardar(new MedicamentoFormulario(
+                "MED-GAST-1", "Omeprazol 20mg", "20 mg", "CAPSULA", "CAJA", new BigDecimal("15.00"), 10, otra
+        ));
+
+        // Buscar en la rama {raiz, subcat}
+        List<Medicamento> rama = medicamentoRepositorio.buscarPorEstadoYCategorias("", true, List.of(raiz, subcat));
+        assertEquals(2, rama.size());
+        assertTrue(rama.stream().anyMatch(m -> m.idMedicamento().equals(m1)));
+        assertTrue(rama.stream().anyMatch(m -> m.idMedicamento().equals(m2)));
+
+        // Con filtro de texto
+        List<Medicamento> filtroTexto = medicamentoRepositorio.buscarPorEstadoYCategorias("losart", true, List.of(raiz, subcat));
+        assertEquals(1, filtroTexto.size());
+        assertEquals("MED-CARD-1", filtroTexto.get(0).codigo());
+
+        // Categoría sin coincidencias
+        List<Medicamento> vacio = medicamentoRepositorio.buscarPorEstadoYCategorias("omeprazol", true, List.of(raiz, subcat));
+        assertTrue(vacio.isEmpty());
+    }
+
+    @Test
+    @DisplayName("MR-14: contarAlertasPorCategorias detecta medicamentos bajo stock mínimo en la rama")
+    void contarAlertasPorCategorias_detectaBajoStock() {
+        Integer raiz = insertarCategoriaAuxiliar("Respiratorio", null);
+        LocalDate hoy = LocalDate.now();
+
+        // Med 1: stockMinimo 20, stockActual 5 -> En alerta
+        Integer m1 = medicamentoRepositorio.guardar(new MedicamentoFormulario(
+                generarCodigoUnico(), "Salbutamol Inhalador", "100 mcg", "INHALADOR", "FRASCO", new BigDecimal("25.00"), 20, raiz
+        ));
+        insertarLoteAuxiliar(m1, "L-RESP-1", hoy.plusMonths(5), 5);
+
+        // Med 2: stockMinimo 10, stockActual 30 -> Normal
+        Integer m2 = medicamentoRepositorio.guardar(new MedicamentoFormulario(
+                generarCodigoUnico(), "Bromhexina", "8 mg", "JARABE", "FRASCO", new BigDecimal("15.00"), 10, raiz
+        ));
+        insertarLoteAuxiliar(m2, "L-RESP-2", hoy.plusMonths(5), 30);
+
+        int alertas = medicamentoRepositorio.contarAlertasPorCategorias(List.of(raiz), hoy);
+        assertEquals(1, alertas, "Debe haber 1 medicamento bajo stock mínimo");
     }
 }

@@ -71,6 +71,18 @@
                             <p class="error" id="error-presentacion" th:if="${#fields.hasErrors('presentacion')}"
                                 th:errors="*{presentacion}"></p>
                         </div>
+                        <div>
+                            <label for="idCategoria">Categoría taxonómica <span class="campo-opcional">(opcional)</span></label>
+                            <select id="idCategoria" th:field="*{idCategoria}"
+                                th:attr="aria-invalid=${#fields.hasErrors('idCategoria')},aria-describedby=${#fields.hasErrors('idCategoria') ? 'error-idCategoria' : null}">
+                                <option value="">Sin categoría asignada</option>
+                                <option th:each="cat : ${categorias}"
+                                        th:value="${cat.idCategoria()}"
+                                        th:text="${cat.nombre()}">Categoría</option>
+                            </select>
+                            <p class="error" id="error-idCategoria" th:if="${#fields.hasErrors('idCategoria')}"
+                                th:errors="*{idCategoria}"></p>
+                        </div>
                     </div>
                 </fieldset>
 

@@ -19,7 +19,8 @@ BEGIN
        OR EXISTS (SELECT 1 FROM venta)
        OR EXISTS (SELECT 1 FROM detalle_venta)
        OR EXISTS (SELECT 1 FROM movimiento_inventario)
-       OR EXISTS (SELECT 1 FROM detalle_movimiento) THEN
+       OR EXISTS (SELECT 1 FROM detalle_movimiento)
+       OR EXISTS (SELECT 1 FROM categoria) THEN
         RAISE NOTICE 'La base ya tiene datos: no se cargan los datos de demostracion.';
         RETURN;
     END IF;
@@ -34,11 +35,24 @@ BEGIN
     ('Vendedor de prueba', 'vendedor_demo',
      '{bcrypt}' || crypt('VendedorDemo2026!', gen_salt('bf', 10)), 'VENDEDOR');
 
+    INSERT INTO categoria (nombre, id_padre) VALUES
+    ('Analgésicos', NULL);
+
+    INSERT INTO categoria (nombre, id_padre)
+    SELECT 'Antiinflamatorios', id_categoria FROM categoria WHERE nombre = 'Analgésicos' AND id_padre IS NULL;
+
+    INSERT INTO categoria (nombre, id_padre)
+    SELECT 'AINEs', id_categoria FROM categoria WHERE nombre = 'Antiinflamatorios';
+
     INSERT INTO medicamento
-    (codigo, nombre, concentracion, presentacion, unidad_control, precio_venta, stock_minimo)
-    VALUES
-    ('MED-001', 'Paracetamol', '500 mg', 'Caja de 20 tabletas', 'CAJA', 8.50, 10),
-    ('MED-002', 'Ibuprofeno', '400 mg', 'Caja de 10 tabletas', 'CAJA', 13.50, 5);
+    (codigo, nombre, concentracion, presentacion, unidad_control, precio_venta, stock_minimo, id_categoria)
+    SELECT 'MED-001', 'Paracetamol', '500 mg', 'Caja de 20 tabletas', 'CAJA', 8.50, 10, id_categoria
+    FROM categoria WHERE nombre = 'Analgésicos' AND id_padre IS NULL;
+
+    INSERT INTO medicamento
+    (codigo, nombre, concentracion, presentacion, unidad_control, precio_venta, stock_minimo, id_categoria)
+    SELECT 'MED-002', 'Ibuprofeno', '400 mg', 'Caja de 10 tabletas', 'CAJA', 13.50, 5, id_categoria
+    FROM categoria WHERE nombre = 'AINEs';
 
     INSERT INTO proveedor (ruc, razon_social, telefono, correo, direccion) VALUES
     ('20000000001', 'Distribuidora de prueba', '999000111',

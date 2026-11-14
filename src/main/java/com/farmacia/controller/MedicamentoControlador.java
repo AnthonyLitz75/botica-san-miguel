@@ -1,11 +1,15 @@
 package com.farmacia.controller;
 
 import com.farmacia.dto.MedicamentoFormulario;
+import com.farmacia.estructuras.ArbolCategorias;
 import com.farmacia.model.Medicamento;
+import com.farmacia.service.CategoriaServicio;
 import com.farmacia.service.MedicamentoServicio;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -16,28 +20,45 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.security.core.Authentication;
 
 @Controller
 @RequestMapping("/medicamentos")
 public class MedicamentoControlador {
 
     private final MedicamentoServicio servicio;
+    private final CategoriaServicio categoriaServicio;
 
-    public MedicamentoControlador(MedicamentoServicio servicio) {
+    public MedicamentoControlador(MedicamentoServicio servicio, CategoriaServicio categoriaServicio) {
         this.servicio = servicio;
+        this.categoriaServicio = categoriaServicio;
     }
 
     @GetMapping
     public String listar(
             @RequestParam(name = "buscar", defaultValue = "") String buscar,
             @RequestParam(name = "activo", defaultValue = "true") boolean activo,
+            @RequestParam(name = "categoria", required = false) Integer categoriaId,
             Model model,
             Authentication autenticacion) {
 
-        model.addAttribute("medicamentos", servicio.buscarPorEstado(buscar, activo));
+        List<Medicamento> medicamentos;
+        if (categoriaId != null) {
+            ArbolCategorias arbol = categoriaServicio.arbol();
+            List<Integer> idsRama = arbol.contiene(categoriaId)
+                    ? arbol.descendientesIds(categoriaId)
+                    : List.of(categoriaId);
+            medicamentos = servicio.buscarActivosPorCategorias(buscar, idsRama);
+            categoriaServicio.buscarPorId(categoriaId)
+                    .ifPresent(cat -> model.addAttribute("categoriaSeleccionada", cat));
+        } else {
+            medicamentos = servicio.buscarPorEstado(buscar, activo);
+        }
+
+        model.addAttribute("medicamentos", medicamentos);
         model.addAttribute("buscar", buscar);
         model.addAttribute("activo", activo);
+        model.addAttribute("categoriaId", categoriaId);
+        model.addAttribute("categorias", categoriaServicio.listarActivas());
         return "medicamentos/listado";
     }
 
@@ -45,15 +66,18 @@ public class MedicamentoControlador {
     public String nuevo(Model model) {
         model.addAttribute(
                 "formulario",
-                new MedicamentoFormulario("", "", "", "", "", null, 0));
+                new MedicamentoFormulario("", "", "", "", "", null, 0, null));
+        model.addAttribute("categorias", categoriaServicio.listarActivas());
         return "medicamentos/formulario";
     }
 
     @PostMapping
     public String guardar(
             @Valid @ModelAttribute("formulario") MedicamentoFormulario formulario,
-            BindingResult resultado) {
+            BindingResult resultado,
+            Model model) {
         if (resultado.hasErrors()) {
+            model.addAttribute("categorias", categoriaServicio.listarActivas());
             return "medicamentos/formulario";
         }
 
@@ -64,6 +88,7 @@ public class MedicamentoControlador {
                     "codigo",
                     "codigo.duplicado",
                     "Ya existe un medicamento con este codigo");
+            model.addAttribute("categorias", categoriaServicio.listarActivas());
             return "medicamentos/formulario";
         }
 
@@ -84,10 +109,12 @@ public class MedicamentoControlador {
                 medicamento.presentacion(),
                 medicamento.unidadControl(),
                 medicamento.precioVenta(),
-                medicamento.stockMinimo());
+                medicamento.stockMinimo(),
+                medicamento.idCategoria());
 
         model.addAttribute("formulario", formulario);
         model.addAttribute("idMedicamento", id);
+        model.addAttribute("categorias", categoriaServicio.listarActivas());
         return "medicamentos/formulario";
     }
 
@@ -103,6 +130,7 @@ public class MedicamentoControlador {
                         "Medicamento no encontrado"));
 
         model.addAttribute("idMedicamento", id);
+        model.addAttribute("categorias", categoriaServicio.listarActivas());
 
         if (resultado.hasErrors()) {
             return "medicamentos/formulario";

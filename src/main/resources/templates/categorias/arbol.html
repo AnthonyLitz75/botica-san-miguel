@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragmentos/head :: recursos('Árbol de Categorías')}">
+    <title>Categorías | Botica San Miguel</title>
+</head>
+<body class="pagina-inventario">
+    <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
+    <aside th:replace="~{fragmentos/navegacion :: lateral('Categorías')}"></aside>
+    <div class="inventario-area">
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Categorías', 'Taxonomía y jerarquía del catálogo')}"></header>
+        <main id="contenido" class="inventario-contenido">
+            <div class="inventario-titulo">
+                <div>
+                    <p class="seccion-etiqueta">CATÁLOGO / TAXONOMÍA</p>
+                    <h1>Árbol de Categorías</h1>
+                    <p class="clientes-intro">Navega y administra la jerarquía de medicamentos en estructura de árbol n-ario.</p>
+                </div>
+                <div sec:authorize="hasRole('ADMINISTRADOR')">
+                    <a class="inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md" th:href="@{/categorias/nueva}">
+                        <span class="icono icono-plus" aria-hidden="true"></span>Nueva categoría
+                    </a>
+                </div>
+            </div>
+
+            <!-- Avisos de operación -->
+            <div class="aviso-operacion aviso-exito shadow-sm" th:if="${mensajeExito != null}" role="status">
+                <span class="icono icono-circle-check" aria-hidden="true"></span>
+                <span th:text="${mensajeExito}"></span>
+            </div>
+            <div class="aviso-operacion aviso-error shadow-sm" th:if="${mensajeError != null}" role="alert">
+                <span class="icono icono-alert-circle" aria-hidden="true"></span>
+                <span th:text="${mensajeError}"></span>
+            </div>
+
+            <!-- Contenido del Árbol -->
+            <section class="inventario-resultados" aria-labelledby="titulo-arbol">
+                <div class="resultados-cabecera">
+                    <h2 id="titulo-arbol">Jerarquía taxonómica <span class="cantidad-resultados" th:text="${totalCategorias}">0</span></h2>
+                </div>
+
+                <div class="inventario-vacio" th:if="${totalCategorias == 0}">
+                    <span class="icono icono-folder-tree" aria-hidden="true"></span>
+                    <p>Aún no hay categorías registradas en el árbol.</p>
+                    <div sec:authorize="hasRole('ADMINISTRADOR')">
+                        <a class="enlace-lotes inline-flex items-center gap-1 font-medium text-emerald-700 hover:text-emerald-800 transition-colors" th:href="@{/categorias/nueva}">
+                            Registrar primera categoría
+                        </a>
+                    </div>
+                </div>
+
+                <div class="tabla-contenedor inventario-tabla" th:unless="${totalCategorias == 0}">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">Nombre y jerarquía</th>
+                                <th scope="col">Ruta completa</th>
+                                <th scope="col" class="numero">Stock en rama</th>
+                                <th scope="col">Estado</th>
+                                <th scope="col" sec:authorize="hasRole('ADMINISTRADOR')">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="nodo : ${arbol.recorrerEnProfundidad()}" class="hover:bg-slate-50/80 transition-colors duration-150">
+                                <td class="font-mono text-xs text-slate-500" th:text="${nodo.id()}">1</td>
+                                <td>
+                                    <!-- Indentación visual según nivel en el árbol -->
+                                    <div class="flex items-center gap-2" th:style="'padding-left: ' + (${#lists.size(arbol.ruta(nodo.id())) - 1} * 1.5) + 'rem;'">
+                                        <span class="text-slate-400" th:if="${nodo.idPadre() != null}">└─</span>
+                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded bg-emerald-100 text-emerald-800 text-xs font-bold"
+                                              th:text="${nodo.idPadre() == null ? 'R' : 'S'}">R</span>
+                                        <a th:href="@{/medicamentos(categoria=${nodo.id()})}"
+                                           class="font-medium text-slate-800 hover:text-emerald-700 transition-colors"
+                                           th:text="${nodo.nombre()}"
+                                           title="Ver medicamentos de esta rama">Nombre</a>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-xs text-slate-500">
+                                        <span th:each="paso, iter : ${arbol.ruta(nodo.id())}">
+                                             <span th:text="${paso.nombre()}"></span>
+                                             <span th:unless="${iter.last}" class="text-slate-300 mx-1">›</span>
+                                        </span>
+                                    </span>
+                                </td>
+                                <td class="numero">
+                                    <span class="inline-flex items-center gap-1.5 font-semibold text-slate-700">
+                                        <span class="icono icono-package text-slate-400" aria-hidden="true"></span>
+                                        <span th:text="${stockPorRama.get(nodo.id()) != null ? stockPorRama.get(nodo.id()) : 0}">0</span>
+                                    </span>
+                                    <span th:if="${alertasPorRama.get(nodo.id()) != null and alertasPorRama.get(nodo.id()) > 0}"
+                                          class="inline-block ml-1.5 px-1.5 py-0.5 rounded text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200"
+                                          th:title="${alertasPorRama.get(nodo.id()) + ' medicamento(s) en alerta en esta rama'}">
+                                        <span th:text="${alertasPorRama.get(nodo.id()) + ' alerta(s)'}"></span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        Activo
+                                    </span>
+                                </td>
+                                <td sec:authorize="hasRole('ADMINISTRADOR')">
+                                    <div class="flex items-center gap-2">
+                                        <a class="boton-icono transition-transform duration-150 hover:scale-110 hover:text-emerald-700"
+                                           th:href="@{/categorias/{id}/editar(id=${nodo.id()})}"
+                                           title="Editar categoría">
+                                            <span class="icono icono-pencil" aria-hidden="true"></span>
+                                        </a>
+                                        <form th:action="@{/categorias/{id}/desactivar(id=${nodo.id()})}" method="post" class="inline"
+                                              onsubmit="return confirm('¿Está seguro de desactivar esta categoría?');">
+                                            <button type="submit" class="boton-icono text-red-600 hover:text-red-700 hover:scale-110 transition-transform"
+                                                    title="Desactivar categoría">
+                                                <span class="icono icono-trash-2" aria-hidden="true"></span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

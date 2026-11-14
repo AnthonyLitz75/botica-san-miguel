@@ -9,6 +9,10 @@
             <span class="icono icono-pill" aria-hidden="true"></span>
             <span>Medicamentos</span>
         </a>
+        <a th:href="@{/categorias}" th:attr="aria-current=${seccion == 'Categorías' ? 'page' : null}">
+            <span class="icono icono-folder-tree" aria-hidden="true"></span>
+            <span>Categorías</span>
+        </a>
         <a th:if="${puedeConsultarAlertas}" th:href="@{/alertas}"
             th:attr="aria-current=${seccion == 'Alertas' ? 'page' : null}">
             <span class="icono icono-package" aria-hidden="true"></span>

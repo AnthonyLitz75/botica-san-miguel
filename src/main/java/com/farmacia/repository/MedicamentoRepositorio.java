@@ -37,7 +37,7 @@ public class MedicamentoRepositorio {
         String sql = """
                 SELECT m.id_medicamento, m.codigo, m.nombre, m.concentracion,
                        m.presentacion, m.unidad_control, m.precio_venta,
-                       m.stock_minimo, m.activo,
+                       m.stock_minimo, m.activo, m.id_categoria,
                        COALESCE(SUM(CASE WHEN l.fecha_vencimiento >= ? THEN l.stock_actual ELSE 0 END), 0)::INTEGER AS stock_actual
                 FROM medicamento m
                 LEFT JOIN lote l ON l.id_medicamento = m.id_medicamento
@@ -48,7 +48,7 @@ public class MedicamentoRepositorio {
                 )
                 GROUP BY m.id_medicamento, m.codigo, m.nombre, m.concentracion,
                          m.presentacion, m.unidad_control, m.precio_venta,
-                         m.stock_minimo, m.activo
+                         m.stock_minimo, m.activo, m.id_categoria
                 ORDER BY m.codigo, m.id_medicamento
                 """;
 
@@ -62,15 +62,16 @@ public class MedicamentoRepositorio {
                 fila.getBigDecimal("precio_venta"),
                 fila.getInt("stock_minimo"),
                 fila.getBoolean("activo"),
-                fila.getInt("stock_actual")), LocalDate.now(clock), activo, texto, texto);
+                fila.getInt("stock_actual"),
+                fila.getObject("id_categoria", Integer.class)), LocalDate.now(clock), activo, texto, texto);
     }
 
     public Integer guardar(MedicamentoFormulario medicamentoFormulario) {
         String sql = """
                 INSERT INTO medicamento (codigo, nombre, concentracion,
                                          presentacion, unidad_control,
-                                         precio_venta, stock_minimo, activo)
-                VALUES (?, ?, ?, ?, ?, ?, ?, TRUE)
+                                         precio_venta, stock_minimo, activo, id_categoria)
+                VALUES (?, ?, ?, ?, ?, ?, ?, TRUE, ?)
                 RETURNING id_medicamento
                 """;
 
@@ -81,21 +82,22 @@ public class MedicamentoRepositorio {
                 medicamentoFormulario.presentacion(),
                 medicamentoFormulario.unidadControl(),
                 medicamentoFormulario.precioVenta(),
-                medicamentoFormulario.stockMinimo());
+                medicamentoFormulario.stockMinimo(),
+                medicamentoFormulario.idCategoria());
     }
 
     public Optional<Medicamento> buscarPorId(Integer id) {
         String sql = """
                 SELECT m.id_medicamento, m.codigo, m.nombre, m.concentracion,
                        m.presentacion, m.unidad_control, m.precio_venta,
-                       m.stock_minimo, m.activo,
+                       m.stock_minimo, m.activo, m.id_categoria,
                        COALESCE(SUM(CASE WHEN l.fecha_vencimiento >= ? THEN l.stock_actual ELSE 0 END), 0)::INTEGER AS stock_actual
                 FROM medicamento m
                 LEFT JOIN lote l ON l.id_medicamento = m.id_medicamento
                 WHERE m.id_medicamento = ?
                 GROUP BY m.id_medicamento, m.codigo, m.nombre, m.concentracion,
                          m.presentacion, m.unidad_control, m.precio_venta,
-                         m.stock_minimo, m.activo
+                         m.stock_minimo, m.activo, m.id_categoria
                 """;
 
         List<Medicamento> resultados = jdbcTemplate.query(
@@ -110,7 +112,8 @@ public class MedicamentoRepositorio {
                         fila.getBigDecimal("precio_venta"),
                         fila.getInt("stock_minimo"),
                         fila.getBoolean("activo"),
-                        fila.getInt("stock_actual")),
+                        fila.getInt("stock_actual"),
+                        fila.getObject("id_categoria", Integer.class)),
                 LocalDate.now(clock), id);
 
         return resultados.stream().findFirst();
@@ -125,7 +128,8 @@ public class MedicamentoRepositorio {
                     presentacion = ?,
                     unidad_control = ?,
                     precio_venta = ?,
-                    stock_minimo = ?
+                    stock_minimo = ?,
+                    id_categoria = ?
                 WHERE id_medicamento = ?
                 """;
 
@@ -138,6 +142,7 @@ public class MedicamentoRepositorio {
                 formulario.unidadControl(),
                 formulario.precioVenta(),
                 formulario.stockMinimo(),
+                formulario.idCategoria(),
                 id);
     }
 
@@ -201,5 +206,113 @@ public class MedicamentoRepositorio {
                 fila.getInt("id_medicamento"), fila.getString("codigo"), fila.getString("nombre"),
                 fila.getString("unidad_control"), fila.getInt("stock_minimo"),
                 fila.getInt("stock_disponible"), fila.getInt("pendiente_recibir")), fechaCorte);
+    }
+
+    /**
+     * Suma el stock disponible (lotes con vencimiento >= fechaCorte) de medicamentos activos
+     * pertenecientes a la lista de categorías dada (CA-3.1).
+     */
+    @SuppressWarnings("java:S2077")
+    public int sumarStockDisponiblePorCategorias(List<Integer> idsCategorias, LocalDate fechaCorte) {
+        if (idsCategorias == null || idsCategorias.isEmpty()) {
+            return 0;
+        }
+        String placeholders = String.join(",", java.util.Collections.nCopies(idsCategorias.size(), "?"));
+        String sql = """
+                SELECT COALESCE(SUM(l.stock_actual), 0)::INTEGER
+                FROM medicamento m
+                JOIN lote l ON l.id_medicamento = m.id_medicamento
+                WHERE m.activo = TRUE
+                  AND l.fecha_vencimiento >= ?
+                  AND m.id_categoria IN (%s)
+                """.formatted(placeholders);
+
+        List<Object> params = new java.util.ArrayList<>();
+        params.add(fechaCorte);
+        params.addAll(idsCategorias);
+
+        Integer total = jdbcTemplate.queryForObject(sql, Integer.class, params.toArray());
+        return total != null ? total : 0;
+    }
+
+    /**
+     * Cuenta cuántos medicamentos activos de la rama de categorías se encuentran en alerta (stock bajo mínimo o agotado).
+     */
+    @SuppressWarnings("java:S2077")
+    public int contarAlertasPorCategorias(List<Integer> idsCategorias, LocalDate fechaCorte) {
+        if (idsCategorias == null || idsCategorias.isEmpty()) {
+            return 0;
+        }
+        String placeholders = String.join(",", java.util.Collections.nCopies(idsCategorias.size(), "?"));
+        String sql = """
+                WITH stock_disp AS (
+                    SELECT m.id_medicamento, m.stock_minimo,
+                           COALESCE(SUM(CASE WHEN l.fecha_vencimiento >= ? THEN l.stock_actual ELSE 0 END), 0)::INTEGER AS stock_disponible
+                    FROM medicamento m
+                    LEFT JOIN lote l ON l.id_medicamento = m.id_medicamento
+                    WHERE m.activo = TRUE
+                      AND m.id_categoria IN (%s)
+                    GROUP BY m.id_medicamento, m.stock_minimo
+                )
+                SELECT COUNT(*)::INTEGER
+                FROM stock_disp
+                WHERE stock_disponible <= stock_minimo
+                """.formatted(placeholders);
+
+        List<Object> params = new java.util.ArrayList<>();
+        params.add(fechaCorte);
+        params.addAll(idsCategorias);
+
+        Integer total = jdbcTemplate.queryForObject(sql, Integer.class, params.toArray());
+        return total != null ? total : 0;
+    }
+
+    /**
+     * Busca medicamentos activos filtrados por texto y restringidos a un conjunto de categorías (CA-3.2).
+     */
+    @SuppressWarnings("java:S2077")
+    public List<Medicamento> buscarPorEstadoYCategorias(String texto, boolean activo, List<Integer> idsCategorias) {
+        if (idsCategorias == null || idsCategorias.isEmpty()) {
+            return List.of();
+        }
+        String placeholders = String.join(",", java.util.Collections.nCopies(idsCategorias.size(), "?"));
+        String sql = """
+                SELECT m.id_medicamento, m.codigo, m.nombre, m.concentracion,
+                       m.presentacion, m.unidad_control, m.precio_venta,
+                       m.stock_minimo, m.activo, m.id_categoria,
+                       COALESCE(SUM(CASE WHEN l.fecha_vencimiento >= ? THEN l.stock_actual ELSE 0 END), 0)::INTEGER AS stock_actual
+                FROM medicamento m
+                LEFT JOIN lote l ON l.id_medicamento = m.id_medicamento
+                WHERE m.activo = ?
+                  AND m.id_categoria IN (%s)
+                  AND (
+                      POSITION(LOWER(?) IN LOWER(m.nombre)) > 0
+                      OR POSITION(LOWER(?) IN LOWER(m.codigo)) > 0
+                  )
+                GROUP BY m.id_medicamento, m.codigo, m.nombre, m.concentracion,
+                         m.presentacion, m.unidad_control, m.precio_venta,
+                         m.stock_minimo, m.activo, m.id_categoria
+                ORDER BY m.codigo, m.id_medicamento
+                """.formatted(placeholders);
+
+        List<Object> params = new java.util.ArrayList<>();
+        params.add(LocalDate.now(clock));
+        params.add(activo);
+        params.addAll(idsCategorias);
+        params.add(texto != null ? texto : "");
+        params.add(texto != null ? texto : "");
+
+        return jdbcTemplate.query(sql, (fila, numeroFila) -> new Medicamento(
+                fila.getInt("id_medicamento"),
+                fila.getString("codigo"),
+                fila.getString("nombre"),
+                fila.getString("concentracion"),
+                fila.getString("presentacion"),
+                fila.getString("unidad_control"),
+                fila.getBigDecimal("precio_venta"),
+                fila.getInt("stock_minimo"),
+                fila.getBoolean("activo"),
+                fila.getInt("stock_actual"),
+                fila.getObject("id_categoria", Integer.class)), params.toArray());
     }
 }

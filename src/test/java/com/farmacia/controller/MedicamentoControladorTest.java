@@ -46,6 +46,12 @@ class MedicamentoControladorTest {
     private MedicamentoServicio servicio;
 
     @MockitoBean
+    private com.farmacia.service.CategoriaServicio categoriaServicio;
+
+    @MockitoBean
+    private com.farmacia.service.AuditoriaServicio auditoriaServicio;
+
+    @MockitoBean
     private UsuarioDetallesServicio usuarios;
 
     private Medicamento crearMedicamentoPrueba(Integer id, String codigo, String nombre) {
@@ -439,5 +445,30 @@ class MedicamentoControladorTest {
                 .with(user("admin").roles("ADMINISTRADOR"))
                 .with(csrf()))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("CA-3.2: GET /medicamentos?categoria=ID filtra incluyendo todos los descendientes en el árbol")
+    void listar_conFiltroCategoria_incluyeDescendientes() throws Exception {
+        com.farmacia.estructuras.ArbolCategorias arbol = new com.farmacia.estructuras.ArbolCategorias();
+        arbol.insertar(1, "Analgésicos", null);
+        arbol.insertar(2, "Antiinflamatorios", 1);
+        arbol.insertar(3, "AINEs", 2);
+
+        when(categoriaServicio.arbol()).thenReturn(arbol);
+        when(categoriaServicio.listarActivas()).thenReturn(List.of());
+        when(categoriaServicio.buscarPorId(1)).thenReturn(Optional.of(new com.farmacia.model.Categoria(1, "Analgésicos", null, true)));
+
+        Medicamento med1 = crearMedicamentoPrueba(1, "MED-001", "Paracetamol");
+        when(servicio.buscarActivosPorCategorias("", List.of(1, 2, 3))).thenReturn(List.of(med1));
+
+        mvc.perform(get("/medicamentos")
+                        .param("categoria", "1")
+                        .with(user("vendedor").roles("VENDEDOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("medicamentos/listado"))
+                .andExpect(model().attributeExists("categoriaSeleccionada", "categoriaId", "medicamentos"));
+
+        verify(servicio).buscarActivosPorCategorias("", List.of(1, 2, 3));
     }
 }

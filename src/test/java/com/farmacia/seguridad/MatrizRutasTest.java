@@ -59,18 +59,21 @@ class MatrizRutasTest {
 
     @Autowired private MockMvc mvc;
 
-    @MockitoBean private AlertaInventarioServicio alertaInventarioServicio;
-    @MockitoBean private ClienteServicio clienteServicio;
-    @MockitoBean private LotePrioridadServicio lotePrioridadServicio;
-    @MockitoBean private LoteServicio loteServicio;
-    @MockitoBean private MedicamentoServicio medicamentoServicio;
-    @MockitoBean private MovimientoInventarioServicio movimientoInventarioServicio;
-    @MockitoBean private OrdenCompraServicio ordenCompraServicio;
-    @MockitoBean private PreparacionVentaServicio preparacionVentaServicio;
-    @MockitoBean private ProveedorServicio proveedorServicio;
-    @MockitoBean private VentaServicio ventaServicio;
-    @MockitoBean private UsuarioDetallesServicio usuarioDetallesServicio;
+    @MockitoBean private com.farmacia.service.AlertaInventarioServicio alertaInventarioServicio;
+    @MockitoBean private com.farmacia.service.ClienteServicio clienteServicio;
+    @MockitoBean private com.farmacia.service.LotePrioridadServicio lotePrioridadServicio;
+    @MockitoBean private com.farmacia.service.LoteServicio loteServicio;
+    @MockitoBean private com.farmacia.service.MedicamentoServicio medicamentoServicio;
+    @MockitoBean private com.farmacia.service.MovimientoInventarioServicio movimientoInventarioServicio;
+    @MockitoBean private com.farmacia.service.OrdenCompraServicio ordenCompraServicio;
+    @MockitoBean private com.farmacia.service.PreparacionVentaServicio preparacionVentaServicio;
+    @MockitoBean private com.farmacia.service.ProveedorServicio proveedorServicio;
+    @MockitoBean private com.farmacia.service.VentaServicio ventaServicio;
+    @MockitoBean private com.farmacia.service.UsuarioDetallesServicio usuarioDetallesServicio;
+    @MockitoBean private com.farmacia.service.UsuarioServicio usuarioServicio;
+    @MockitoBean private com.farmacia.service.ReporteServicio reporteServicio;
     @MockitoBean private com.farmacia.service.AuditoriaServicio auditoriaServicio;
+    @MockitoBean private com.farmacia.service.CategoriaServicio categoriaServicio;
 
     /** Ruta, método y roles que la pueden usar (matriz del README). */
     static Stream<Arguments> rutas() {
@@ -130,7 +133,14 @@ class MatrizRutasTest {
                 ruta("GET", "/ventas/mias", V),
                 // Auditoría (spec 014)
                 ruta("GET", "/auditoria", A),
-                ruta("GET", "/auditoria.csv", A));
+                ruta("GET", "/auditoria.csv", A),
+                // Categorías (spec 009)
+                ruta("GET", "/categorias", A, V, L, C),
+                ruta("GET", "/categorias/nueva", A),
+                ruta("POST", "/categorias/nueva", A),
+                ruta("GET", "/categorias/1/editar", A),
+                ruta("POST", "/categorias/1/editar", A),
+                ruta("POST", "/categorias/1/desactivar", A));
     }
 
     @ParameterizedTest(name = "{0} {1} → permitido a {2}")

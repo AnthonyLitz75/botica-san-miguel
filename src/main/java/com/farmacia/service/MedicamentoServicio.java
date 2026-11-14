@@ -53,6 +53,7 @@ public class MedicamentoServicio {
                     .campo("unidad_control", a.unidadControl(), limpio.unidadControl())
                     .campo("precio_venta", a.precioVenta(), limpio.precioVenta())
                     .campo("stock_minimo", a.stockMinimo(), limpio.stockMinimo())
+                    .campo("id_categoria", a.idCategoria(), limpio.idCategoria())
                     .describir()).orElse(null);
             auditoria.registrarCambio(AccionAuditoria.EDITAR, ENTIDAD, id, detalle);
         }
@@ -70,7 +71,8 @@ public class MedicamentoServicio {
                 formulario.presentacion().strip(),
                 formulario.unidadControl().strip(),
                 formulario.precioVenta(),
-                formulario.stockMinimo());
+                formulario.stockMinimo(),
+                formulario.idCategoria());
     }
 
     public Optional<Medicamento> buscarPorId(Integer id) {
@@ -100,4 +102,8 @@ public class MedicamentoServicio {
         return repositorio.buscarPorEstado(textoLimpio, activo);
     }
 
+    public List<Medicamento> buscarActivosPorCategorias(String texto, List<Integer> idsCategorias) {
+        String textoLimpio = texto == null ? "" : texto.strip();
+        return repositorio.buscarPorEstadoYCategorias(textoLimpio, true, idsCategorias);
+    }
 }

@@ -146,6 +146,12 @@ public class SeguridadConfiguracion {
                                                 .requestMatchers("/clientes", "/clientes/**")
                                                 .hasAnyRole("ADMINISTRADOR", "VENDEDOR")
 
+                                                // Categorías taxonómicas (spec 009): consulta para los roles con acceso a catálogo, gestión solo ADMINISTRADOR
+                                                .requestMatchers(HttpMethod.GET, "/categorias")
+                                                .hasAnyRole("ADMINISTRADOR", "VENDEDOR", "ALMACENERO", "COMPRAS")
+                                                .requestMatchers("/categorias", "/categorias/**")
+                                                .hasRole("ADMINISTRADOR")
+
                                                 .requestMatchers(
                                                                 HttpMethod.GET,
                                                                 "/ordenes-compra",

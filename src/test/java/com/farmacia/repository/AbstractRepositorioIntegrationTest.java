@@ -47,6 +47,7 @@ public abstract class AbstractRepositorioIntegrationTest {
             DELETE FROM cliente;
             DELETE FROM lote;
             DELETE FROM medicamento;
+            DELETE FROM categoria;
             DELETE FROM usuario;
         """);
     }

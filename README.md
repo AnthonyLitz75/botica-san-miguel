@@ -40,6 +40,7 @@ Fue desarrollada como proyecto académico del curso **Algoritmos y Estructura de
 ### Inventario
 
 - **Medicamentos:** consulta, creación, edición, activación y desactivación sin borrar el historial.
+- **Categorías taxonómicas y árbol n-ario:** organización jerárquica de medicamentos (`/categorias`), con cálculo de stock disponible agregado por rama mediante DFS, alertas de inventario y filtro por categoría con descendientes en el catálogo.
 - **Lotes y existencias:** consulta de lotes por medicamento, con indicador del **lote prioritario FEFO** (primero en vencer, primero en salir).
 - **Existencias iniciales:** registro directo de stock inicial de lotes sin orden de compra (`/inventario/existencias-iniciales`, ADMINISTRADOR y ALMACENERO), con motivo, validación de lote duplicado (RN-04) y opción de confirmar acumulación de existencias en lotes preexistentes con la misma fecha de vencimiento.
 - **Salidas de inventario:** registro desde un lote o mediante un formulario de salida directa, con validación de existencias. Incluye la opción de dar de baja lotes vencidos directamente desde el panel de alertas con motivo precargado (`?motivo=Baja por vencimiento`).
@@ -96,6 +97,8 @@ Módulo gerencial exclusivo para el rol `ADMINISTRADOR` (`/reportes`), con visua
 | Función                                  | Administrador | Almacenero | Compras | Vendedor |
 | :--------------------------------------- | :-----------: | :--------: | :-----: | :------: |
 | Consultar medicamentos, lotes y alertas  |      Sí       |     Sí     |   Sí    |    Sí    |
+| Consultar árbol y categorías (`/categorias`) |  Sí       |     Sí     |   Sí    |    Sí    |
+| Crear, editar y desactivar categorías    |      Sí       |     No     |   No    |    No    |
 | Crear, editar y desactivar medicamentos  |      Sí       |     No     |   No    |    No    |
 | Consultar proveedores                    |      Sí       |     Sí     |   Sí    |    No    |
 | Crear y editar proveedores               |      Sí       |     No     |   Sí    |    No    |
@@ -143,6 +146,7 @@ Crea una base de datos **vacía** (por ejemplo, `farmacia_aed`). No hace falta e
 | `db/migration/V2__migracion_3fn.sql` | `movimiento_inventario` en 3FN (sin `id_proveedor`: el proveedor se obtiene por la orden), trigger de coherencia movimiento–detalle y 10 índices (`idx_*`, incluido el parcial `idx_lote_fefo`). |
 | `db/migration/V3__secuencia_comprobante.sql` | Secuencia del número de comprobante `B001-########`. |
 | `db/migration/V4__auditoria.sql` | Tabla `auditoria` de solo inserción (trigger que rechaza `UPDATE`/`DELETE`), acciones y resultados de lista cerrada e índices por fecha y usuario. |
+| `db/migration/V5__categorias.sql` | Jerarquía de categorías (tabla `categoria`, `id_padre` reflexivo, índice único por nivel e `id_categoria` opcional en `medicamento`). |
 | `db/migration/V<n>__*.sql`          | Cambios posteriores del esquema, en orden de versión. Una migración aplicada nunca se edita.   |
 | `db/demo/R__datos_demo.sql`         | Datos ficticios: 4 cuentas, 2 medicamentos, 2 proveedores, un lote, un movimiento y una orden. **Solo con el perfil `demo`**; no inserta nada si la base ya tiene datos. |
 
@@ -267,8 +271,9 @@ El curso se centra en estructuras de datos; estas son las que usa el sistema (pa
 | **Lista simplemente enlazada** (implementación propia) | `ListaEnlazada`      | Líneas de la preparación de venta, que conservan su orden de ingreso. Permite agregar, buscar, reemplazar y eliminar por criterio.                      |
 | **Pila (LIFO)**                                    | `PilaDeshacer`       | Historial de instantáneas para deshacer cambios en la preparación de venta.                                                                             |
 | **Cola de prioridad**                              | `ColaPrioridadLotes` | Orden FEFO: primero el lote con vencimiento más cercano (desempata por ID). El criterio lo aporta la política `PoliticaFefo` (patrón Strategy); se usa para planificar salidas y ventas e identificar el lote prioritario de cada medicamento. |
+| **Árbol n-ario jerárquico**                        | `ArbolCategorias`    | Taxonomía jerárquica de categorías de medicamentos (Analgésicos → Antiinflamatorios → AINEs). Búsqueda O(1) con mapa indexado, ascenso por ruta O(h) y cálculo de stock y alertas agregados por rama mediante recorrido en profundidad (DFS) O(k). |
 
-`PilaDeshacer` se apoya en `ArrayDeque` y `ColaPrioridadLotes` en `PriorityQueue`; `ListaEnlazada` está implementada con nodos propios.
+`PilaDeshacer` se apoya en `ArrayDeque`, `ColaPrioridadLotes` en `PriorityQueue` y `ArbolCategorias` en nodos n-arios con mapa auxiliar de acceso directo; `ListaEnlazada` está implementada con nodos y punteros propios.
 
 ## API
 
