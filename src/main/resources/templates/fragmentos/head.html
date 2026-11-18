@@ -3,10 +3,170 @@
 <head th:fragment="recursos(titulo)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}">
+    <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}">
     <title th:text="${titulo != null ? (titulo.endsWith('Botica San Miguel') ? titulo : titulo + ' | Botica San Miguel') : 'Botica San Miguel'}">Botica San Miguel</title>
-    <link rel="stylesheet" th:href="@{/css/estilos.css}">
-    <link rel="stylesheet" th:href="@{/css/inventario.css}">
     <link rel="stylesheet" th:href="@{/css/tailwind.css}">
+
+    <!-- Cliente LiveReload Inteligente: Hot CSS Reload, Detección de Plantillas y Auto-Reconnect -->
+    <!-- Activo EXCLUSIVAMENTE en entorno de desarrollo local (perfil 'dev') -->
+    <script th:if="${#arrays.contains(@environment.getActiveProfiles(), 'dev')}">
+    (function () {
+        var host = window.location.hostname || 'localhost';
+        var wsUrl = 'ws://' + host + ':35729/livereload';
+        var socket = null;
+        var wasConnected = false;
+        var lastCssModified = null;
+        var lastHtmlSignature = null;
+
+        // 1. Hot CSS Reload: Refresca hojas de estilo sin perder estado ni recargar la página
+        function reloadStylesheets() {
+            var links = document.querySelectorAll('link[rel="stylesheet"]');
+            var timestamp = new Date().getTime();
+            for (var i = 0; i < links.length; i++) {
+                var href = links[i].getAttribute('href');
+                if (href) {
+                    var cleanHref = href.split('?')[0];
+                    links[i].setAttribute('href', cleanHref + '?v=' + timestamp);
+                }
+            }
+            console.log('[LiveReload] 🎨 Hojas de estilo CSS actualizadas en caliente.');
+        }
+
+        // 2. Conexión WebSocket oficial de Spring Boot DevTools (puerto 35729)
+        function connectWebSocket() {
+            try {
+                socket = new WebSocket(wsUrl);
+            } catch (e) {
+                return;
+            }
+
+            socket.onopen = function () {
+                console.log('[LiveReload] ⚡ Conectado al servidor LiveReload (puerto 35729).');
+                socket.send(JSON.stringify({
+                    command: 'hello',
+                    protocols: ['http://livereload.com/protocols/official-7']
+                }));
+                if (wasConnected) {
+                    console.log('[LiveReload] 🔄 Backend reiniciado. Recargando página...');
+                    window.location.reload();
+                    return;
+                }
+                wasConnected = true;
+            };
+
+            socket.onmessage = function (event) {
+                try {
+                    var data = JSON.parse(event.data);
+                    if (data.command === 'reload') {
+                        var path = (data.path || '').toLowerCase();
+                        if (data.liveCSS !== false && (path.endsWith('.css') || path.indexOf('css') !== -1)) {
+                            reloadStylesheets();
+                        } else {
+                            console.log('[LiveReload] 🔄 Cambio detectado en', path, '- Recargando página...');
+                            window.location.reload();
+                        }
+                    }
+                } catch (err) {}
+            };
+
+            socket.onclose = function () {
+                socket = null;
+                setTimeout(connectWebSocket, 1500);
+            };
+
+            socket.onerror = function () {
+                if (socket) {
+                    try { socket.close(); } catch (e) {}
+                }
+            };
+        }
+
+        var isCheckingCss = false;
+        var isCheckingHtml = false;
+
+        // 3. Sondeo defensivo para Hot CSS Reload (respaldo seguro sin contención de I/O en Windows NTFS)
+        function pollCssUpdates() {
+            if (isCheckingCss) return;
+            isCheckingCss = true;
+
+            var testUrl = '/css/tailwind.css?t=' + new Date().getTime();
+            fetch(testUrl, { method: 'HEAD', cache: 'no-store' })
+                .then(function (res) {
+                    var modified = res.headers.get('last-modified') || res.headers.get('content-length');
+                    if (modified) {
+                        if (lastCssModified !== null && lastCssModified !== modified) {
+                            reloadStylesheets();
+                        }
+                        lastCssModified = modified;
+                    }
+                })
+                .catch(function () {})
+                .finally(function () {
+                    isCheckingCss = false;
+                    // Si el WebSocket oficial está activo, el sondeo de respaldo es pasivo (2000ms); si no, cada 1200ms
+                    var interval = (socket && socket.readyState === WebSocket.OPEN) ? 2000 : 1200;
+                    setTimeout(pollCssUpdates, interval);
+                });
+        }
+
+        // 4. Sondeo defensivo para recarga automática de plantillas HTML
+        function pollHtmlUpdates() {
+            if (isCheckingHtml) return;
+            // No sondear APIs, ventanas inactivas ni cuando el usuario está escribiendo activamente
+            if (window.location.pathname.startsWith('/api') || document.hidden) {
+                setTimeout(pollHtmlUpdates, 2000);
+                return;
+            }
+
+            var activeTag = document.activeElement ? (document.activeElement.tagName || '') : '';
+            if (activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeTag === 'SELECT') {
+                setTimeout(pollHtmlUpdates, 2000);
+                return;
+            }
+
+            isCheckingHtml = true;
+            fetch(window.location.href, {
+                method: 'GET',
+                cache: 'no-store',
+                headers: { 'X-Requested-With': 'LiveReloadCheck' }
+            })
+            .then(function (res) {
+                if (!res.ok) return;
+                return res.text();
+            })
+            .then(function (html) {
+                if (!html) return;
+                var signature = html.length + '_' + html.substring(Math.max(0, html.length - 200));
+                if (lastHtmlSignature !== null && lastHtmlSignature !== signature) {
+                    console.log('[LiveReload] 📄 Plantilla HTML modificada en servidor. Recargando página...');
+                    window.location.reload();
+                } else {
+                    lastHtmlSignature = signature;
+                }
+            })
+            .catch(function () {})
+            .finally(function () {
+                isCheckingHtml = false;
+                setTimeout(pollHtmlUpdates, 2000);
+            });
+        }
+
+        // Inicializar cuando el DOM esté listo
+        function init() {
+            connectWebSocket();
+            pollCssUpdates();
+            // Iniciar sondeo HTML tras 1.5s para fijar la firma base
+            setTimeout(pollHtmlUpdates, 1500);
+        }
+
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            init();
+        } else {
+            document.addEventListener('DOMContentLoaded', init);
+        }
+    })();
+    </script>
 </head>
 <body></body>
 </html>

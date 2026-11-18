@@ -1,0 +1,194 @@
+/* ==========================================================================
+   BOTICA SAN MIGUEL — MÓDULO: COMPROBANTE E IMPRESIÓN TÉRMICA (80MM)
+   Comprobante interno de venta (RF-13), boleta ticket y reglas @media print
+   ========================================================================== */
+
+.stage {
+  display: flex;
+  gap: 48px;
+  justify-content: center;
+  padding: 30px 20px 48px;
+  align-items: flex-start;
+}
+
+@media (max-width: 900px) {
+  .stage {
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+    gap: 24px;
+  }
+}
+
+/* Tarjeta de Ticket Térmico en Pantalla */
+.ticket,
+.comprobante-ticket {
+  width: 360px;
+  max-width: 100%;
+  background-color: #ffffff;
+  padding: 24px 22px;
+  font-family: ui-monospace, "Courier New", monospace;
+  font-size: 13px;
+  color: #111111;
+  border-radius: 4px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.12);
+  border: 1px solid #dfe6e3;
+  line-height: 1.4;
+  margin: 0 auto;
+}
+
+.ticket .ctr,
+.comprobante-cabecera {
+  text-align: center;
+}
+
+.comprobante-empresa {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--color-primario, #156552);
+}
+
+.ticket .big,
+.comprobante-numero {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  margin: 4px 0;
+}
+
+.comprobante-leyenda,
+.comprobante-pie,
+.ann {
+  font-size: 12px;
+  color: #475569;
+  text-align: center;
+}
+
+.ticket hr {
+  border: 0;
+  border-top: 1px dashed #666666;
+  margin: 10px 0;
+}
+
+.ticket .l,
+.comprobante-datos div,
+.comprobante-totales div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.comprobante-datos,
+.comprobante-totales {
+  display: grid;
+  gap: 4px;
+  margin: 10px 0;
+  font-size: 13px;
+}
+
+.comprobante-datos dt,
+.comprobante-totales dt {
+  color: #475569;
+}
+
+.comprobante-totales {
+  border-top: 1px dashed #94a3b8;
+  padding-top: 8px;
+}
+
+.comprobante-total {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.comprobante-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.comprobante-tabla th,
+.comprobante-tabla td {
+  padding: 5px 4px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+.comprobante-tabla th {
+  font-weight: 600;
+  color: #334155;
+}
+
+.comprobante-tabla .text-right {
+  text-align: right;
+}
+
+/* Código QR Simulado para Ticket */
+.ticket .qr {
+  width: 96px;
+  height: 96px;
+  margin: 10px auto 0;
+  background: conic-gradient(#111 25%, #fff 0 50%, #111 0 75%, #fff 0) 0 0 / 16px 16px;
+  border: 6px solid #ffffff;
+  outline: 2px solid #111111;
+}
+
+/* Reglas Estrictas de Impresión Térmica de 80 mm */
+@media print {
+  @page {
+    size: 80mm auto;
+    margin: 0;
+  }
+
+  body,
+  html,
+  body.pagina-inventario {
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    color: #000000 !important;
+  }
+
+  aside,
+  header,
+  .no-imprimir,
+  .inventario-lateral,
+  .inventario-cabecera,
+  .ann,
+  .stage > .ann,
+  .saltar-contenido {
+    display: none !important;
+  }
+
+  .inventario-area,
+  .inventario-contenido {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  .stage {
+    padding: 0 !important;
+    margin: 0 !important;
+    justify-content: flex-start !important;
+  }
+
+  .ticket,
+  .comprobante-ticket {
+    width: 72mm !important;
+    max-width: 72mm !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 4mm 2mm !important;
+    margin: 0 !important;
+    font-size: 9pt !important;
+  }
+
+  .ticket .qr {
+    display: block !important;
+  }
+
+  .comprobante-tabla {
+    font-size: 8pt !important;
+  }
+}

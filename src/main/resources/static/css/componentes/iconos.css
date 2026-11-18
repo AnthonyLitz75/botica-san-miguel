@@ -1,0 +1,83 @@
+/* ==========================================================================
+   BOTICA SAN MIGUEL — COMPONENTES: ICONOS SVG
+   Iconos vectoriales monocromáticos mediante CSS mask-image
+   ========================================================================== */
+
+.icono {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  flex: none;
+  background: currentColor;
+  mask-size: contain;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+}
+
+.icono-pill {
+  mask-image: url("../images/icons/pill.svg");
+  -webkit-mask-image: url("../images/icons/pill.svg");
+}
+.icono-truck {
+  mask-image: url("../images/icons/truck.svg");
+  -webkit-mask-image: url("../images/icons/truck.svg");
+}
+.icono-clipboard-list {
+  mask-image: url("../images/icons/clipboard-list.svg");
+  -webkit-mask-image: url("../images/icons/clipboard-list.svg");
+}
+.icono-arrow-left-right {
+  mask-image: url("../images/icons/arrow-left-right.svg");
+  -webkit-mask-image: url("../images/icons/arrow-left-right.svg");
+}
+.icono-log-out {
+  mask-image: url("../images/icons/log-out.svg");
+  -webkit-mask-image: url("../images/icons/log-out.svg");
+}
+.icono-search {
+  mask-image: url("../images/icons/search.svg");
+  -webkit-mask-image: url("../images/icons/search.svg");
+}
+.icono-x {
+  mask-image: url("../images/icons/x.svg");
+  -webkit-mask-image: url("../images/icons/x.svg");
+}
+.icono-plus {
+  mask-image: url("../images/icons/plus.svg");
+  -webkit-mask-image: url("../images/icons/plus.svg");
+}
+.icono-pencil {
+  mask-image: url("../images/icons/pencil.svg");
+  -webkit-mask-image: url("../images/icons/pencil.svg");
+}
+.icono-circle-minus {
+  mask-image: url("../images/icons/circle-minus.svg");
+  -webkit-mask-image: url("../images/icons/circle-minus.svg");
+}
+.icono-circle-check {
+  mask-image: url("../images/icons/circle-check.svg");
+  -webkit-mask-image: url("../images/icons/circle-check.svg");
+}
+.icono-package {
+  mask-image: url("../images/icons/package.svg");
+  -webkit-mask-image: url("../images/icons/package.svg");
+}
+.icono-menu {
+  mask-image: url("../images/icons/menu.svg");
+  -webkit-mask-image: url("../images/icons/menu.svg");
+}
+.icono-user-round {
+  mask-image: url("../images/icons/user-round.svg");
+  -webkit-mask-image: url("../images/icons/user-round.svg");
+}
+.icono-arrow-left {
+  mask-image: url("../images/icons/arrow-left.svg");
+  -webkit-mask-image: url("../images/icons/arrow-left.svg");
+}
+.icono-save {
+  mask-image: url("../images/icons/save.svg");
+  -webkit-mask-image: url("../images/icons/save.svg");
+}

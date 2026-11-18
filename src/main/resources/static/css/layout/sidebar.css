@@ -1,0 +1,215 @@
+/* ==========================================================================
+   BOTICA SAN MIGUEL — LAYOUT: BARRA LATERAL (SIDEBAR)
+   Navegación lateral, marcas, enlaces activos y adaptabilidad
+   ========================================================================== */
+
+.pagina-inventario {
+  background: #f3f6f5;
+  color: #1e2d27;
+  font-size: 14px;
+  min-height: 100vh;
+}
+
+.pagina-inventario a {
+  text-decoration: none;
+}
+
+.saltar-contenido {
+  position: fixed;
+  top: -80px;
+  left: 16px;
+  z-index: 50;
+  background: #ffffff;
+  color: #156552;
+  font-weight: 600;
+  padding: 12px 16px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: top 0.2s ease;
+}
+
+.saltar-contenido:focus {
+  top: 12px;
+}
+
+/* Sidebar con gradiente institucional */
+.inventario-lateral,
+aside.inventario-lateral {
+  width: 248px;
+  position: fixed;
+  inset: 0 auto 0 0;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 14px 20px;
+  background: linear-gradient(180deg, #143a31 0%, #0f2a24 100%);
+  color: #cfe3dc;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
+  z-index: 20;
+  min-height: 100vh;
+}
+
+/* Identidad y Marca en Sidebar */
+.inventario-marca,
+.brand {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 4px 8px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 10px;
+  text-decoration: none;
+  color: #ffffff;
+}
+
+.inventario-marca:hover,
+.brand:hover {
+  color: #ffffff;
+}
+
+.inventario-marca img,
+.brand .lg {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 4px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.marca-nombre,
+.brand b {
+  display: block;
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+}
+
+.marca-subtitulo,
+.brand small {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #8fb7aa;
+  text-transform: uppercase;
+}
+
+/* Títulos de sección y navegación */
+.nav-titulo,
+.grp {
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9fc3b7; /* Contraste AA >= 4.5:1 */
+  padding: 14px 12px 6px;
+  font-weight: 700;
+}
+
+.inventario-nav {
+  display: grid;
+  gap: 4px;
+}
+
+.inventario-nav a,
+.it {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 42px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  color: #d6e8e1;
+  font-weight: 600;
+  font-size: 13.5px;
+  margin-bottom: 2px;
+  position: relative;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.inventario-nav a:hover,
+.it:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+
+.inventario-nav a[aria-current="page"],
+.it.on {
+  background: #ffffff;
+  color: #064e3b;
+  font-weight: 700;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.inventario-nav a[aria-current="page"] .ico,
+.it.on .ico {
+  color: #064e3b;
+  stroke: #064e3b;
+  opacity: 1;
+}
+
+.inventario-nav a[aria-current="page"]::before,
+.it.on::before {
+  display: none;
+}
+
+.it .ico {
+  opacity: 0.85;
+  flex: none;
+}
+
+.it.on .ico {
+  opacity: 1;
+  color: #166a55;
+}
+
+.it .bd,
+.sidebar-badge {
+  margin-left: auto;
+  background: #e11d48;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+
+/* Pie de barra lateral y puntos de estado */
+.lateral-pie,
+.foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding: 14px 12px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 12px;
+  color: #8fb7aa;
+}
+
+.punto-activo,
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.25);
+  flex: none;
+}
+
+/* Adaptabilidad móvil para Sidebar */
+@media (max-width: 1024px) {
+  .inventario-lateral,
+  aside.inventario-lateral {
+    position: static;
+    width: 100%;
+    min-height: auto;
+    padding: 16px;
+  }
+}

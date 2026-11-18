@@ -1,8 +1,12 @@
 /**
  * Módulo de Control de Diálogos Modales Accesibles (Spec 015 - Bocetos 14 a 19).
  * Botica San Miguel - Vanilla JS con soporte WCAG 2.1 AA.
+ * Refactorizado: Consume core/validador-docs.js (Principio DRY)
  */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Carga modular dinámica del núcleo de validación
+    const { aplicarEstadoVisualDocumento } = await import('./core/validador-docs.js');
+
     let modalActivo = null;
     let ultimoElementoFoco = null;
 
@@ -105,66 +109,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Validación interactiva en tiempo real para DNI / RUC según bocetos
+    // Validación interactiva en tiempo real para DNI / RUC según bocetos (reutiliza core/validador-docs.js)
     document.addEventListener('input', (e) => {
         const input = e.target;
 
-        // Validación interactiva de RUC (Modal 15 y Cliente)
         if (input.matches('[data-valida="ruc"]')) {
-            const contenedorInp = input.closest('.inp') || input;
             const contenedorHelp = input.closest('.mb, form')?.querySelector(`[data-help-for="${input.id}"]`);
-            const val = input.value.trim();
-
-            if (val.length === 0) {
-                contenedorInp.classList.remove('err', 'ok2');
-                if (contenedorHelp) {
-                    contenedorHelp.className = 'help';
-                    contenedorHelp.textContent = '11 dígitos numéricos';
-                }
-            } else if (!/^\d+$/.test(val) || val.length !== 11) {
-                contenedorInp.classList.add('err');
-                contenedorInp.classList.remove('ok2');
-                if (contenedorHelp) {
-                    contenedorHelp.className = 'help e';
-                    contenedorHelp.textContent = `El RUC debe tener 11 dígitos numéricos (ingresaste ${val.length}).`;
-                }
-            } else {
-                contenedorInp.classList.remove('err');
-                contenedorInp.classList.add('ok2');
-                if (contenedorHelp) {
-                    contenedorHelp.className = 'help';
-                    contenedorHelp.textContent = '11 dígitos · validado';
-                }
-            }
-        }
-
-        // Validación interactiva de DNI
-        if (input.matches('[data-valida="dni"]')) {
-            const contenedorInp = input.closest('.inp') || input;
+            aplicarEstadoVisualDocumento(input, contenedorHelp, 'RUC');
+        } else if (input.matches('[data-valida="dni"]')) {
             const contenedorHelp = input.closest('.mb, form')?.querySelector(`[data-help-for="${input.id}"]`);
-            const val = input.value.trim();
-
-            if (val.length === 0) {
-                contenedorInp.classList.remove('err', 'ok2');
-                if (contenedorHelp) {
-                    contenedorHelp.className = 'help';
-                    contenedorHelp.textContent = '8 dígitos numéricos';
-                }
-            } else if (!/^\d+$/.test(val) || val.length !== 8) {
-                contenedorInp.classList.add('err');
-                contenedorInp.classList.remove('ok2');
-                if (contenedorHelp) {
-                    contenedorHelp.className = 'help e';
-                    contenedorHelp.textContent = `El DNI debe tener 8 dígitos numéricos (ingresaste ${val.length}).`;
-                }
-            } else {
-                contenedorInp.classList.remove('err');
-                contenedorInp.classList.add('ok2');
-                if (contenedorHelp) {
-                    contenedorHelp.className = 'help';
-                    contenedorHelp.textContent = '8 dígitos · validado';
-                }
-            }
+            aplicarEstadoVisualDocumento(input, contenedorHelp, 'DNI');
         }
     });
 

@@ -1,0 +1,923 @@
+/* ==========================================================================
+   BOTICA SAN MIGUEL — MÓDULO: CAJA / PUNTO DE VENTA (POS)
+   Buscador interactivo (.sugg), canasta de venta (.tabla-caja), stepper,
+   despacho FEFO, tarjeta de cliente (.cli), selector de pago (.seg) y totales (.sum)
+   ========================================================================== */
+
+/* Buscador de Medicamentos y Sugerencias Flotantes (.sugg) */
+.sugg {
+  margin-top: 8px;
+  border: 1px solid var(--line, #dfe6e3);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.sugg .o {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #edf1ef;
+  transition: background 0.15s ease;
+  user-select: none;
+}
+
+.sugg .o:last-child {
+  border: 0;
+}
+
+.sugg .o.hi,
+.sugg .o:hover:not([style*="not-allowed"]) {
+  background: var(--pine-50, #e9f4f0);
+}
+
+.sugg .o b {
+  font-size: 14px;
+  color: var(--ink, #10201b);
+}
+
+.sugg .o small {
+  color: var(--ink-3, #5b6d66);
+  display: block;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.chip.mono {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--pine-700, #166a55);
+  font-weight: 700;
+  background: #eef2f0;
+  border-radius: 6px;
+  padding: 3px 8px;
+}
+
+/* Canasta de Venta: Tabla Compacta y Columnas Fijas (H-01 Responsive) */
+#contenedor-tabla {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabla-caja {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.tabla-caja th {
+  background: #f7f9f8 !important;
+  color: var(--ink-3, #5b6d66) !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  border-bottom: 1px solid var(--line, #dfe6e3) !important;
+  padding: 11px 12px !important;
+  vertical-align: middle !important;
+  white-space: nowrap !important;
+}
+
+.tabla-caja td {
+  padding: 12px 12px !important;
+  border-bottom: 1px solid #edf1ef !important;
+  font-size: 13.5px !important;
+  vertical-align: middle !important;
+}
+
+.tabla-caja tbody tr:hover {
+  background: #fafcfb;
+}
+
+.tabla-caja .col-prod {
+  width: auto;
+  min-width: 160px;
+  text-align: left;
+}
+
+.tabla-caja .col-cant {
+  width: 138px;
+  text-align: center;
+}
+
+.tabla-caja .col-precio {
+  width: 90px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.tabla-caja .col-desc {
+  width: 84px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.tabla-caja .col-tot {
+  width: 94px;
+  text-align: right;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.tabla-caja .col-acc {
+  width: 52px;
+  text-align: right;
+  vertical-align: middle !important;
+  padding-left: 4px !important;
+  padding-right: 12px !important;
+}
+
+.tabla-caja .stepper {
+  margin: 0 auto;
+}
+
+.tabla-caja .boton-retirar {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Control Stepper de Cantidad (+ / -) */
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #cfd8d4;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.stepper button,
+.stepper span {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  color: var(--ink-2, #33463f);
+  background: #f7f9f8;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+  user-select: none;
+}
+
+.stepper button:hover,
+.stepper span:hover {
+  background: #edf1ef;
+}
+
+.stepper button:focus-visible {
+  outline: 2px solid var(--pine-700, #166a55);
+  outline-offset: -2px;
+  background: #e9f4f0;
+  z-index: 2;
+}
+
+.stepper b {
+  width: 44px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink, #10201b);
+}
+
+/* Indicador de Lote FEFO */
+.fefo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  font-size: 12px;
+  color: var(--ink-3, #5b6d66);
+  margin-top: 4px;
+}
+
+.fefo i {
+  font-style: normal;
+  background: var(--pine-50, #e9f4f0);
+  color: var(--pine-700, #166a55);
+  border-radius: 6px;
+  padding: 1px 7px;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+.btn-editar-descuento {
+  cursor: pointer;
+  text-decoration: underline dashed rgba(0, 0, 0, 0.2);
+  transition: color 0.15s ease;
+}
+
+.btn-editar-descuento:hover {
+  color: var(--pine-700, #166a55);
+}
+
+/* Botón Cuadrado Compacto (.ibtn) */
+.ibtn {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line, #dfe6e3);
+  border-radius: 9px;
+  display: inline-grid;
+  place-items: center;
+  color: var(--ink-2, #33463f);
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ibtn.dng {
+  color: var(--rose, #be123c);
+  border-color: #fecdd3;
+}
+
+.ibtn.dng:hover {
+  background: var(--rose-bg, #ffe4e6);
+  border-color: var(--rose, #be123c);
+}
+
+/* Tarjeta de Cliente Asignado (.cli) */
+.cli {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: var(--pine-50, #e9f4f0);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-top: 10px;
+}
+
+.cli .av {
+  background: #ffffff;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--pine-700, #166a55);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+.cli-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cli-fila-principal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cli-fila-principal b {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ink, #10201b);
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cli .lbl {
+  font-size: 12px;
+  color: var(--ink-3, #5b6d66);
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Selector Segmentado de Métodos de Pago (.seg) */
+.seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.seg div {
+  border: 1px solid #cfd8d4;
+  border-radius: 10px;
+  padding: 10px 6px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink-2, #33463f);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  user-select: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: #ffffff;
+}
+
+.seg div:hover:not(.on) {
+  background: #f7f9f8;
+}
+
+.seg div.on {
+  border-color: var(--pine-700, #166a55);
+  background: var(--pine-50, #e9f4f0);
+  color: var(--pine-800, #143a31);
+  box-shadow: inset 0 0 0 1px var(--pine-700, #166a55);
+}
+
+/* Panel de Desglose de Totales (.sum) */
+.sum .ln {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  color: var(--ink-2, #33463f);
+  font-size: 13.5px;
+}
+
+.sum .tot {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-top: 2px dashed var(--line, #dfe6e3);
+  margin-top: 10px;
+  padding-top: 14px;
+}
+
+.sum .tot b {
+  font-size: 38px;
+  letter-spacing: -0.02em;
+  color: var(--pine-800, #143a31);
+  line-height: 1;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--ink-3, #5b6d66);
+  text-align: center;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+/* ==========================================================================
+   Estructura y Componentes Nativos del Boceto POS (01-caja)
+   ========================================================================== */
+.pos {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(350px, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .pos {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.pos > div {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.page {
+  padding: 28px 32px 48px;
+  max-width: 1500px;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 16px 12px 32px;
+  }
+}
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pine-700, #166a55);
+  font-weight: 700;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 22px;
+  gap: 16px;
+}
+
+.head h1 {
+  font-size: 30px;
+  letter-spacing: -0.02em;
+  margin: 4px 0 4px;
+  font-weight: 700;
+  color: var(--ink, #10201b);
+}
+
+.sub {
+  color: var(--ink-3, #5b6d66);
+  font-size: 14px;
+}
+
+.card {
+  background: var(--card, #ffffff);
+  border: 1px solid var(--line, #dfe6e3);
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(16, 32, 27, 0.04), 0 6px 18px -10px rgba(16, 32, 27, 0.12);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.pad {
+  padding: 20px;
+}
+
+.pos label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink-2, #33463f);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.inp {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 42px;
+  border: 1px solid #cfd8d4;
+  border-radius: 10px;
+  padding: 0 12px;
+  background: #ffffff;
+  color: var(--ink-3, #5b6d66);
+  font-size: 14px;
+}
+
+.inp.foco-verde {
+  height: 52px;
+  border: 2px solid var(--pine-700, #166a55);
+  box-shadow: 0 0 0 4px rgba(22, 106, 85, 0.12);
+}
+
+.kbd {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid #cfd8d4;
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  padding: 1px 7px;
+  color: var(--ink-3, #5b6d66);
+  background: #f7f9f8;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 13.5px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.btn.p {
+  background: var(--pine-700, #166a55);
+  color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.btn.p:hover:not(:disabled) {
+  background: var(--pine-800, #143a31);
+}
+
+.btn.s {
+  background: #ffffff;
+  color: var(--ink-2, #33463f);
+  border-color: #cfd8d4;
+}
+
+.btn.s:hover {
+  background: #f7f9f8;
+}
+
+.btn.w {
+  background: var(--amber-500, #f59e0b);
+  color: #2b1700;
+}
+
+.btn.w:hover:not(:disabled) {
+  background: #d97706;
+}
+
+.btn.lg {
+  padding: 16px 20px;
+  font-size: 17px;
+  border-radius: 12px;
+  width: 100%;
+  justify-content: center;
+}
+
+/* ==========================================================================
+   MODAL FLOTANTE DE DESCUENTOS (CAJA POS)
+   Diseño idéntico a referencia visual (media_1794699935887_84edddf8.jpg)
+   ========================================================================== */
+.modal-descuento-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 999999;
+  background: rgba(16, 32, 27, 0.45);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal-descuento-card {
+  background: #ffffff !important;
+  opacity: 1 !important;
+  border-radius: 18px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25), 0 10px 10px -5px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 440px;
+  padding: 24px;
+  position: relative;
+  z-index: 1000000;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.modal-desc-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.modal-desc-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modal-desc-icono-wrap {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #d1fae5;
+  color: #059669;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.modal-desc-titulo {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.modal-desc-subtitulo {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 2px 0 0 0;
+}
+
+.modal-desc-producto-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 5px;
+  padding: 2px 8px;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #166534;
+}
+
+.modal-desc-producto-label {
+  color: #15803d;
+  font-weight: 500;
+}
+
+.modal-desc-producto-nombre {
+  font-weight: 700;
+  color: #064e3b;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.modal-desc-cerrar {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.modal-desc-cerrar:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.modal-desc-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-top: 18px;
+  margin-bottom: 16px;
+}
+
+.modal-desc-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s ease;
+  user-select: none;
+  color: #6b7280;
+  font-family: inherit;
+}
+
+.modal-desc-tab.tab-activa {
+  color: #059669;
+  border-bottom-color: #059669;
+  font-weight: 700;
+}
+
+.modal-desc-tab.tab-inactiva:hover {
+  color: #374151;
+}
+
+.modal-desc-field {
+  margin-bottom: 14px;
+}
+
+.modal-desc-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #1f2937;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.modal-desc-input-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 12px;
+  padding: 8px 14px;
+  transition: all 0.15s ease;
+}
+
+.modal-desc-input-box:focus-within {
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+}
+
+.modal-desc-input {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  background: transparent;
+  border: none;
+  outline: none;
+  width: 100%;
+  font-family: inherit;
+}
+
+.modal-desc-badge {
+  background: #f3f4f6;
+  color: #374151;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.modal-desc-preview {
+  background: #ecfdf5;
+  border: 1px solid #d1fae5;
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 14px;
+  margin-bottom: 20px;
+  transition: all 0.15s ease;
+}
+
+.modal-desc-preview.caja-previa-error {
+  background: #fef2f2;
+  border-color: #fee2e2;
+}
+
+.modal-desc-preview-icono {
+  color: #059669;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.modal-desc-preview.caja-previa-error .modal-desc-preview-icono {
+  color: #dc2626;
+}
+
+.modal-desc-preview-texto-1 {
+  font-size: 13px;
+  font-weight: 700;
+  color: #064e3b;
+  margin: 0;
+}
+
+.modal-desc-preview.caja-previa-error .modal-desc-preview-texto-1 {
+  color: #991b1b;
+}
+
+.modal-desc-preview-texto-2 {
+  font-size: 12px;
+  font-weight: 500;
+  color: #047857;
+  margin: 2px 0 0 0;
+}
+
+.modal-desc-preview.caja-previa-error .modal-desc-preview-texto-2 {
+  color: #b91c1c;
+}
+
+.modal-desc-error-msg {
+  font-size: 12px;
+  font-weight: 600;
+  color: #dc2626;
+  margin-top: 6px;
+  display: none;
+}
+
+.modal-desc-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.modal-desc-btn-cancelar {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  color: #374151;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s ease;
+}
+
+.modal-desc-btn-cancelar:hover {
+  background: #f9fafb;
+}
+
+.modal-desc-btn-aplicar {
+  background: #059669;
+  border: none;
+  border-radius: 12px;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 10px 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.modal-desc-btn-aplicar:hover:not(:disabled) {
+  background: #047857;
+}
+
+.modal-desc-btn-aplicar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   Modal de Cancelación de Venta Activa (H-06)
+   ========================================================================== */
+.modal-cancelar-card {
+  max-width: 440px;
+}
+
+.modal-cancelar-subtitulo {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 2px 0 0 0;
+}
+
+.modal-cancelar-icono-wrap {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #fee2e2;
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.modal-cancelar-cuerpo {
+  margin: 16px 0 20px 0;
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.modal-cancelar-texto {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #991b1b;
+  margin: 0;
+  font-weight: 500;
+}
+
+.modal-cancelar-actions {
+  margin-top: 10px;
+}
+
+.modal-btn-peligro {
+  background: #dc2626;
+  border: none;
+  border-radius: 12px;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 10px 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.modal-btn-peligro:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.modal-btn-peligro:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+body.modal-abierto {
+  overflow: hidden;
+}

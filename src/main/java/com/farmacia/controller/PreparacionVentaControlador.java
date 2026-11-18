@@ -7,11 +7,13 @@ import com.farmacia.model.PreparacionVentaVista;
 import com.farmacia.service.PreparacionVentaServicio;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -33,9 +35,15 @@ public class PreparacionVentaControlador {
         return servicio.obtener(autenticacion.getName());
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public PreparacionVentaVista agregar(Authentication autenticacion,
             @Valid @RequestBody PreparacionVentaCambioFormulario formulario) {
+        return servicio.agregar(autenticacion.getName(), formulario);
+    }
+
+    @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public PreparacionVentaVista agregarForm(Authentication autenticacion,
+            @Valid @ModelAttribute PreparacionVentaCambioFormulario formulario) {
         return servicio.agregar(autenticacion.getName(), formulario);
     }
 

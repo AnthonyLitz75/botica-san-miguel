@@ -91,8 +91,8 @@
     </aside>
 
     <header th:fragment="cabecera(seccion, area)" class="inventario-cabecera top">
-        <details class="menu-movil">
-            <summary title="Abrir o cerrar navegación" aria-label="Abrir o cerrar navegación">
+        <details class="menu-movil lg:hidden">
+            <summary class="list-none [&::-webkit-details-marker]:hidden cursor-pointer" title="Abrir o cerrar navegación" aria-label="Abrir o cerrar navegación">
                 <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </summary>
             <nav th:replace="~{fragmentos/navegacion :: menu(${seccion})}"></nav>

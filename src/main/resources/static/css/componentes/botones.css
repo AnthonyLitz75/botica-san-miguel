@@ -1,0 +1,174 @@
+/* ==========================================================================
+   BOTICA SAN MIGUEL — COMPONENTES: BOTONES
+   Botones estándar, variantes de color (.btn.p, .btn.s, .btn.w, .btn.d),
+   botones de inventario y botones de icono (.btn-ico)
+   ========================================================================== */
+
+button {
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid var(--borde-suave, #dde5e2);
+  border-radius: var(--radio-sm, 6px);
+  background: var(--bg-superficie, #ffffff);
+  color: var(--texto-principal, #10201b);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color var(--transicion, 0.18s ease-in-out),
+    border-color var(--transicion, 0.18s ease-in-out),
+    transform 0.1s ease;
+}
+
+button:hover {
+  background-color: #eef2f0;
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+/* Sistema de Botones Moderno (.btn) */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 13.5px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Primario (Pino Institucional) */
+.btn.p,
+.pagina-inventario .boton-principal {
+  background-color: #166a55;
+  color: #ffffff;
+  border-color: #166a55;
+  box-shadow: 0 1px 2px rgba(0,0,0,.15);
+}
+
+.btn.p:hover,
+.pagina-inventario .boton-principal:hover {
+  background-color: #1b7f66;
+  border-color: #1b7f66;
+}
+
+/* Secundario (Neutro Blanco) */
+.btn.s,
+.pagina-inventario .boton-secundario {
+  background-color: #ffffff;
+  color: #33463f;
+  border-color: #cfd8d4;
+}
+
+.btn.s:hover,
+.pagina-inventario .boton-secundario:hover {
+  background-color: #f7f9f8;
+  color: #1e2d27;
+}
+
+/* Advertencia / Deshacer Pila AyE (Ámbar) */
+.btn.w {
+  background-color: #f59e0b;
+  color: #2b1700;
+  border-color: #f59e0b;
+}
+
+.btn.w:hover {
+  background-color: #d97706;
+}
+
+/* Peligro / Eliminar / Bajas (Rojo) */
+.btn.d,
+.pagina-inventario .boton-peligro {
+  background-color: #be123c;
+  color: #ffffff;
+  border-color: #be123c;
+}
+
+.btn.d:hover,
+.pagina-inventario .boton-peligro:hover {
+  background-color: #9f1239;
+}
+
+/* Tamaño Grande (Caja / POS) */
+.btn.lg {
+  padding: 16px 20px;
+  font-size: 17px;
+  border-radius: 12px;
+  width: 100%;
+  justify-content: center;
+}
+
+/* Botones de Icono Cuadrados (.btn-ico) */
+.btn-ico {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid #dfe6e3;
+  background: #ffffff;
+  color: #5b6d66;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-ico:hover {
+  border-color: #166a55;
+  color: #166a55;
+  background: #f0f7f4;
+}
+
+.btn-ico.d:hover {
+  border-color: #be123c;
+  color: #be123c;
+  background: #ffe4e6;
+}
+
+/* Botones Específicos de Estado en Catálogo */
+.boton-desactivar {
+  padding: 8px 12px;
+  border: 1px solid var(--color-error, #b42318);
+  border-radius: var(--radio-sm, 6px);
+  background-color: var(--bg-superficie, #ffffff);
+  color: var(--color-error, #b42318);
+}
+
+.boton-desactivar:hover {
+  background-color: var(--bg-error, #fef3f2);
+}
+
+.boton-activar {
+  padding: 8px 12px;
+  border: 1px solid var(--color-primario, #156552);
+  border-radius: var(--radio-sm, 6px);
+  background-color: var(--bg-superficie, #ffffff);
+  color: var(--color-primario, #156552);
+}
+
+.boton-activar:hover {
+  background-color: var(--color-primario-suave, #e8f4f0);
+}
+
+.inventario-boton {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 10px 16px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  transition: all 0.18s ease;
+}

@@ -1,0 +1,264 @@
+/* ==========================================================================
+   BOTICA SAN MIGUEL — MÓDULO: INVENTARIO, ALERTAS Y CATEGORÍAS
+   Tablero de alertas a 90 días, semáforos de stock crítico, avisos de operación,
+   tarjetas de KPI y estructura jerárquica del Árbol de Categorías (AyE)
+   ========================================================================== */
+
+/* Avisos de Operación y Notificaciones */
+.aviso-operacion {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 14px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.aviso-operacion p {
+  margin: 0;
+}
+
+.aviso-operacion p + p {
+  margin-top: 4px;
+}
+
+.aviso-exito {
+  background: #ecfdf3;
+  color: #15603a;
+  border: 1px solid #abefc6;
+}
+
+.aviso-error {
+  background: #fef3f2;
+  color: #b42318;
+  border: 1px solid #fecdca;
+}
+
+.aviso-info {
+  background: #f0f7fe;
+  color: #175cd3;
+  border: 1px solid #b2ddff;
+}
+
+/* Panel de Alertas de Inventario */
+.alertas-intro {
+  margin: 8px 0 0;
+  color: #687970;
+}
+
+.alertas-metricas,
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.alerta-metrica,
+.kpi {
+  display: grid;
+  gap: 7px;
+  min-height: 132px;
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid #e1e9e5;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px rgba(24, 55, 43, 0.04);
+}
+
+.alerta-metrica strong {
+  color: #1e2d27;
+  font-size: 32px;
+  line-height: 1;
+}
+
+.alerta-metrica > span:last-child {
+  color: #687970;
+  font-size: 12px;
+}
+
+.alerta-metrica-etiqueta {
+  color: #46574e;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.metrica-critica {
+  border-top: 3px solid #c84a4a;
+}
+
+.metrica-preventiva {
+  border-top: 3px solid #d79a27;
+}
+
+.alertas-seccion {
+  margin-top: 22px;
+}
+
+.alertas-seccion .resultados-cabecera {
+  align-items: flex-start;
+}
+
+.alertas-seccion .resultados-cabecera h2 {
+  margin: 0;
+}
+
+.alertas-ayuda {
+  margin: 6px 0 0;
+  color: #718078;
+  font-size: 12px;
+}
+
+.alerta-producto {
+  display: block;
+  margin-top: 4px;
+  color: #25372f;
+}
+
+.alerta-cantidad {
+  color: #156552;
+  white-space: nowrap;
+}
+
+.alerta-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 25px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.035em;
+  white-space: nowrap;
+}
+
+.alerta-badge-critico,
+.alerta-contador-critico {
+  background: #fde9e7;
+  color: #a52d2b;
+}
+
+.alerta-badge-preventivo,
+.alerta-contador-preventivo {
+  background: #fff2d5;
+  color: #805800;
+}
+
+.alerta-sin-permiso {
+  color: #77847d;
+  font-size: 11px;
+}
+
+.alertas-seccion .inventario-vacio {
+  margin: 0 16px 16px;
+}
+
+/* Árbol Jerárquico de Categorías Farmacológicas */
+.tr {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 18px;
+  border-bottom: 1px solid #edf1ef;
+  transition: background 0.15s ease;
+}
+
+.tr:hover {
+  background-color: #fafcfb;
+}
+
+.tr:last-child {
+  border-bottom: 0;
+}
+
+.tr .cnt2 {
+  margin-left: auto;
+  color: #5b6d66;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tr.l1 {
+  padding-left: 48px;
+  background: #fcfdfc;
+}
+
+.tr.l2 {
+  padding-left: 80px;
+  background: #fafcfb;
+}
+
+.tr .fi {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: #e9f4f0;
+  color: #166a55;
+  flex: none;
+}
+
+.tr.l1 .fi {
+  background: #eef2f0;
+  color: #33463f;
+}
+
+.tr.l2 .fi {
+  background: #f1f4f3;
+  color: #5b6d66;
+}
+
+@media (max-width: 1100px) {
+  .alertas-metricas,
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .alertas-metricas,
+  .kpis {
+    grid-template-columns: 1fr;
+  }
+  .alerta-metrica {
+    min-height: 108px;
+  }
+}
+
+/* Barras e Histogramas de Reportes en CSS */
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 150px;
+  padding-top: 10px;
+}
+
+.bars div {
+  flex: 1;
+  background: linear-gradient(180deg, #1b7f66, #166a55);
+  border-radius: 6px 6px 0 0;
+  position: relative;
+  min-height: 6px;
+  transition: opacity 0.15s ease;
+}
+
+.bars div:hover {
+  opacity: 0.85;
+}
+
+.bars small {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: #5b6d66;
+  white-space: nowrap;
+}
+

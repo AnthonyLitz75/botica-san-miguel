@@ -25,9 +25,10 @@ class PreparacionVentaControladorTest {
 
         assertSame(vista, controlador.obtener(auth));
         assertSame(vista, controlador.agregar(auth, new PreparacionVentaCambioFormulario(4, 1)));
+        assertSame(vista, controlador.agregarForm(auth, new PreparacionVentaCambioFormulario(4, 1)));
         assertSame(vista, controlador.retirar(auth, 8));
         assertSame(vista, controlador.deshacer(auth));
-        verify(servicio).agregar(eq("vendedor"), any());
+        verify(servicio, times(2)).agregar(eq("vendedor"), any());
         verify(servicio).retirar("vendedor", 8);
         verify(servicio).deshacer("vendedor");
     }

@@ -116,9 +116,34 @@ public class PreparacionVentaServicio {
                 .orElseThrow(() -> new IllegalArgumentException("Medicamento no encontrado o inactivo"));
         var anterior = detalles.buscar(linea -> linea.idMedicamento().equals(idMedicamento))
                 .orElseThrow(() -> new IllegalArgumentException("El medicamento no está en la preparación"));
-        BigDecimal valorDescuento = anterior.descuento();
         BigDecimal bruto = medicamento.precioVenta().multiply(BigDecimal.valueOf(nuevaCantidad))
                 .setScale(2, RoundingMode.HALF_UP);
+
+        int cantidadAnterior = anterior.cantidad();
+        BigDecimal subtotalAnterior = anterior.importeBruto();
+        BigDecimal valorDescuento;
+
+        if (anterior.descuento() == null || anterior.descuento().signum() <= 0) {
+            valorDescuento = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        } else if (nuevaCantidad < cantidadAnterior && subtotalAnterior.signum() > 0) {
+            // Regla H-05: Conservar la proporción económica al reducir cantidad
+            // nuevoDescuento = descuentoAnterior × (nuevoSubtotal / subtotalAnterior)
+            valorDescuento = anterior.descuento()
+                    .multiply(bruto)
+                    .divide(subtotalAnterior, 2, RoundingMode.HALF_UP);
+        } else {
+            // Al aumentar o mantener la cantidad se conserva el descuento absoluto
+            valorDescuento = anterior.descuento();
+        }
+
+        // El nuevo descuento nunca podrá superar el nuevo subtotal ni ser negativo
+        if (valorDescuento.compareTo(bruto) > 0) {
+            valorDescuento = bruto;
+        }
+        if (valorDescuento.signum() < 0) {
+            valorDescuento = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        }
+
         BigDecimal descuento = politicaDescuento.calcular(bruto, valorDescuento);
         var lotes = lotePrioridadServicio.planificarSalida(idMedicamento, nuevaCantidad);
         var linea = new LineaPreparacionVentaVista(medicamento.idMedicamento(), medicamento.codigo(),

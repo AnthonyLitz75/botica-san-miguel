@@ -1,8 +1,13 @@
 /**
  * formularios.js — Utilidades de usabilidad, micro-interacciones y prevención de doble envío.
  * Botica San Miguel (AyE)
+ * Refactorizado: Consume core/validador-docs.js (Principio DRY)
  */
-document.addEventListener("DOMContentLoaded", () => {
+
+document.addEventListener("DOMContentLoaded", async () => {
+  // Carga modular dinámica del núcleo de validación
+  const { limpiarDigitos, obtenerConfiguracionDoc } = await import("./core/validador-docs.js");
+
   // -------------------------------------------------------------
   // 1. Dinamismo reactivo para DNI / RUC (Directorio de Clientes)
   // -------------------------------------------------------------
@@ -12,26 +17,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (selectTipoDoc && inputNumeroDoc) {
     function sincronizarTipoDocumento() {
-      const esRuc = selectTipoDoc.value === "RUC";
-      const longitudEsperada = esRuc ? 11 : 8;
+      const config = obtenerConfiguracionDoc(selectTipoDoc.value);
 
-      // Reiniciar minLength primero a 0 para prevenir IndexSizeError en navegadores si el nuevo maxLength < minLength previo
+      // Reiniciar minLength primero a 0 para prevenir IndexSizeError en navegadores
       inputNumeroDoc.minLength = 0;
-      inputNumeroDoc.maxLength = longitudEsperada;
-      inputNumeroDoc.minLength = longitudEsperada;
-      inputNumeroDoc.placeholder = esRuc
-        ? "11 dígitos numéricos (ej. 20123456789)"
-        : "8 dígitos numéricos (ej. 72345678)";
+      inputNumeroDoc.maxLength = config.longitud;
+      inputNumeroDoc.minLength = config.longitud;
+      inputNumeroDoc.placeholder = config.placeholder;
 
       if (ayudaDoc) {
-        ayudaDoc.innerHTML = esRuc
-          ? '<span class="text-emerald-700 font-medium">RUC: requiere exactamente 11 dígitos numéricos.</span>'
-          : '<span class="text-emerald-700 font-medium">DNI: requiere exactamente 8 dígitos numéricos.</span>';
+        ayudaDoc.innerHTML = `<span class="text-emerald-700 font-medium">${config.mensajeAyuda}</span>`;
       }
 
       // Si al cambiar excede la longitud del nuevo tipo, recortar
-      if (inputNumeroDoc.value.length > longitudEsperada) {
-        inputNumeroDoc.value = inputNumeroDoc.value.slice(0, longitudEsperada);
+      if (inputNumeroDoc.value.length > config.longitud) {
+        inputNumeroDoc.value = inputNumeroDoc.value.slice(0, config.longitud);
       }
     }
 
@@ -39,9 +39,9 @@ document.addEventListener("DOMContentLoaded", () => {
     selectTipoDoc.addEventListener("input", sincronizarTipoDocumento);
     sincronizarTipoDocumento();
 
-    // Sanitización: admitir estrictamente dígitos numéricos
+    // Sanitización centralizada: admitir estrictamente dígitos numéricos
     inputNumeroDoc.addEventListener("input", (e) => {
-      const valorLimpio = e.target.value.replace(/\D/g, "");
+      const valorLimpio = limpiarDigitos(e.target.value);
       if (e.target.value !== valorLimpio) {
         e.target.value = valorLimpio;
       }
@@ -69,12 +69,12 @@ document.addEventListener("DOMContentLoaded", () => {
           submitBtn.style.minWidth = `${anchoOriginal}px`;
           submitBtn.classList.add("opacity-80", "cursor-wait");
           submitBtn.innerHTML = `
-                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 inline-block text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                        </svg>
-                        <span>Guardando...</span>
-                    `;
+            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 inline-block text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+            </svg>
+            <span>Guardando...</span>
+          `;
         }, 0);
 
         // Salvaguarda: rehabilitar a los 10 segundos si la petición no navegó

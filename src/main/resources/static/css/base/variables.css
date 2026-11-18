@@ -1,0 +1,41 @@
+/* ==========================================================================
+   BOTICA SAN MIGUEL — BASE: VARIABLES Y TOKENS DE DISEÑO
+   Paleta Institucional Pino, Tokens de Color, Sombras y Radios (:root)
+   ========================================================================== */
+
+:root {
+  /* Paleta Principal - Verde Farmacéutico (Pino Institucional) */
+  --color-primario: #156552;
+  --color-primario-hover: #0e4b3c;
+  --color-primario-suave: #e8f4f0;
+  --color-primario-borde: #b8dcd2;
+
+  /* Superficies y Fondos */
+  --bg-pagina: #f4f7f6;
+  --bg-superficie: #ffffff;
+  --bg-hover-fila: #f2f8f5;
+
+  /* Textos */
+  --texto-principal: #1e2926;
+  --texto-secundario: #5c6b66;
+
+  /* Bordes y Estados */
+  --borde-suave: #dde5e2;
+  --borde-input: #b8c7c1;
+  --color-foco: #0284c7;
+  --color-error: #b42318;
+  --bg-error: #fef3f2;
+  --borde-error: #fecdca;
+  --color-exito: #15603a;
+  --bg-exito: #ecfdf3;
+  --borde-exito: #abefc6;
+
+  /* Sombras y Radios */
+  --radio-sm: 6px;
+  --radio-md: 8px;
+  --radio-lg: 12px;
+  --sombra-tarjeta:
+    0 1px 3px rgba(16, 24, 40, 0.06), 0 1px 2px rgba(16, 24, 40, 0.04);
+  --sombra-elevada: 0 20px 40px -12px rgba(14, 42, 35, 0.22);
+  --transicion: 0.18s ease-in-out;
+}

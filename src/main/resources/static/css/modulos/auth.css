@@ -1,0 +1,216 @@
+/* ==========================================================================
+   BOTICA SAN MIGUEL — MÓDULO: AUTENTICACIÓN Y ACCESO (LOGIN)
+   Pantalla de acceso, tarjeta de login, inputs de credenciales y avisos
+   ========================================================================== */
+
+.pagina-login {
+  min-height: 100dvh;
+  background-color: #113229;
+  background-image:
+    radial-gradient(
+      circle at center,
+      rgba(19, 57, 48, 0.55) 0%,
+      rgba(10, 32, 26, 0.82) 100%
+    ),
+    url("../images/fondo-login.png");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+.login-principal {
+  max-width: none;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 32px 20px;
+  backdrop-filter: blur(3px);
+}
+
+.login-panel {
+  width: 100%;
+  max-width: 420px;
+  padding: 36px 36px 28px;
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-top: 5px solid var(--color-primario, #156552);
+  border-radius: 14px;
+  box-shadow:
+    0 24px 48px -12px rgba(6, 22, 18, 0.45),
+    0 0 0 1px rgba(16, 48, 40, 0.08);
+}
+
+.login-identidad {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.login-emblema-caja {
+  width: 84px;
+  height: 84px;
+  margin: 0 auto 12px;
+  display: grid;
+  place-items: center;
+  background: #f0f7f4;
+  border: 1px solid #d5e8e0;
+  border-radius: 20px;
+}
+
+.login-emblema {
+  display: block;
+  width: 68px;
+  height: 68px;
+  object-fit: contain;
+}
+
+.login-etiqueta {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-primario, #156552);
+}
+
+.login-identidad h1 {
+  margin: 0 0 4px;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.login-identidad h2 {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 400;
+  color: var(--texto-secundario, #5c6b66);
+}
+
+.login-campo {
+  margin-bottom: 18px;
+}
+
+.login-campo label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #263530;
+}
+
+.login-input-grupo {
+  position: relative;
+}
+
+.login-input-grupo > .icono,
+.login-input-grupo > .icono-svg-input {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: #7c8c84;
+  pointer-events: none;
+}
+
+.login-campo input {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 10px 14px 10px 42px;
+  border: 1px solid var(--borde-input, #b8c7c1);
+  border-radius: 8px;
+  background: #f9fbfa;
+  color: var(--texto-principal, #10201b);
+  font: inherit;
+  font-size: 14px;
+  transition:
+    border-color var(--transicion, 0.18s ease-in-out),
+    box-shadow var(--transicion, 0.18s ease-in-out),
+    background-color var(--transicion, 0.18s ease-in-out);
+}
+
+.login-campo input:focus {
+  background: #ffffff;
+  border-color: var(--color-primario, #156552);
+  box-shadow: 0 0 0 3px rgba(21, 101, 82, 0.15);
+  outline: none;
+}
+
+.login-mostrar-clave {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: -2px 0 20px;
+  font-size: 13.5px;
+  color: var(--texto-secundario, #5c6b66);
+  cursor: pointer;
+  user-select: none;
+}
+
+.login-mostrar-clave input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primario, #156552);
+  cursor: pointer;
+}
+
+.login-boton {
+  width: 100%;
+  min-height: 46px;
+  border-radius: 8px;
+  background: var(--color-primario, #156552);
+  border-color: var(--color-primario, #156552);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(21, 101, 82, 0.25);
+}
+
+.login-boton:hover {
+  background: var(--color-primario-hover, #0e4b3c);
+  border-color: var(--color-primario-hover, #0e4b3c);
+}
+
+.login-aviso {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding: 11px 14px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.login-aviso-error {
+  background: var(--bg-error, #fef3f2);
+  color: var(--color-error, #b42318);
+  border: 1px solid var(--borde-error, #fecdca);
+}
+
+.login-aviso-exito {
+  background: var(--bg-exito, #ecfdf3);
+  color: var(--color-exito, #15603a);
+  border: 1px solid var(--borde-exito, #abefc6);
+}
+
+.login-pie {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--borde-suave, #dde5e2);
+  text-align: center;
+  font-size: 12px;
+  color: var(--texto-secundario, #5c6b66);
+}
+
+@media (max-width: 480px) {
+  .login-principal {
+    padding: 20px 16px;
+  }
+  .login-panel {
+    padding: 28px 22px 24px;
+  }
+}

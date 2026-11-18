@@ -1,0 +1,104 @@
+/* ==========================================================================
+   BOTICA SAN MIGUEL — LAYOUT: MODALES Y DIÁLOGOS
+   Backdrop, ventanas emergentes, animaciones y modales de confirmación
+   ========================================================================== */
+
+.ov {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 42, 36, 0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 48px 16px;
+  overflow-y: auto;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.ov.activo,
+.ov.on {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.md {
+  width: 100%;
+  max-width: 620px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  margin: auto 0;
+  transform: translateY(-16px) scale(0.98);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ov.activo .md,
+.ov.on .md {
+  transform: translateY(0) scale(1);
+}
+
+.md .mh {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 22px 26px 16px;
+  border-bottom: 1px solid var(--line, #dfe6e3);
+}
+
+.md .mh .fi2 {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--pine-50, #e9f4f0);
+  color: var(--pine-700, #166a55);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+
+.md .mh h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink, #10201b);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.md .mh p {
+  color: var(--ink-3, #5b6d66);
+  font-size: 13px;
+  margin-top: 2px;
+  margin-bottom: 0;
+}
+
+.md .mb {
+  padding: 20px 26px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 16px;
+}
+
+.md .mb .full {
+  grid-column: 1 / -1;
+}
+
+.md .mf {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 26px;
+  background: #f7f9f8;
+  border-top: 1px solid var(--line, #dfe6e3);
+}
+
+@media (max-width: 640px) {
+  .md .mb {
+    grid-template-columns: 1fr;
+  }
+}

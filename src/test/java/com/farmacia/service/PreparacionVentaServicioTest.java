@@ -318,4 +318,165 @@ class PreparacionVentaServicioTest {
                 new BigDecimal("2.50"), 5, true);
     }
 
+    // ------------------------------------------------------------------ FASE A: Proporcionalidad de Descuentos al Modificar Cantidad (H-05)
+
+    @Test
+    void ejemplo1_reduccionCantidadConDescuentoFijo() {
+        // Situación inicial: P.U. S/ 10.00, Cantidad 2, Subtotal S/ 20.00, Descuento S/ 15.00, Total S/ 5.00
+        var servicio = servicioConDiezSoles(new DescuentoImporteFijo());
+        servicio.agregar("vendedor", new PreparacionVentaCambioFormulario(10, 2, new BigDecimal("15.00")));
+
+        // El usuario reduce la cantidad a 1
+        var vista = servicio.modificarCantidad("vendedor", 10, 1);
+
+        // Resultado esperado: Nuevo subtotal S/ 10.00, Nuevo descuento S/ 7.50, Nuevo total S/ 2.50
+        assertEquals(new BigDecimal("10.00"), vista.subtotal());
+        assertEquals(new BigDecimal("7.50"), vista.descuentoTotal());
+        assertEquals(new BigDecimal("2.50"), vista.total());
+
+        var linea = vista.detalles().getFirst();
+        assertEquals(1, linea.cantidad());
+        assertEquals(new BigDecimal("7.50"), linea.descuento());
+        assertEquals(new BigDecimal("2.50"), linea.importe());
+    }
+
+    @Test
+    void ejemplo2_reduccionCantidadConDescuentoPequeno() {
+        // Situación inicial: P.U. S/ 8.50, Cantidad 3, Subtotal S/ 25.50, Descuento S/ 3.00
+        var medicamentos = mock(MedicamentoRepositorio.class);
+        when(medicamentos.buscarPorId(20)).thenReturn(Optional.of(new Medicamento(20, "MED-20", "Amoxicilina",
+                "500 mg", "Caja", "CAJA", new BigDecimal("8.50"), 10, true)));
+        var prioridad = mock(LotePrioridadServicio.class);
+        when(prioridad.planificarSalida(eq(20), anyInt())).thenAnswer(inv ->
+                List.of(new AsignacionLoteFefo(1, "LT-1", LocalDate.now().plusDays(20), 50, inv.getArgument(1))));
+        var servicio = new PreparacionVentaServicio(medicamentos, usuarioRepo(), prioridad, new DescuentoImporteFijo());
+
+        servicio.agregar("vendedor", new PreparacionVentaCambioFormulario(20, 3, new BigDecimal("3.00")));
+
+        // El usuario reduce la cantidad a 2
+        var vista = servicio.modificarCantidad("vendedor", 20, 2);
+
+        // Resultado esperado: Nuevo subtotal S/ 17.00, Nuevo descuento S/ 2.00, Nuevo total S/ 15.00
+        assertEquals(new BigDecimal("17.00"), vista.subtotal());
+        assertEquals(new BigDecimal("2.00"), vista.descuentoTotal());
+        assertEquals(new BigDecimal("15.00"), vista.total());
+
+        var linea = vista.detalles().getFirst();
+        assertEquals(2, linea.cantidad());
+        assertEquals(new BigDecimal("2.00"), linea.descuento());
+        assertEquals(new BigDecimal("15.00"), linea.importe());
+    }
+
+    @Test
+    void ejemplo3_aumentoCantidadConservaDescuentoAbsoluto() {
+        // Situación inicial: P.U. S/ 10.00, Cantidad 1, Subtotal S/ 10.00, Descuento S/ 5.00
+        var servicio = servicioConDiezSoles(new DescuentoImporteFijo());
+        servicio.agregar("vendedor", new PreparacionVentaCambioFormulario(10, 1, new BigDecimal("5.00")));
+
+        // El usuario aumenta la cantidad a 2
+        var vista = servicio.modificarCantidad("vendedor", 10, 2);
+
+        // Resultado esperado: Nuevo subtotal S/ 20.00, Nuevo descuento S/ 5.00, Nuevo total S/ 15.00
+        assertEquals(new BigDecimal("20.00"), vista.subtotal());
+        assertEquals(new BigDecimal("5.00"), vista.descuentoTotal());
+        assertEquals(new BigDecimal("15.00"), vista.total());
+
+        var linea = vista.detalles().getFirst();
+        assertEquals(2, linea.cantidad());
+        assertEquals(new BigDecimal("5.00"), linea.descuento());
+        assertEquals(new BigDecimal("15.00"), linea.importe());
+    }
+
+    @Test
+    void modificarCantidad_descuentoIgualAlSubtotal_alReducirSigueSiendoGratis() {
+        // 3 unidades a S/ 10.00 = S/ 30.00 con descuento S/ 30.00 (100% de descuento)
+        var servicio = servicioConDiezSoles(new DescuentoImporteFijo());
+        servicio.agregar("vendedor", new PreparacionVentaCambioFormulario(10, 3, new BigDecimal("30.00")));
+
+        // Reducir a 1 unidad
+        var vista = servicio.modificarCantidad("vendedor", 10, 1);
+
+        assertEquals(new BigDecimal("10.00"), vista.subtotal());
+        assertEquals(new BigDecimal("10.00"), vista.descuentoTotal());
+        assertEquals(new BigDecimal("0.00"), vista.total());
+    }
+
+    @Test
+    void modificarCantidad_lineaSinDescuento_conservaDescuentoCero() {
+        var servicio = servicioConDiezSoles(new DescuentoImporteFijo());
+        servicio.agregar("vendedor", new PreparacionVentaCambioFormulario(10, 3));
+
+        var vista = servicio.modificarCantidad("vendedor", 10, 2);
+
+        assertEquals(new BigDecimal("20.00"), vista.subtotal());
+        assertEquals(new BigDecimal("0.00"), vista.descuentoTotal());
+        assertEquals(new BigDecimal("20.00"), vista.total());
+    }
+
+    @Test
+    void modificarCantidad_descuentoConRedondeoMedio() {
+        // 3 unidades a S/ 10.00 = S/ 30.00 con descuento S/ 10.00
+        var servicio = servicioConDiezSoles(new DescuentoImporteFijo());
+        servicio.agregar("vendedor", new PreparacionVentaCambioFormulario(10, 3, new BigDecimal("10.00")));
+
+        // Reduce a 2 unidades (subtotal 20.00):
+        // 10.00 * (20.00 / 30.00) = 6.6666... -> redondeado HALF_UP = S/ 6.67
+        var vista = servicio.modificarCantidad("vendedor", 10, 2);
+
+        assertEquals(new BigDecimal("20.00"), vista.subtotal());
+        assertEquals(new BigDecimal("6.67"), vista.descuentoTotal());
+        assertEquals(new BigDecimal("13.33"), vista.total());
+    }
+
+    @Test
+    void modificarCantidad_reducirHastaMinimoPermitidoUnaUnidad() {
+        var servicio = servicioConDiezSoles(new DescuentoImporteFijo());
+        servicio.agregar("vendedor", new PreparacionVentaCambioFormulario(10, 5, new BigDecimal("25.00")));
+
+        var vista = servicio.modificarCantidad("vendedor", 10, 1);
+
+        assertEquals(new BigDecimal("10.00"), vista.subtotal());
+        assertEquals(new BigDecimal("5.00"), vista.descuentoTotal());
+        assertEquals(new BigDecimal("5.00"), vista.total());
+    }
+
+    @Test
+    void modificarCantidad_deshacerRecuperaCantidadYDescuentoOriginales() {
+        var servicio = servicioConDiezSoles(new DescuentoImporteFijo());
+        servicio.agregar("vendedor", new PreparacionVentaCambioFormulario(10, 2, new BigDecimal("15.00")));
+
+        // Modifica a 1 unidad
+        servicio.modificarCantidad("vendedor", 10, 1);
+
+        // Deshacer recupera la situación inicial (2 unidades, S/ 15.00 de descuento)
+        var restaurada = servicio.deshacer("vendedor");
+        assertEquals(2, restaurada.detalles().getFirst().cantidad());
+        assertEquals(new BigDecimal("20.00"), restaurada.subtotal());
+        assertEquals(new BigDecimal("15.00"), restaurada.descuentoTotal());
+        assertEquals(new BigDecimal("5.00"), restaurada.total());
+    }
+
+    @Test
+    void modificarCantidad_deshacerMultiplesModificacionesConsecutivas() {
+        var servicio = servicioConDiezSoles(new DescuentoImporteFijo());
+        servicio.agregar("vendedor", new PreparacionVentaCambioFormulario(10, 3, new BigDecimal("9.00")));
+
+        // Paso 1: reduce a 2 (descuento = 9 * 20/30 = 6.00)
+        servicio.modificarCantidad("vendedor", 10, 2);
+        // Paso 2: reduce a 1 (descuento = 6 * 10/20 = 3.00)
+        servicio.modificarCantidad("vendedor", 10, 1);
+
+        // Deshacer 1 -> vuelve a 2 unidades y S/ 6.00
+        var deshecho1 = servicio.deshacer("vendedor");
+        assertEquals(2, deshecho1.detalles().getFirst().cantidad());
+        assertEquals(new BigDecimal("6.00"), deshecho1.descuentoTotal());
+        assertEquals(new BigDecimal("14.00"), deshecho1.total());
+
+        // Deshacer 2 -> vuelve a 3 unidades y S/ 9.00
+        var deshecho2 = servicio.deshacer("vendedor");
+        assertEquals(3, deshecho2.detalles().getFirst().cantidad());
+        assertEquals(new BigDecimal("9.00"), deshecho2.descuentoTotal());
+        assertEquals(new BigDecimal("21.00"), deshecho2.total());
+    }
+
 }

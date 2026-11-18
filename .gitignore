@@ -44,4 +44,7 @@ application-local.properties
 # Node & Frontend
 node_modules/
 package-lock.json
+playwright-report/
+test-results/
+
 

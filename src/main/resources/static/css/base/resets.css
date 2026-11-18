@@ -1,0 +1,61 @@
+/* ==========================================================================
+   BOTICA SAN MIGUEL — BASE: RESETS GLOBALES Y TIPOGRAFÍA
+   Normalización del DOM y tipografía base
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+  color: var(--texto-principal, #10201b);
+  background-color: var(--bg-pagina, #f4f7f6);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+main {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 40px 28px;
+}
+
+h1 {
+  margin: 0 0 28px;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--texto-principal);
+}
+
+a {
+  color: var(--color-primario);
+  text-underline-offset: 3px;
+  transition: color var(--transicion);
+}
+
+a:hover {
+  color: var(--color-primario-hover);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-foco);
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  main {
+    padding: 24px 16px;
+  }
+}

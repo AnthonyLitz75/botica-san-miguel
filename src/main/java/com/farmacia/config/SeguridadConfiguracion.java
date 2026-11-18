@@ -205,6 +205,8 @@ public class SeguridadConfiguracion {
 
                                                 .requestMatchers(HttpMethod.PUT, "/ventas/preparacion/{idMedicamento:[0-9]+}/descuento")
                                                 .hasAnyRole("ADMINISTRADOR", "VENDEDOR")
+                                                .requestMatchers(HttpMethod.PUT, "/ventas/preparacion/{idMedicamento:[0-9]+}/cantidad")
+                                                .hasAnyRole("ADMINISTRADOR", "VENDEDOR")
                                                 .requestMatchers(HttpMethod.POST, "/ventas/confirmar")
                                                 .hasAnyRole("ADMINISTRADOR", "VENDEDOR")
                                                 .requestMatchers(HttpMethod.GET, "/ventas/{idVenta:[0-9]+}")

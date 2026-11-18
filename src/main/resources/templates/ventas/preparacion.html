@@ -1,29 +1,26 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-<head>
+<head th:replace="~{fragmentos/head :: recursos('Caja · Preparación de venta')}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <title>Caja · Preparación de venta | Botica San Miguel</title>
-    <link rel="stylesheet" th:href="@{/css/estilos.css}">
-    <link rel="stylesheet" th:href="@{/css/inventario.css}">
-    <link rel="stylesheet" th:href="@{/css/tailwind.css}">
 </head>
 
-<body class="pagina-inventario">
+<body class="pagina-inventario bg-slate-50 text-slate-800 antialiased font-sans">
     <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
     <aside th:replace="~{fragmentos/navegacion :: lateral('Ventas')}"></aside>
     <div class="inventario-area">
-        <header th:replace="~{fragmentos/navegacion :: cabecera('Ventas', 'Caja')}"></header>
-        <main id="contenido" class="inventario-contenido">
-            <!-- Encabezado de sección tipo Boceto 01 -->
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Caja', 'Ventas')}"></header>
+        <main id="contenido" class="page">
+            <!-- Encabezado de la página (idéntico al boceto) -->
             <div class="head">
                 <div>
                     <div class="eyebrow">VENTAS / MOSTRADOR</div>
                     <h1>Caja</h1>
-                    <div class="sub">Escanea el código de barras o selecciona para buscar. Atajos: <b>[F2]</b> buscar · <b>[F4]</b> cliente · <b>[F9]</b> cobrar.</div>
+                    <div class="sub">Escanea el código de barras o escribe para buscar. Atajos: F2 buscar · F4 cliente · F9 cobrar.</div>
                 </div>
             </div>
 
@@ -35,130 +32,145 @@
                 </div>
             </div>
 
-            <!-- Contenedor POS de 2 columnas -->
+            <!-- Grid principal de 2 columnas (.pos) idéntico al boceto -->
             <div class="pos" th:unless="${#lists.isEmpty(medicamentos)}">
-                <!-- Columna Izquierda: Búsqueda, Alertas y Canasta de Venta -->
+                <!-- Columna Izquierda: Buscador de medicamentos + Canasta de venta -->
                 <div>
-                    <!-- Tarjeta de Búsqueda y Selección de Medicamento (Boceto 01) -->
+                    <!-- 1. Tarjeta "Buscar medicamento" -->
                     <div class="card pad">
                         <label for="buscar-caja">Buscar medicamento</label>
-                        <div class="inp" style="height:52px;border-color:var(--pine-700);box-shadow:0 0 0 4px rgba(22,106,85,.12);margin-top:6px;">
-                            <svg class="ico text-pine-700" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <div class="inp foco-verde">
+                            <svg class="ico shrink-0" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M3 5v14M8 5v14M12 5v14M17 5v14M21 5v14"/>
                             </svg>
-                            <input id="buscar-caja" type="text" placeholder="Buscar medicamento o escanear código..." style="background:transparent;border:none;outline:none;font-size:16px;font-weight:700;color:var(--ink);width:100%;font-family:inherit;" autocomplete="off">
+                            <input id="buscar-caja" type="text" placeholder="Buscar medicamento o escanear código..." autocomplete="off"
+                                   style="background:transparent;border:none;outline:none;font-size:16px;font-weight:700;color:var(--ink, #10201b);width:100%;font-family:inherit;">
                             <span class="kbd">F2</span>
                         </div>
-                        <div class="sugg" id="sugerencias-caja">
-                            <!-- Filas generadas reactivamente por JavaScript al escribir -->
+
+                        <!-- Dropdown de resultados / autocompletado (H-03) -->
+                        <div class="sugg" id="sugerencias-caja" style="display:none;">
+                            <!-- Filas generadas reactivamente por JavaScript -->
                         </div>
-                        <div id="aviso-caja" style="display:none;color:var(--rose);font-size:12.5px;font-weight:700;margin-top:8px;padding:6px 10px;background:var(--rose-bg);border-radius:8px"></div>
+
+                        <!-- Mensaje de aviso contextual -->
+                        <div id="aviso-caja" style="display:none;color:var(--rose, #be123c);font-size:12.5px;font-weight:700;margin-top:8px;padding:6px 10px;background:var(--rose-bg, #ffe4e6);border-radius:8px"></div>
 
                         <!-- Formulario de compatibilidad y accesibilidad para pruebas automatizadas (oculto visualmente) -->
-                        <form id="formulario-agregar" class="hidden" style="display:none;" aria-hidden="true">
-                            <select id="select-medicamento" name="idMedicamento">
+                        <form id="formulario-agregar" class="hidden" style="display:none;">
+                            <label for="select-medicamento" class="sr-only">Seleccionar medicamento</label>
+                            <select id="select-medicamento" name="idMedicamento" aria-label="Seleccionar medicamento" tabindex="-1">
                                 <option th:each="m : ${medicamentos}"
                                         th:value="${m.idMedicamento}"
                                         th:text="${m.codigo + ' — ' + m.nombre + ' ' + (m.concentracion != null ? m.concentracion : '') + ' (' + (m.presentacion != null ? m.presentacion : '') + ')'}">
                                 </option>
                             </select>
-                            <input id="input-cantidad" type="number" name="cantidad" value="1">
-                            <button type="submit" id="boton-agregar">Agregar</button>
+                            <label for="input-cantidad" class="sr-only">Cantidad</label>
+                            <input id="input-cantidad" type="number" name="cantidad" value="1" aria-label="Cantidad" tabindex="-1">
+                            <button type="submit" id="boton-agregar" tabindex="-1">Agregar</button>
                         </form>
                     </div>
 
                     <!-- Zona de Alertas de Negocio (role="alert") -->
-                    <div id="zona-alertas" role="alert" class="aviso-operacion aviso-error hidden mt-4" aria-live="polite">
+                    <div id="zona-alertas" role="alert" class="aviso-operacion aviso-error hidden" style="margin-top:14px;" aria-live="polite">
                         <span class="icono icono-x" aria-hidden="true"></span>
                         <div id="texto-alerta"></div>
                     </div>
 
-                    <!-- Tarjeta de Canasta de Venta -->
-                    <div class="card mt-6">
-                        <div class="pad flex items-center justify-between pb-3 border-b border-line">
-                            <div class="flex items-center gap-3">
-                                <h2 class="text-base font-bold text-ink flex items-center gap-2 mb-0" style="font-size:17px">
-                                    <span>Canasta de venta</span>
-                                    <span id="contador-canasta" class="cnt font-bold ml-2 text-xs" style="background:var(--pine-50);color:var(--pine-700);border-radius:999px;padding:2px 9px;">0 productos</span>
-                                </h2>
-                            </div>
+                    <!-- 2. Tarjeta "Canasta de venta" -->
+                    <div class="card" style="margin-top:22px">
+                        <!-- Cabecera de la canasta -->
+                        <div class="pad" style="display:flex;align-items:center;justify-content:space-between;padding-bottom:6px">
+                            <h2 style="font-size:17px;font-weight:700;margin:0;display:flex;align-items:center">
+                                Canasta de venta
+                                <span class="cnt" id="contador-canasta" style="background:var(--pine-50, #e9f4f0);color:var(--pine-700, #166a55);font-weight:800;font-size:12px;border-radius:999px;padding:2px 9px;margin-left:6px">0 productos</span>
+                            </h2>
 
-                            <button id="boton-deshacer" type="button" disabled
-                                class="btn w" style="border:none;font-family:inherit;cursor:not-allowed;opacity:0.5;padding:8px 14px;border-radius:10px;"
-                                title="Deshacer la última modificación en la canasta (Pila LIFO)">
-                                <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <button id="boton-deshacer" type="button" disabled class="btn w"
+                                    style="border:none;font-family:inherit;cursor:pointer"
+                                    title="Deshacer la última modificación en la canasta (Pila LIFO)">
+                                <svg class="ico shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                     <path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>
                                 </svg>
                                 <span>Deshacer último cambio</span>
-                                <small id="contador-pila" style="font-size:11px;opacity:0.85;margin-left:4px">(0 cambios)</small>
                             </button>
                         </div>
 
                         <!-- Estado Vacío -->
-                        <div id="estado-vacio" class="py-12 text-center">
+                        <div id="estado-vacio" class="py-14 text-center px-4">
                             <svg class="mx-auto text-slate-300 mb-3" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                                 <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/>
                                 <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
                             </svg>
-                            <p class="text-sm font-semibold text-ink-2">No hay productos en la venta.</p>
-                            <p class="text-xs text-ink-3 mt-1">Selecciona un medicamento y haz clic en "Agregar" para iniciar la preparación.</p>
+                            <p class="text-sm font-semibold text-slate-700">No hay productos en la venta.</p>
+                            <p class="text-xs text-slate-400 mt-1">Busca un medicamento arriba o escanea su código de barras para comenzar.</p>
                         </div>
 
-                        <!-- Contenedor de Tabla de Líneas -->
-                        <div id="contenedor-tabla" class="hidden">
-                            <div class="overflow-x-auto">
-                                <table id="tabla-lineas">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">Producto</th>
-                                            <th scope="col" class="c">Cantidad</th>
-                                            <th scope="col" class="r">P. unit.</th>
-                                            <th scope="col" class="r">Desc.</th>
-                                            <th scope="col" class="r">Total</th>
-                                            <th scope="col" class="r"></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="cuerpo-lineas">
-                                        <!-- Filas generadas dinámicamente por JavaScript -->
-                                    </tbody>
-                                </table>
-                            </div>
+                        <!-- Tabla de Líneas de la canasta -->
+                        <div id="contenedor-tabla" class="hidden overflow-x-auto">
+                            <table id="tabla-lineas" class="tabla-caja">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" class="col-prod">Producto</th>
+                                        <th scope="col" class="col-cant c">Cantidad</th>
+                                        <th scope="col" class="col-precio r">P. unit.</th>
+                                        <th scope="col" class="col-desc r">Desc.</th>
+                                        <th scope="col" class="col-tot r">Total</th>
+                                        <th scope="col" class="col-acc"><span class="sr-only">Acciones</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cuerpo-lineas">
+                                    <!-- Filas generadas reactivamente por JavaScript -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
 
-                <!-- Columna Derecha: Sticky Panel (Cliente, Pago y Confirmación) -->
-                <div class="flex flex-col gap-5 sticky top-20">
-                    <!-- Tarjeta de Selección de Cliente (Boceto 01) -->
-                    <div class="card pad">
-                        <label for="cliente-caja">Cliente <span class="kbd" style="margin-left:6px">F4</span></label>
-                        <div class="inp w-full" style="position:relative;">
-                            <svg class="ico text-ink-3 flex-none" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <!-- Columna Derecha: Cliente + Método de Pago y Totales + Confirmación -->
+                <div style="display:flex;flex-direction:column;gap:22px;position:sticky;top:86px">
+                    <!-- 1. Tarjeta "Cliente" -->
+                    <div class="card pad space-y-3">
+                        <div class="mb-2.5 flex items-center gap-2">
+                            <label for="cliente-caja" class="m-0 text-sm font-semibold leading-none text-slate-700">
+                                Cliente
+                            </label>
+                            <kbd class="inline-flex h-5 items-center justify-center rounded border border-slate-200 bg-slate-100 px-1.5 font-mono text-[11px] font-medium leading-none text-slate-600">
+                                F4
+                            </kbd>
+                        </div>
+                        <div class="relative">
+                            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
                             </svg>
-                            <input id="cliente-caja" type="text" placeholder="DNI / RUC o nombre…" autocomplete="off"
-                                   style="background:transparent;border:none;outline:none;font-size:14px;color:var(--ink);width:100%;font-family:inherit;">
-                            <div id="sugerencias-cliente" class="sugg" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:20;margin-top:4px;box-shadow:0 8px 24px rgba(0,0,0,0.12);max-height:220px;overflow-y:auto;">
-                                <!-- Opciones coincidentes generadas reactivamente -->
-                            </div>
+                            <input id="cliente-caja" type="text" placeholder="DNI / RUC o nombre..." autocomplete="off"
+                                   class="w-full pl-9 pr-3 py-2 text-sm bg-white rounded-xl border border-slate-200 focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/10 text-slate-800 placeholder:text-slate-400 outline-none transition">
                         </div>
 
-                        <!-- Tarjeta de Resumen del Cliente (.cli) -->
-                        <div class="cli" id="tarjeta-resumen-cliente">
-                            <div class="av">
-                                <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <!-- Dropdown de sugerencias de clientes en flujo normal (H-04) -->
+                        <div id="sugerencias-cliente" class="sugg" style="display:none;width:100%;margin-top:6px;max-height:200px;overflow-y:auto;background:#fff;border:1px solid var(--line, #dfe6e3);border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.06);">
+                            <!-- Opciones coincidentes generadas reactivamente -->
+                        </div>
+
+                        <!-- Tarjeta de Resumen del Cliente Seleccionado (.cli) -->
+                        <div class="cli bg-emerald-50/70 border border-emerald-200/70 rounded-xl p-3 flex items-center justify-between gap-3 mt-3" id="tarjeta-resumen-cliente">
+                            <div class="w-9 h-9 rounded-full bg-white border border-emerald-100 shadow-sm flex items-center justify-center text-emerald-700 shrink-0">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                     <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
                                 </svg>
                             </div>
-                            <div class="min-w-0 flex-1">
-                                <b id="nombre-cliente-mostrado">Público general</b>
-                                <div id="doc-cliente-mostrado" class="lbl">Sin registro o cliente eventual</div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between gap-2">
+                                    <b id="nombre-cliente-mostrado" class="text-xs font-bold text-slate-900 truncate">Público general</b>
+                                    <span class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[11px] font-semibold px-2 py-0.5 rounded-full" id="badge-cliente-mostrado">• Mostrador</span>
+                                </div>
+                                <div id="doc-cliente-mostrado" class="text-[11px] text-slate-500 truncate mt-0.5">Sin registro o cliente eventual</div>
                             </div>
-                            <span class="badge t-ok" id="badge-cliente-mostrado" style="margin-left:auto">Mostrador</span>
                         </div>
 
                         <!-- Selector nativo para persistencia y compatibilidad de pruebas (oculto) -->
-                        <select id="select-cliente" name="idCliente" style="display:none;" aria-hidden="true">
+                        <label for="select-cliente" class="sr-only">Seleccionar cliente</label>
+                        <select id="select-cliente" name="idCliente" style="display:none;" aria-label="Seleccionar cliente" tabindex="-1">
                             <option value="" selected>Público general</option>
                             <option th:each="c : ${clientes}" th:value="${c.idCliente()}"
                                 th:data-nombre="${c.nombreCompleto()}"
@@ -169,23 +181,31 @@
                         </select>
                     </div>
 
-                    <!-- Tarjeta de Método de Pago y Totales (Boceto 01) -->
+                    <!-- 2. Tarjeta "Método de pago" y Resumen de Totales (.card.pad.sum) -->
                     <div class="card pad sum">
-                        <label>Método de pago</label>
-                        <div class="seg" id="selector-pago">
-                            <div class="on" style="cursor:pointer" data-metodo="EFECTIVO" role="button" tabindex="0">
-                                <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
-                                Efectivo
+                        <label id="label-metodo-pago">Método de pago</label>
+                        <div class="seg" id="selector-pago" role="group" aria-labelledby="label-metodo-pago">
+                            <div class="on" data-metodo="EFECTIVO" role="button" tabindex="0">
+                                <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>
+                                </svg>
+                                <span>Efectivo</span>
                             </div>
-                            <div style="cursor:pointer" data-metodo="YAPE_PLIN" role="button" tabindex="0">
-                                <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
-                                Yape / Plin
+                            <div data-metodo="YAPE_PLIN" role="button" tabindex="0">
+                                <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/>
+                                </svg>
+                                <span>Yape / Plin</span>
                             </div>
-                            <div style="cursor:pointer" data-metodo="TARJETA" role="button" tabindex="0">
-                                <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
-                                Tarjeta
+                            <div data-metodo="TARJETA" role="button" tabindex="0">
+                                <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>
+                                </svg>
+                                <span>Tarjeta</span>
                             </div>
                         </div>
+
+                        <!-- Separador y desglose (.ln) -->
                         <div style="height:16px"></div>
                         <div class="ln">
                             <span>Subtotal (<span id="subtotal-cant">0</span> unidades)</span>
@@ -195,33 +215,183 @@
                             <span>Descuento</span>
                             <span id="descuento-venta" style="color:var(--rose, #be123c)">—</span>
                         </div>
+
+                        <!-- Total a cobrar destacado (.tot) -->
                         <div class="tot">
-                            <span style="font-weight:700;color:var(--ink-2)">TOTAL A COBRAR</span>
+                            <span style="font-weight:700;color:var(--ink-2, #33463f)">TOTAL A COBRAR</span>
                             <b id="total-venta">S/ 0.00</b>
                         </div>
                     </div>
 
-                    <!-- Tarjeta de Acción / Confirmar Venta (Boceto 01) -->
+                    <!-- 3. Tarjeta de Acción / Confirmar Venta -->
                     <div class="card pad" style="display:grid;gap:12px">
-                        <button type="button" class="btn p lg" id="boton-confirmar" style="border:none;cursor:pointer;width:100%" disabled>
+                        <button type="button" id="boton-confirmar" disabled class="btn p lg"
+                                style="border:none;cursor:pointer">
                             <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/>
                             </svg>
                             <span>Confirmar venta</span>
-                            <span class="kbd" style="margin-left:auto;background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.4);color:#fff">F9</span>
+                            <span class="kbd" style="background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.4);color:#fff">F9</span>
                         </button>
-                        <button type="button" class="btn s" id="btn-cancelar-venta" style="justify-content:center;cursor:pointer;width:100%">
+
+                        <button type="button" id="btn-cancelar-venta" class="btn s"
+                                style="justify-content:center;cursor:pointer">
                             <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M18 6 6 18M6 6l12 12"/>
                             </svg>
                             <span>Cancelar venta</span>
                         </button>
+
                         <div class="hint">Al confirmar se descuenta stock por lote (FEFO) y se imprime la boleta.</div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
+
+    <!-- Modal Flotante de Descuentos (Idéntico a imagen de referencia) -->
+    <div id="modal-descuento-backdrop" class="modal-descuento-backdrop hidden" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="modal-descuento-titulo">
+        <div id="modal-descuento-dialogo" class="modal-descuento-card">
+            <!-- Encabezado del Modal -->
+            <div class="modal-desc-header">
+                <div class="modal-desc-header-left">
+                    <div class="modal-desc-icono-wrap">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M2.05 13.59l8.36 8.36a2 2 0 0 0 2.83 0l8.71-8.71a2 2 0 0 0 0-2.83L13.59 2.05A2 2 0 0 0 12.17 1.46H3.5a2 2 0 0 0-2 2v8.67c0 .53.21 1.04.55 1.46z"/>
+                            <line x1="9" y1="9" x2="15" y2="15"/>
+                            <circle cx="10" cy="14" r="1"/>
+                            <circle cx="14" cy="10" r="1"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 id="modal-descuento-titulo" class="modal-desc-titulo">Descuentos</h2>
+                        <p class="modal-desc-subtitulo">Aplica un descuento a tu venta</p>
+                        <div class="modal-desc-producto-banner">
+                            <span class="modal-desc-producto-label">Producto:</span>
+                            <span id="modal-descuento-producto-nombre" class="modal-desc-producto-nombre">este medicamento</span>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" id="modal-descuento-cerrar" class="modal-desc-cerrar" aria-label="Cerrar modal de descuentos">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M18 6 6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Selector de Modalidad (Segmented Tabs: Monto vs Porcentaje) -->
+            <div class="modal-desc-tabs" role="tablist" aria-label="Modalidad de descuento">
+                <button type="button" id="tab-descuento-monto" class="modal-desc-tab tab-activa" role="tab" aria-selected="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="2" y="6" width="20" height="12" rx="2"/>
+                        <circle cx="12" cy="12" r="2"/>
+                        <path d="M6 12h.01M18 12h.01"/>
+                    </svg>
+                    <span>Monto</span>
+                </button>
+                <button type="button" id="tab-descuento-porcentaje" class="modal-desc-tab tab-inactiva" role="tab" aria-selected="false">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="19" y1="5" x2="5" y2="19"/>
+                        <circle cx="6.5" cy="6.5" r="2.5"/>
+                        <circle cx="17.5" cy="17.5" r="2.5"/>
+                    </svg>
+                    <span>Porcentaje</span>
+                </button>
+            </div>
+
+            <!-- Campo de Entrada -->
+            <div class="modal-desc-field">
+                <label id="label-input-descuento" for="input-valor-descuento" class="modal-desc-label">Monto del descuento (S/)</label>
+                <div class="modal-desc-input-box">
+                    <input type="text" id="input-valor-descuento" class="modal-desc-input" placeholder="0.00" value="0.00" autocomplete="off" inputmode="decimal">
+                    <span id="indicador-unidad-descuento" class="modal-desc-badge">S/</span>
+                </div>
+                <div id="mensaje-error-descuento" class="modal-desc-error-msg" role="alert"></div>
+            </div>
+
+            <!-- Vista Previa Reactiva del Descuento -->
+            <div id="caja-previa-descuento" class="modal-desc-preview">
+                <svg class="modal-desc-preview-icono" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+                <div>
+                    <p id="texto-previa-descuento" class="modal-desc-preview-texto-1">Se aplicará un descuento de S/ 0.00</p>
+                    <p id="texto-previa-nuevo-total" class="modal-desc-preview-texto-2">Nuevo total: S/ 0.00</p>
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="modal-desc-actions">
+                <button type="button" id="btn-cancelar-descuento" class="modal-desc-btn-cancelar">Cancelar</button>
+                <button type="button" id="btn-aplicar-descuento" class="modal-desc-btn-aplicar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="m9 12 2 2 4-4"/>
+                    </svg>
+                    <span>Aplicar descuento</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Cancelación de Venta Activa (H-06) -->
+    <div id="modal-cancelar-venta-backdrop" class="modal-descuento-backdrop hidden" style="display:none;" role="alertdialog" aria-modal="true" aria-labelledby="modal-cancelar-venta-titulo" aria-describedby="modal-cancelar-venta-descripcion">
+        <div id="modal-cancelar-venta-dialogo" class="modal-descuento-card modal-cancelar-card">
+            <!-- Encabezado del Modal -->
+            <div class="modal-desc-header">
+                <div class="modal-desc-header-left">
+                    <div class="modal-cancelar-icono-wrap" aria-hidden="true">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                            <line x1="12" y1="9" x2="12" y2="13"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 id="modal-cancelar-venta-titulo" class="modal-desc-titulo text-red-900">¿Cancelar esta venta?</h2>
+                        <p class="modal-cancelar-subtitulo">Confirmación de vaciado de mostrador</p>
+                    </div>
+                </div>
+                <button type="button" id="modal-cancelar-venta-cerrar" class="modal-desc-cerrar" aria-label="Cerrar modal de cancelación">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M18 6 6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Cuerpo de advertencia -->
+            <div class="modal-cancelar-cuerpo">
+                <p id="modal-cancelar-venta-descripcion" class="modal-cancelar-texto">
+                    Se descartarán todos los medicamentos agregados a la canasta activa y se restablecerá la preparación de mostrador. Esta acción no se puede deshacer.
+                </p>
+            </div>
+
+            <!-- Mensaje de error contextual dentro del modal -->
+            <div id="modal-cancelar-error" class="modal-desc-error-msg" role="alert" style="display:none;margin-bottom:12px;"></div>
+
+            <!-- Botones de Acción -->
+            <div class="modal-desc-actions modal-cancelar-actions">
+                <button type="button" id="btn-abortar-cancelacion" class="modal-desc-btn-cancelar">
+                    Continuar venta
+                </button>
+                <button type="button" id="btn-confirmar-cancelar-venta" class="modal-btn-peligro">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3 6h18"/>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                        <line x1="10" y1="11" x2="10" y2="17"/>
+                        <line x1="14" y1="11" x2="14" y2="17"/>
+                    </svg>
+                    <span>Sí, cancelar venta</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Catálogo de medicamentos y clientes en memoria para búsqueda inmediata -->
     <script th:inline="javascript">
         /*<![CDATA[*/
         window.CATALOGO_MEDICAMENTOS = [
@@ -250,62 +420,36 @@
         ];
         /*]]>*/
     </script>
-    <script th:src="@{/js/preparacion-venta.js}"></script>
+
+    <!-- Script ligero para atajos de teclado de mostrador (F2, F4, F9) -->
     <script>
-        // Atajos de teclado ergonómicos para el cajero
         document.addEventListener('keydown', function(e) {
             if (e.key === 'F2') {
                 e.preventDefault();
-                const inpBuscar = document.getElementById('buscar-caja');
-                if (inpBuscar) {
-                    inpBuscar.focus();
-                    inpBuscar.select();
+                const inp = document.getElementById('buscar-caja') || document.getElementById('buscar-medicamento');
+                if (inp) {
+                    inp.focus();
+                    inp.select();
                 }
             } else if (e.key === 'F4') {
                 e.preventDefault();
-                const inpCli = document.getElementById('cliente-caja');
-                const selCli = document.getElementById('select-cliente');
-                if (inpCli) {
-                    inpCli.focus();
-                    inpCli.select();
-                } else if (selCli) {
-                    selCli.focus();
+                const inp = document.getElementById('cliente-caja') || document.getElementById('buscar-cliente');
+                if (inp) {
+                    inp.focus();
+                    inp.select();
                 }
             } else if (e.key === 'F9') {
                 e.preventDefault();
-                const btnConf = document.getElementById('boton-confirmar');
-                if (btnConf && !btnConf.disabled) btnConf.click();
+                const btn = document.getElementById('boton-confirmar');
+                if (btn && !btn.disabled) {
+                    btn.click();
+                }
             }
         });
-
-        // Actualización visual del chip de cliente al cambiar selección
-        const selectCliente = document.getElementById('select-cliente');
-        const nombreClienteMostrado = document.getElementById('nombre-cliente-mostrado');
-        const docClienteMostrado = document.getElementById('doc-cliente-mostrado');
-
-        if (selectCliente && nombreClienteMostrado && docClienteMostrado) {
-            selectCliente.addEventListener('change', function() {
-                const opt = selectCliente.options[selectCliente.selectedIndex];
-                if (opt && opt.value) {
-                    const texto = opt.text;
-                    const partes = texto.split('—');
-                    nombreClienteMostrado.textContent = partes[0] ? partes[0].trim() : texto;
-                    docClienteMostrado.textContent = partes[1] ? partes[1].trim() : 'Cliente registrado';
-                } else {
-                    nombreClienteMostrado.textContent = 'Público general';
-                    docClienteMostrado.textContent = 'Sin registro o cliente eventual';
-                }
-            });
-        }
-
-        // Selección visual de método de pago
-        document.querySelectorAll('.seg div').forEach(function(el) {
-            el.addEventListener('click', function() {
-                document.querySelectorAll('.seg div').forEach(function(d) { d.classList.remove('on'); });
-                el.classList.add('on');
-            });
-        });
     </script>
+
+    <!-- Módulo orquestador del Punto de Venta -->
+    <script type="module" th:src="@{/js/preparacion-venta.js}"></script>
 </body>
 
 </html>
