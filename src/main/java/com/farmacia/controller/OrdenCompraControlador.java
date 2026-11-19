@@ -44,6 +44,7 @@ public class OrdenCompraControlador {
 
         @GetMapping
         public String listar(
+                        @RequestParam(name = "estado", required = false) String estado,
                         Model model,
                         Authentication autenticacion) {
 
@@ -52,7 +53,11 @@ public class OrdenCompraControlador {
                                 .anyMatch(autoridad -> autoridad.getAuthority().equals("ROLE_ADMINISTRADOR")
                                                 || autoridad.getAuthority().equals("ROLE_COMPRAS"));
 
-                model.addAttribute("ordenes", servicio.listar());
+                String estadoNormalizado = (estado != null && !estado.isBlank()) ? estado.strip().toUpperCase() : null;
+
+                model.addAttribute("ordenes", servicio.listarVista(estadoNormalizado));
+                model.addAttribute("estadoSeleccionado", estadoNormalizado);
+                model.addAttribute("conteosPorEstado", servicio.contarPorEstado());
                 model.addAttribute("puedeCrearOrden", puedeCrearOrden);
 
                 return "ordenes-compra/listado";

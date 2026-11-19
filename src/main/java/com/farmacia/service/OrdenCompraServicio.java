@@ -76,7 +76,7 @@ public class OrdenCompraServicio {
         }
 
         public Map<String, Integer> contarPorEstado() {
-                return Map.of();
+                return ordenRepositorio.contarPorEstado();
         }
 
         public List<OrdenCompra> listar() {
