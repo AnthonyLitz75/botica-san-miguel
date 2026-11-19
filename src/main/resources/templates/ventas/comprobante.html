@@ -120,6 +120,10 @@
                         <span>TOTAL</span>
                         <span id="total-comprobante" th:text="|S/ ${#numbers.formatDecimal(comprobante.total(), 1, 'POINT', 2, 'POINT')}|">S/ 56.50</span>
                     </div>
+                    <div class="l" th:if="${comprobante.metodoPago() != null}">
+                        <span>PAGO</span>
+                        <span id="metodo-pago-comprobante" th:text="${comprobante.metodoPago().etiqueta()}">Efectivo</span>
+                    </div>
                     <hr>
 
                     <!-- Pie de Ticket y QR Simulado -->

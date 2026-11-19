@@ -146,6 +146,7 @@
                                 <th scope="col">Fecha y hora</th>
                                 <th scope="col">Vendedor</th>
                                 <th scope="col">Cliente</th>
+                                <th scope="col">Pago</th>
                                 <th scope="col" class="r">Subtotal</th>
                                 <th scope="col" class="r">Descuento</th>
                                 <th scope="col" class="r">Total</th>
@@ -161,6 +162,10 @@
                                 <td class="text-xs text-ink-2" th:text="${#temporals.format(fila.fechaHora(), 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</td>
                                 <td class="text-xs font-semibold text-ink-2" th:text="${fila.vendedor()}">Vendedor</td>
                                 <td class="text-xs text-ink-2 font-medium" th:text="${fila.clienteVisible()}">Público general</td>
+                                <td class="text-xs">
+                                    <span class="chip" th:if="${fila.metodoPago() != null}" th:text="${fila.metodoPago().etiqueta()}">Efectivo</span>
+                                    <span class="text-ink-3" th:unless="${fila.metodoPago() != null}">—</span>
+                                </td>
                                 <td class="r text-xs text-ink-3" th:text="${'S/ ' + #numbers.formatDecimal(fila.subtotal(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</td>
                                 <td class="r text-xs text-rose-600" th:text="${'S/ ' + #numbers.formatDecimal(fila.descuentoTotal(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</td>
                                 <td class="r font-bold text-ink" th:text="${'S/ ' + #numbers.formatDecimal(fila.total(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</td>
