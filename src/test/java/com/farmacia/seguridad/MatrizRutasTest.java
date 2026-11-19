@@ -73,6 +73,7 @@ class MatrizRutasTest {
     @MockitoBean private com.farmacia.service.UsuarioServicio usuarioServicio;
     @MockitoBean private com.farmacia.service.ReporteServicio reporteServicio;
     @MockitoBean private com.farmacia.service.AuditoriaServicio auditoriaServicio;
+    @MockitoBean private com.farmacia.config.DatosBotica datosBotica;
     @MockitoBean private com.farmacia.service.CategoriaServicio categoriaServicio;
 
     /** Ruta, método y roles que la pueden usar (matriz del README). */
