@@ -23,4 +23,14 @@ class ClienteFrecuenteTest {
         assertTrue(servicio.esClienteFrecuente(10), "10 compras debe ser frecuente");
         assertTrue(servicio.esClienteFrecuente(15), "15 compras supera el umbral y debe ser frecuente");
     }
+
+    @Test
+    @DisplayName("CA-1.3: Con umbral configurado dinámicamente (ej. 5), se adapta al valor indicado")
+    void umbralConfigurable() {
+        ClienteServicio servicio = new ClienteServicio(mock(ClienteRepositorio.class), mock(AuditoriaServicio.class), 5);
+
+        assertFalse(servicio.esClienteFrecuente(4), "4 compras con umbral 5 no es frecuente");
+        assertTrue(servicio.esClienteFrecuente(5), "5 compras con umbral 5 debe ser frecuente");
+        assertTrue(servicio.esClienteFrecuente(6), "6 compras con umbral 5 debe ser frecuente");
+    }
 }

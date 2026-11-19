@@ -6,6 +6,7 @@ import com.farmacia.model.ClienteResumenVista;
 import com.farmacia.repository.ClienteRepositorio;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,18 +16,32 @@ public class ClienteServicio {
     private static final String ENTIDAD = "CLIENTE";
     private final ClienteRepositorio repositorio;
     private final AuditoriaServicio auditoria;
+    private final int umbralClienteFrecuente;
 
-    public ClienteServicio(ClienteRepositorio repositorio, AuditoriaServicio auditoria) {
+    public ClienteServicio(ClienteRepositorio repositorio, AuditoriaServicio auditoria,
+            @Value("${botica.cliente-frecuente-minimo-compras:10}") int umbralClienteFrecuente) {
         this.repositorio = repositorio;
         this.auditoria = auditoria;
+        this.umbralClienteFrecuente = umbralClienteFrecuente;
+    }
+
+    public ClienteServicio(ClienteRepositorio repositorio, AuditoriaServicio auditoria) {
+        this(repositorio, auditoria, 10);
     }
 
     public boolean esClienteFrecuente(long compras) {
-        return false;
+        return compras >= umbralClienteFrecuente;
+    }
+
+    public int getUmbralClienteFrecuente() {
+        return umbralClienteFrecuente;
     }
 
     public List<ClienteResumenVista> listar(String texto) {
-        return repositorio.listar(texto == null ? "" : texto.strip());
+        List<ClienteResumenVista> clientes = repositorio.listar(texto == null ? "" : texto.strip());
+        return clientes.stream()
+                .map(c -> c.conFrecuencia(esClienteFrecuente(c.compras())))
+                .toList();
     }
 
     public Optional<Cliente> buscarPorId(Integer id) {
