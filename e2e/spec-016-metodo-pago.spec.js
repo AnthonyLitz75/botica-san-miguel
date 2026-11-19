@@ -9,7 +9,7 @@ test.describe('Spec 016: Método de pago en la venta', () => {
 
   test.beforeEach(async ({ page }) => {
     test.setTimeout(45000);
-    // Configurar viewport de escritorio a 1600x900 (CA-V.1 / Spec 023)
+    // Configurar viewport de escritorio a 1600x900 (CA-V.1 / Spec 023 / T1615)
     await page.setViewportSize({ width: 1600, height: 900 });
   });
 
@@ -211,6 +211,28 @@ test.describe('Spec 016: Método de pago en la venta', () => {
       const esValido = ['Efectivo', 'Yape / Plin', 'Tarjeta', '—'].includes(texto || '');
       expect(esValido).toBeTruthy();
     }
+  });
+
+  test('CA-V.1 / T1615: Capturas de contraste visual a 1600x900 (Caja POS, Ticket y Historial)', async ({ page }) => {
+    await iniciarSesion(page, 'admin_demo', 'AdminDemo2026!');
+
+    // 1. Captura de Caja POS con selector de método de pago
+    await page.goto('/ventas/nueva');
+    await expect(page.getByRole('heading', { level: 1, name: 'Caja' })).toBeVisible();
+    await page.screenshot({ path: 'e2e/evidencias/spec016-v1-caja-1600x900.png' });
+
+    // 2. Captura de Historial de Ventas con columna Pago y chips
+    await page.goto('/ventas');
+    await expect(page.getByRole('heading', { level: 1, name: /Historial de ventas/i })).toBeVisible();
+    await page.screenshot({ path: 'e2e/evidencias/spec016-v1-historial-1600x900.png' });
+
+    // 3. Captura de Ticket comprobante con línea PAGO
+    const primerEnlaceComprobante = page.locator('tbody tr td:last-child a.lnk').first();
+    await expect(primerEnlaceComprobante).toBeVisible();
+    await primerEnlaceComprobante.click();
+    await page.waitForURL((url) => /\/ventas\/\d+/.test(url.pathname), { timeout: 15000 });
+    await expect(page.locator('#metodo-pago-comprobante')).toBeVisible();
+    await page.screenshot({ path: 'e2e/evidencias/spec016-v1-ticket-1600x900.png' });
   });
 
   test('Reglas Fase D: Ausencia de scroll horizontal a 320px en Caja POS, Comprobante e Historial', async ({ page }) => {
