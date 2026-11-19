@@ -124,7 +124,9 @@ class AuditoriaServicioPersistenciaTest extends AbstractRepositorioIntegrationTe
         var filtro = new com.farmacia.dto.FiltroAuditoriaFormulario(null, null, admin, "INICIO_SESION", null, null);
         String csv = servicio.exportarCsv(admin, filtro);
 
-        assertTrue(csv.startsWith("fecha_hora,usuario,accion"), csv);
+        assertTrue(csv.startsWith("fecha_hora,usuario,accion,etiqueta_accion"), csv);
+        assertTrue(csv.contains("INICIO_SESION"), csv);
+        assertTrue(csv.contains("Inicio de sesión"), csv);
         assertTrue(csv.contains("\"con, coma\""), csv);
         assertEquals(1, jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM auditoria WHERE nombre_usuario = ? AND accion = 'EXPORTAR'", Integer.class, admin));

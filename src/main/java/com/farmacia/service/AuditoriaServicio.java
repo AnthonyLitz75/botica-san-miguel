@@ -72,11 +72,11 @@ public class AuditoriaServicio {
     public String exportarCsv(String nombreUsuario, FiltroAuditoriaFormulario filtro) {
         validarAdministrador(nombreUsuario);
         var efectivo = filtroEfectivo(filtro);
-        var csv = new CsvEscritor().fila("fecha_hora", "usuario", "accion", "entidad", "id_entidad",
+        var csv = new CsvEscritor().fila("fecha_hora", "usuario", "accion", "etiqueta_accion", "entidad", "id_entidad",
                 "resultado", "detalle", "ip_origen");
         var eventos = repositorio.buscar(efectivo, MAX_FILAS_CSV, 0);
         for (var e : eventos) {
-            csv.fila(e.fechaHora(), e.nombreUsuario(), e.accion(), e.entidad(), e.idEntidad(), e.resultado(),
+            csv.fila(e.fechaHora(), e.nombreUsuario(), e.accion(), e.etiquetaAccion(), e.entidad(), e.idEntidad(), e.resultado(),
                     e.detalle(), e.ipOrigen());
         }
         registrarCambio(AccionAuditoria.EXPORTAR, "AUDITORIA", null,
