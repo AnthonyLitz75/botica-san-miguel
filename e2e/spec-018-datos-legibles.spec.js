@@ -62,9 +62,6 @@ test.describe('Spec 018: Datos legibles en listados', () => {
     if (cantidadExito > 0) {
       await expect(badgesExito.first()).toHaveText('ÉXITO');
     }
-
-    // 4. Captura visual para T1813 / CA-V.1
-    await capturarPantallaSegura(page, 'e2e/evidencias/spec-018-06-auditoria-1600x900.png');
   });
 
   test('CA-1.1 a CA-1.3 y CA-3.1 / CA-3.2: Órdenes de compra muestra razón social, sin "Proveedor #" y con chips por estado', async ({ page }) => {
@@ -114,10 +111,18 @@ test.describe('Spec 018: Datos legibles en listados', () => {
     const textoProveedorDetalle = await proveedorDetalle.innerText();
     expect(textoProveedorDetalle.trim().length).toBeGreaterThan(0);
     expect(textoProveedorDetalle).not.toContain('Proveedor #');
+  });
 
-    // 7. Captura visual para T1813 / CA-V.1
+  test('CA-V.1 / T1813: Capturas de contraste visual a 1600x900 (Órdenes de compra y Auditoría)', async ({ page }) => {
+    // 1. Captura de Órdenes de compra a 1600x900 con chips y razón social de proveedor
     await page.goto('/ordenes-compra');
+    await expect(page.getByRole('heading', { level: 1, name: 'Órdenes de compra' })).toBeVisible();
     await capturarPantallaSegura(page, 'e2e/evidencias/spec-018-05-ordenes-compra-1600x900.png');
+
+    // 2. Captura de Auditoría a 1600x900 con etiquetas legibles y badges con tilde
+    await page.goto('/auditoria');
+    await expect(page.getByRole('heading', { level: 1, name: 'Auditoría' })).toBeVisible();
+    await capturarPantallaSegura(page, 'e2e/evidencias/spec-018-06-auditoria-1600x900.png');
   });
 
   test('Reglas Fase D: Ausencia de scroll horizontal a 320 px en Auditoría y Órdenes de compra', async ({ page }) => {
