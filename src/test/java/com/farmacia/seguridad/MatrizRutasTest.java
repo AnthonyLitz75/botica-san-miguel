@@ -126,6 +126,7 @@ class MatrizRutasTest {
                 ruta("POST", "/ventas/preparacion/deshacer", A, V),
                 ruta("DELETE", "/ventas/preparacion/1", A, V),
                 ruta("PUT", "/ventas/preparacion/1/descuento", A, V),
+                ruta("PUT", "/ventas/preparacion/1/cantidad", A, V),
                 ruta("POST", "/ventas/confirmar", A, V),
                 ruta("GET", "/ventas/1", A, V),
                 // Historial de ventas (spec 005)

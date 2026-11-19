@@ -1,0 +1,99 @@
+name: farmacia-aed-dev
+
+services:
+  # ==============================================================================
+  # BASE DE DATOS: PostgreSQL 16 (Persistencia y Healthcheck)
+  # ==============================================================================
+  database:
+    image: postgres:16-alpine
+    container_name: farmacia-dev-database
+    environment:
+      POSTGRES_DB: ${DB_NAME:-farmacia_aed}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    ports:
+      # Expone exclusivamente en loopback local (127.0.0.1) en el puerto 5433 del host
+      - "127.0.0.1:${DB_PORT_HOST:-5433}:5432"
+    volumes:
+      - farmacia_db_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-farmacia_aed}"]
+      interval: 4s
+      timeout: 4s
+      retries: 6
+      start_period: 4s
+    restart: unless-stopped
+    networks:
+      - farmacia_dev_net
+
+  # ==============================================================================
+  # BACKEND: Spring Boot 4.1.2 (Java 25 con DevTools y Debug JDWP 5005)
+  # ==============================================================================
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: farmacia-dev-backend
+    environment:
+      DB_URL: jdbc:postgresql://database:5432/${DB_NAME:-farmacia_aed}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      PORT: ${PORT:-8080}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      DIAS_POR_VENCER: ${DIAS_POR_VENCER:-90}
+    ports:
+      # Expone exclusivamente en loopback local (127.0.0.1) para evitar exposición en redes externas/WiFi
+      - "127.0.0.1:${PORT:-8080}:${PORT:-8080}"
+      - "127.0.0.1:${JVM_DEBUG_PORT:-5005}:5005"
+      - "127.0.0.1:${LIVERELOAD_PORT:-35729}:35729"
+    volumes:
+      # Sincronización de código fuente en tiempo real para recarga DevTools
+      - ./src:/app/src
+      - ./pom.xml:/app/pom.xml
+      - ./mvnw:/app/mvnw
+      - ./.mvn:/app/.mvn
+      - ./entrypoint-dev.sh:/app/entrypoint-dev.sh
+      - ./dev-java-watcher.sh:/app/dev-java-watcher.sh
+      # Caché persistente de dependencias Maven para inicios rápidos
+      - m2_cache:/root/.m2
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - farmacia_dev_net
+
+  # ==============================================================================
+  # FRONTEND WATCHER: Compilador en Vivo de Tailwind CSS (Node.js 22 Alpine)
+  # ==============================================================================
+  frontend-watcher:
+    build:
+      context: .
+      dockerfile: Dockerfile.watcher.dev
+    container_name: farmacia-dev-frontend-watcher
+    stdin_open: true
+    tty: true
+    environment:
+      CHOKIDAR_USEPOLLING: "1"
+    volumes:
+      # Sincronización de plantillas HTML, scripts JS y archivos CSS
+      - ./src:/app/src
+      - ./tailwind.config.js:/app/tailwind.config.js
+      # Volumen anónimo para no sobreescribir ni mezclar binarios de node_modules del host
+      - /app/node_modules
+    restart: unless-stopped
+    networks:
+      - farmacia_dev_net
+
+networks:
+  farmacia_dev_net:
+    name: farmacia_dev_net
+    driver: bridge
+
+volumes:
+  # Volumen nombrado persistente para la base de datos PostgreSQL
+  farmacia_db_dev_data:
+    name: farmacia_db_dev_data
+  # Volumen nombrado para caché de artefactos Maven
+  m2_cache:
+    name: farmacia_m2_cache

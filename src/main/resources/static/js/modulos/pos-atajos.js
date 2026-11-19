@@ -75,8 +75,21 @@ export function configurarBotonCancelar({ onCancelar, getTieneLineas, mostrarAvi
 
   if (!btnCancelarVenta) return;
 
-  const abrirModalCancelar = () => {
+  let ultimoDisparador = null;
+
+  const esElementoEnfocable = (el) => {
+    if (!el || typeof el.focus !== "function") return false;
+    if (!document.contains(el)) return false;
+    if (el.disabled) return false;
+    if (el.hasAttribute("hidden") || el.getAttribute("aria-hidden") === "true") return false;
+    const estilo = window.getComputedStyle ? window.getComputedStyle(el) : el.style;
+    if (estilo && (estilo.display === "none" || estilo.visibility === "hidden")) return false;
+    return true;
+  };
+
+  const abrirModalCancelar = (disparador = null) => {
     if (!backdrop) return;
+    ultimoDisparador = disparador || document.activeElement || btnCancelarVenta;
     backdrop.classList.remove("hidden");
     backdrop.style.display = "flex";
     document.body.classList.add("modal-abierto");
@@ -96,7 +109,7 @@ export function configurarBotonCancelar({ onCancelar, getTieneLineas, mostrarAvi
     }
   };
 
-  const cerrarModalCancelar = () => {
+  const cerrarModalCancelar = (opciones = {}) => {
     if (!backdrop) return;
     backdrop.classList.add("hidden");
     backdrop.style.display = "none";
@@ -114,6 +127,25 @@ export function configurarBotonCancelar({ onCancelar, getTieneLineas, mostrarAvi
     if (btnCerrar) {
       btnCerrar.disabled = false;
     }
+
+    const debeRestaurar =
+      opciones === false || (typeof opciones === "object" && opciones !== null && opciones.restaurarFoco === false)
+        ? false
+        : true;
+
+    if (debeRestaurar) {
+      const elementoRestaurar = ultimoDisparador || btnCancelarVenta;
+      if (esElementoEnfocable(elementoRestaurar)) {
+        elementoRestaurar.focus();
+      } else {
+        const inputBuscar = document.getElementById("buscar-caja");
+        if (esElementoEnfocable(inputBuscar)) {
+          inputBuscar.focus();
+        }
+      }
+    }
+
+    ultimoDisparador = null;
   };
 
   // Clic en el botón principal "Cancelar venta" de la barra de acciones
@@ -121,7 +153,7 @@ export function configurarBotonCancelar({ onCancelar, getTieneLineas, mostrarAvi
     const tieneLineas = typeof getTieneLineas === "function" ? getTieneLineas() : false;
 
     if (tieneLineas) {
-      abrirModalCancelar();
+      abrirModalCancelar(btnCancelarVenta);
     } else if (typeof mostrarAviso === "function") {
       mostrarAviso("La canasta ya se encuentra vacía.");
     }
@@ -129,19 +161,19 @@ export function configurarBotonCancelar({ onCancelar, getTieneLineas, mostrarAvi
 
   // Botón "Continuar venta" (abortar cancelación)
   if (btnAbortar) {
-    btnAbortar.addEventListener("click", cerrarModalCancelar);
+    btnAbortar.addEventListener("click", () => cerrarModalCancelar({ restaurarFoco: true }));
   }
 
   // Botón X de cierre
   if (btnCerrar) {
-    btnCerrar.addEventListener("click", cerrarModalCancelar);
+    btnCerrar.addEventListener("click", () => cerrarModalCancelar({ restaurarFoco: true }));
   }
 
   // Clic en la zona exterior del backdrop para cerrar (sin cerrar si se hace clic dentro del diálogo)
   if (backdrop) {
     backdrop.addEventListener("click", (e) => {
       if (e.target === backdrop) {
-        cerrarModalCancelar();
+        cerrarModalCancelar({ restaurarFoco: true });
       }
     });
   }
@@ -149,7 +181,7 @@ export function configurarBotonCancelar({ onCancelar, getTieneLineas, mostrarAvi
   // Tecla Escape global cuando el modal está abierto
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && backdrop && !backdrop.classList.contains("hidden")) {
-      cerrarModalCancelar();
+      cerrarModalCancelar({ restaurarFoco: true });
     }
   });
 
@@ -201,7 +233,7 @@ export function configurarBotonCancelar({ onCancelar, getTieneLineas, mostrarAvi
         if (typeof onCancelar === "function") {
           await onCancelar();
         }
-        cerrarModalCancelar();
+        cerrarModalCancelar({ restaurarFoco: false });
       } catch (error) {
         btnConfirmar.disabled = false;
         if (btnAbortar) btnAbortar.disabled = false;

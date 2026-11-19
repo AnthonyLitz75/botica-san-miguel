@@ -71,32 +71,44 @@
         </a>
     </nav>
 
-    <aside th:fragment="lateral(seccion)" class="inventario-lateral" aria-label="Navegación principal">
-        <a class="brand transition-transform duration-200 hover:scale-[1.02]" th:href="@{/medicamentos}">
-            <div class="lg">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#166a55" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M3 12h18a8 8 0 0 1-8 7h-2a8 8 0 0 1-8-7Z"/><path d="M12 6v4M10 8h4"/><path d="M15 10c2-1 4-3 4-6"/>
-                </svg>
+    <th:block th:fragment="lateral(seccion)">
+        <div id="sidebar-backdrop" class="sidebar-backdrop" aria-hidden="true"></div>
+        <aside id="sidebar-lateral" class="inventario-lateral" aria-label="Navegación principal">
+            <div class="sidebar-top-bar">
+                <a class="brand transition-transform duration-200 hover:scale-[1.02]" th:href="@{/medicamentos}">
+                    <div class="lg">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#166a55" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M3 12h18a8 8 0 0 1-8 7h-2a8 8 0 0 1-8-7Z"/><path d="M12 6v4M10 8h4"/><path d="M15 10c2-1 4-3 4-6"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <small>Botica</small>
+                        <b>San Miguel</b>
+                    </div>
+                </a>
+                <button id="btn-cerrar-sidebar" class="btn-cerrar-sidebar lg:hidden" type="button" aria-label="Cerrar navegación" title="Cerrar menú">
+                    <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
             </div>
-            <div>
-                <small>Botica</small>
-                <b>San Miguel</b>
+            <nav th:replace="~{fragmentos/navegacion :: menu(${seccion})}"></nav>
+            <div class="foot">
+                <span class="dot" aria-hidden="true"></span>
+                <span>Sistema de Inventario · v1.0</span>
             </div>
-        </a>
-        <nav th:replace="~{fragmentos/navegacion :: menu(${seccion})}"></nav>
-        <div class="foot">
-            <span class="dot" aria-hidden="true"></span>
-            <span>Sistema de Inventario · v1.0</span>
-        </div>
-    </aside>
+        </aside>
+    </th:block>
 
     <header th:fragment="cabecera(seccion, area)" class="inventario-cabecera top">
-        <details class="menu-movil lg:hidden">
-            <summary class="list-none [&::-webkit-details-marker]:hidden cursor-pointer" title="Abrir o cerrar navegación" aria-label="Abrir o cerrar navegación">
-                <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-            </summary>
-            <nav th:replace="~{fragmentos/navegacion :: menu(${seccion})}"></nav>
-        </details>
+        <button id="btn-abrir-sidebar" class="btn-menu-movil lg:hidden" type="button" aria-label="Abrir menú de navegación" aria-controls="sidebar-lateral" aria-expanded="false" title="Abrir menú de navegación">
+            <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
 
         <div class="crumb">
             <span class="pill">

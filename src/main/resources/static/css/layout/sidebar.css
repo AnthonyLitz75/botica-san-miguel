@@ -8,6 +8,18 @@
   color: #1e2d27;
   font-size: 14px;
   min-height: 100vh;
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+body.pagina-inventario {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Ocultar visualmente modales inactivos para accesibilidad y pruebas E2E */
+.ov:not(.activo):not(.on) {
+  visibility: hidden !important;
 }
 
 .pagina-inventario a {
@@ -203,13 +215,122 @@ aside.inventario-lateral {
   flex: none;
 }
 
-/* Adaptabilidad móvil para Sidebar */
+/* ==========================================================================
+   BACKDROP DEL DRAWER (MÓVIL / TABLET)
+   ========================================================================== */
+#sidebar-backdrop,
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 42, 36, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 999;
+  cursor: pointer;
+}
+
+#sidebar-backdrop.activo,
+#sidebar-backdrop.visible,
+.sidebar-backdrop.activo,
+.sidebar-backdrop.visible {
+  display: block;
+}
+
+@media (min-width: 1025px) {
+  #sidebar-backdrop,
+  .sidebar-backdrop {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+   BARRA SUPERIOR INTERIOR Y BOTÓN DE CIERRE DEL DRAWER
+   ========================================================================== */
+.sidebar-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sidebar-top-bar .brand {
+  flex: 1;
+  margin-bottom: 0;
+  padding-bottom: 12px;
+}
+
+.btn-cerrar-sidebar,
+#btn-cerrar-sidebar {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  color: #cfe3dc;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 12px;
+  flex: none;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-cerrar-sidebar:hover,
+#btn-cerrar-sidebar:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-cerrar-sidebar:focus-visible,
+#btn-cerrar-sidebar:focus-visible {
+  outline: 2px solid #34d399;
+  outline-offset: 2px;
+}
+
+@media (min-width: 1025px) {
+  .btn-cerrar-sidebar,
+  #btn-cerrar-sidebar {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+   ADAPTABILIDAD RESPONSIVE (DRAWER OFF-CANVAS EN <= 1024px)
+   ========================================================================== */
 @media (max-width: 1024px) {
   .inventario-lateral,
-  aside.inventario-lateral {
-    position: static;
-    width: 100%;
-    min-height: auto;
-    padding: 16px;
+  aside.inventario-lateral,
+  #sidebar-lateral {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 272px;
+    max-width: 280px;
+    box-sizing: border-box;
+    height: 100%;
+    min-height: 100vh;
+    z-index: 1000;
+    transform: translateX(-100%);
+    visibility: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    box-shadow: none;
+    margin: 0;
+    display: flex !important;
+  }
+
+  .inventario-lateral.sidebar-abierto,
+  aside.inventario-lateral.sidebar-abierto,
+  #sidebar-lateral.sidebar-abierto {
+    transform: translateX(0) !important;
+    visibility: visible !important;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.45);
   }
 }

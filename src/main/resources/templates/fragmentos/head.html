@@ -7,6 +7,7 @@
     <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}">
     <title th:text="${titulo != null ? (titulo.endsWith('Botica San Miguel') ? titulo : titulo + ' | Botica San Miguel') : 'Botica San Miguel'}">Botica San Miguel</title>
     <link rel="stylesheet" th:href="@{/css/tailwind.css}">
+    <script defer th:src="@{/js/modulos/sidebar-movil.js}"></script>
 
     <!-- Cliente LiveReload Inteligente: Hot CSS Reload, Detección de Plantillas y Auto-Reconnect -->
     <!-- Activo EXCLUSIVAMENTE en entorno de desarrollo local (perfil 'dev') -->

@@ -147,15 +147,148 @@ header.inventario-cabecera.top {
   color: #be123c;
 }
 
+/* ==========================================================================
+   DISPARADOR TÁCTIL DEL MENÚ LATERAL (#btn-abrir-sidebar)
+   ========================================================================== */
+#btn-abrir-sidebar,
+.btn-menu-movil {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid #dfe6e3;
+  background: #ffffff;
+  color: #166a55;
+  cursor: pointer;
+  padding: 0;
+  flex: none;
+  transition: all 0.15s ease;
+}
+
+#btn-abrir-sidebar:hover,
+.btn-menu-movil:hover {
+  background: #e9f4f0;
+  border-color: #c5dfd3;
+}
+
+#btn-abrir-sidebar:focus-visible,
+.btn-menu-movil:focus-visible {
+  outline: 2px solid #166a55;
+  outline-offset: 2px;
+}
+
+@media (min-width: 1025px) {
+  #btn-abrir-sidebar,
+  .btn-menu-movil {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+   ADAPTABILIDAD RESPONSIVE DE CABECERA Y CONTENIDO (<= 1024px)
+   ========================================================================== */
 @media (max-width: 1024px) {
   .inventario-area {
-    margin-left: 0;
+    margin-left: 0 !important;
+    max-width: 100vw;
+    overflow-x: hidden;
   }
   .inventario-cabecera,
   header.inventario-cabecera.top {
     padding: 12px 16px;
+    max-width: 100vw;
+    box-sizing: border-box;
   }
   .inventario-contenido {
     padding: 20px 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .inventario-cabecera,
+  header.inventario-cabecera.top {
+    padding: 6px 10px;
+    gap: 8px;
+    min-height: 52px;
+  }
+  .crumb {
+    font-size: 12px;
+    gap: 6px;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .crumb .pill {
+    padding: 3px 6px;
+    font-size: 11px;
+  }
+  .crumb b {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .user {
+    padding: 2px 8px 2px 4px;
+    gap: 6px;
+  }
+  .user b {
+    max-width: 80px;
+  }
+}
+
+@media (max-width: 430px) {
+  .inventario-cabecera,
+  header.inventario-cabecera.top {
+    padding: 4px 8px;
+    gap: 6px;
+    min-height: 48px;
+  }
+  .page {
+    padding-top: 8px !important;
+  }
+  .head {
+    margin-bottom: 8px !important;
+    padding-bottom: 4px !important;
+  }
+  .crumb .pill {
+    display: none;
+  }
+  .user small {
+    display: none;
+  }
+  .user b {
+    max-width: 60px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 360px) {
+  .inventario-cabecera,
+  header.inventario-cabecera.top {
+    padding: 3px 6px;
+    gap: 4px;
+    min-height: 44px;
+  }
+  .crumb b {
+    max-width: 70px;
+    font-size: 11px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .user div {
+    display: none;
+  }
+  .user {
+    padding: 2px;
+    border-radius: 50%;
+  }
+  .sq.cerrar-sesion {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
   }
 }
