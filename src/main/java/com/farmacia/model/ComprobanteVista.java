@@ -16,9 +16,25 @@ public record ComprobanteVista(
         List<Linea> lineas,
         BigDecimal subtotal,
         BigDecimal descuentoTotal,
-        BigDecimal total) {
+        BigDecimal total,
+        MetodoPago metodoPago) {
 
     public static final String PUBLICO_GENERAL = "Público general";
+
+    public ComprobanteVista(
+            Integer idVenta,
+            String numeroComprobante,
+            LocalDateTime fechaHora,
+            Integer idVendedor,
+            String vendedor,
+            String cliente,
+            String documentoCliente,
+            List<Linea> lineas,
+            BigDecimal subtotal,
+            BigDecimal descuentoTotal,
+            BigDecimal total) {
+        this(idVenta, numeroComprobante, fechaHora, idVendedor, vendedor, cliente, documentoCliente, lineas, subtotal, descuentoTotal, total, null);
+    }
 
     public ComprobanteVista {
         lineas = List.copyOf(lineas);
@@ -27,6 +43,10 @@ public record ComprobanteVista(
     /** Nombre del cliente o "Público general" si la venta no tiene cliente. */
     public String clienteVisible() {
         return cliente == null ? PUBLICO_GENERAL : cliente;
+    }
+
+    public String metodoPagoVisible() {
+        return metodoPago == null ? "—" : metodoPago.etiqueta();
     }
 
     public record Linea(

@@ -1,6 +1,7 @@
 package com.farmacia.repository;
 
 import com.farmacia.dto.FiltroVentasFormulario;
+import com.farmacia.model.MetodoPago;
 import com.farmacia.model.VentaResumenVista;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -181,24 +182,27 @@ class VentaRepositorioPersistenciaTest extends AbstractRepositorioIntegrationTes
     @Test
     @DisplayName("CA-1.1, RF-03: Insertar venta guarda el metodo_pago y ventas viejas conservan NULL")
     void insertarYLeerMetodoPago() {
-        int idVentaMetodo = jdbcTemplate.queryForObject("""
-                INSERT INTO venta (id_usuario, id_cliente, subtotal, descuento_total, total, numero_comprobante, metodo_pago)
-                VALUES (?, ?, 10.00, 0.00, 10.00, 'B001-00000888', 'YAPE_PLIN')
-                RETURNING id_venta
-                """, Integer.class, idVendedor1, idCliente1);
+        int idVentaMetodo = repositorio.insertar(idVendedor1, idCliente1, new BigDecimal("10.00"),
+                BigDecimal.ZERO, new BigDecimal("10.00"), "B001-00000888", MetodoPago.YAPE_PLIN);
 
-        int idVentaVieja = jdbcTemplate.queryForObject("""
-                INSERT INTO venta (id_usuario, id_cliente, subtotal, descuento_total, total, numero_comprobante)
-                VALUES (?, ?, 20.00, 0.00, 20.00, 'B001-00000889')
-                RETURNING id_venta
-                """, Integer.class, idVendedor1, idCliente1);
+        int idVentaVieja = repositorio.insertar(idVendedor1, idCliente1, new BigDecimal("20.00"),
+                BigDecimal.ZERO, new BigDecimal("20.00"), "B001-00000889");
 
-        String metodoGuardado = jdbcTemplate.queryForObject(
-                "SELECT metodo_pago FROM venta WHERE id_venta = ?", String.class, idVentaMetodo);
-        assertEquals("YAPE_PLIN", metodoGuardado);
+        var comprobanteMetodo = repositorio.buscarComprobante(idVentaMetodo).orElseThrow();
+        assertEquals(MetodoPago.YAPE_PLIN, comprobanteMetodo.metodoPago());
+        assertEquals("Yape / Plin", comprobanteMetodo.metodoPagoVisible());
 
-        String metodoViejo = jdbcTemplate.queryForObject(
-                "SELECT metodo_pago FROM venta WHERE id_venta = ?", String.class, idVentaVieja);
-        assertNull(metodoViejo);
+        var comprobanteViejo = repositorio.buscarComprobante(idVentaVieja).orElseThrow();
+        assertNull(comprobanteViejo.metodoPago());
+        assertEquals("—", comprobanteViejo.metodoPagoVisible());
+
+        var listado = repositorio.listar(FiltroVentasFormulario.vacio(), 10, 0);
+        var venta1 = listado.stream().filter(v -> v.idVenta().equals(idVentaMetodo)).findFirst().orElseThrow();
+        assertEquals(MetodoPago.YAPE_PLIN, venta1.metodoPago());
+        assertEquals("Yape / Plin", venta1.metodoPagoVisible());
+
+        var venta2 = listado.stream().filter(v -> v.idVenta().equals(idVentaVieja)).findFirst().orElseThrow();
+        assertNull(venta2.metodoPago());
+        assertEquals("—", venta2.metodoPagoVisible());
     }
 }

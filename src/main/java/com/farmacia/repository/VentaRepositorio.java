@@ -84,7 +84,7 @@ public class VentaRepositorio {
                        u.nombre AS vendedor, c.nombre_completo AS cliente,
                        CASE WHEN c.id_cliente IS NULL THEN NULL
                             ELSE c.tipo_documento || ' ' || c.numero_documento END AS documento_cliente,
-                       v.subtotal, v.descuento_total, v.total
+                       v.subtotal, v.descuento_total, v.total, v.metodo_pago
                 FROM venta v
                 JOIN usuario u ON u.id_usuario = v.id_usuario
                 LEFT JOIN cliente c ON c.id_cliente = v.id_cliente
@@ -102,7 +102,8 @@ public class VentaRepositorio {
                         lineas,
                         fila.getBigDecimal("subtotal"),
                         fila.getBigDecimal("descuento_total"),
-                        fila.getBigDecimal("total")),
+                        fila.getBigDecimal("total"),
+                        parsearMetodoPago(fila.getString("metodo_pago"))),
                 idVenta).stream().findFirst();
     }
 
@@ -115,7 +116,8 @@ public class VentaRepositorio {
             fila.getString("cliente"),
             fila.getBigDecimal("subtotal"),
             fila.getBigDecimal("descuento_total"),
-            fila.getBigDecimal("total"));
+            fila.getBigDecimal("total"),
+            parsearMetodoPago(fila.getString("metodo_pago")));
 
     /**
      * Lista ventas paginadas con filtros opcionales (spec 005, CA-1.1, 1.2, 1.3,
@@ -128,7 +130,7 @@ public class VentaRepositorio {
         String sql = """
                 SELECT v.id_venta, v.numero_comprobante, v.fecha_hora, v.id_usuario,
                        u.nombre AS vendedor, c.nombre_completo AS cliente,
-                       v.subtotal, v.descuento_total, v.total
+                       v.subtotal, v.descuento_total, v.total, v.metodo_pago
                 FROM venta v
                 JOIN usuario u ON u.id_usuario = v.id_usuario
                 LEFT JOIN cliente c ON c.id_cliente = v.id_cliente
@@ -191,5 +193,9 @@ public class VentaRepositorio {
 
     private static boolean tieneTexto(String valor) {
         return valor != null && !valor.isBlank();
+    }
+
+    private static MetodoPago parsearMetodoPago(String valor) {
+        return tieneTexto(valor) ? MetodoPago.valueOf(valor) : null;
     }
 }
