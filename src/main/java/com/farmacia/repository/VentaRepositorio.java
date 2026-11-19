@@ -3,6 +3,7 @@ package com.farmacia.repository;
 import com.farmacia.dto.FiltroVentasFormulario;
 import com.farmacia.model.ComprobanteVista;
 import com.farmacia.model.DetalleVenta;
+import com.farmacia.model.MetodoPago;
 import com.farmacia.model.VentaResumenVista;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -32,14 +33,20 @@ public class VentaRepositorio {
     }
 
     public Integer insertar(Integer idUsuario, Integer idCliente, BigDecimal subtotal,
-            BigDecimal descuentoTotal, BigDecimal total, String numeroComprobante) {
+            BigDecimal descuentoTotal, BigDecimal total, String numeroComprobante, MetodoPago metodoPago) {
         String sql = """
-                INSERT INTO venta (id_usuario, id_cliente, subtotal, descuento_total, total, numero_comprobante)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO venta (id_usuario, id_cliente, subtotal, descuento_total, total, numero_comprobante, metodo_pago)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 RETURNING id_venta
                 """;
         return jdbcTemplate.queryForObject(sql, Integer.class,
-                idUsuario, idCliente, subtotal, descuentoTotal, total, numeroComprobante);
+                idUsuario, idCliente, subtotal, descuentoTotal, total, numeroComprobante,
+                metodoPago != null ? metodoPago.name() : null);
+    }
+
+    public Integer insertar(Integer idUsuario, Integer idCliente, BigDecimal subtotal,
+            BigDecimal descuentoTotal, BigDecimal total, String numeroComprobante) {
+        return insertar(idUsuario, idCliente, subtotal, descuentoTotal, total, numeroComprobante, null);
     }
 
     public void insertarDetalle(Integer idVenta, DetalleVenta detalle) {

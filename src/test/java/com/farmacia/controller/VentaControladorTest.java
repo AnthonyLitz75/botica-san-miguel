@@ -2,6 +2,7 @@ package com.farmacia.controller;
 
 import com.farmacia.config.SeguridadConfiguracion;
 import com.farmacia.model.LineaPreparacionVentaVista;
+import com.farmacia.model.MetodoPago;
 import com.farmacia.model.PreparacionVentaVista;
 import com.farmacia.model.VentaConfirmadaVista;
 import com.farmacia.service.PreparacionVentaServicio;
@@ -60,11 +61,11 @@ class VentaControladorTest {
     void confirmaYVaciaLaPreparacion() throws Exception {
         when(preparacionServicio.obtener("vendedor1"))
                 .thenReturn(new PreparacionVentaVista(lineas, new BigDecimal("34.00"), true));
-        when(ventaServicio.confirmar("vendedor1", 3, lineas))
+        when(ventaServicio.confirmar("vendedor1", 3, MetodoPago.EFECTIVO, lineas))
                 .thenReturn(new VentaConfirmadaVista(12, "B001-00000012"));
 
         mvc.perform(post("/ventas/confirmar").with(user("vendedor1").roles("VENDEDOR")).with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON).content("{\"idCliente\": 3}"))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"idCliente\": 3, \"metodoPago\": \"EFECTIVO\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.idVenta").value(12))
                 .andExpect(jsonPath("$.numeroComprobante").value("B001-00000012"));
@@ -77,10 +78,11 @@ class VentaControladorTest {
     void confirmaSinCliente() throws Exception {
         when(preparacionServicio.obtener("admin"))
                 .thenReturn(new PreparacionVentaVista(lineas, new BigDecimal("34.00"), false));
-        when(ventaServicio.confirmar("admin", null, lineas)).thenReturn(new VentaConfirmadaVista(1, "B001-00000001"));
+        when(ventaServicio.confirmar("admin", null, MetodoPago.EFECTIVO, lineas))
+                .thenReturn(new VentaConfirmadaVista(1, "B001-00000001"));
 
         mvc.perform(post("/ventas/confirmar").with(user("admin").roles("ADMINISTRADOR")).with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON).content("{\"idCliente\": null}"))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"idCliente\": null, \"metodoPago\": \"EFECTIVO\"}"))
                 .andExpect(status().isOk());
     }
 
@@ -89,11 +91,11 @@ class VentaControladorTest {
     void errorDeNegocioConservaLaPreparacion() throws Exception {
         when(preparacionServicio.obtener("vendedor1"))
                 .thenReturn(new PreparacionVentaVista(lineas, new BigDecimal("34.00"), true));
-        when(ventaServicio.confirmar(eq("vendedor1"), any(), any()))
+        when(ventaServicio.confirmar(eq("vendedor1"), any(), any(), any()))
                 .thenThrow(new StockInsuficienteException("El stock cambió; vuelve a preparar la venta"));
 
         mvc.perform(post("/ventas/confirmar").with(user("vendedor1").roles("VENDEDOR")).with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON).content("{}"))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"metodoPago\": \"EFECTIVO\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.mensaje").value("El stock cambió; vuelve a preparar la venta"));
 

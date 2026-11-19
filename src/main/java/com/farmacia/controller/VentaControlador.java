@@ -35,7 +35,7 @@ public class VentaControlador {
             @Valid @RequestBody VentaConfirmacionFormulario formulario) {
         String usuario = autenticacion.getName();
         var preparacion = preparacionServicio.obtener(usuario);
-        var resultado = ventaServicio.confirmar(usuario, formulario.idCliente(), preparacion.detalles());
+        var resultado = ventaServicio.confirmar(usuario, formulario.idCliente(), formulario.metodoPago(), preparacion.detalles());
         preparacionServicio.limpiar(usuario);
         return resultado;
     }

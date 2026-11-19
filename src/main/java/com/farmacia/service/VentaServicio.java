@@ -5,6 +5,7 @@ import com.farmacia.model.AsignacionLoteFefo;
 import com.farmacia.model.ComprobanteVista;
 import com.farmacia.model.DetalleVenta;
 import com.farmacia.model.LineaPreparacionVentaVista;
+import com.farmacia.model.MetodoPago;
 import com.farmacia.model.Usuario;
 import com.farmacia.model.VentaConfirmadaVista;
 import com.farmacia.model.VentaResumenVista;
@@ -96,7 +97,16 @@ public class VentaServicio {
     @Transactional(rollbackFor = Exception.class)
     public VentaConfirmadaVista confirmar(String nombreUsuario, Integer idCliente,
             List<LineaPreparacionVentaVista> lineas) {
+        return confirmar(nombreUsuario, idCliente, MetodoPago.EFECTIVO, lineas);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public VentaConfirmadaVista confirmar(String nombreUsuario, Integer idCliente, MetodoPago metodoPago,
+            List<LineaPreparacionVentaVista> lineas) {
         Usuario vendedor = validarVendedor(nombreUsuario);
+        if (metodoPago == null) {
+            throw new IllegalArgumentException("El método de pago es obligatorio");
+        }
         if (lineas == null || lineas.isEmpty()) {
             throw new IllegalArgumentException("La venta no tiene productos");
         }
@@ -158,7 +168,7 @@ public class VentaServicio {
         String numero = ventaRepositorio.siguienteNumeroComprobante();
         BigDecimal total = subtotal.subtract(descuentoTotal);
         Integer idVenta = ventaRepositorio.insertar(vendedor.idUsuario(), idCliente, subtotal,
-                descuentoTotal, total, numero);
+                descuentoTotal, total, numero, metodoPago);
         for (var tramo : tramos) {
             ventaRepositorio.insertarDetalle(idVenta, new DetalleVenta(tramo.idLote(), tramo.cantidad(),
                     tramo.precio(), tramo.descuento(), tramo.bruto().subtract(tramo.descuento())));
