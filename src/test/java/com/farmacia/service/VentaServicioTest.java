@@ -6,6 +6,7 @@ import com.farmacia.model.Cliente;
 import com.farmacia.model.ComprobanteVista;
 import com.farmacia.model.DetalleVenta;
 import com.farmacia.model.LineaPreparacionVentaVista;
+import com.farmacia.model.MetodoPago;
 import com.farmacia.model.Usuario;
 import com.farmacia.model.VentaResumenVista;
 import com.farmacia.repository.ClienteRepositorio;
@@ -71,7 +72,7 @@ class VentaServicioTest {
         servicio = new VentaServicio(usuarios, clientes, prioridad, lotes, ventas, movimientos, RELOJ, auditoria);
         when(usuarios.buscarPorNombreUsuario("vendedor")).thenReturn(Optional.of(usuario(7, "VENDEDOR")));
         when(ventas.siguienteNumeroComprobante()).thenReturn("B001-00000012");
-        when(ventas.insertar(eq(7), any(), any(), any(), any(), eq("B001-00000012"))).thenReturn(12);
+        when(ventas.insertar(eq(7), any(), any(), any(), any(), eq("B001-00000012"), any())).thenReturn(12);
         when(movimientos.registrarSalidaPorVenta(7, 12, "Venta B001-00000012")).thenReturn(40);
     }
 
@@ -86,7 +87,7 @@ class VentaServicioTest {
         assertEquals(12, resultado.idVenta());
         assertEquals("B001-00000012", resultado.numeroComprobante());
         verify(ventas).insertar(7, null, new BigDecimal("34.00"), new BigDecimal("0.00"),
-                new BigDecimal("34.00"), "B001-00000012");
+                new BigDecimal("34.00"), "B001-00000012", MetodoPago.EFECTIVO);
         verify(ventas).insertarDetalle(12, new DetalleVenta(3, 4, PRECIO, new BigDecimal("0.00"),
                 new BigDecimal("34.00")));
         verify(movimientos).registrarDetalle(40, 3, 4);
@@ -120,7 +121,7 @@ class VentaServicioTest {
         servicio.confirmar("vendedor", null, List.of(conDescuento));
 
         verify(ventas).insertar(7, null, new BigDecimal("85.00"), new BigDecimal("5.00"),
-                new BigDecimal("80.00"), "B001-00000012");
+                new BigDecimal("80.00"), "B001-00000012", MetodoPago.EFECTIVO);
         verify(ventas).insertarDetalle(12, new DetalleVenta(3, 4, PRECIO, new BigDecimal("2.00"),
                 new BigDecimal("32.00")));
         verify(ventas).insertarDetalle(12, new DetalleVenta(9, 6, PRECIO, new BigDecimal("3.00"),
@@ -192,11 +193,11 @@ class VentaServicioTest {
                 new Cliente(5, "DNI", "12345678", "Ana Pérez", null, null)));
         when(prioridad.planificarSalida(5, 1)).thenReturn(List.of(tramo(3, 30, 1)));
         when(lotes.descontarStockVigente(3, 1, HOY)).thenReturn(1);
-        when(ventas.insertar(eq(7), eq(5), any(), any(), any(), eq("B001-00000012"))).thenReturn(12);
+        when(ventas.insertar(eq(7), eq(5), any(), any(), any(), eq("B001-00000012"), any())).thenReturn(12);
 
         servicio.confirmar("vendedor", 5, List.of(linea(5, 1)));
 
-        verify(ventas).insertar(eq(7), eq(5), any(), any(), any(), eq("B001-00000012"));
+        verify(ventas).insertar(eq(7), eq(5), any(), any(), any(), eq("B001-00000012"), eq(MetodoPago.EFECTIVO));
     }
 
     @Test
