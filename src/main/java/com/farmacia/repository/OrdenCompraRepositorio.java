@@ -6,6 +6,9 @@ import com.farmacia.model.OrdenCompra;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.math.BigDecimal;
 
 import java.time.LocalDateTime;
@@ -21,11 +24,89 @@ public class OrdenCompraRepositorio {
         }
 
         public List<OrdenCompraListadoVista> listarVista(String estado) {
-                return List.of();
+                StringBuilder sql = new StringBuilder("""
+                                SELECT oc.id_orden, oc.numero_orden, oc.id_usuario, oc.id_proveedor,
+                                       p.razon_social AS razon_social_proveedor,
+                                       oc.fecha_hora, oc.estado, oc.total_estimado, oc.observaciones
+                                FROM orden_compra oc
+                                LEFT JOIN proveedor p ON oc.id_proveedor = p.id_proveedor
+                                """);
+
+                List<Object> parametros = new ArrayList<>();
+                if (estado != null && !estado.isBlank()) {
+                        sql.append(" WHERE oc.estado = ?");
+                        parametros.add(estado.strip());
+                }
+                sql.append(" ORDER BY oc.fecha_hora DESC, oc.id_orden DESC");
+
+                return jdbcTemplate.query(
+                                sql.toString(),
+                                (fila, numeroFila) -> new OrdenCompraListadoVista(
+                                                fila.getInt("id_orden"),
+                                                fila.getString("numero_orden"),
+                                                fila.getInt("id_usuario"),
+                                                fila.getInt("id_proveedor"),
+                                                fila.getString("razon_social_proveedor"),
+                                                fila.getObject("fecha_hora", LocalDateTime.class),
+                                                fila.getString("estado"),
+                                                fila.getBigDecimal("total_estimado"),
+                                                fila.getString("observaciones")),
+                                parametros.toArray());
         }
 
         public List<OrdenCompraListadoVista> listarVista() {
                 return listarVista(null);
+        }
+
+        public Optional<OrdenCompraListadoVista> buscarVistaPorId(Integer idOrden) {
+                String sql = """
+                                SELECT oc.id_orden, oc.numero_orden, oc.id_usuario, oc.id_proveedor,
+                                       p.razon_social AS razon_social_proveedor,
+                                       oc.fecha_hora, oc.estado, oc.total_estimado, oc.observaciones
+                                FROM orden_compra oc
+                                LEFT JOIN proveedor p ON oc.id_proveedor = p.id_proveedor
+                                WHERE oc.id_orden = ?
+                                """;
+
+                List<OrdenCompraListadoVista> ordenes = jdbcTemplate.query(
+                                sql,
+                                (fila, numeroFila) -> new OrdenCompraListadoVista(
+                                                fila.getInt("id_orden"),
+                                                fila.getString("numero_orden"),
+                                                fila.getInt("id_usuario"),
+                                                fila.getInt("id_proveedor"),
+                                                fila.getString("razon_social_proveedor"),
+                                                fila.getObject("fecha_hora", LocalDateTime.class),
+                                                fila.getString("estado"),
+                                                fila.getBigDecimal("total_estimado"),
+                                                fila.getString("observaciones")),
+                                idOrden);
+
+                return ordenes.stream().findFirst();
+        }
+
+        public Map<String, Integer> contarPorEstado() {
+                String sql = """
+                                SELECT estado, COUNT(*) as cantidad
+                                FROM orden_compra
+                                GROUP BY estado
+                                """;
+                Map<String, Integer> conteos = new HashMap<>();
+                conteos.put("TODAS", 0);
+                conteos.put("PENDIENTE", 0);
+                conteos.put("PARCIALMENTE_RECIBIDA", 0);
+                conteos.put("RECIBIDA", 0);
+                conteos.put("CANCELADA", 0);
+
+                jdbcTemplate.query(sql, rs -> {
+                        String estado = rs.getString("estado");
+                        int cantidad = rs.getInt("cantidad");
+                        conteos.put(estado, cantidad);
+                });
+
+                int total = conteos.values().stream().mapToInt(Integer::intValue).sum();
+                conteos.put("TODAS", total);
+                return conteos;
         }
 
         public List<OrdenCompra> listar() {
