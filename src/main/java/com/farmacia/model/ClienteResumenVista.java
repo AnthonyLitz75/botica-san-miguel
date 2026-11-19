@@ -23,10 +23,17 @@ public record ClienteResumenVista(
         if (nombreCompleto == null || nombreCompleto.isBlank()) {
             return "CL";
         }
-        String[] partes = nombreCompleto.strip().split("\\s+");
+        String limpio = nombreCompleto.strip();
+        String[] partes = limpio.split("\\s+");
         if (partes.length == 1) {
             return partes[0].substring(0, Math.min(2, partes[0].length())).toUpperCase();
         }
-        return ("" + partes[0].charAt(0) + (partes.length == 4 ? partes[2].charAt(0) : partes[1].charAt(0))).toUpperCase();
+        String upper = limpio.toUpperCase();
+        boolean esEntidad = upper.contains("S.A.") || upper.contains("SAC") || upper.contains("S.R.L.")
+                || upper.contains("E.I.R.L.") || upper.startsWith("CLÍNICA") || upper.startsWith("CLINICA")
+                || upper.startsWith("BOTICA") || upper.startsWith("FARMACIA") || upper.startsWith("DISTRIBUIDORA");
+        char primera = Character.toUpperCase(partes[0].charAt(0));
+        char segunda = Character.toUpperCase((partes.length == 4 && !esEntidad) ? partes[2].charAt(0) : partes[1].charAt(0));
+        return "" + primera + segunda;
     }
 }

@@ -1,9 +1,11 @@
 package com.farmacia.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import com.farmacia.model.ClienteResumenVista;
 import com.farmacia.repository.ClienteRepositorio;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,5 +34,21 @@ class ClienteFrecuenteTest {
         assertFalse(servicio.esClienteFrecuente(4), "4 compras con umbral 5 no es frecuente");
         assertTrue(servicio.esClienteFrecuente(5), "5 compras con umbral 5 debe ser frecuente");
         assertTrue(servicio.esClienteFrecuente(6), "6 compras con umbral 5 debe ser frecuente");
+    }
+
+    @Test
+    @DisplayName("CA-2.1: Cálculo de iniciales para avatar de clientes personales y jurídicos")
+    void calculoInicialesAvatar() {
+        assertEquals("AS", resumen("Alberto Antonio Suárez Díaz").iniciales());
+        assertEquals("JP", resumen("Juan Pérez Quispe").iniciales());
+        assertEquals("MT", resumen("María Torres León").iniciales());
+        assertEquals("CS", resumen("Clínica Santa Rosa S.A.C.").iniciales());
+        assertEquals("SO", resumen("Solo").iniciales());
+        assertEquals("CL", resumen("").iniciales());
+        assertEquals("CL", resumen(null).iniciales());
+    }
+
+    private ClienteResumenVista resumen(String nombre) {
+        return new ClienteResumenVista(1, "DNI", "12345678", nombre, "987654321", "correo@test.pe", 0L);
     }
 }

@@ -73,6 +73,7 @@
                                 <th scope="col">Nombre completo</th>
                                 <th scope="col">Teléfono</th>
                                 <th scope="col">Correo</th>
+                                <th scope="col" class="c text-center">Compras</th>
                                 <th scope="col" class="r">Acciones</th>
                             </tr>
                         </thead>
@@ -84,12 +85,15 @@
                                 </td>
                                 <td>
                                     <div class="who">
-                                        <span class="ini" th:text="${#strings.length(cliente.nombreCompleto()) >= 2 ? #strings.substring(cliente.nombreCompleto(), 0, 2).toUpperCase() : 'CL'}">CL</span>
+                                        <span class="ini" th:text="${cliente.iniciales()}">AS</span>
                                         <b class="nombre-medicamento font-bold text-ink" th:text="${cliente.nombreCompleto()}">Alberto Antonio Suárez Díaz</b>
                                     </div>
                                 </td>
                                 <td th:text="${#strings.isEmpty(cliente.telefono()) ? '—' : cliente.telefono()}">—</td>
                                 <td class="contacto-proveedor text-ink-3" th:text="${#strings.isEmpty(cliente.correo()) ? '—' : cliente.correo()}">—</td>
+                                <td class="c text-center">
+                                    <span class="num font-bold" th:text="${cliente.compras()}">0</span>
+                                </td>
                                 <td class="r">
                                     <a class="ibtn boton-icono transition-transform duration-150 hover:scale-105"
                                         th:href="@{/clientes/{id}/editar(id=${cliente.idCliente()})}"

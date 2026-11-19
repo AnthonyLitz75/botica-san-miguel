@@ -31,6 +31,16 @@ td {
   vertical-align: middle;
 }
 
+th.c,
+td.c {
+  text-align: center;
+}
+
+th.r,
+td.r {
+  text-align: right;
+}
+
 th,
 .inventario-tabla th {
   background-color: #f4f7f6;
