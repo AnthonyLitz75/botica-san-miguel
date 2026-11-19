@@ -17,5 +17,9 @@ public enum AccionAuditoria {
     EXISTENCIA_INICIAL,
     CAMBIAR_CLAVE,
     CAMBIAR_ROL,
-    EXPORTAR
+    EXPORTAR;
+
+    public String etiqueta() {
+        return "";
+    }
 }
