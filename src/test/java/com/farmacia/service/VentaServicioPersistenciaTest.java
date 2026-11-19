@@ -249,6 +249,18 @@ class VentaServicioPersistenciaTest extends AbstractRepositorioIntegrationTest {
         assertEquals("B001-", misVentas.filas().getFirst().numeroComprobante().substring(0, 5));
     }
 
+    @Test
+    @DisplayName("CA-1.4: si la confirmación falla por stock insuficiente, no queda venta ni método guardado")
+    void transaccionalidad_siFallaConfirmacionNoQuedaVentaNiMetodo() {
+        lote("A", hoy.plusDays(60), 2);
+
+        assertThrows(StockInsuficienteException.class,
+                () -> servicio.confirmar("vendedor_p", null, List.of(linea(5))));
+
+        assertEquals(0, contar("SELECT COUNT(*) FROM venta WHERE metodo_pago IS NOT NULL"));
+        assertEquals(0, contar("SELECT COUNT(*) FROM venta"));
+    }
+
     private LineaPreparacionVentaVista linea(int cantidad) {
         return new LineaPreparacionVentaVista(idMedicamento, "MED", "Paracetamol", cantidad, PRECIO,
                 PRECIO.multiply(BigDecimal.valueOf(cantidad)), List.of());
