@@ -239,9 +239,11 @@ export async function manejarConfirmar() {
   limpiarAlerta();
   const selectCliente = document.getElementById("select-cliente");
   const idCliente = selectCliente ? selectCliente.value : "";
+  const opcionPago = document.querySelector("#selector-pago div[data-metodo].on");
+  const metodoPago = opcionPago && opcionPago.dataset.metodo ? opcionPago.dataset.metodo : "EFECTIVO";
   toggleBotonesAccion(true);
   try {
-    const resultado = await confirmar(idCliente);
+    const resultado = await confirmar(idCliente, metodoPago);
     window.location.assign(`/ventas/${encodeURIComponent(resultado.idVenta)}`);
     return;
   } catch (error) {

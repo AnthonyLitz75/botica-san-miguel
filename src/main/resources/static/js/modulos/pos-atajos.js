@@ -45,13 +45,26 @@ export function configurarSelectorPago() {
   const selectorPago = document.getElementById("selector-pago");
   if (!selectorPago) return;
 
-  selectorPago.addEventListener("click", (e) => {
-    const opcion = e.target.closest("div[data-metodo]");
+  const seleccionar = (opcion) => {
     if (opcion) {
       selectorPago
         .querySelectorAll("div[data-metodo]")
         .forEach((div) => div.classList.remove("on"));
       opcion.classList.add("on");
+    }
+  };
+
+  selectorPago.addEventListener("click", (e) => {
+    seleccionar(e.target.closest("div[data-metodo]"));
+  });
+
+  selectorPago.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      const opcion = e.target.closest("div[data-metodo]");
+      if (opcion) {
+        e.preventDefault();
+        seleccionar(opcion);
+      }
     }
   });
 }

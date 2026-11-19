@@ -94,15 +94,17 @@ export async function aplicarDescuento(idMedicamento, descuento) {
 }
 
 /**
- * Confirma la venta y genera el comprobante interno (spec 003).
+ * Confirma la venta y genera el comprobante interno (spec 003, spec 016).
  * @param {number|string|null} idCliente Vacío o null = "Público general"
+ * @param {string} [metodoPago="EFECTIVO"] Método de pago (EFECTIVO, YAPE_PLIN, TARJETA)
  * @returns {Promise<{ idVenta: number, numeroComprobante: string }>}
  */
-export async function confirmar(idCliente) {
+export async function confirmar(idCliente, metodoPago = "EFECTIVO") {
   return peticion("/ventas/confirmar", {
     method: "POST",
     body: JSON.stringify({
       idCliente: idCliente ? Number(idCliente) : null,
+      metodoPago: metodoPago || "EFECTIVO",
     }),
   });
 }
