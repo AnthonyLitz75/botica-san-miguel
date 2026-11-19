@@ -1,5 +1,6 @@
 package com.farmacia.controller;
 
+import com.farmacia.config.DatosBotica;
 import com.farmacia.config.SeguridadConfiguracion;
 import com.farmacia.model.Medicamento;
 import com.farmacia.model.ComprobanteVista;
@@ -23,6 +24,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -51,6 +53,9 @@ class VentaWebControladorTest {
 
     @MockitoBean
     private VentaServicio ventaServicio;
+
+    @MockitoBean
+    private DatosBotica datosBotica;
 
     @Test
     @DisplayName("Escenario 1: Solicitud anónima a /ventas/nueva redirige a /login")
@@ -174,5 +179,24 @@ class VentaWebControladorTest {
                 .andExpect(status().isForbidden());
         mvc.perform(get("/ventas/12").with(user("compras1").roles("COMPRAS")))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("CA-2.1 y CA-2.2: comprobante muestra nombre, RUC y direccion configurados y no valores fijos de ejemplo")
+    void comprobante_muestraDatosBoticaConfigurados() throws Exception {
+        when(ventaServicio.obtenerComprobante(12, "vendedor1")).thenReturn(Optional.of(comprobante()));
+        when(datosBotica.getNombre()).thenReturn("Botica La Salud");
+        when(datosBotica.getRuc()).thenReturn("20123456789");
+        when(datosBotica.getDireccion()).thenReturn("Jr. Puno 456 - Arequipa");
+
+        mvc.perform(get("/ventas/12").with(user("vendedor1").roles("VENDEDOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("ventas/comprobante"))
+                .andExpect(model().attributeExists("botica"))
+                .andExpect(content().string(containsString("Botica La Salud")))
+                .andExpect(content().string(containsString("20123456789")))
+                .andExpect(content().string(containsString("Jr. Puno 456 - Arequipa")))
+                .andExpect(content().string(not(containsString("20601234567"))))
+                .andExpect(content().string(not(containsString("Av. Universitaria 1234 - Lima"))));
     }
 }
