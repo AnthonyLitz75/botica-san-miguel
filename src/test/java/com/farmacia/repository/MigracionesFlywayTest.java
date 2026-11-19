@@ -65,8 +65,8 @@ class MigracionesFlywayTest extends AbstractRepositorioIntegrationTest {
             assertTrue(flyway.migrate().success, "La migración con datos demo debe completarse");
 
             assertEquals(4, contar(esquema, "usuario"));
-            assertEquals(2, contar(esquema, "medicamento"));
-            assertEquals(1, contar(esquema, "lote"));
+            assertEquals(3, contar(esquema, "medicamento"));
+            assertEquals(2, contar(esquema, "lote"));
             assertEquals(2, contar(esquema, "proveedor"));
             assertEquals(1, contar(esquema, "orden_compra"));
 
