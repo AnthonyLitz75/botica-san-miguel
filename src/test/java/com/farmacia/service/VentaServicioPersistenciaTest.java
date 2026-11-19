@@ -66,6 +66,10 @@ class VentaServicioPersistenciaTest extends AbstractRepositorioIntegrationTest {
         assertTrue(resultado.numeroComprobante().matches("B001-\\d{8}"), resultado.numeroComprobante());        // Spec 014: la venta confirmada queda en la bitácora, en la misma transacción
         assertEquals(1, contar("SELECT COUNT(*) FROM auditoria WHERE accion = 'CONFIRMAR_VENTA' "
                 + "AND entidad = 'VENTA' AND id_entidad = ?", String.valueOf(resultado.idVenta())));
+        String detalleAuditoria = jdbcTemplate.queryForObject(
+                "SELECT detalle FROM auditoria WHERE accion = 'CONFIRMAR_VENTA' AND entidad = 'VENTA' AND id_entidad = ?",
+                String.class, String.valueOf(resultado.idVenta()));
+        assertTrue(detalleAuditoria.contains("pago: EFECTIVO"), "Debe registrar método de pago en auditoría: " + detalleAuditoria);
     }
 
     @Test

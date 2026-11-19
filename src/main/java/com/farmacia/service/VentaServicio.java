@@ -179,7 +179,8 @@ public class VentaServicio {
             movimientoRepositorio.registrarDetalle(idMovimiento, tramo.idLote(), tramo.cantidad());
         }
         auditoria.registrarCambio(AccionAuditoria.CONFIRMAR_VENTA, "VENTA", idVenta,
-                "comprobante: " + numero + "; lineas: " + lineas.size() + "; total: " + total);
+                "comprobante: " + numero + "; lineas: " + lineas.size() + "; total: " + total
+                        + "; pago: " + (metodoPago != null ? metodoPago.name() : "—"));
         return new VentaConfirmadaVista(idVenta, numero);
     }
 
