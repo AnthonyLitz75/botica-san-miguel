@@ -44,8 +44,10 @@ test.describe('Spec 016: Método de pago en la venta', () => {
 
   /**
    * Helper para agregar un producto a la canasta.
+   * Utiliza el medicamento exclusivo de spec 016 (Amoxicilina / MED-016)
+   * para no consumir el stock de PAR-DEMO-A utilizado por otras pruebas E2E.
    */
-  async function agregarProducto(page, termino = 'para') {
+  async function agregarProducto(page, termino = 'amox') {
     const inputBuscador = page.locator('#buscar-caja');
     await inputBuscador.fill(termino);
     const sugerencia = page.locator('#sugerencias-caja .o:not([style*="not-allowed"])').first();
@@ -57,7 +59,7 @@ test.describe('Spec 016: Método de pago en la venta', () => {
   test('CA-1.2, CA-2.2 y CA-2.1: Venta con Efectivo por defecto (sin alterar selector) muestra PAGO: Efectivo en comprobante e historial', async ({ page }) => {
     await iniciarSesion(page, 'admin_demo', 'AdminDemo2026!');
     await asegurarCanastaLimpia(page);
-    await agregarProducto(page, 'para');
+    await agregarProducto(page, 'amox');
 
     // Verificar selector de pago: Efectivo seleccionado por defecto (CA-1.2)
     const optEfectivo = page.locator('#selector-pago div[data-metodo="EFECTIVO"]');
@@ -98,7 +100,7 @@ test.describe('Spec 016: Método de pago en la venta', () => {
   test('CA-1.1: Venta seleccionando Yape / Plin persiste metodo_pago y muestra PAGO: Yape / Plin en comprobante y chip en historial', async ({ page }) => {
     await iniciarSesion(page, 'admin_demo', 'AdminDemo2026!');
     await asegurarCanastaLimpia(page);
-    await agregarProducto(page, 'para');
+    await agregarProducto(page, 'amox');
 
     // Seleccionar Yape / Plin
     const optEfectivo = page.locator('#selector-pago div[data-metodo="EFECTIVO"]');
@@ -132,7 +134,7 @@ test.describe('Spec 016: Método de pago en la venta', () => {
   test('CA-1.1: Venta seleccionando Tarjeta persiste metodo_pago y muestra PAGO: Tarjeta en comprobante y chip en historial', async ({ page }) => {
     await iniciarSesion(page, 'admin_demo', 'AdminDemo2026!');
     await asegurarCanastaLimpia(page);
-    await agregarProducto(page, 'para');
+    await agregarProducto(page, 'amox');
 
     // Seleccionar Tarjeta
     const optEfectivo = page.locator('#selector-pago div[data-metodo="EFECTIVO"]');
@@ -168,7 +170,7 @@ test.describe('Spec 016: Método de pago en la venta', () => {
   test('CA-2.1: Vendedor visualiza columna Pago con chip en Mis Ventas (/ventas/mias)', async ({ page }) => {
     await iniciarSesion(page, 'vendedor_demo', 'VendedorDemo2026!');
     await asegurarCanastaLimpia(page);
-    await agregarProducto(page, 'para');
+    await agregarProducto(page, 'amox');
 
     // Confirmar venta en efectivo como vendedor
     const btnConfirmar = page.locator('#boton-confirmar');

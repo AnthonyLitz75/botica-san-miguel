@@ -54,6 +54,11 @@ BEGIN
     SELECT 'MED-002', 'Ibuprofeno', '400 mg', 'Caja de 10 tabletas', 'CAJA', 13.50, 5, id_categoria
     FROM categoria WHERE nombre = 'AINEs';
 
+    INSERT INTO medicamento
+    (codigo, nombre, concentracion, presentacion, unidad_control, precio_venta, stock_minimo, id_categoria)
+    SELECT 'MED-016', 'Amoxicilina', '500 mg', 'Caja de 30 cápsulas', 'CAJA', 12.00, 10, id_categoria
+    FROM categoria WHERE nombre = 'Analgésicos' AND id_padre IS NULL;
+
     INSERT INTO proveedor (ruc, razon_social, telefono, correo, direccion) VALUES
     ('20000000001', 'Distribuidora de prueba', '999000111',
      'proveedor@example.com', 'Direccion de prueba'),
@@ -63,6 +68,10 @@ BEGIN
     INSERT INTO lote (id_medicamento, numero_lote, fecha_vencimiento, stock_actual)
     SELECT id_medicamento, 'PAR-DEMO-A', CURRENT_DATE + INTERVAL '2 years', 30
     FROM medicamento WHERE codigo = 'MED-001';
+
+    INSERT INTO lote (id_medicamento, numero_lote, fecha_vencimiento, stock_actual)
+    SELECT id_medicamento, 'AMX-DEMO-016', CURRENT_DATE + INTERVAL '2 years', 500
+    FROM medicamento WHERE codigo = 'MED-016';
 
     WITH nuevo_movimiento AS (
         INSERT INTO movimiento_inventario (id_usuario, tipo, motivo)
@@ -89,5 +98,22 @@ BEGIN
     (id_orden, id_medicamento, cantidad_solicitada, costo_unitario, importe_estimado)
     SELECT o.id_orden, m.id_medicamento, 10, 5.00, 50.00
     FROM nueva_orden o CROSS JOIN medicamento m WHERE m.codigo = 'MED-001';
+END;
+$$;
+
+-- Asegurar datos propios de Spec 016 para repetibilidad E2E en bases ya inicializadas
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM medicamento WHERE codigo = 'MED-016') THEN
+        INSERT INTO medicamento
+        (codigo, nombre, concentracion, presentacion, unidad_control, precio_venta, stock_minimo, id_categoria)
+        SELECT 'MED-016', 'Amoxicilina', '500 mg', 'Caja de 30 cápsulas', 'CAJA', 12.00, 10, id_categoria
+        FROM categoria WHERE nombre = 'Analgésicos' AND id_padre IS NULL
+        LIMIT 1;
+
+        INSERT INTO lote (id_medicamento, numero_lote, fecha_vencimiento, stock_actual)
+        SELECT id_medicamento, 'AMX-DEMO-016', CURRENT_DATE + INTERVAL '2 years', 500
+        FROM medicamento WHERE codigo = 'MED-016';
+    END IF;
 END;
 $$;
