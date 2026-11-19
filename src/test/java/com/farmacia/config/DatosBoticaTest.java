@@ -31,6 +31,7 @@ class DatosBoticaTest {
                 .run(context -> {
                     assertThat(context).hasFailed();
                     assertThat(context.getStartupFailure())
+                            .rootCause()
                             .hasMessageContaining("ruc");
                 });
     }
@@ -47,6 +48,7 @@ class DatosBoticaTest {
                 .run(context -> {
                     assertThat(context).hasFailed();
                     assertThat(context.getStartupFailure())
+                            .rootCause()
                             .hasMessageContaining("ruc");
                 });
     }
@@ -61,6 +63,7 @@ class DatosBoticaTest {
                 .run(context -> {
                     assertThat(context).hasFailed();
                     assertThat(context.getStartupFailure())
+                            .rootCause()
                             .hasMessageContaining("nombre");
                 });
     }
