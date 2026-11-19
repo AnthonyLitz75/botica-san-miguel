@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -76,6 +77,23 @@ class MigracionesFlywayTest extends AbstractRepositorioIntegrationTest {
             flyway.clean();
             jdbcTemplate.execute("DROP SCHEMA IF EXISTS " + esquema + " CASCADE");
         }
+    }
+
+    @Test
+    @DisplayName("La tabla venta posee columna metodo_pago con CHECK para valores validos")
+    void columnaMetodoPagoExisteYValidaValores() {
+        Integer existeColumna = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*) FROM information_schema.columns
+                WHERE table_schema = 'public' AND table_name = 'venta' AND column_name = 'metodo_pago'
+                """, Integer.class);
+        assertEquals(1, existeColumna, "Debe existir la columna metodo_pago en la tabla venta");
+
+        assertThrows(org.springframework.dao.DataAccessException.class, () -> {
+            jdbcTemplate.update("""
+                    INSERT INTO venta (id_venta, nro_comprobante, id_usuario, subtotal, descuento, total, metodo_pago)
+                    VALUES (99999, 'B001-99999999', 1, 10.00, 0.00, 10.00, 'INVALIDO')
+                    """);
+        });
     }
 
     private int contar(String esquema, String tabla) {
