@@ -21,6 +21,10 @@ public class ClienteServicio {
         this.auditoria = auditoria;
     }
 
+    public boolean esClienteFrecuente(long compras) {
+        return false;
+    }
+
     public List<ClienteResumenVista> listar(String texto) {
         return repositorio.listar(texto == null ? "" : texto.strip());
     }
