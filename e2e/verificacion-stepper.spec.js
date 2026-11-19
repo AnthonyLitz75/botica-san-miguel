@@ -1,5 +1,17 @@
 import { test, expect } from '@playwright/test';
 
+async function capturarPantallaSegura(page, ruta, reintentos = 3) {
+  for (let i = 0; i < reintentos; i++) {
+    try {
+      await page.screenshot({ path: ruta });
+      return;
+    } catch (e) {
+      if (i === reintentos - 1) throw e;
+      await new Promise(r => setTimeout(r, 250));
+    }
+  }
+}
+
 test.describe('Verificación del Stepper de Cantidad en Caja POS (AyE)', () => {
 
   test.beforeEach(async ({ page }) => {
@@ -58,7 +70,7 @@ test.describe('Verificación del Stepper de Cantidad en Caja POS (AyE)', () => {
     await expect(cantidadBadge).toHaveText('3');
     await expect(subtotalVenta).toHaveText('S/ 25.50');
     await expect(totalVenta).toHaveText('S/ 25.50');
-    await page.screenshot({ path: 'e2e/evidencias/04a-stepper-incrementado-3.png' });
+    await capturarPantallaSegura(page, 'e2e/evidencias/04a-stepper-incrementado-3.png');
 
     // 2. APLICAR DESCUENTO en el modal (S/ 6.00 sobre subtotal S/ 25.50)
     await btnEditarDesc.click();
@@ -76,7 +88,7 @@ test.describe('Verificación del Stepper de Cantidad en Caja POS (AyE)', () => {
     await expect(subtotalVenta).toHaveText('S/ 17.00');
     await expect(btnEditarDesc).toContainText('- S/ 4.00');
     await expect(totalVenta).toHaveText('S/ 13.00');
-    await page.screenshot({ path: 'e2e/evidencias/04b-stepper-decrementado-descuento-proporcional.png' });
+    await capturarPantallaSegura(page, 'e2e/evidencias/04b-stepper-decrementado-descuento-proporcional.png');
 
     // 4. MANTENER DESCUENTO ABSOLUTO AL INCREMENTAR:
     // Cantidad: 2 -> 3. Al incrementar, el descuento de S/ 4.00 se mantiene fijo.
@@ -86,7 +98,7 @@ test.describe('Verificación del Stepper de Cantidad en Caja POS (AyE)', () => {
     await expect(subtotalVenta).toHaveText('S/ 25.50');
     await expect(btnEditarDesc).toContainText('- S/ 4.00');
     await expect(totalVenta).toHaveText('S/ 21.50');
-    await page.screenshot({ path: 'e2e/evidencias/04c-stepper-incrementado-descuento-fijo.png' });
+    await capturarPantallaSegura(page, 'e2e/evidencias/04c-stepper-incrementado-descuento-fijo.png');
 
     // 5. DECREMENTAR HASTA 1 Y VERIFICAR COMPORTAMIENTO INFERIOR A UNO:
     // 3 -> 2 (descuento proporcional: 4.00 * (17.00 / 25.50) = S/ 2.67, Total = S/ 14.33)
@@ -108,7 +120,7 @@ test.describe('Verificación del Stepper de Cantidad en Caja POS (AyE)', () => {
     await btnStepDown.click();
     // La canasta debe quedar vacía (no existen cantidades 0 o negativas en la canasta)
     await expect(page.locator('#estado-vacio')).toBeVisible();
-    await page.screenshot({ path: 'e2e/evidencias/04d-stepper-retirar-en-uno.png' });
+    await capturarPantallaSegura(page, 'e2e/evidencias/04d-stepper-retirar-en-uno.png');
   });
 
 });
