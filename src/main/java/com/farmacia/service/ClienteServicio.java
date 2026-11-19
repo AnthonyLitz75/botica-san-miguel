@@ -2,6 +2,7 @@ package com.farmacia.service;
 
 import com.farmacia.dto.ClienteFormulario;
 import com.farmacia.model.Cliente;
+import com.farmacia.model.ClienteResumenVista;
 import com.farmacia.repository.ClienteRepositorio;
 import java.util.List;
 import java.util.Optional;
@@ -20,7 +21,7 @@ public class ClienteServicio {
         this.auditoria = auditoria;
     }
 
-    public List<Cliente> listar(String texto) {
+    public List<ClienteResumenVista> listar(String texto) {
         return repositorio.listar(texto == null ? "" : texto.strip());
     }
 

@@ -2,6 +2,7 @@ package com.farmacia.repository;
 
 import com.farmacia.dto.ClienteFormulario;
 import com.farmacia.model.Cliente;
+import com.farmacia.model.ClienteResumenVista;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,7 +16,7 @@ public class ClienteRepositorio {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<Cliente> listar(String texto) {
+    public List<ClienteResumenVista> listar(String texto) {
         String sql = """
                 SELECT id_cliente, tipo_documento, numero_documento, nombre_completo, telefono, correo
                 FROM cliente
@@ -23,9 +24,9 @@ public class ClienteRepositorio {
                    OR POSITION(LOWER(?) IN LOWER(numero_documento)) > 0
                 ORDER BY nombre_completo, id_cliente
                 """;
-        return jdbcTemplate.query(sql, (fila, numeroFila) -> mapear(fila.getInt("id_cliente"),
+        return jdbcTemplate.query(sql, (fila, numeroFila) -> new ClienteResumenVista(fila.getInt("id_cliente"),
                 fila.getString("tipo_documento"), fila.getString("numero_documento"),
-                fila.getString("nombre_completo"), fila.getString("telefono"), fila.getString("correo")),
+                fila.getString("nombre_completo"), fila.getString("telefono"), fila.getString("correo"), 0L),
                 texto, texto);
     }
 

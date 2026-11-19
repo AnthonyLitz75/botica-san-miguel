@@ -3,6 +3,7 @@ package com.farmacia.controller;
 import com.farmacia.config.SeguridadConfiguracion;
 import com.farmacia.dto.ClienteFormulario;
 import com.farmacia.model.Cliente;
+import com.farmacia.model.ClienteResumenVista;
 import com.farmacia.service.ClienteServicio;
 import com.farmacia.service.UsuarioDetallesServicio;
 import org.junit.jupiter.api.DisplayName;
@@ -88,7 +89,7 @@ class ClienteWebControladorTest {
     @DisplayName("Escenario 4: Listado de clientes por criterio con VENDEDOR y enlace al formulario")
     void listaClientesPorCriterioYEnlazaAlFormulario() throws Exception {
         when(servicio.listar("Ana")).thenReturn(List.of(
-                new Cliente(8, "DNI", "12345678", "Ana Torres", "987 654 321", "ana@example.com")));
+                new ClienteResumenVista(8, "DNI", "12345678", "Ana Torres", "987 654 321", "ana@example.com", 0L)));
 
         mvc.perform(get("/clientes")
                         .param("buscar", " Ana ")

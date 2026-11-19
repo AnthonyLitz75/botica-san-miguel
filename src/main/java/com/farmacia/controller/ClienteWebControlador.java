@@ -2,6 +2,7 @@ package com.farmacia.controller;
 
 import com.farmacia.dto.ClienteFormulario;
 import com.farmacia.model.Cliente;
+import com.farmacia.model.ClienteResumenVista;
 import com.farmacia.service.ClienteServicio;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -31,7 +32,7 @@ public class ClienteWebControlador {
     @GetMapping
     public String listar(@RequestParam(name = "buscar", defaultValue = "") String buscar, Model model) {
         String criterio = buscar.strip();
-        List<Cliente> clientes = servicio.listar(criterio);
+        List<ClienteResumenVista> clientes = servicio.listar(criterio);
         model.addAttribute("clientes", clientes);
         model.addAttribute("buscar", criterio);
         return "clientes/listado";

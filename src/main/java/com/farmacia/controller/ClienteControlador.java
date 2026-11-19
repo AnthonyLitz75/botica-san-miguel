@@ -2,6 +2,7 @@ package com.farmacia.controller;
 
 import com.farmacia.dto.ClienteFormulario;
 import com.farmacia.model.Cliente;
+import com.farmacia.model.ClienteResumenVista;
 import com.farmacia.service.ClienteServicio;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -33,7 +34,7 @@ public class ClienteControlador {
     }
 
     @GetMapping
-    public List<Cliente> listar(@RequestParam(name = "buscar", defaultValue = "") String buscar) {
+    public List<ClienteResumenVista> listar(@RequestParam(name = "buscar", defaultValue = "") String buscar) {
         return servicio.listar(buscar);
     }
 
