@@ -1,5 +1,7 @@
 package com.farmacia.repository;
 
+import com.farmacia.model.OrdenCompraListadoVista;
+
 import com.farmacia.model.OrdenCompra;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -16,6 +18,14 @@ public class OrdenCompraRepositorio {
 
         public OrdenCompraRepositorio(JdbcTemplate jdbcTemplate) {
                 this.jdbcTemplate = jdbcTemplate;
+        }
+
+        public List<OrdenCompraListadoVista> listarVista(String estado) {
+                return List.of();
+        }
+
+        public List<OrdenCompraListadoVista> listarVista() {
+                return listarVista(null);
         }
 
         public List<OrdenCompra> listar() {
