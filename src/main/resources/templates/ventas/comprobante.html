@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:text="${'Comprobante ' + comprobante.numeroComprobante() + ' | Botica San Miguel'}">Comprobante | Botica San Miguel</title>
+    <title th:text="${'Comprobante ' + comprobante.numeroComprobante() + ' | ' + botica.nombre}">Comprobante | Botica</title>
     <link rel="stylesheet" th:href="@{/css/tailwind.css}">
 </head>
 
@@ -51,9 +51,9 @@
                 <article id="comprobante" class="ticket comprobante-ticket" aria-labelledby="titulo-comprobante">
                     <!-- Cabecera de Ticket -->
                     <div class="ctr">
-                        <div class="big">BOTICA SAN MIGUEL</div>
-                        <div>RUC: 20601234567</div>
-                        <div>Av. Universitaria 1234 - Lima</div>
+                        <div class="big" th:text="${botica.nombre}">BOTICA SAN MIGUEL</div>
+                        <div th:text="${'RUC: ' + botica.ruc}">RUC: </div>
+                        <div th:text="${botica.direccion}">Dirección</div>
                         <hr>
                         <b>BOLETA DE VENTA ELECTRÓNICA</b><br>
                         <span id="titulo-comprobante" class="font-bold text-base tracking-wider" th:text="${comprobante.numeroComprobante()}">B001-00000001</span>

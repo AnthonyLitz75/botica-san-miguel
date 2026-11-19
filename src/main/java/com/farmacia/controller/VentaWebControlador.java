@@ -1,5 +1,6 @@
 package com.farmacia.controller;
 
+import com.farmacia.config.DatosBotica;
 import com.farmacia.model.Medicamento;
 import com.farmacia.service.ClienteServicio;
 import com.farmacia.service.MedicamentoServicio;
@@ -21,12 +22,14 @@ public class VentaWebControlador {
     private final MedicamentoServicio medicamentoServicio;
     private final ClienteServicio clienteServicio;
     private final VentaServicio ventaServicio;
+    private final DatosBotica datosBotica;
 
     public VentaWebControlador(MedicamentoServicio medicamentoServicio, ClienteServicio clienteServicio,
-            VentaServicio ventaServicio) {
+            VentaServicio ventaServicio, DatosBotica datosBotica) {
         this.medicamentoServicio = medicamentoServicio;
         this.clienteServicio = clienteServicio;
         this.ventaServicio = ventaServicio;
+        this.datosBotica = datosBotica;
     }
 
     @GetMapping("/nueva")
@@ -43,6 +46,7 @@ public class VentaWebControlador {
         var comprobante = ventaServicio.obtenerComprobante(idVenta, autenticacion.getName())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venta no encontrada"));
         model.addAttribute("comprobante", comprobante);
+        model.addAttribute("botica", datosBotica);
         return "ventas/comprobante";
     }
 }
