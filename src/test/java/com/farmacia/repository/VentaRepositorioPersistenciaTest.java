@@ -15,6 +15,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -175,5 +176,29 @@ class VentaRepositorioPersistenciaTest extends AbstractRepositorioIntegrationTes
         assertEquals(0, resultado.size());
         assertEquals(0, repositorio.contar(filtroInyeccion));
         assertEquals(0, BigDecimal.ZERO.compareTo(repositorio.sumarTotal(filtroInyeccion)));
+    }
+
+    @Test
+    @DisplayName("CA-1.1, RF-03: Insertar venta guarda el metodo_pago y ventas viejas conservan NULL")
+    void insertarYLeerMetodoPago() {
+        int idVentaMetodo = jdbcTemplate.queryForObject("""
+                INSERT INTO venta (id_usuario, id_cliente, subtotal, descuento_total, total, numero_comprobante, metodo_pago)
+                VALUES (?, ?, 10.00, 0.00, 10.00, 'B001-00000888', 'YAPE_PLIN')
+                RETURNING id_venta
+                """, Integer.class, idVendedor1, idCliente1);
+
+        int idVentaVieja = jdbcTemplate.queryForObject("""
+                INSERT INTO venta (id_usuario, id_cliente, subtotal, descuento_total, total, numero_comprobante)
+                VALUES (?, ?, 20.00, 0.00, 20.00, 'B001-00000889')
+                RETURNING id_venta
+                """, Integer.class, idVendedor1, idCliente1);
+
+        String metodoGuardado = jdbcTemplate.queryForObject(
+                "SELECT metodo_pago FROM venta WHERE id_venta = ?", String.class, idVentaMetodo);
+        assertEquals("YAPE_PLIN", metodoGuardado);
+
+        String metodoViejo = jdbcTemplate.queryForObject(
+                "SELECT metodo_pago FROM venta WHERE id_venta = ?", String.class, idVentaVieja);
+        assertNull(metodoViejo);
     }
 }
