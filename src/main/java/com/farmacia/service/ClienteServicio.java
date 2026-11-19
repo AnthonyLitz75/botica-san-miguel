@@ -6,6 +6,7 @@ import com.farmacia.model.ClienteResumenVista;
 import com.farmacia.repository.ClienteRepositorio;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ public class ClienteServicio {
     private final AuditoriaServicio auditoria;
     private final int umbralClienteFrecuente;
 
+    @Autowired
     public ClienteServicio(ClienteRepositorio repositorio, AuditoriaServicio auditoria,
             @Value("${botica.cliente-frecuente-minimo-compras:10}") int umbralClienteFrecuente) {
         this.repositorio = repositorio;
