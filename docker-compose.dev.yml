@@ -41,6 +41,9 @@ services:
       PORT: ${PORT:-8080}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       DIAS_POR_VENCER: ${DIAS_POR_VENCER:-90}
+      BOTICA_NOMBRE: ${BOTICA_NOMBRE:-Botica San Miguel (Docker Dev - Ficticio)}
+      BOTICA_RUC: ${BOTICA_RUC:-20601234567}
+      BOTICA_DIRECCION: ${BOTICA_DIRECCION:-Av. Universitaria 1234 - Lima (Ficticio)}
     ports:
       # Expone exclusivamente en loopback local (127.0.0.1) para evitar exposición en redes externas/WiFi
       - "127.0.0.1:${PORT:-8080}:${PORT:-8080}"

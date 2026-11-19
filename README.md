@@ -181,6 +181,12 @@ La conexión se define con variables de entorno:
 | `DB_PASSWORD` | Contraseña del usuario (obligatoria) | *(Sin valor por defecto; debe definirse siempre)* |
 | `PORT`        | Puerto del servidor         | `8080`                                           |
 | `DIAS_POR_VENCER` | Horizonte de la alerta "por vencer" (propiedad `farmacia.alertas.dias-por-vencer`) | `90` |
+| `BOTICA_NOMBRE` | Nombre de la botica para comprobantes (obligatoria en producción / perfil default) | *(Sin valor por defecto)* |
+| `BOTICA_RUC` | RUC institucional de 11 dígitos numéricos (obligatoria en producción / perfil default) | *(Sin valor por defecto)* |
+| `BOTICA_DIRECCION` | Dirección física de la botica (obligatoria en producción / perfil default) | *(Sin valor por defecto)* |
+
+> [!NOTE]
+> Con el perfil `demo` (`-Dspring-boot.run.profiles=demo`) o `dev` (Docker), los datos institucionales de la botica se cargan automáticamente con valores ficticios de prueba. En el perfil estándar/producción, la aplicación valida estrictamente su presencia al arrancar y se detiene si falta alguna de estas propiedades.
 
 <details>
 <summary><b>Windows (PowerShell)</b></summary>
@@ -188,6 +194,10 @@ La conexión se define con variables de entorno:
 ```powershell
 $env:DB_USER = "postgres"
 $env:DB_PASSWORD = "tu-contraseña-local"
+# Obligatorios si no se usa el perfil demo:
+$env:BOTICA_NOMBRE = "Botica San Miguel"
+$env:BOTICA_RUC = "20601234567"
+$env:BOTICA_DIRECCION = "Av. Universitaria 1234 - Lima"
 
 .\mvnw.cmd spring-boot:run
 ```
@@ -200,6 +210,10 @@ $env:DB_PASSWORD = "tu-contraseña-local"
 ```bash
 export DB_USER="postgres"
 export DB_PASSWORD="tu-contraseña-local"
+# Obligatorios si no se usa el perfil demo:
+export BOTICA_NOMBRE="Botica San Miguel"
+export BOTICA_RUC="20601234567"
+export BOTICA_DIRECCION="Av. Universitaria 1234 - Lima"
 
 ./mvnw spring-boot:run
 ```

@@ -134,6 +134,15 @@ Las variables se aplican a esta terminal y a los procesos que inicie desde ella.
 No se cargan automaticamente desde un archivo .env.
 No use setx para guardar la clave permanentemente.
 
+DATOS DE LA BOTICA PARA COMPROBANTES:
+Si inicia con el perfil demo ("-Dspring-boot.run.profiles=demo"), los datos institucionales
+vienen precargados con valores ficticios de prueba.
+Si inicia sin datos demo (perfil por defecto o produccion), la aplicacion valida
+estrictamente los datos y SE DETIENE si faltan. En ese caso, configure antes:
+    $env:BOTICA_NOMBRE = "Botica San Miguel"
+    $env:BOTICA_RUC = "20601234567"          # exactamente 11 digitos numericos
+    $env:BOTICA_DIRECCION = "Av. Universitaria 1234 - Lima"
+
 6. COMPILAR E INICIAR
 --------------------
 En esa MISMA terminal, dentro de la carpeta que contiene package.json,
@@ -225,6 +234,9 @@ Para retirar las credenciales del entorno de esa terminal:
     Remove-Item Env:DB_USER -ErrorAction SilentlyContinue
     Remove-Item Env:SPRING_DATASOURCE_URL -ErrorAction SilentlyContinue
     Remove-Item Env:SERVER_PORT -ErrorAction SilentlyContinue
+    Remove-Item Env:BOTICA_NOMBRE -ErrorAction SilentlyContinue
+    Remove-Item Env:BOTICA_RUC -ErrorAction SilentlyContinue
+    Remove-Item Env:BOTICA_DIRECCION -ErrorAction SilentlyContinue
 
 La base conserva los datos. Para volver a iniciar:
 - Configure otra vez las variables del paso 5.
