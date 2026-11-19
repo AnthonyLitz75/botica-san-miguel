@@ -8,14 +8,18 @@ import { test, expect } from '@playwright/test';
 test.describe('Spec 019: Compras reales por cliente (caja y listado)', () => {
 
   test.beforeEach(async ({ page }) => {
-    // 1. Iniciar sesión como administrador
-    await page.goto('/acceso/login');
+    test.setTimeout(45000);
+    // 1. Configurar viewport de escritorio a 1600x900 (CA-V.1 / T1911)
+    await page.setViewportSize({ width: 1600, height: 900 });
+
+    // 2. Iniciar sesión como administrador
+    await page.goto('/acceso/login', { waitUntil: 'domcontentloaded' });
     const usuario = process.env.DEMO_ADMIN_USER || 'admin_demo';
     const clave = process.env.DEMO_ADMIN_PASSWORD || 'AdminDemo2026!';
     await page.getByLabel('Usuario', { exact: true }).fill(usuario);
     await page.getByLabel('Contraseña', { exact: true }).fill(clave);
     await page.getByRole('button', { name: /Iniciar sesión/i }).click();
-    await page.waitForURL((url) => url.pathname.includes('/medicamentos'));
+    await page.waitForURL((url) => url.pathname.includes('/medicamentos'), { timeout: 15000 });
   });
 
   test('CA-1.4 y CA-1.2: Caja POS muestra Mostrador por defecto y "Cliente nuevo" sin badge Frecuente al elegir cliente con 0 compras', async ({ page }) => {
@@ -33,6 +37,7 @@ test.describe('Spec 019: Compras reales por cliente (caja y listado)', () => {
     await expect(badgeMostrado).toContainText('Mostrador');
 
     await page.screenshot({ path: 'e2e/evidencias/spec019-01-caja-mostrador.png' });
+    await page.screenshot({ path: 'e2e/evidencias/spec019-01-caja-mostrador-1600x900.png' });
 
     // 2. Seleccionar cliente con 0 compras (Alberto)
     const inputCliente = page.locator('#cliente-caja');
@@ -53,6 +58,7 @@ test.describe('Spec 019: Compras reales por cliente (caja y listado)', () => {
     await expect(badgeMostrado).toBeHidden();
 
     await page.screenshot({ path: 'e2e/evidencias/spec019-02-caja-cliente-nuevo.png' });
+    await page.screenshot({ path: 'e2e/evidencias/spec019-02-caja-cliente-nuevo-1600x900.png' });
   });
 
   test('CA-1.1, CA-1.3 y CA-1.5: Caja POS muestra compras reales (12 compras) y badge Frecuente sin dato falso 14 compras', async ({ page }) => {
@@ -83,6 +89,7 @@ test.describe('Spec 019: Compras reales por cliente (caja y listado)', () => {
     await expect(badgeMostrado).toContainText('Frecuente');
 
     await page.screenshot({ path: 'e2e/evidencias/spec019-03-caja-cliente-frecuente.png' });
+    await page.screenshot({ path: 'e2e/evidencias/spec019-03-caja-cliente-frecuente-1600x900.png' });
   });
 
   test('CA-2.1 a CA-2.3: Listado de clientes muestra columna Compras, avatar con iniciales y responsive a 320 px', async ({ page }) => {
@@ -111,6 +118,7 @@ test.describe('Spec 019: Compras reales por cliente (caja y listado)', () => {
     }
 
     await page.screenshot({ path: 'e2e/evidencias/spec019-04-clientes-listado.png' });
+    await page.screenshot({ path: 'e2e/evidencias/spec019-04-clientes-listado-1600x900.png' });
 
     // 3. CA-2.3: Búsqueda preserva el conteo de compras
     const inputBuscar = page.locator('#buscar');

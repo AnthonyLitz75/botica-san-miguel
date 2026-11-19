@@ -153,19 +153,17 @@
                         </div>
 
                         <!-- Tarjeta de Resumen del Cliente Seleccionado (.cli) -->
-                        <div class="cli bg-emerald-50/70 border border-emerald-200/70 rounded-xl p-3 flex items-center justify-between gap-3 mt-3" id="tarjeta-resumen-cliente">
-                            <div class="w-9 h-9 rounded-full bg-white border border-emerald-100 shadow-sm flex items-center justify-center text-emerald-700 shrink-0">
-                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <div class="cli" id="tarjeta-resumen-cliente">
+                            <div class="av">
+                                <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                     <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
                                 </svg>
                             </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between gap-2">
-                                    <b id="nombre-cliente-mostrado" class="text-xs font-bold text-slate-900 truncate">Público general</b>
-                                    <span class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[11px] font-semibold px-2 py-0.5 rounded-full" id="badge-cliente-mostrado">• Mostrador</span>
-                                </div>
-                                <div id="doc-cliente-mostrado" class="text-[11px] text-slate-500 truncate mt-0.5">Sin registro o cliente eventual</div>
+                            <div class="cli-info">
+                                <b id="nombre-cliente-mostrado">Público general</b>
+                                <div id="doc-cliente-mostrado" class="lbl">Sin registro o cliente eventual</div>
                             </div>
+                            <span class="badge t-ok" style="margin-left:auto" id="badge-cliente-mostrado">Mostrador</span>
                         </div>
 
                         <!-- Selector nativo para persistencia y compatibilidad de pruebas (oculto) -->

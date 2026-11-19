@@ -39,9 +39,10 @@ export function seleccionarCliente(cliente) {
     }
     if (badgeMostrado) {
       if (cliente.esFrecuente) {
-        badgeMostrado.textContent = "• Frecuente";
-        badgeMostrado.className = "inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[11px] font-semibold px-2 py-0.5 rounded-full badge t-ok";
+        badgeMostrado.textContent = "Frecuente";
+        badgeMostrado.className = "badge t-ok";
         badgeMostrado.style.display = "";
+        badgeMostrado.style.marginLeft = "auto";
       } else {
         badgeMostrado.textContent = "";
         badgeMostrado.style.display = "none";
@@ -52,9 +53,10 @@ export function seleccionarCliente(cliente) {
     if (nombreMostrado) nombreMostrado.textContent = "Público general";
     if (docMostrado) docMostrado.textContent = "Sin registro o cliente eventual";
     if (badgeMostrado) {
-      badgeMostrado.textContent = "• Mostrador";
-      badgeMostrado.className = "inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[11px] font-semibold px-2 py-0.5 rounded-full badge t-ok";
+      badgeMostrado.textContent = "Mostrador";
+      badgeMostrado.className = "badge t-ok";
       badgeMostrado.style.display = "";
+      badgeMostrado.style.marginLeft = "auto";
     }
   }
 }
