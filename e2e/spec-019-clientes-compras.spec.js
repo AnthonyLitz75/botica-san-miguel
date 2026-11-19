@@ -1,5 +1,17 @@
 import { test, expect } from '@playwright/test';
 
+async function capturarPantallaSegura(page, ruta, reintentos = 3) {
+  for (let i = 0; i < reintentos; i++) {
+    try {
+      await page.screenshot({ path: ruta });
+      return;
+    } catch (e) {
+      if (i === reintentos - 1) throw e;
+      await new Promise(r => setTimeout(r, 250));
+    }
+  }
+}
+
 /**
  * e2e/spec-019-clientes-compras.spec.js
  * Especificación 019: Compras reales por cliente (caja y listado)
@@ -36,8 +48,8 @@ test.describe('Spec 019: Compras reales por cliente (caja y listado)', () => {
     await expect(badgeMostrado).toBeVisible();
     await expect(badgeMostrado).toContainText('Mostrador');
 
-    await page.screenshot({ path: 'e2e/evidencias/spec019-01-caja-mostrador.png' });
-    await page.screenshot({ path: 'e2e/evidencias/spec019-01-caja-mostrador-1600x900.png' });
+    await capturarPantallaSegura(page, 'e2e/evidencias/spec019-01-caja-mostrador.png');
+    await capturarPantallaSegura(page, 'e2e/evidencias/spec019-01-caja-mostrador-1600x900.png');
 
     // 2. Seleccionar cliente con 0 compras (Alberto)
     const inputCliente = page.locator('#cliente-caja');
@@ -57,8 +69,8 @@ test.describe('Spec 019: Compras reales por cliente (caja y listado)', () => {
     await expect(docMostrado).not.toContainText('14 compras');
     await expect(badgeMostrado).toBeHidden();
 
-    await page.screenshot({ path: 'e2e/evidencias/spec019-02-caja-cliente-nuevo.png' });
-    await page.screenshot({ path: 'e2e/evidencias/spec019-02-caja-cliente-nuevo-1600x900.png' });
+    await capturarPantallaSegura(page, 'e2e/evidencias/spec019-02-caja-cliente-nuevo.png');
+    await capturarPantallaSegura(page, 'e2e/evidencias/spec019-02-caja-cliente-nuevo-1600x900.png');
   });
 
   test('CA-1.1, CA-1.3 y CA-1.5: Caja POS muestra compras reales (12 compras) y badge Frecuente sin dato falso 14 compras', async ({ page }) => {
@@ -88,8 +100,8 @@ test.describe('Spec 019: Compras reales por cliente (caja y listado)', () => {
     await expect(badgeMostrado).toBeVisible();
     await expect(badgeMostrado).toContainText('Frecuente');
 
-    await page.screenshot({ path: 'e2e/evidencias/spec019-03-caja-cliente-frecuente.png' });
-    await page.screenshot({ path: 'e2e/evidencias/spec019-03-caja-cliente-frecuente-1600x900.png' });
+    await capturarPantallaSegura(page, 'e2e/evidencias/spec019-03-caja-cliente-frecuente.png');
+    await capturarPantallaSegura(page, 'e2e/evidencias/spec019-03-caja-cliente-frecuente-1600x900.png');
   });
 
   test('CA-2.1 a CA-2.3: Listado de clientes muestra columna Compras, avatar con iniciales y responsive a 320 px', async ({ page }) => {
@@ -117,8 +129,8 @@ test.describe('Spec 019: Compras reales por cliente (caja y listado)', () => {
       await expect(filaAlberto.locator('.num')).toHaveText('0');
     }
 
-    await page.screenshot({ path: 'e2e/evidencias/spec019-04-clientes-listado.png' });
-    await page.screenshot({ path: 'e2e/evidencias/spec019-04-clientes-listado-1600x900.png' });
+    await capturarPantallaSegura(page, 'e2e/evidencias/spec019-04-clientes-listado.png');
+    await capturarPantallaSegura(page, 'e2e/evidencias/spec019-04-clientes-listado-1600x900.png');
 
     // 3. CA-2.3: Búsqueda preserva el conteo de compras
     const inputBuscar = page.locator('#buscar');
@@ -141,7 +153,7 @@ test.describe('Spec 019: Compras reales por cliente (caja y listado)', () => {
     const contenedorTabla = page.locator('.tabla-contenedor');
     await expect(contenedorTabla).toBeVisible();
 
-    await page.screenshot({ path: 'e2e/evidencias/spec019-05-clientes-listado-320px.png' });
+    await capturarPantallaSegura(page, 'e2e/evidencias/spec019-05-clientes-listado-320px.png');
   });
 
 });
