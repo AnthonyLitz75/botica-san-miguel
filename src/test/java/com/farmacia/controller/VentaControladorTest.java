@@ -104,9 +104,33 @@ class VentaControladorTest {
     @DisplayName("400: un idCliente no positivo se rechaza por validación")
     void validaElCliente() throws Exception {
         mvc.perform(post("/ventas/confirmar").with(user("vendedor1").roles("VENDEDOR")).with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON).content("{\"idCliente\": 0}"))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"idCliente\": 0, \"metodoPago\": \"EFECTIVO\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.mensaje").value("Selecciona un cliente válido"));
+        verifyNoInteractions(ventaServicio);
+    }
+
+    @Test
+    @DisplayName("CA-1.3: 400 si falta el método de pago")
+    void validaMetodoPagoObligatorio() throws Exception {
+        when(preparacionServicio.obtener("vendedor1"))
+                .thenReturn(new PreparacionVentaVista(lineas, new BigDecimal("34.00"), true));
+
+        mvc.perform(post("/ventas/confirmar").with(user("vendedor1").roles("VENDEDOR")).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"idCliente\": 3}"))
+                .andExpect(status().isBadRequest());
+        verifyNoInteractions(ventaServicio);
+    }
+
+    @Test
+    @DisplayName("CA-1.3: 400 si el método de pago no pertenece a los permitidos")
+    void validaMetodoPagoInvalido() throws Exception {
+        when(preparacionServicio.obtener("vendedor1"))
+                .thenReturn(new PreparacionVentaVista(lineas, new BigDecimal("34.00"), true));
+
+        mvc.perform(post("/ventas/confirmar").with(user("vendedor1").roles("VENDEDOR")).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"idCliente\": 3, \"metodoPago\": \"INVALIDO\"}"))
+                .andExpect(status().isBadRequest());
         verifyNoInteractions(ventaServicio);
     }
 
