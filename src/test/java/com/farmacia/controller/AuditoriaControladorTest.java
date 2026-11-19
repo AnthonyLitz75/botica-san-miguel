@@ -91,4 +91,40 @@ class AuditoriaControladorTest {
         mvc.perform(get("/auditoria.csv").with(user("u").roles(rol))).andExpect(status().isForbidden());
         verifyNoInteractions(servicio);
     }
+
+    @Test
+    @DisplayName("CA-2.1 a CA-2.3: el HTML muestra etiquetas legibles y badge con ÉXITO, mientras que el value del filtro conserva el codigo")
+    void etiquetasLegiblesYFiltrosConCodigo() throws Exception {
+        var evento1 = new EventoAuditoria(1L, LocalDateTime.of(2026, 11, 13, 9, 30), 7, "admin_demo", "CONFIRMAR_VENTA",
+                "VENTA", "42", "EXITO", "B001-00000042 · S/ 56.50", "127.0.0.1");
+        var evento2 = new EventoAuditoria(2L, LocalDateTime.of(2026, 11, 13, 9, 35), 7, "admin_demo", "ACCESO_DENEGADO",
+                "RUTA", null, "DENEGADO", "GET /inventario/kardex", "127.0.0.1");
+        var evento3 = new EventoAuditoria(3L, LocalDateTime.of(2026, 11, 13, 9, 40), 7, "admin_demo", "INICIO_SESION_FALLIDO",
+                "SESION", null, "FALLO", "Credenciales incorrectas", "127.0.0.1");
+
+        when(servicio.consultar(eq("admin"), any(), anyInt())).thenReturn(new AuditoriaServicio.Consulta(
+                List.of(evento1, evento2, evento3), 3, 1, 1, LocalDate.of(2026, 11, 7), LocalDate.of(2026, 11, 13)));
+
+        mvc.perform(get("/auditoria").with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Venta confirmada")))
+                .andExpect(content().string(containsString("Acceso denegado")))
+                .andExpect(content().string(containsString("Inicio de sesión fallido")))
+                .andExpect(content().string(containsString("ÉXITO")))
+                .andExpect(content().string(containsString("<option value=\"INICIO_SESION_FALLIDO\">Inicio de sesión fallido</option>")))
+                .andExpect(content().string(containsString("<option value=\"CONFIRMAR_VENTA\">Venta confirmada</option>")));
+    }
+
+    @Test
+    @DisplayName("CA-2.5: una accion desconocida en auditoria cae al texto original sin romper la pantalla")
+    void accionDesconocidaMuestraTextoOriginal() throws Exception {
+        var eventoAntiguo = new EventoAuditoria(99L, LocalDateTime.of(2026, 11, 1, 9, 0), 1, "sistema", "ACCION_OBSOLETA",
+                "SISTEMA", null, "EXITO", "Evento historico", "127.0.0.1");
+        when(servicio.consultar(eq("admin"), any(), anyInt())).thenReturn(new AuditoriaServicio.Consulta(
+                List.of(eventoAntiguo), 1, 1, 1, LocalDate.of(2026, 11, 1), LocalDate.of(2026, 11, 13)));
+
+        mvc.perform(get("/auditoria").with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("ACCION_OBSOLETA")));
+    }
 }
