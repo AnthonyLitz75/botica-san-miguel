@@ -15,7 +15,7 @@ test.describe('Spec 019: Compras reales por cliente (caja y listado)', () => {
     await page.getByLabel('Usuario', { exact: true }).fill(usuario);
     await page.getByLabel('Contraseña', { exact: true }).fill(clave);
     await page.getByRole('button', { name: /Iniciar sesión/i }).click();
-    await page.waitForURL((url) => !url.pathname.includes('/acceso/login'));
+    await page.waitForURL((url) => url.pathname.includes('/medicamentos'));
   });
 
   test('CA-1.4 y CA-1.2: Caja POS muestra Mostrador por defecto y "Cliente nuevo" sin badge Frecuente al elegir cliente con 0 compras', async ({ page }) => {

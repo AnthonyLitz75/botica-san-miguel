@@ -223,5 +223,22 @@ class BusquedaConcurrenteRendimientoTest extends AbstractRepositorioIntegrationT
                 hoy.minusDays(30).atStartOfDay(), hoy.plusDays(1).atStartOfDay());
         String planMasVendidosTexto = String.join("\n", planMasVendidos);
         System.out.println("=== EXPLAIN MAS VENDIDOS ===\n" + planMasVendidosTexto);
+
+        // 6. Listado de clientes con compras reales (Spec 019) sobre ventas y clientes
+        String sqlClientesCompras = """
+                EXPLAIN (ANALYZE, BUFFERS)
+                SELECT c.id_cliente, c.tipo_documento, c.numero_documento, c.nombre_completo, c.telefono, c.correo,
+                       COUNT(v.id_venta) AS compras
+                FROM cliente c
+                LEFT JOIN venta v ON v.id_cliente = c.id_cliente
+                WHERE POSITION(LOWER(?) IN LOWER(c.nombre_completo)) > 0
+                   OR POSITION(LOWER(?) IN LOWER(c.numero_documento)) > 0
+                GROUP BY c.id_cliente, c.tipo_documento, c.numero_documento, c.nombre_completo, c.telefono, c.correo
+                ORDER BY c.nombre_completo, c.id_cliente
+                """;
+        List<String> planClientes = jdbcTemplate.queryForList(sqlClientesCompras, String.class, "", "");
+        String planClientesTexto = String.join("\n", planClientes);
+        System.out.println("=== EXPLAIN CLIENTES CON COMPRAS (SPEC 019) ===\n" + planClientesTexto);
+        assertNotNull(planClientesTexto, "El plan de ejecución no debe ser nulo");
     }
 }
