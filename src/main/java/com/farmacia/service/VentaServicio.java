@@ -298,9 +298,10 @@ public class VentaServicio {
 
         Integer idVendedor = filtro != null ? filtro.idVendedor() : null;
         String comprobante = filtro != null ? filtro.comprobante() : null;
+        com.farmacia.model.MetodoPago metodoPago = filtro != null ? filtro.metodoPago() : null;
         Integer pagina = filtro != null ? filtro.pagina() : null;
 
-        return new FiltroVentasFormulario(desde, hasta, idVendedor, comprobante, pagina);
+        return new FiltroVentasFormulario(desde, hasta, idVendedor, comprobante, metodoPago, pagina);
     }
 
     private Usuario validarAdministrador(String nombreUsuario) {

@@ -213,6 +213,32 @@ test.describe('Spec 016: Método de pago en la venta', () => {
     }
   });
 
+  test('CA-2.3 / T1612: Filtro por método de pago en historial filtra resultados por Yape / Plin', async ({ page }) => {
+    await iniciarSesion(page, 'admin_demo', 'AdminDemo2026!');
+    await page.goto('/ventas');
+    await expect(page.getByRole('heading', { level: 1, name: /Historial de ventas/i })).toBeVisible();
+
+    // Seleccionar filtro por YAPE_PLIN
+    const selectMetodo = page.locator('#metodoPago');
+    await expect(selectMetodo).toBeVisible();
+    await selectMetodo.selectOption('YAPE_PLIN');
+
+    // Click en botón Filtrar
+    await page.getByRole('button', { name: /Filtrar/i }).click();
+    await page.waitForURL((url) => url.searchParams.get('metodoPago') === 'YAPE_PLIN');
+
+    // Verificar que todas las filas mostradas tengan chip Yape / Plin
+    const chipsPago = page.locator('tbody tr td:nth-child(5) .chip');
+    const totalChips = await chipsPago.count();
+    if (totalChips > 0) {
+      for (let i = 0; i < totalChips; i++) {
+        await expect(chipsPago.nth(i)).toHaveText('Yape / Plin');
+      }
+    }
+
+    await page.screenshot({ path: 'e2e/evidencias/spec016-07-historial-filtrado-yape.png' });
+  });
+
   test('CA-V.1 / T1615: Capturas de contraste visual a 1600x900 (Caja POS, Ticket y Historial)', async ({ page }) => {
     await iniciarSesion(page, 'admin_demo', 'AdminDemo2026!');
 

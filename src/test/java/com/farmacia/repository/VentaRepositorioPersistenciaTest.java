@@ -205,4 +205,23 @@ class VentaRepositorioPersistenciaTest extends AbstractRepositorioIntegrationTes
         assertNull(venta2.metodoPago());
         assertEquals("—", venta2.metodoPagoVisible());
     }
+
+    @Test
+    @DisplayName("CA-2.3: Filtrar por metodo de pago en listar, contar y sumarTotal")
+    void listar_filtroMetodoPago() {
+        repositorio.insertar(idVendedor1, null, new BigDecimal("10.00"), BigDecimal.ZERO, new BigDecimal("10.00"),
+                "B001-00000401", MetodoPago.EFECTIVO);
+        repositorio.insertar(idVendedor1, null, new BigDecimal("20.00"), BigDecimal.ZERO, new BigDecimal("20.00"),
+                "B001-00000402", MetodoPago.YAPE_PLIN);
+        repositorio.insertar(idVendedor1, null, new BigDecimal("30.00"), BigDecimal.ZERO, new BigDecimal("30.00"),
+                "B001-00000403", MetodoPago.TARJETA);
+
+        FiltroVentasFormulario filtroYape = new FiltroVentasFormulario(null, null, null, null, MetodoPago.YAPE_PLIN, 1);
+        List<VentaResumenVista> resultado = repositorio.listar(filtroYape, 10, 0);
+
+        assertEquals(1, resultado.size());
+        assertEquals(MetodoPago.YAPE_PLIN, resultado.get(0).metodoPago());
+        assertEquals(1, repositorio.contar(filtroYape));
+        assertEquals(0, new BigDecimal("20.00").compareTo(repositorio.sumarTotal(filtroYape)));
+    }
 }

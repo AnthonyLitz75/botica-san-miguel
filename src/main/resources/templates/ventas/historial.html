@@ -65,7 +65,7 @@
             <!-- Filtros de Búsqueda -->
             <div class="card pad mb-6">
                 <form th:action="@{/ventas}" method="get" role="search" aria-label="Filtros del historial de ventas">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
                         <div>
                             <label for="desde">Desde</label>
                             <div class="inp">
@@ -93,6 +93,17 @@
                                     <option value="">Todos los vendedores</option>
                                     <option th:each="v : ${vendedores}" th:value="${v.idUsuario()}" th:text="${v.nombre()}"
                                         th:selected="${filtro.idVendedor() == v.idUsuario()}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="metodoPago">Método de pago</label>
+                            <div class="inp">
+                                <select id="metodoPago" name="metodoPago" class="w-full bg-transparent border-0 focus:outline-none text-ink font-medium">
+                                    <option value="">Todos los métodos</option>
+                                    <option value="EFECTIVO" th:selected="${filtro.metodoPago() != null and filtro.metodoPago().name() == 'EFECTIVO'}">Efectivo</option>
+                                    <option value="YAPE_PLIN" th:selected="${filtro.metodoPago() != null and filtro.metodoPago().name() == 'YAPE_PLIN'}">Yape / Plin</option>
+                                    <option value="TARJETA" th:selected="${filtro.metodoPago() != null and filtro.metodoPago().name() == 'TARJETA'}">Tarjeta</option>
                                 </select>
                             </div>
                         </div>
@@ -188,11 +199,11 @@
 
                 <nav class="flex items-center justify-between p-4 border-t border-line" aria-label="Paginación" th:if="${paginas > 1}">
                     <a class="btn s text-xs" th:if="${pagina > 1}"
-                        th:href="@{/ventas(desde=${filtro.desde() != null ? filtro.desde() : desdeEfectivo},hasta=${filtro.hasta() != null ? filtro.hasta() : hastaEfectivo},idVendedor=${filtro.idVendedor()},comprobante=${filtro.comprobante()},pagina=${pagina - 1})}">Anterior</a>
+                        th:href="@{/ventas(desde=${filtro.desde() != null ? filtro.desde() : desdeEfectivo},hasta=${filtro.hasta() != null ? filtro.hasta() : hastaEfectivo},idVendedor=${filtro.idVendedor()},comprobante=${filtro.comprobante()},metodoPago=${filtro.metodoPago()},pagina=${pagina - 1})}">Anterior</a>
                     <span th:unless="${pagina > 1}"></span>
                     <span class="text-xs text-ink-3 font-semibold" th:text="|Página ${pagina} de ${paginas}|">Página 1 de 1</span>
                     <a class="btn s text-xs" th:if="${pagina < paginas}"
-                        th:href="@{/ventas(desde=${filtro.desde() != null ? filtro.desde() : desdeEfectivo},hasta=${filtro.hasta() != null ? filtro.hasta() : hastaEfectivo},idVendedor=${filtro.idVendedor()},comprobante=${filtro.comprobante()},pagina=${pagina + 1})}">Siguiente</a>
+                        th:href="@{/ventas(desde=${filtro.desde() != null ? filtro.desde() : desdeEfectivo},hasta=${filtro.hasta() != null ? filtro.hasta() : hastaEfectivo},idVendedor=${filtro.idVendedor()},comprobante=${filtro.comprobante()},metodoPago=${filtro.metodoPago()},pagina=${pagina + 1})}">Siguiente</a>
                     <span th:unless="${pagina < paginas}"></span>
                 </nav>
             </div>

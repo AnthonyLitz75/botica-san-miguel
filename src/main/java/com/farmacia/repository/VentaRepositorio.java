@@ -187,6 +187,10 @@ public class VentaRepositorio {
                 where.append(" AND v.numero_comprobante ILIKE ?");
                 parametros.add(filtro.comprobante().strip() + "%");
             }
+            if (filtro.metodoPago() != null) {
+                where.append(" AND v.metodo_pago = ?");
+                parametros.add(filtro.metodoPago().name());
+            }
         }
         return where.toString();
     }

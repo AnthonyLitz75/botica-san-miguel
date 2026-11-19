@@ -111,6 +111,22 @@ class HistorialVentasControladorTest {
     }
 
     @Test
+    @DisplayName("CA-2.3: el filtro por método de pago se transmite al servicio")
+    void listadoConFiltroMetodoPago() throws Exception {
+        when(ventaServicio.listarVendedores()).thenReturn(List.of());
+        when(ventaServicio.listarHistorial(eq("admin"), any(FiltroVentasFormulario.class), eq(1)))
+                .thenReturn(new VentaServicio.Historial(List.of(), BigDecimal.ZERO, 0, 1, 1, LocalDate.of(2026, 11, 1), LocalDate.of(2026, 11, 10)));
+
+        mvc.perform(get("/ventas")
+                .param("metodoPago", "YAPE_PLIN")
+                .with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("ventas/historial"));
+
+        verify(ventaServicio).listarHistorial(eq("admin"), org.mockito.ArgumentMatchers.argThat(f -> f.metodoPago() == com.farmacia.model.MetodoPago.YAPE_PLIN), eq(1));
+    }
+
+    @Test
     @DisplayName("CA-1.4: si hasta < desde muestra mensaje de validación sin error 500")
     void errorRangoInvalido() throws Exception {
         when(ventaServicio.listarVendedores()).thenReturn(List.of());
