@@ -18,15 +18,19 @@ public class ClienteRepositorio {
 
     public List<ClienteResumenVista> listar(String texto) {
         String sql = """
-                SELECT id_cliente, tipo_documento, numero_documento, nombre_completo, telefono, correo
-                FROM cliente
-                WHERE POSITION(LOWER(?) IN LOWER(nombre_completo)) > 0
-                   OR POSITION(LOWER(?) IN LOWER(numero_documento)) > 0
-                ORDER BY nombre_completo, id_cliente
+                SELECT c.id_cliente, c.tipo_documento, c.numero_documento, c.nombre_completo, c.telefono, c.correo,
+                       COUNT(v.id_venta) AS compras
+                FROM cliente c
+                LEFT JOIN venta v ON v.id_cliente = c.id_cliente
+                WHERE POSITION(LOWER(?) IN LOWER(c.nombre_completo)) > 0
+                   OR POSITION(LOWER(?) IN LOWER(c.numero_documento)) > 0
+                GROUP BY c.id_cliente, c.tipo_documento, c.numero_documento, c.nombre_completo, c.telefono, c.correo
+                ORDER BY c.nombre_completo, c.id_cliente
                 """;
         return jdbcTemplate.query(sql, (fila, numeroFila) -> new ClienteResumenVista(fila.getInt("id_cliente"),
                 fila.getString("tipo_documento"), fila.getString("numero_documento"),
-                fila.getString("nombre_completo"), fila.getString("telefono"), fila.getString("correo"), 0L),
+                fila.getString("nombre_completo"), fila.getString("telefono"), fila.getString("correo"),
+                fila.getLong("compras")),
                 texto, texto);
     }
 
