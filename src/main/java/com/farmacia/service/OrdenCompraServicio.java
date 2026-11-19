@@ -1,5 +1,6 @@
 package com.farmacia.service;
 
+import com.farmacia.model.OrdenCompraListadoVista;
 import com.farmacia.model.OrdenCompra;
 import com.farmacia.model.DetalleOrdenCompra;
 import com.farmacia.repository.OrdenCompraRepositorio;
@@ -68,6 +69,14 @@ public class OrdenCompraServicio {
         /** Primer vencimiento aceptado en una recepción: el lote debe vencer después de hoy. */
         public LocalDate fechaMinimaVencimientoRecepcion() {
                 return LocalDate.now(clock).plusDays(1);
+        }
+
+        public List<OrdenCompraListadoVista> listarVista(String estado) {
+                return ordenRepositorio.listarVista(estado);
+        }
+
+        public Map<String, Integer> contarPorEstado() {
+                return Map.of();
         }
 
         public List<OrdenCompra> listar() {
