@@ -373,6 +373,44 @@ class VentaServicioTest {
         verify(movimientos).registrarDetalle(40, 12, 2);
     }
 
+    @Test
+    @DisplayName("T2293: ticketPromedio calcula promedio normal con 2 decimales")
+    void ticketPromedio_promedioNormal() {
+        var historial = new VentaServicio.Historial(
+                List.of(), new BigDecimal("100.00"), 2, 1, 1, HOY, HOY);
+        assertEquals(new BigDecimal("50.00"), historial.ticketPromedio());
+    }
+
+    @Test
+    @DisplayName("T2293: ticketPromedio aplica redondeo HALF_UP a 2 decimales")
+    void ticketPromedio_redondeoHalfUp() {
+        // 100.00 / 3 = 33.3333... -> 33.33
+        var historial1 = new VentaServicio.Historial(
+                List.of(), new BigDecimal("100.00"), 3, 1, 1, HOY, HOY);
+        assertEquals(new BigDecimal("33.33"), historial1.ticketPromedio());
+
+        // 100.00 / 6 = 16.6666... -> 16.67
+        var historial2 = new VentaServicio.Historial(
+                List.of(), new BigDecimal("100.00"), 6, 1, 1, HOY, HOY);
+        assertEquals(new BigDecimal("16.67"), historial2.ticketPromedio());
+    }
+
+    @Test
+    @DisplayName("T2293: ticketPromedio con 0 ventas retorna 0.00 sin division por cero")
+    void ticketPromedio_ceroVentas() {
+        var historial = new VentaServicio.Historial(
+                List.of(), BigDecimal.ZERO, 0, 1, 1, HOY, HOY);
+        assertEquals(new BigDecimal("0.00"), historial.ticketPromedio());
+    }
+
+    @Test
+    @DisplayName("T2293: ticketPromedio con una sola venta retorna exactamente el total filtrado")
+    void ticketPromedio_unaSolaVenta() {
+        var historial = new VentaServicio.Historial(
+                List.of(), new BigDecimal("42.50"), 1, 1, 1, HOY, HOY);
+        assertEquals(new BigDecimal("42.50"), historial.ticketPromedio());
+    }
+
     private static LineaPreparacionVentaVista linea(int idMedicamento, int cantidad) {
         return new LineaPreparacionVentaVista(idMedicamento, "MED-001", "Paracetamol", cantidad, PRECIO,
                 PRECIO.multiply(BigDecimal.valueOf(cantidad)), List.of());
