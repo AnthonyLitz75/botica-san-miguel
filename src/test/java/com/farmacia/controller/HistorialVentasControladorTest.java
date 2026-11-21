@@ -241,4 +241,47 @@ class HistorialVentasControladorTest {
                 .andExpect(content().string(not(containsString("Anuladas"))))
                 .andExpect(content().string(not(containsString("ANULADA"))));
     }
+
+    @Test
+    @DisplayName("T2295: el HTML del historial muestra las tres tarjetas con sus textos exactos y sin columna Estado")
+    void historialTresTarjetasYOrdenColumnas() throws Exception {
+        var fila = new VentaResumenVista(
+                10,
+                "B001-00000010",
+                LocalDateTime.of(2026, 11, 13, 14, 30),
+                2,
+                "vendedor_demo",
+                "Juan Perez",
+                new BigDecimal("50.00"),
+                BigDecimal.ZERO,
+                new BigDecimal("50.00"));
+
+        when(ventaServicio.listarVendedores()).thenReturn(List.of());
+        when(ventaServicio.listarHistorial(eq("admin"), any(), eq(1))).thenReturn(new VentaServicio.Historial(
+                List.of(fila),
+                new BigDecimal("50.00"),
+                1,
+                1,
+                1,
+                LocalDate.of(2026, 10, 14),
+                LocalDate.of(2026, 11, 13)));
+
+        mvc.perform(get("/ventas").with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("ventas/historial"))
+                // Tarjeta 1
+                .andExpect(content().string(containsString("Monto total filtrado")))
+                .andExpect(content().string(containsString("Suma de las ventas del rango")))
+                // Tarjeta 2
+                .andExpect(content().string(containsString("Ticket promedio")))
+                .andExpect(content().string(containsString("Por comprobante emitido")))
+                .andExpect(content().string(containsString("S/ 50.00")))
+                // Tarjeta 3
+                .andExpect(content().string(containsString("Ventas realizadas")))
+                .andExpect(content().string(containsString("En el rango filtrado")))
+                // Ausencias requeridas
+                .andExpect(content().string(not(containsString("Comprobantes listados"))))
+                .andExpect(content().string(not(containsString("<th scope=\"col\" class=\"c\">Estado</th>"))))
+                .andExpect(content().string(not(containsString(">EMITIDA<"))));
+    }
 }
