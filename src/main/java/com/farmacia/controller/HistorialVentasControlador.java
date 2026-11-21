@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -42,6 +43,7 @@ public class HistorialVentasControlador {
             model.addAttribute("historial", historial);
             model.addAttribute("filas", historial.filas());
             model.addAttribute("totalFiltrado", historial.totalFiltrado());
+            model.addAttribute("ticketPromedio", historial.ticketPromedio());
             model.addAttribute("pagina", historial.pagina());
             model.addAttribute("paginas", historial.paginas());
             model.addAttribute("total", historial.total());
@@ -51,6 +53,7 @@ public class HistorialVentasControlador {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("filas", List.of());
             model.addAttribute("totalFiltrado", BigDecimal.ZERO);
+            model.addAttribute("ticketPromedio", BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
             model.addAttribute("pagina", 1);
             model.addAttribute("paginas", 1);
             model.addAttribute("total", 0);
