@@ -24,6 +24,7 @@ class ClienteFrecuenteTest {
         assertFalse(servicio.esClienteFrecuente(9), "9 compras no alcanza el umbral de 10");
         assertTrue(servicio.esClienteFrecuente(10), "10 compras debe ser frecuente");
         assertTrue(servicio.esClienteFrecuente(15), "15 compras supera el umbral y debe ser frecuente");
+        assertEquals(10, servicio.getUmbralClienteFrecuente(), "El umbral por defecto debe ser 10");
     }
 
     @Test
@@ -34,6 +35,26 @@ class ClienteFrecuenteTest {
         assertFalse(servicio.esClienteFrecuente(4), "4 compras con umbral 5 no es frecuente");
         assertTrue(servicio.esClienteFrecuente(5), "5 compras con umbral 5 debe ser frecuente");
         assertTrue(servicio.esClienteFrecuente(6), "6 compras con umbral 5 debe ser frecuente");
+        assertEquals(5, servicio.getUmbralClienteFrecuente(), "El umbral configurado debe ser 5");
+    }
+
+    @Test
+    @DisplayName("listar: normaliza texto nulo a vacio y limpia espacios al invocar repositorio")
+    void listarNormalizaTexto() {
+        var repo = mock(ClienteRepositorio.class);
+        var auditoria = mock(AuditoriaServicio.class);
+        ClienteServicio servicio = new ClienteServicio(repo, auditoria);
+
+        org.mockito.Mockito.when(repo.listar("")).thenReturn(java.util.List.of(resumen("Cliente 1")));
+        org.mockito.Mockito.when(repo.listar("Perez")).thenReturn(java.util.List.of(resumen("Juan Perez")));
+
+        var resNulo = servicio.listar(null);
+        assertEquals(1, resNulo.size());
+        org.mockito.Mockito.verify(repo).listar("");
+
+        var resConTexto = servicio.listar("  Perez  ");
+        assertEquals(1, resConTexto.size());
+        org.mockito.Mockito.verify(repo).listar("Perez");
     }
 
     @Test
