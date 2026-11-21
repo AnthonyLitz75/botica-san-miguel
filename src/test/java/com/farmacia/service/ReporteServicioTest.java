@@ -444,4 +444,31 @@ class ReporteServicioTest {
         assertThrows(IllegalArgumentException.class, () -> reporteServicio.calcularBarrasGrafico(List.of(), null, d2));
         assertThrows(IllegalArgumentException.class, () -> reporteServicio.calcularBarrasGrafico(List.of(), d1, null));
     }
+
+    @Test
+    @DisplayName("T2103: generarResumenGrafico genera resumen con rango, total y día de mayor venta")
+    void generarResumenGrafico_conVentas_generaResumenEsperado() {
+        LocalDate d1 = LocalDate.of(2026, 11, 8);
+        LocalDate d2 = LocalDate.of(2026, 11, 14);
+
+        var barras = List.of(
+                new com.farmacia.model.BarraGraficoVista(LocalDate.of(2026, 11, 8), new BigDecimal("100.00"), 50),
+                new com.farmacia.model.BarraGraficoVista(LocalDate.of(2026, 11, 10), new BigDecimal("200.00"), 100),
+                new com.farmacia.model.BarraGraficoVista(LocalDate.of(2026, 11, 14), new BigDecimal("50.00"), 25)
+        );
+
+        String resumen = reporteServicio.generarResumenGrafico(barras, d1, d2);
+
+        org.junit.jupiter.api.Assertions.assertTrue(resumen.contains("08/11/2026 al 14/11/2026"));
+        org.junit.jupiter.api.Assertions.assertTrue(resumen.contains("Total neto: S/ 350.00"));
+        org.junit.jupiter.api.Assertions.assertTrue(resumen.contains("Mayor venta: 10/11/2026 con S/ 200.00"));
+
+        // Sin ventas
+        String resumenSin = reporteServicio.generarResumenGrafico(List.of(), d1, d2);
+        org.junit.jupiter.api.Assertions.assertTrue(resumenSin.contains("Sin datos"));
+
+        var barrasCero = List.of(new com.farmacia.model.BarraGraficoVista(d1, BigDecimal.ZERO, 0));
+        String resumenCero = reporteServicio.generarResumenGrafico(barrasCero, d1, d2);
+        org.junit.jupiter.api.Assertions.assertTrue(resumenCero.contains("Sin ventas registradas"));
+    }
 }

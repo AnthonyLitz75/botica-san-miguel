@@ -14,10 +14,17 @@ import com.farmacia.repository.ReporteRepositorio;
 import com.farmacia.repository.UsuarioRepositorio;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -202,7 +209,82 @@ public class ReporteServicio {
     }
 
     public List<BarraGraficoVista> calcularBarrasGrafico(List<VentasDiaVista> ventas, LocalDate desde, LocalDate hasta) {
-        return List.of();
+        if (desde == null || hasta == null) {
+            throw new IllegalArgumentException("Las fechas desde y hasta son obligatorias");
+        }
+        if (desde.isAfter(hasta)) {
+            throw new IllegalArgumentException("La fecha 'desde' no puede ser posterior a 'hasta'");
+        }
+
+        Map<LocalDate, BigDecimal> totalesPorDia = new HashMap<>();
+        if (ventas != null) {
+            for (VentasDiaVista v : ventas) {
+                if (v != null && v.fecha() != null) {
+                    BigDecimal totalVal = v.total() != null ? v.total() : BigDecimal.ZERO;
+                    totalesPorDia.merge(v.fecha(), totalVal, BigDecimal::add);
+                }
+            }
+        }
+
+        BigDecimal maximo = BigDecimal.ZERO;
+        LocalDate actual = desde;
+        while (!actual.isAfter(hasta)) {
+            BigDecimal totalDia = totalesPorDia.getOrDefault(actual, BigDecimal.ZERO);
+            if (totalDia.compareTo(maximo) > 0) {
+                maximo = totalDia;
+            }
+            actual = actual.plusDays(1);
+        }
+
+        List<BarraGraficoVista> resultado = new ArrayList<>();
+        actual = desde;
+        while (!actual.isAfter(hasta)) {
+            BigDecimal totalDia = totalesPorDia.getOrDefault(actual, BigDecimal.ZERO);
+            int porcentaje = 0;
+            if (maximo.compareTo(BigDecimal.ZERO) > 0 && totalDia.compareTo(BigDecimal.ZERO) > 0) {
+                porcentaje = totalDia.multiply(BigDecimal.valueOf(100))
+                        .divide(maximo, 0, RoundingMode.HALF_UP)
+                        .intValue();
+                if (porcentaje < 2) {
+                    porcentaje = 2; // Mínimo visual de 2 % para barras con ventas (distinguir de cero)
+                }
+                if (porcentaje > 100) {
+                    porcentaje = 100;
+                }
+            }
+            resultado.add(new BarraGraficoVista(actual, totalDia, porcentaje));
+            actual = actual.plusDays(1);
+        }
+
+        return List.copyOf(resultado);
+    }
+
+    public String generarResumenGrafico(List<BarraGraficoVista> barras, LocalDate desde, LocalDate hasta) {
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DecimalFormatSymbols simbolos = new DecimalFormatSymbols(Locale.US);
+        simbolos.setGroupingSeparator(',');
+        simbolos.setDecimalSeparator('.');
+        DecimalFormat monedaFmt = new DecimalFormat("#,##0.00", simbolos);
+
+        if (barras == null || barras.isEmpty()) {
+            return "Sin datos en el período del " + desde.format(fmt) + " al " + hasta.format(fmt) + ".";
+        }
+
+        BigDecimal totalAcumulado = barras.stream()
+                .map(BarraGraficoVista::total)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BarraGraficoVista mayor = barras.stream()
+                .max(Comparator.comparing(BarraGraficoVista::total))
+                .orElse(null);
+
+        if (mayor == null || mayor.total().compareTo(BigDecimal.ZERO) <= 0) {
+            return "Sin ventas registradas del " + desde.format(fmt) + " al " + hasta.format(fmt) + ".";
+        }
+
+        return "Ventas del " + desde.format(fmt) + " al " + hasta.format(fmt)
+                + ". Total neto: S/ " + monedaFmt.format(totalAcumulado)
+                + ". Mayor venta: " + mayor.fecha().format(fmt) + " con S/ " + monedaFmt.format(mayor.total()) + ".";
     }
 
     private void validarAdministrador(String usuarioAutenticado) {
