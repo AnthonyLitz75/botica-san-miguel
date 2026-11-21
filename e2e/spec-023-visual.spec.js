@@ -43,4 +43,51 @@ test.describe('Spec 023: Fase 1 — Pruebas de estilos computados y tokens', () 
     expect(bodyFontSize).toBe('14px');
   });
 
+  test('T2302: estilos computados de componentes en pantalla representativa (boton primario, tarjeta, campo 42 px, badge, KPI)', async ({ page }) => {
+    await page.setViewportSize({ width: 1600, height: 900 });
+    await iniciarSesion(page, 'admin_demo', 'AdminDemo2026!');
+    await page.goto('/alertas', { waitUntil: 'domcontentloaded' });
+
+    // 1. Tarjeta (.card): fondo blanco y radio 16 px (CA-3.2)
+    const card = page.locator('.card').first();
+    await expect(card).toBeVisible();
+    const cardRadius = await card.evaluate((el) => window.getComputedStyle(el).borderRadius);
+    expect(cardRadius).toBe('16px');
+
+    // 2. Botón primario (.btn.p): fondo pine-700 (#166a55), radio 10 px (CA-3.1)
+    const btnP = page.locator('.btn.p').first();
+    await expect(btnP).toBeVisible();
+    const btnRadius = await btnP.evaluate((el) => window.getComputedStyle(el).borderRadius);
+    expect(btnRadius).toBe('10px');
+    const btnBg = await btnP.evaluate((el) => window.getComputedStyle(el).backgroundColor);
+    expect(btnBg).toBe('rgb(22, 106, 85)');
+
+    // 3. Campo de texto (.inp): alto 42 px, radio 10 px (CA-3.3)
+    // Ir a /medicamentos para encontrar un .inp
+    await page.goto('/medicamentos', { waitUntil: 'domcontentloaded' });
+    const inp = page.locator('.inp').first();
+    await expect(inp).toBeVisible();
+    const inpHeight = await inp.evaluate((el) => window.getComputedStyle(el).height);
+    expect(inpHeight).toBe('42px');
+    const inpRadius = await inp.evaluate((el) => window.getComputedStyle(el).borderRadius);
+    expect(inpRadius).toBe('10px');
+
+    // 4. Badge (.badge): radio 999 px (CA-3.3)
+    const badge = page.locator('.badge').first();
+    await expect(badge).toBeVisible();
+    const badgeRadius = await badge.evaluate((el) => window.getComputedStyle(el).borderRadius);
+    expect(badgeRadius).toBe('999px');
+
+    // 5. KPI (.kpi .ic): icono 44 px radio 12 px (CA-3.4) en /alertas
+    await page.goto('/alertas', { waitUntil: 'domcontentloaded' });
+    const kpiIc = page.locator('.kpi .ic').first();
+    await expect(kpiIc).toBeVisible();
+    const kpiIcWidth = await kpiIc.evaluate((el) => window.getComputedStyle(el).width);
+    expect(kpiIcWidth).toBe('44px');
+    const kpiIcHeight = await kpiIc.evaluate((el) => window.getComputedStyle(el).height);
+    expect(kpiIcHeight).toBe('44px');
+    const kpiIcRadius = await kpiIc.evaluate((el) => window.getComputedStyle(el).borderRadius);
+    expect(kpiIcRadius).toBe('12px');
+  });
+
 });
