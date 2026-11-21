@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.farmacia.model.Usuario;
+import com.farmacia.model.UsuarioListadoVista;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -142,5 +143,25 @@ class UsuarioRepositorioPersistenciaTest extends AbstractRepositorioIntegrationT
 
         assertNotNull(accesoFinalA, "El usuario A debe tener fecha de último acceso actualizada");
         assertEquals(null, accesoFinalB, "El usuario B debe permanecer con ultimo_acceso en NULL");
+    }
+
+    @Test
+    @DisplayName("listarParaListado recupera usuarios con su ultimo_acceso")
+    void listarParaListadoRecuperaUsuariosConUltimoAcceso() {
+        String sufijo = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+        String userA = "vista_" + sufijo;
+        Integer idA = repositorio.insertar("Vista User", userA, "{bcrypt}h", "COMPRAS");
+
+        repositorio.registrarAcceso(userA);
+
+        List<UsuarioListadoVista> lista = repositorio.listarParaListado();
+        UsuarioListadoVista encontrado = lista.stream()
+                .filter(u -> u.idUsuario().equals(idA))
+                .findFirst()
+                .orElseThrow();
+
+        assertEquals("Vista User", encontrado.nombre());
+        assertEquals(userA, encontrado.nombreUsuario());
+        assertNotNull(encontrado.ultimoAcceso());
     }
 }

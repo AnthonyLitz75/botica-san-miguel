@@ -3,6 +3,7 @@ package com.farmacia.controller;
 import com.farmacia.dto.UsuarioClaveFormulario;
 import com.farmacia.dto.UsuarioFormulario;
 import com.farmacia.model.Usuario;
+import com.farmacia.model.UsuarioListadoVista;
 import com.farmacia.service.UsuarioServicio;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -34,7 +35,15 @@ public class UsuarioControlador {
 
     @GetMapping
     public String listar(Model model, Authentication autenticacion) {
-        List<Usuario> usuarios = servicio.listar(autenticacion.getName());
+        List<UsuarioListadoVista> usuarios = servicio.listarParaListado(autenticacion.getName());
+        if (usuarios == null) {
+            List<Usuario> lista = servicio.listar(autenticacion.getName());
+            if (lista != null) {
+                usuarios = lista.stream()
+                        .map(u -> new UsuarioListadoVista(u.idUsuario(), u.nombre(), u.nombreUsuario(), u.rol(), u.activo(), null))
+                        .toList();
+            }
+        }
         model.addAttribute("usuarios", usuarios);
         model.addAttribute("formularioClave", new UsuarioClaveFormulario(""));
         return "usuarios/listado";

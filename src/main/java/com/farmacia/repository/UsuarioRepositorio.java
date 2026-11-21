@@ -1,10 +1,12 @@
 package com.farmacia.repository;
 
 import com.farmacia.model.Usuario;
+import com.farmacia.model.UsuarioListadoVista;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,6 +20,14 @@ public class UsuarioRepositorio {
             fila.getString("clave_hash"),
             fila.getString("rol"),
             fila.getBoolean("activo"));
+
+    private static final RowMapper<UsuarioListadoVista> MAPEO_USUARIO_LISTADO = (fila, numeroFila) -> new UsuarioListadoVista(
+            fila.getInt("id_usuario"),
+            fila.getString("nombre"),
+            fila.getString("nombre_usuario"),
+            fila.getString("rol"),
+            fila.getBoolean("activo"),
+            fila.getObject("ultimo_acceso", LocalDateTime.class));
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -113,7 +123,23 @@ public class UsuarioRepositorio {
         return cuenta == null ? 0 : cuenta;
     }
 
+    public List<UsuarioListadoVista> listarParaListado() {
+        String sql = """
+                SELECT id_usuario, nombre, nombre_usuario,
+                       rol, activo, ultimo_acceso
+                FROM usuario
+                ORDER BY nombre ASC, id_usuario ASC
+                """;
+        return jdbcTemplate.query(sql, MAPEO_USUARIO_LISTADO);
+    }
+
     public boolean registrarAcceso(String nombreUsuario) {
-        return false;
+        String sql = """
+                UPDATE usuario
+                SET ultimo_acceso = CURRENT_TIMESTAMP
+                WHERE nombre_usuario = ?
+                """;
+        int filas = jdbcTemplate.update(sql, nombreUsuario);
+        return filas > 0;
     }
 }

@@ -3,6 +3,7 @@ package com.farmacia.service;
 import com.farmacia.dto.UsuarioClaveFormulario;
 import com.farmacia.dto.UsuarioFormulario;
 import com.farmacia.model.Usuario;
+import com.farmacia.model.UsuarioListadoVista;
 import com.farmacia.repository.UsuarioRepositorio;
 import java.util.List;
 import java.util.Optional;
@@ -50,6 +51,11 @@ public class UsuarioServicio {
     public List<Usuario> listar(String usuarioAutenticado) {
         validarAdministrador(usuarioAutenticado);
         return repositorio.listar();
+    }
+
+    public List<UsuarioListadoVista> listarParaListado(String usuarioAutenticado) {
+        validarAdministrador(usuarioAutenticado);
+        return repositorio.listarParaListado();
     }
 
     public Optional<Usuario> buscarPorId(Integer idUsuario, String usuarioAutenticado) {
@@ -182,8 +188,9 @@ public class UsuarioServicio {
                 "cuenta activada para usuario: " + existente.nombreUsuario());
     }
 
-    public void registrarAcceso(String nombreUsuario) {
-        repositorio.registrarAcceso(nombreUsuario);
+    @Transactional(rollbackFor = Exception.class)
+    public boolean registrarAcceso(String nombreUsuario) {
+        return repositorio.registrarAcceso(nombreUsuario);
     }
 
     private void expirarSesionesDeUsuario(String nombreUsuario) {

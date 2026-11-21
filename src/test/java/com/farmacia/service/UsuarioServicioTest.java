@@ -16,7 +16,9 @@ import static org.mockito.Mockito.when;
 import com.farmacia.dto.UsuarioClaveFormulario;
 import com.farmacia.dto.UsuarioFormulario;
 import com.farmacia.model.Usuario;
+import com.farmacia.model.UsuarioListadoVista;
 import com.farmacia.repository.UsuarioRepositorio;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -249,5 +251,29 @@ class UsuarioServicioTest {
 
         verify(repositorio).cambiarEstado(3, true);
         verify(auditoria).registrarCambio(eq(AccionAuditoria.ACTIVAR), eq("USUARIO"), eq(3), anyString());
+    }
+
+    @Test
+    @DisplayName("listarParaListado invoca repositorio si es administrador y deniega si no")
+    void listarParaListadoValidaAdminYRetornaVista() {
+        mockAdmin("admin1");
+        var vista1 = new UsuarioListadoVista(1, "Admin", "admin1", "ADMINISTRADOR", true, null);
+        when(repositorio.listarParaListado()).thenReturn(List.of(vista1));
+
+        List<UsuarioListadoVista> resultado = servicio.listarParaListado("admin1");
+        assertEquals(1, resultado.size());
+        assertEquals("admin1", resultado.getFirst().nombreUsuario());
+
+        mockNoAdmin("vend1", "VENDEDOR");
+        assertThrows(AccessDeniedException.class, () -> servicio.listarParaListado("vend1"));
+    }
+
+    @Test
+    @DisplayName("registrarAcceso delega al repositorio")
+    void registrarAccesoDelegaAlRepositorio() {
+        when(repositorio.registrarAcceso("vend1")).thenReturn(true);
+        boolean ok = servicio.registrarAcceso("vend1");
+        assertTrue(ok);
+        verify(repositorio).registrarAcceso("vend1");
     }
 }
