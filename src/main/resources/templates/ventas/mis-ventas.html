@@ -104,7 +104,6 @@
                                 <th scope="col">Cliente</th>
                                 <th scope="col">Pago</th>
                                 <th scope="col" class="r">Total</th>
-                                <th scope="col" class="c">Estado</th>
                                 <th scope="col" class="r">Acción</th>
                             </tr>
                         </thead>
@@ -120,9 +119,6 @@
                                     <span class="text-ink-3" th:unless="${fila.metodoPago() != null}">—</span>
                                 </td>
                                 <td class="r font-bold text-ink" th:text="${'S/ ' + #numbers.formatDecimal(fila.total(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</td>
-                                <td class="c">
-                                    <span class="badge t-ok">EMITIDA</span>
-                                </td>
                                 <td class="r">
                                     <a class="lnk" th:href="@{/ventas/{id}(id=${fila.idVenta()})}" title="Ver e imprimir ticket">
                                         <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">

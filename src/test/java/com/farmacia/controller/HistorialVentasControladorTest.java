@@ -182,7 +182,9 @@ class HistorialVentasControladorTest {
                 .andExpect(model().attributeExists("filas", "desde", "hasta"))
                 .andExpect(content().string(containsString("B001-00000015")))
                 .andExpect(content().string(containsString("Público general")))
-                .andExpect(content().string(containsString("/ventas/15")));
+                .andExpect(content().string(containsString("/ventas/15")))
+                .andExpect(content().string(not(containsString("<th scope=\"col\" class=\"c\">Estado</th>"))))
+                .andExpect(content().string(not(containsString(">EMITIDA<"))));
     }
 
     @Test
