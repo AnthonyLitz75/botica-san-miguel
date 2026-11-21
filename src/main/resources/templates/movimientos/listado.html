@@ -67,29 +67,29 @@
                                 <input type="date" id="hasta" name="hasta" th:value="${filtro != null ? filtro.hasta() : null}">
                             </div>
                         </div>
-                        <div style="width:200px">
+                        <div style="width:220px">
                             <label for="idMedicamento">Medicamento</label>
                             <div class="inp">
                                 <select id="idMedicamento" name="idMedicamento">
-                                    <option value="">Todos los medicamentos</option>
+                                    <option value="">Todos</option>
                                     <option th:each="m : ${medicamentos}" th:value="${m.idMedicamento()}"
                                         th:text="${m.codigo() + ' - ' + m.nombre()}"
                                         th:selected="${filtro != null and filtro.idMedicamento() == m.idMedicamento()}"></option>
                                 </select>
                             </div>
                         </div>
-                        <div style="width:150px">
-                            <label for="numeroLote">N° Lote</label>
+                        <div style="width:160px">
+                            <label for="numeroLote">N.º de lote</label>
                             <div class="inp">
                                 <input type="search" id="numeroLote" name="numeroLote" th:value="${filtro != null ? filtro.numeroLote() : null}"
                                     placeholder="Buscar lote...">
                             </div>
                         </div>
-                        <div style="width:180px">
+                        <div style="width:200px">
                             <label for="idUsuario">Responsable</label>
                             <div class="inp">
                                 <select id="idUsuario" name="idUsuario">
-                                    <option value="">Todos los responsables</option>
+                                    <option value="">Todos</option>
                                     <option th:each="u : ${usuarios}" th:value="${u.idUsuario()}"
                                         th:text="${u.nombre()}"
                                         th:selected="${filtro != null and filtro.idUsuario() == u.idUsuario()}"></option>
@@ -108,7 +108,7 @@
                 </form>
             </div>
 
-            <section class="inventario-resultados registro-listado" aria-labelledby="titulo-resultados">
+            <section class="inventario-resultados" aria-labelledby="titulo-resultados">
                 <div class="sec">
                     <h2 id="titulo-resultados">Historial de movimientos</h2>
                     <span class="cnt cantidad-resultados" th:text="${total != null ? total : #lists.size(movimientos)}">0</span>
