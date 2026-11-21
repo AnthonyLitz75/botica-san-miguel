@@ -112,4 +112,8 @@ public class UsuarioRepositorio {
         Integer cuenta = jdbcTemplate.queryForObject(sql, Integer.class);
         return cuenta == null ? 0 : cuenta;
     }
+
+    public boolean registrarAcceso(String nombreUsuario) {
+        return false;
+    }
 }

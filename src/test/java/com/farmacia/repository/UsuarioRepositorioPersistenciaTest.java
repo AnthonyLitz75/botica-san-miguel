@@ -121,4 +121,26 @@ class UsuarioRepositorioPersistenciaTest extends AbstractRepositorioIntegrationT
         int despues = repositorio.contarAdministradoresActivos();
         assertEquals(inicial + 1, despues);
     }
+
+    @Test
+    @DisplayName("registrarAcceso actualiza ultimo_acceso solo al usuario indicado")
+    void registrarAccesoActualizaSoloAlUsuarioIndicado() {
+        String sufijo = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+        String userA = "usera_" + sufijo;
+        String userB = "userb_" + sufijo;
+
+        Integer idA = repositorio.insertar("Usuario A", userA, "{bcrypt}hashA", "VENDEDOR");
+        Integer idB = repositorio.insertar("Usuario B", userB, "{bcrypt}hashB", "ALMACENERO");
+
+        boolean actualizado = repositorio.registrarAcceso(userA);
+        assertTrue(actualizado);
+
+        java.time.LocalDateTime accesoFinalA = jdbcTemplate.queryForObject(
+                "SELECT ultimo_acceso FROM usuario WHERE id_usuario = ?", java.time.LocalDateTime.class, idA);
+        java.time.LocalDateTime accesoFinalB = jdbcTemplate.queryForObject(
+                "SELECT ultimo_acceso FROM usuario WHERE id_usuario = ?", java.time.LocalDateTime.class, idB);
+
+        assertNotNull(accesoFinalA, "El usuario A debe tener fecha de último acceso actualizada");
+        assertEquals(null, accesoFinalB, "El usuario B debe permanecer con ultimo_acceso en NULL");
+    }
 }
