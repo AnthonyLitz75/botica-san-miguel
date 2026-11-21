@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:text="${'Comprobante ' + comprobante.numeroComprobante() + ' | ' + botica.nombre}">Comprobante | Botica</title>
+    <title th:text="${'Comprobante ' + comprobante.numeroComprobante() + ' | ' + (botica != null && botica.nombre != null ? botica.nombre : 'Botica San Miguel')}">Comprobante | Botica</title>
     <link rel="stylesheet" th:href="@{/css/tailwind.css}">
 </head>
 
@@ -56,15 +56,15 @@
                     <article id="comprobante" class="ticket comprobante-ticket" aria-labelledby="titulo-comprobante">
                         <!-- Cabecera de Ticket -->
                         <div class="ctr">
-                            <th:block th:if="${#strings.contains(botica.nombre, '(')}">
+                            <th:block th:if="${botica != null && botica.nombre != null && #strings.contains(botica.nombre, '(')}">
                                 <div class="big" th:text="${#strings.trim(#strings.substringBefore(botica.nombre, '('))}">BOTICA SAN MIGUEL</div>
                                 <div class="text-[11px] text-ink-3 font-normal" th:text="'(' + ${#strings.substringAfter(botica.nombre, '(')}">(Dev Local - Ficticio)</div>
                             </th:block>
-                            <th:block th:unless="${#strings.contains(botica.nombre, '(')}">
-                                <div class="big" th:text="${botica.nombre}">BOTICA SAN MIGUEL</div>
+                            <th:block th:unless="${botica != null && botica.nombre != null && #strings.contains(botica.nombre, '(')}">
+                                <div class="big" th:text="${botica != null && botica.nombre != null ? botica.nombre : 'BOTICA SAN MIGUEL'}">BOTICA SAN MIGUEL</div>
                             </th:block>
-                            <div th:text="${'RUC: ' + botica.ruc}">RUC: </div>
-                        <div th:text="${botica.direccion}">Dirección</div>
+                            <div th:text="${botica != null && botica.ruc != null ? 'RUC: ' + botica.ruc : 'RUC: 20601234567'}">RUC: </div>
+                            <div th:text="${botica != null && botica.direccion != null ? botica.direccion : 'Av. Universitaria 1234 - Lima'}">Dirección</div>
                         <hr>
                         <b>BOLETA DE VENTA ELECTRÓNICA</b><br>
                         <span id="titulo-comprobante" class="font-bold text-base tracking-wider" th:text="${comprobante.numeroComprobante()}">B001-00000001</span>
