@@ -133,13 +133,17 @@ public class UsuarioRepositorio {
         return jdbcTemplate.query(sql, MAPEO_USUARIO_LISTADO);
     }
 
-    public boolean registrarAcceso(String nombreUsuario) {
+    public boolean registrarAcceso(String nombreUsuario, LocalDateTime fechaHora) {
         String sql = """
                 UPDATE usuario
-                SET ultimo_acceso = CURRENT_TIMESTAMP
+                SET ultimo_acceso = ?
                 WHERE nombre_usuario = ?
                 """;
-        int filas = jdbcTemplate.update(sql, nombreUsuario);
+        int filas = jdbcTemplate.update(sql, fechaHora, nombreUsuario);
         return filas > 0;
+    }
+
+    public boolean registrarAcceso(String nombreUsuario) {
+        return registrarAcceso(nombreUsuario, LocalDateTime.now(com.farmacia.util.FormatoUltimoAcceso.ZONA_LIMA));
     }
 }

@@ -5,6 +5,9 @@ import com.farmacia.dto.UsuarioFormulario;
 import com.farmacia.model.Usuario;
 import com.farmacia.model.UsuarioListadoVista;
 import com.farmacia.repository.UsuarioRepositorio;
+import com.farmacia.util.FormatoUltimoAcceso;
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -13,6 +16,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -28,12 +32,21 @@ public class UsuarioServicio {
     private final PasswordEncoder passwordEncoder;
     private final AuditoriaServicio auditoria;
     private final SessionRegistry sessionRegistry;
+    private final Clock clock;
 
     public UsuarioServicio(
             UsuarioRepositorio repositorio,
             PasswordEncoder passwordEncoder,
             AuditoriaServicio auditoria) {
-        this(repositorio, passwordEncoder, auditoria, null);
+        this(repositorio, passwordEncoder, auditoria, null, null);
+    }
+
+    public UsuarioServicio(
+            UsuarioRepositorio repositorio,
+            PasswordEncoder passwordEncoder,
+            AuditoriaServicio auditoria,
+            SessionRegistry sessionRegistry) {
+        this(repositorio, passwordEncoder, auditoria, sessionRegistry, null);
     }
 
     @Autowired
@@ -41,11 +54,13 @@ public class UsuarioServicio {
             UsuarioRepositorio repositorio,
             PasswordEncoder passwordEncoder,
             AuditoriaServicio auditoria,
-            @Autowired(required = false) SessionRegistry sessionRegistry) {
+            @Autowired(required = false) SessionRegistry sessionRegistry,
+            @Autowired(required = false) Clock clock) {
         this.repositorio = repositorio;
         this.passwordEncoder = passwordEncoder;
         this.auditoria = auditoria;
         this.sessionRegistry = sessionRegistry;
+        this.clock = clock != null ? clock : Clock.system(FormatoUltimoAcceso.ZONA_LIMA);
     }
 
     public List<Usuario> listar(String usuarioAutenticado) {
@@ -188,9 +203,18 @@ public class UsuarioServicio {
                 "cuenta activada para usuario: " + existente.nombreUsuario());
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public boolean registrarAcceso(String nombreUsuario) {
-        return repositorio.registrarAcceso(nombreUsuario);
+        Clock relojLima = clock.getZone().equals(FormatoUltimoAcceso.ZONA_LIMA)
+                ? clock
+                : clock.withZone(FormatoUltimoAcceso.ZONA_LIMA);
+        LocalDateTime ahoraLima = LocalDateTime.now(relojLima);
+        return repositorio.registrarAcceso(nombreUsuario, ahoraLima);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
+    public boolean registrarAcceso(String nombreUsuario, LocalDateTime fechaHora) {
+        return repositorio.registrarAcceso(nombreUsuario, fechaHora);
     }
 
     private void expirarSesionesDeUsuario(String nombreUsuario) {
