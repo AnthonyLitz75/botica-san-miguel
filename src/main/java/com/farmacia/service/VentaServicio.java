@@ -49,6 +49,13 @@ public class VentaServicio {
             int paginas,
             LocalDate desde,
             LocalDate hasta) {
+
+        public BigDecimal ticketPromedio() {
+            if (total <= 0 || totalFiltrado == null) {
+                return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+            }
+            return totalFiltrado.divide(BigDecimal.valueOf(total), 2, RoundingMode.HALF_UP);
+        }
     }
 
     /**
