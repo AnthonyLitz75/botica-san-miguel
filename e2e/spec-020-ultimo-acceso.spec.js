@@ -75,7 +75,8 @@ test.describe('Spec 020: Último acceso de los usuarios', () => {
     await page.locator('#modal-clave-user').fill('ClaveTest2026!');
     await modal.locator('button[type="submit"]').click();
 
-    await page.waitForURL((url) => url.pathname.endsWith('/usuarios'), { timeout: 15000 });
+    // Esperar a que el servidor procese el POST y muestre el mensaje de éxito
+    await expect(page.locator('.aviso-operacion.aviso-exito')).toContainText('Usuario registrado correctamente', { timeout: 15000 });
 
     // 8. Verificar que el usuario recién creado muestra "Nunca" en Último acceso
     const filaNuevo = page.locator(`table tbody tr:has(.mono:text("${usuarioNuevo}"))`);
