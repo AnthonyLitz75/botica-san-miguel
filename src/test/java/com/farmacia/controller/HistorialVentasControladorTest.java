@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -208,5 +209,36 @@ class HistorialVentasControladorTest {
                 .andExpect(status().isForbidden());
 
         verifyNoInteractions(ventaServicio);
+    }
+
+    @Test
+    @DisplayName("T2292: el HTML del historial no contiene 'Anuladas' ni badge de anulación")
+    void historialNoContieneAnuladas() throws Exception {
+        var fila = new VentaResumenVista(
+                10,
+                "B001-00000010",
+                LocalDateTime.of(2026, 11, 13, 14, 30),
+                2,
+                "vendedor_demo",
+                "Juan Perez",
+                new BigDecimal("50.00"),
+                BigDecimal.ZERO,
+                new BigDecimal("50.00"));
+
+        when(ventaServicio.listarVendedores()).thenReturn(List.of());
+        when(ventaServicio.listarHistorial(eq("admin"), any(), eq(1))).thenReturn(new VentaServicio.Historial(
+                List.of(fila),
+                new BigDecimal("50.00"),
+                1,
+                1,
+                1,
+                LocalDate.of(2026, 10, 14),
+                LocalDate.of(2026, 11, 13)));
+
+        mvc.perform(get("/ventas").with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("ventas/historial"))
+                .andExpect(content().string(not(containsString("Anuladas"))))
+                .andExpect(content().string(not(containsString("ANULADA"))));
     }
 }
