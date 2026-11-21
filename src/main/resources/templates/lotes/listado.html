@@ -146,14 +146,14 @@
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <div class="mb">
                     <div>
-                        <label>Medicamento</label>
+                        <div class="lbl">Medicamento</div>
                         <div class="inp" style="background:#f7f9f8">
                             <span class="chip mono text-xs" th:text="${medicamento.codigo()}">MED-001</span>
                             <b class="text-xs truncate" th:text="${medicamento.nombre()}">Paracetamol</b>
                         </div>
                     </div>
                     <div>
-                        <label>Lote seleccionado</label>
+                        <div class="lbl">Lote seleccionado</div>
                         <div class="inp" style="background:#f7f9f8">
                             <b id="modal-salida-lote-num" class="mono text-pine-700">LOT-XXXX</b>
                             <span id="modal-salida-lote-stock" class="badge t-ok ml-auto">Stock: 0</span>
