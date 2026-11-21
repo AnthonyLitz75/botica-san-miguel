@@ -8,6 +8,7 @@ import com.farmacia.service.ClienteServicio;
 import com.farmacia.service.MedicamentoServicio;
 import com.farmacia.service.VentaServicio;
 import org.springframework.security.access.AccessDeniedException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import com.farmacia.service.UsuarioDetallesServicio;
@@ -138,7 +139,7 @@ class VentaWebControladorTest {
     private ComprobanteVista comprobante() {
         return new ComprobanteVista(12, "B001-00000012", LocalDateTime.of(2026, 11, 10, 9, 30), 7,
                 "Vendedor Demo", null, null,
-                List.of(new ComprobanteVista.Linea("MED-001", "Paracetamol", "LT-A", 4,
+                List.of(new ComprobanteVista.Linea("MED-001", "Paracetamol", "LT-A", LocalDate.of(2026, 12, 31), 4,
                         new BigDecimal("8.50"), new BigDecimal("0.00"), new BigDecimal("34.00"))),
                 new BigDecimal("34.00"), new BigDecimal("0.00"), new BigDecimal("34.00"));
     }
@@ -154,6 +155,7 @@ class VentaWebControladorTest {
                 .andExpect(content().string(containsString("B001-00000012")))
                 .andExpect(content().string(containsString("Público general")))
                 .andExpect(content().string(containsString("LT-A")))
+                .andExpect(content().string(containsString("Venc 12/2026")))
                 .andExpect(content().string(containsString("Comprobante interno")))
                 .andExpect(content().string(containsString("S/ 34.00")))
                 .andExpect(content().string(containsString("window.print()")));

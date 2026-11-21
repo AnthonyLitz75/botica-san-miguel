@@ -101,7 +101,7 @@
                                 </span>
                             </div>
                             <div class="text-[11px] text-slate-500 font-mono">
-                                <span th:text="${'   Lote ' + linea.numeroLote()}">   Lote LOT-A</span>
+                                <span th:text="${'   Lote ' + linea.numeroLote() + (linea.fechaVencimiento() != null ? (' · Venc ' + #temporals.format(linea.fechaVencimiento(), 'MM/yyyy')) : '')}">   Lote LOT-A · Venc 12/2026</span>
                             </div>
                         </div>
                     </div>
