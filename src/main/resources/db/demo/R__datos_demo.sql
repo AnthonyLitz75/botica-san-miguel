@@ -27,11 +27,11 @@ BEGIN
 
     INSERT INTO usuario (nombre, nombre_usuario, clave_hash, rol, ultimo_acceso) VALUES
     ('Administrador de prueba', 'admin_demo',
-     '{bcrypt}' || crypt('AdminDemo2026!', gen_salt('bf', 10)), 'ADMINISTRADOR', NOW() - INTERVAL '2 hours'),
+     '{bcrypt}' || crypt('AdminDemo2026!', gen_salt('bf', 10)), 'ADMINISTRADOR', (NOW() AT TIME ZONE 'America/Lima') - INTERVAL '2 hours'),
     ('Almacenero de prueba', 'almacen_demo',
-     '{bcrypt}' || crypt('FarmaciaDemo2026!', gen_salt('bf', 10)), 'ALMACENERO', NOW() - INTERVAL '1 day'),
+     '{bcrypt}' || crypt('FarmaciaDemo2026!', gen_salt('bf', 10)), 'ALMACENERO', (NOW() AT TIME ZONE 'America/Lima') - INTERVAL '1 day'),
     ('Compras de prueba', 'compras_demo',
-     '{bcrypt}' || crypt('ComprasDemo2026!', gen_salt('bf', 10)), 'COMPRAS', NOW() - INTERVAL '10 days'),
+     '{bcrypt}' || crypt('ComprasDemo2026!', gen_salt('bf', 10)), 'COMPRAS', (NOW() AT TIME ZONE 'America/Lima') - INTERVAL '10 days'),
     ('Vendedor de prueba', 'vendedor_demo',
      '{bcrypt}' || crypt('VendedorDemo2026!', gen_salt('bf', 10)), 'VENDEDOR', NULL);
 
