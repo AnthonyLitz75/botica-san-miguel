@@ -75,10 +75,10 @@
                 <div class="sec">
                     <h2 id="titulo-reposicion">Necesidades de reposición</h2>
                     <span class="cnt cantidad-resultados" th:text="${#lists.size(reposicion)}">0</span>
-                    <span class="lbl">La cantidad sugerida descuenta unidades pendientes de recibir.</span>
+                    <span class="lbl text-xs text-ink-3 font-normal" style="color:var(--ink-3);font-size:12px;font-weight:normal;">La cantidad sugerida descuenta unidades pendientes de recibir.</span>
                 </div>
 
-                <div class="card pad inventario-vacio text-center" th:if="${#lists.isEmpty(reposicion)}">
+                <div class="card pad text-center py-8" th:if="${#lists.isEmpty(reposicion)}">
                     <p class="text-ink-2 font-medium">No hay necesidades de reposición pendientes.</p>
                 </div>
 
@@ -126,10 +126,10 @@
                 <div class="sec">
                     <h2 id="titulo-vencidos">Lotes vencidos</h2>
                     <span class="cnt critico alerta-contador-critico" th:text="${#lists.size(panel.vencidos())}">0</span>
-                    <span class="lbl">Verifica y gestiona estos lotes según el procedimiento de la botica.</span>
+                    <span class="lbl text-xs text-ink-3 font-normal" style="color:var(--ink-3);font-size:12px;font-weight:normal;">Verifica y gestiona estos lotes según el procedimiento de la botica.</span>
                 </div>
 
-                <div class="card pad inventario-vacio text-center" th:if="${#lists.isEmpty(panel.vencidos())}">
+                <div class="card pad text-center py-8" th:if="${#lists.isEmpty(panel.vencidos())}">
                     <p class="text-ink-2 font-medium">No se encontraron lotes vencidos.</p>
                 </div>
 
@@ -177,10 +177,10 @@
                 <div class="sec">
                     <h2 id="titulo-por-vencer">Próximos a vencer</h2>
                     <span class="cnt preventivo alerta-contador-preventivo" th:text="${#lists.size(panel.porVencer())}">0</span>
-                    <span class="lbl" th:text="|Horizonte de ${diasPorVencer} días · ordenados por fecha de caducidad (FEFO).|">Horizonte de 90 días · ordenados por fecha.</span>
+                    <span class="lbl text-xs text-ink-3 font-normal" style="color:var(--ink-3);font-size:12px;font-weight:normal;" th:text="|Horizonte de ${diasPorVencer} días · ordenados por fecha de caducidad (FEFO).|">Horizonte de 90 días · ordenados por fecha.</span>
                 </div>
 
-                <div class="card pad inventario-vacio text-center" th:if="${#lists.isEmpty(panel.porVencer())}">
+                <div class="card pad text-center py-8" th:if="${#lists.isEmpty(panel.porVencer())}">
                     <p class="text-ink-2 font-medium" th:text="|No hay lotes próximos a vencer en los siguientes ${diasPorVencer} días.|">No hay lotes próximos a vencer.</p>
                 </div>
 

@@ -109,6 +109,43 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    // Toggle segmentado DNI / RUC en modales (Boceto 14)
+    document.addEventListener('click', (e) => {
+        const btnToggle = e.target.closest('.btn-toggle-doc');
+        if (!btnToggle) return;
+        const contenedor = btnToggle.closest('.seg');
+        if (!contenedor) return;
+        const tipo = btnToggle.dataset.tipo;
+        const modal = btnToggle.closest('.md, form');
+        const inputHidden = modal ? modal.querySelector('#modal-tipoDocumento, input[name="tipoDocumento"]') : null;
+        if (inputHidden) {
+            inputHidden.value = tipo;
+        }
+        contenedor.querySelectorAll('.btn-toggle-doc').forEach((btn) => {
+            const activo = btn === btnToggle;
+            btn.classList.toggle('on', activo);
+            btn.setAttribute('aria-pressed', activo ? 'true' : 'false');
+        });
+
+        // Actualizar validación de número de documento si existe
+        const inputNum = modal ? modal.querySelector('#modal-numeroDocumento, #numeroDocumento') : null;
+        if (inputNum) {
+            const contenedorHelp = modal.querySelector(`[data-help-for="${inputNum.id}"]`);
+            if (tipo === 'DNI') {
+                inputNum.setAttribute('maxlength', '8');
+                inputNum.setAttribute('data-valida', 'dni');
+                inputNum.setAttribute('placeholder', '8 dígitos para DNI');
+                if (contenedorHelp) contenedorHelp.textContent = '8 dígitos numéricos';
+            } else {
+                inputNum.setAttribute('maxlength', '11');
+                inputNum.setAttribute('data-valida', 'ruc');
+                inputNum.setAttribute('placeholder', '11 dígitos para RUC');
+                if (contenedorHelp) contenedorHelp.textContent = '11 dígitos (RUC)';
+            }
+            inputNum.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    });
+
     // Validación interactiva en tiempo real para DNI / RUC según bocetos (reutiliza core/validador-docs.js)
     document.addEventListener('input', (e) => {
         const input = e.target;

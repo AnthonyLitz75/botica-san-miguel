@@ -63,6 +63,7 @@ public class ReporteControlador {
 
             if (efectivo.desde() != null && efectivo.hasta() != null) {
                 long diasRango = ChronoUnit.DAYS.between(efectivo.desde(), efectivo.hasta()) + 1;
+                model.addAttribute("diasRango", diasRango);
                 if (diasRango > 31) {
                     model.addAttribute("avisoGrafico", "Acota el rango a 31 días para ver el gráfico");
                 } else if (!reporte.isEmpty() && total.compareTo(BigDecimal.ZERO) > 0) {

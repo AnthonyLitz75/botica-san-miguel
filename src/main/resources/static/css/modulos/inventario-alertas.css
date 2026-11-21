@@ -103,11 +103,11 @@
 }
 
 .metrica-critica {
-  border-top: 3px solid #c84a4a;
+  border-top: none;
 }
 
 .metrica-preventiva {
-  border-top: 3px solid #d79a27;
+  border-top: none;
 }
 
 .alertas-seccion {

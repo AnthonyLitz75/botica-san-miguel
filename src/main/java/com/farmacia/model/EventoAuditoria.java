@@ -53,4 +53,36 @@ public record EventoAuditoria(
             default -> codigoResultado;
         };
     }
+
+    /**
+     * Devuelve la etiqueta humana legible de la entidad (Boceto 06).
+     */
+    public String etiquetaEntidad() {
+        return etiquetaEntidad(this.entidad);
+    }
+
+    public static String etiquetaEntidad(String codigoEntidad) {
+        if (codigoEntidad == null || codigoEntidad.isBlank()) {
+            return "—";
+        }
+        return switch (codigoEntidad.strip().toUpperCase()) {
+            case "SESION" -> "Sesión";
+            case "RUTA" -> "Ruta";
+            case "VENTA" -> "Venta";
+            case "MEDICAMENTO" -> "Medicamento";
+            case "CATEGORIA" -> "Categoría";
+            case "CLIENTE" -> "Cliente";
+            case "PROVEEDOR" -> "Proveedor";
+            case "USUARIO" -> "Usuario";
+            case "LOTE" -> "Lote";
+            case "ORDEN_COMPRA" -> "Orden de compra";
+            case "AUDITORIA" -> "Auditoría";
+            case "REPORTE_VENTAS" -> "Reporte de ventas";
+            case "REPORTE_MAS_VENDIDOS" -> "Reporte más vendidos";
+            case "REPORTE_MERMAS" -> "Reporte de mermas";
+            case "REPORTE_INVENTARIO" -> "Reporte de inventario";
+            case "REPORTE_COMPRAS" -> "Reporte de compras";
+            default -> codigoEntidad;
+        };
+    }
 }

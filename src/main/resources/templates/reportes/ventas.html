@@ -87,8 +87,8 @@
             <!-- Filtros de fecha -->
             <div class="card pad mb-6">
                 <form th:action="@{/reportes/ventas}" method="get" role="search" aria-label="Filtro de fechas">
-                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
-                        <div class="sm:col-span-5">
+                    <div class="flex items-end gap-4 flex-wrap">
+                        <div class="w-full sm:w-[230px]">
                             <label for="desde">Desde</label>
                             <div class="inp">
                                 <svg class="ico text-ink-3 flex-none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -97,7 +97,7 @@
                                 <input type="date" id="desde" name="desde" th:value="${filtro.desde()}" class="w-full bg-transparent border-0 focus:outline-none text-ink font-semibold">
                             </div>
                         </div>
-                        <div class="sm:col-span-5">
+                        <div class="w-full sm:w-[230px]">
                             <label for="hasta">Hasta</label>
                             <div class="inp">
                                 <svg class="ico text-ink-3 flex-none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -106,14 +106,17 @@
                                 <input type="date" id="hasta" name="hasta" th:value="${filtro.hasta()}" class="w-full bg-transparent border-0 focus:outline-none text-ink font-semibold">
                             </div>
                         </div>
-                        <div class="sm:col-span-2">
-                            <button type="submit" class="btn p w-full justify-center" style="height:42px;">
+                        <div>
+                            <button type="submit" class="btn p" style="height:42px;">
                                 <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                     <path d="M22 3H2l8 9.46V19l4 2v-8.54z"/>
                                 </svg>
                                 <span>Filtrar</span>
                             </button>
                         </div>
+                        <div class="sp flex-1"></div>
+                        <span class="lbl self-center text-xs text-ink-3 font-semibold pb-1"
+                              th:text="${diasRango != null ? 'Últimos ' + diasRango + ' días' : 'Últimos 30 días'}">Últimos 30 días</span>
                     </div>
                 </form>
             </div>

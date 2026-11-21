@@ -177,6 +177,87 @@ test.describe('Spec 023: Fase 1 — Pruebas de estilos computados y tokens', () 
     }
   });
 
+  test('Punto C: Por pantalla - categorias, usuarios, historial, auditoria, reportes, ticket, alertas y modal nuevo cliente', async ({ page }) => {
+    await page.setViewportSize({ width: 1600, height: 900 });
+    await iniciarSesion(page, 'admin_demo', 'AdminDemo2026!');
+
+    // 7. Categorias: quitar #id visibles y subtitulo gris normal
+    await page.goto('/categorias', { waitUntil: 'domcontentloaded' });
+    const idVisible = await page.locator('.tr .font-mono:has-text("#")').count();
+    expect(idVisible).toBe(0);
+    const lblSubtitulo = page.locator('.sec .lbl').first();
+    const lblColor = await lblSubtitulo.evaluate((el) => window.getComputedStyle(el).color);
+    // ink-3 es #5b6d66 -> rgb(91, 109, 102)
+    expect(lblColor).toBe('rgb(91, 109, 102)');
+
+    // 8. Usuarios: username mono verde pine-700 y boton reset clave neutro
+    await page.goto('/usuarios', { waitUntil: 'domcontentloaded' });
+    const userMono = page.locator('table tbody tr .who .mono').first();
+    const userColor = await userMono.evaluate((el) => window.getComputedStyle(el).color);
+    expect(userColor).toBe('rgb(22, 106, 85)'); // pine-700
+    const btnClaveIcon = page.locator('table tbody tr button[title="Restablecer clave"] svg').first();
+    const btnClaveClasses = await btnClaveIcon.getAttribute('class');
+    expect(btnClaveClasses).not.toContain('text-blue-600');
+
+    // 9. Historial: botones icono Ver e Imprimir con aria-label y target blank
+    await page.goto('/ventas', { waitUntil: 'domcontentloaded' });
+    const btnVer = page.locator('table tbody tr a[aria-label^="Ver comprobante"]').first();
+    await expect(btnVer).toBeVisible();
+    const btnImprimir = page.locator('table tbody tr a[aria-label^="Imprimir comprobante"]').first();
+    await expect(btnImprimir).toBeVisible();
+    expect(await btnImprimir.getAttribute('target')).toBe('_blank');
+
+    // 10. Auditoria: entidad legible, IP text-left, fecha no mono
+    await page.goto('/auditoria', { waitUntil: 'domcontentloaded' });
+    const primerFila = page.locator('table tbody tr').first();
+    if (await primerFila.isVisible()) {
+      const celdaFecha = primerFila.locator('td').first();
+      const fechaClase = await celdaFecha.getAttribute('class');
+      expect(fechaClase).not.toContain('font-mono');
+      const celdaIp = primerFila.locator('td').last();
+      const ipClase = await celdaIp.getAttribute('class');
+      expect(ipClase).not.toContain('r');
+    }
+
+    // 11. Reportes: leyenda "Ultimos N dias" y etiquetas dd/MM
+    await page.goto('/reportes/ventas', { waitUntil: 'domcontentloaded' });
+    const leyendaDias = page.locator('form[aria-label="Filtro de fechas"] .lbl:has-text("días")');
+    await expect(leyendaDias).toBeVisible();
+
+    // 12. Ticket: sin tarjeta atajos de mostrador, botones en barra fina sobre el ticket
+    await page.goto('/ventas', { waitUntil: 'domcontentloaded' });
+    const primerTicket = page.locator('table tbody tr a[aria-label^="Ver comprobante"]').first();
+    await primerTicket.click();
+    await page.waitForURL(/\/ventas\/\d+/, { timeout: 10000 });
+    const atajos = page.locator('.ann:has-text("Atajos de mostrador")');
+    expect(await atajos.count()).toBe(0);
+    const barraTicket = page.locator('.barra-ticket-acciones, .stage .ticket-toolbar');
+    await expect(barraTicket).toBeVisible();
+
+    // 13. Alertas: sin borde superior en KPIs
+    await page.goto('/alertas', { waitUntil: 'domcontentloaded' });
+    const kpiCard = page.locator('.kpi').first();
+    const borderTopWidth = await kpiCard.evaluate((el) => window.getComputedStyle(el).borderTopWidth);
+    const borderTopColor = await kpiCard.evaluate((el) => window.getComputedStyle(el).borderTopColor);
+    // Debe tener el borde normal de 1px con var(--line) rgb(223, 230, 227) o 0px, no el de 3px rojo/ambar
+    expect(borderTopWidth).not.toBe('3px');
+
+    // 14. Modal Nuevo cliente: toggle segmentado DNI / RUC con aria-pressed
+    await page.goto('/clientes', { waitUntil: 'domcontentloaded' });
+    const btnNuevoCliente = page.locator('a[data-modal-open="modal-nuevo-cliente"]');
+    await btnNuevoCliente.click();
+    const modalCliente = page.locator('#modal-nuevo-cliente');
+    await expect(modalCliente).toBeVisible();
+    const selectTipoDoc = modalCliente.locator('select#modal-tipoDocumento');
+    expect(await selectTipoDoc.count()).toBe(0);
+    const btnToggleDni = modalCliente.locator('button.btn-toggle-doc[data-tipo="DNI"]');
+    const btnToggleRuc = modalCliente.locator('button.btn-toggle-doc[data-tipo="RUC"]');
+    await expect(btnToggleDni).toBeVisible();
+    await expect(btnToggleRuc).toBeVisible();
+    expect(await btnToggleDni.getAttribute('aria-pressed')).toBe('true');
+    expect(await btnToggleRuc.getAttribute('aria-pressed')).toBe('false');
+  });
+
   test('T2303: tokens existen en tailwind.config.js y no se carga ninguna fuente externa', async () => {
     // 1. Leer tailwind.config.js
     const configPath = path.resolve('tailwind.config.js');

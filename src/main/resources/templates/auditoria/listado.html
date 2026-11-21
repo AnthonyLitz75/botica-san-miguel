@@ -76,7 +76,7 @@
                             <div class="inp">
                                 <select id="entidad" th:field="*{entidad}" class="w-full bg-transparent border-0 focus:outline-none text-ink text-xs">
                                     <option value="">Todas</option>
-                                    <option th:each="e : ${entidades}" th:value="${e}" th:text="${e}"></option>
+                                    <option th:each="e : ${entidades}" th:value="${e}" th:text="${T(com.farmacia.model.EventoAuditoria).etiquetaEntidad(e)}"></option>
                                 </select>
                             </div>
                         </div>
@@ -139,17 +139,17 @@
                                     <th scope="col">ID</th>
                                     <th scope="col" class="c">Resultado</th>
                                     <th scope="col">Detalle</th>
-                                    <th scope="col" class="r">IP Origen</th>
+                                    <th scope="col">IP</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr th:each="e : ${consulta.eventos()}">
-                                    <td class="text-xs text-ink-2 font-mono whitespace-nowrap" th:text="${#temporals.format(e.fechaHora(), 'dd/MM/yyyy HH:mm:ss')}">13/11/2026</td>
-                                    <td class="font-bold text-xs text-ink" th:text="${e.nombreUsuario()}">admin</td>
+                                    <td class="text-xs text-ink-2 whitespace-nowrap" th:text="${#temporals.format(e.fechaHora(), 'dd/MM/yyyy HH:mm:ss')}">13/11/2026</td>
+                                    <td class="text-xs text-ink-2" th:text="${e.nombreUsuario()}">admin</td>
                                     <td>
-                                        <b class="text-xs text-ink-2" th:text="${e.etiquetaAccion()}">EDITAR</b>
+                                        <b class="text-xs text-ink" th:text="${e.etiquetaAccion()}">EDITAR</b>
                                     </td>
-                                    <td class="text-xs text-ink-3" th:text="${e.entidad()}">MEDICAMENTO</td>
+                                    <td class="text-xs text-ink-2" th:text="${e.etiquetaEntidad()}">MEDICAMENTO</td>
                                     <td class="text-xs font-mono text-ink-2" th:text="${e.idEntidad() != null ? e.idEntidad() : '—'}">1</td>
                                     <td class="c">
                                         <span class="badge"
@@ -157,7 +157,7 @@
                                             th:text="${e.etiquetaResultado()}">ÉXITO</span>
                                     </td>
                                     <td class="text-xs text-ink-2 max-w-xs truncate" th:text="${e.detalle() != null ? e.detalle() : '—'}" th:title="${e.detalle()}">—</td>
-                                    <td class="r lbl font-mono text-xs" th:text="${e.ipOrigen() != null ? e.ipOrigen() : '—'}">127.0.0.1</td>
+                                    <td class="lbl text-xs text-ink-3" th:text="${e.ipOrigen() != null ? e.ipOrigen() : '—'}">127.0.0.1</td>
                                 </tr>
                             </tbody>
                         </table>

@@ -14,7 +14,7 @@
     <div class="inventario-area">
         <header th:replace="~{fragmentos/navegacion :: cabecera('Ventas', 'Comprobante')}"></header>
         <main id="contenido" class="inventario-contenido">
-            <!-- Barra superior no imprimible con botones de acción rápida -->
+            <!-- Barra superior no imprimible -->
             <div class="head no-imprimir">
                 <div>
                     <div class="eyebrow">VENTAS / COMPROBANTE</div>
@@ -22,19 +22,6 @@
                     <div class="sub">Comprobante emitido con correlativo formal y asignación de lotes FEFO.</div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button type="button" id="boton-imprimir" class="btn p" onclick="window.print()">
-                        <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-                            <path d="M6 14h12v8H6z"/>
-                        </svg>
-                        <span>Imprimir ticket (80 mm)</span>
-                    </button>
-                    <a class="btn s" th:href="@{/ventas/nueva}">
-                        <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M5 12h14M12 5v14"/>
-                        </svg>
-                        <span>Nueva venta</span>
-                    </a>
                     <a class="btn s" th:href="@{/ventas/historial}">
                         <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                             <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/>
@@ -47,12 +34,36 @@
 
             <!-- Escenario con Ticket Térmico y Panel Informativo (Boceto 02) -->
             <div class="stage">
-                <!-- Ticket Térmico de 80 mm -->
-                <article id="comprobante" class="ticket comprobante-ticket" aria-labelledby="titulo-comprobante">
-                    <!-- Cabecera de Ticket -->
-                    <div class="ctr">
-                        <div class="big" th:text="${botica.nombre}">BOTICA SAN MIGUEL</div>
-                        <div th:text="${'RUC: ' + botica.ruc}">RUC: </div>
+                <div>
+                    <!-- Barra de acciones fina encima del papel -->
+                    <div class="ticket-toolbar barra-ticket-acciones no-imprimir flex items-center justify-between gap-3 mb-3 w-[340px] max-w-full">
+                        <button type="button" id="boton-imprimir" class="btn p flex-1 justify-center py-2 text-xs" onclick="window.print()">
+                            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                                <path d="M6 14h12v8H6z"/>
+                            </svg>
+                            <span>Imprimir ticket</span>
+                        </button>
+                        <a class="btn s flex-1 justify-center py-2 text-xs" th:href="@{/ventas/nueva}">
+                            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 12h14M12 5v14"/>
+                            </svg>
+                            <span>Iniciar siguiente venta</span>
+                        </a>
+                    </div>
+
+                    <!-- Ticket Térmico de 80 mm -->
+                    <article id="comprobante" class="ticket comprobante-ticket" aria-labelledby="titulo-comprobante">
+                        <!-- Cabecera de Ticket -->
+                        <div class="ctr">
+                            <th:block th:if="${#strings.contains(botica.nombre, '(')}">
+                                <div class="big" th:text="${#strings.trim(#strings.substringBefore(botica.nombre, '('))}">BOTICA SAN MIGUEL</div>
+                                <div class="text-[11px] text-ink-3 font-normal" th:text="'(' + ${#strings.substringAfter(botica.nombre, '(')}">(Dev Local - Ficticio)</div>
+                            </th:block>
+                            <th:block th:unless="${#strings.contains(botica.nombre, '(')}">
+                                <div class="big" th:text="${botica.nombre}">BOTICA SAN MIGUEL</div>
+                            </th:block>
+                            <div th:text="${'RUC: ' + botica.ruc}">RUC: </div>
                         <div th:text="${botica.direccion}">Dirección</div>
                         <hr>
                         <b>BOLETA DE VENTA ELECTRÓNICA</b><br>
@@ -135,6 +146,7 @@
                         </div>
                     </div>
                 </article>
+                </div>
 
                 <!-- Panel Informativo Lateral (no imprimible) -->
                 <div class="ann no-imprimir">
@@ -146,22 +158,6 @@
                         <li><b>Correlativo formal:</b> Formato institucional <code>B001-XXXXXXXX</code> auditable en el sistema.</li>
                         <li><b>Búsqueda en historial:</b> El número de comprobante permite buscarlo directamente en el Historial de ventas.</li>
                     </ul>
-
-                    <div class="card pad mt-6 bg-slate-50 border-slate-200">
-                        <div class="flex items-center gap-2 font-bold text-xs text-ink-2 mb-2">
-                            <svg class="ico text-pine-700" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
-                            </svg>
-                            <span>Atajos de mostrador</span>
-                        </div>
-                        <p class="text-xs text-ink-3 mb-3">Presiona <kbd class="kbd">Ctrl + P</kbd> o el botón <b>Imprimir</b> para enviar el ticket directamente a la impresora térmica seleccionada.</p>
-                        <a th:href="@{/ventas/nueva}" class="btn p w-full justify-center text-xs">
-                            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
-                            </svg>
-                            <span>Iniciar siguiente venta</span>
-                        </a>
-                    </div>
                 </div>
             </div>
         </main>

@@ -38,7 +38,7 @@
                 <div class="sec" style="margin-top:0">
                     <h2 id="titulo-arbol">Jerarquía taxonómica</h2>
                     <span class="cnt cantidad-resultados" th:text="${totalCategorias}">0</span>
-                    <span class="lbl">Estructura N-aria · usa [+] para añadir una subcategoría</span>
+                    <span class="lbl text-xs text-ink-3 font-normal" style="color: var(--ink-3); font-size: 12px; font-weight: normal;">Estructura N-aria · usa [+] para añadir una subcategoría</span>
                 </div>
 
                 <div class="card pad inventario-vacio text-center" th:if="${totalCategorias == 0}">
@@ -61,7 +61,6 @@
                         </span>
 
                         <div class="flex items-center gap-2">
-                            <span class="font-mono text-xs text-ink-3" th:text="'#' + ${nodo.id()}">#1</span>
                             <a th:href="@{/medicamentos(categoria=${nodo.id()})}"
                                class="font-bold text-ink hover:text-pine-700 transition-colors"
                                th:text="${nodo.nombre()}"

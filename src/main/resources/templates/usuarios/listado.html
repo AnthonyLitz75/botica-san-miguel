@@ -68,7 +68,7 @@
                                 <td>
                                     <div class="who">
                                         <span class="ini" th:text="${#strings.length(u.nombre()) >= 2 ? #strings.toUpperCase(#strings.substring(u.nombre(), 0, 2)) : 'US'}">US</span>
-                                        <span class="mono" th:text="${u.nombreUsuario()}">usuario</span>
+                                        <span class="mono font-mono font-semibold text-pine-700" th:text="${u.nombreUsuario()}">usuario</span>
                                     </div>
                                 </td>
                                 <td>
@@ -102,7 +102,7 @@
                                             onclick="abrirModalClave(this.dataset.id, this.dataset.usuario)"
                                             title="Restablecer clave"
                                             th:attr="aria-label=${'Restablecer contraseña de ' + u.nombreUsuario()}">
-                                            <svg class="ico text-blue-600" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                                 <circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/>
                                             </svg>
                                         </button>

@@ -193,13 +193,25 @@
                                 <td class="r text-xs text-rose-600" th:text="${'S/ ' + #numbers.formatDecimal(fila.descuentoTotal(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</td>
                                 <td class="r font-bold text-ink" th:text="${'S/ ' + #numbers.formatDecimal(fila.total(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</td>
                                 <td class="r">
-                                    <a class="lnk" th:href="@{/ventas/{id}(id=${fila.idVenta()})}" title="Ver o reimprimir comprobante">
-                                        <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-                                            <path d="M6 9V3h12v6"/><rect x="6" y="14" width="12" height="8"/>
-                                        </svg>
-                                        <span>Comprobante</span>
-                                    </a>
+                                    <div class="flex items-center justify-end gap-1.5">
+                                        <a class="ibtn" th:href="@{/ventas/{id}(id=${fila.idVenta()})}"
+                                           th:attr="aria-label=${'Ver comprobante ' + fila.numeroComprobante()}"
+                                           title="Ver comprobante">
+                                            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                                                <circle cx="12" cy="12" r="3"/>
+                                            </svg>
+                                        </a>
+                                        <a class="ibtn" th:href="@{/ventas/{id}(id=${fila.idVenta()})}"
+                                           target="_blank" rel="noopener noreferrer"
+                                           th:attr="aria-label=${'Imprimir comprobante ' + fila.numeroComprobante()}"
+                                           title="Imprimir comprobante en nueva pestaña">
+                                            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                                                <path d="M6 9V3h12v6"/><rect x="6" y="14" width="12" height="8"/>
+                                            </svg>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>
