@@ -69,6 +69,7 @@ test.describe('Spec 020: Último acceso de los usuarios', () => {
 
     const modal = page.locator('#modal-nuevo-usuario');
     await expect(modal).toBeVisible();
+    await page.waitForTimeout(100);
 
     await page.locator('#modal-nombre-user').fill('Usuario Prueba Nunca');
     await page.locator('#modal-nombreUsuario').fill(usuarioNuevo);
