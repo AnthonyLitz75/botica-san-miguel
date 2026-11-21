@@ -4,38 +4,66 @@
    ========================================================================== */
 
 :root {
-  /* Paleta Principal - Verde Farmacéutico (Pino Institucional) */
-  --color-primario: #156552;
-  --color-primario-hover: #0e4b3c;
-  --color-primario-suave: #e8f4f0;
-  --color-primario-borde: #b8dcd2;
+  /* Tokens Oficiales Bocetos Botica San Miguel (Spec 023) */
+  --pine-900: #0f2a24;
+  --pine-800: #143a31;
+  --pine-700: #166a55;
+  --pine-600: #1b7f66;
+  --pine-100: #d3ebe3;
+  --pine-50: #e9f4f0;
 
-  /* Superficies y Fondos */
-  --bg-pagina: #f4f7f6;
+  --ink: #10201b;
+  --ink-2: #33463f;
+  --ink-3: #5b6d66;
+
+  --line: #dfe6e3;
+  --bg: #f3f5f4;
+  --card: #ffffff;
+  --borde-campo: #cfd8d4;
+
+  --amber: #b45309;
+  --amber-bg: #fef3c7;
+  --amber-500: #f59e0b;
+  --rose: #be123c;
+  --rose-bg: #ffe4e6;
+  --blue: #1d4ed8;
+  --blue-bg: #e0ecff;
+  --ok: #047857;
+  --ok-bg: #d1fae5;
+  --acento-activo: #34d399;
+  --insignia-alertas: #e11d48;
+
+  /* Tipografía */
+  --fuente-sans: Inter, "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fuente-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Compatibilidad hacia atrás */
+  --color-primario: #166a55;
+  --color-primario-hover: #1b7f66;
+  --color-primario-suave: #e9f4f0;
+  --color-primario-borde: #d3ebe3;
+
+  --bg-pagina: #f3f5f4;
   --bg-superficie: #ffffff;
-  --bg-hover-fila: #f2f8f5;
+  --bg-hover-fila: #fafcfb;
 
-  /* Textos */
-  --texto-principal: #1e2926;
-  --texto-secundario: #5c6b66;
+  --texto-principal: #10201b;
+  --texto-secundario: #5b6d66;
 
-  /* Bordes y Estados */
-  --borde-suave: #dde5e2;
-  --borde-input: #b8c7c1;
-  --color-foco: #0284c7;
-  --color-error: #b42318;
-  --bg-error: #fef3f2;
+  --borde-suave: #dfe6e3;
+  --borde-input: #cfd8d4;
+  --color-foco: #166a55;
+  --color-error: #be123c;
+  --bg-error: #ffe4e6;
   --borde-error: #fecdca;
-  --color-exito: #15603a;
-  --bg-exito: #ecfdf3;
-  --borde-exito: #abefc6;
+  --color-exito: #047857;
+  --bg-exito: #d1fae5;
+  --borde-exito: #a7f3d0;
 
-  /* Sombras y Radios */
   --radio-sm: 6px;
-  --radio-md: 8px;
-  --radio-lg: 12px;
-  --sombra-tarjeta:
-    0 1px 3px rgba(16, 24, 40, 0.06), 0 1px 2px rgba(16, 24, 40, 0.04);
-  --sombra-elevada: 0 20px 40px -12px rgba(14, 42, 35, 0.22);
-  --transicion: 0.18s ease-in-out;
+  --radio-md: 10px;
+  --radio-lg: 16px;
+  --sombra-tarjeta: 0 1px 2px rgba(16, 32, 27, 0.04), 0 6px 18px -10px rgba(16, 32, 27, 0.12);
+  --sombra-elevada: 0 30px 80px -20px rgba(0, 0, 0, 0.5);
+  --transicion: 0.15s ease;
 }

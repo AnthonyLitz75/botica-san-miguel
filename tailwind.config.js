@@ -30,6 +30,7 @@ module.exports = {
           3: '#5b6d66',
         },
         line: '#dfe6e3',
+        bg: '#f3f5f4',
         surface: '#f3f5f4',
         card: '#ffffff',
         // Estados semánticos (Contraste AA verificado >= 4.5:1)
@@ -70,7 +71,7 @@ module.exports = {
         }
       },
       fontFamily: {
-        sans: ['"Inter"', '"Segoe UI"', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['Inter', '"Segoe UI"', 'system-ui', '-apple-system', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
         mono: ['ui-monospace', '"SF Mono"', 'Menlo', 'Consolas', 'monospace'],
       },
       boxShadow: {
