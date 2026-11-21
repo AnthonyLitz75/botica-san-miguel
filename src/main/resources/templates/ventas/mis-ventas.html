@@ -84,7 +84,7 @@
             <!-- Listado de Comprobantes emitidos -->
             <div class="sec">
                 <h2>Comprobantes emitidos</h2>
-                <span class="cnt" th:text="${#lists.size(filas)}">0</span>
+                <span class="cnt" th:text="${total != null ? total : #lists.size(filas)}">0</span>
             </div>
 
             <div class="card pad text-center py-12" th:if="${#lists.isEmpty(filas)}">
@@ -144,6 +144,7 @@
                         </tbody>
                     </table>
                 </div>
+                <div th:replace="~{fragmentos/paginacion :: control(${paginacion})}"></div>
             </div>
         </main>
     </div>

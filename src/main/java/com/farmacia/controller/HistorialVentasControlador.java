@@ -1,6 +1,7 @@
 package com.farmacia.controller;
 
 import com.farmacia.dto.FiltroVentasFormulario;
+import com.farmacia.dto.PaginacionModelo;
 import com.farmacia.service.VentaServicio;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.Authentication;
@@ -13,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Consulta del historial general de ventas para el ADMINISTRADOR (spec 005, US-1, RF-001).
@@ -49,6 +52,13 @@ public class HistorialVentasControlador {
             model.addAttribute("total", historial.total());
             model.addAttribute("desdeEfectivo", historial.desde());
             model.addAttribute("hastaEfectivo", historial.hasta());
+
+            Map<String, Object> params = filtro != null
+                    ? filtro.aParametros(historial.desde(), historial.hasta())
+                    : Map.of();
+            model.addAttribute("paginacion", PaginacionModelo.crear(
+                    historial.pagina(), historial.total(), VentaServicio.VENTAS_POR_PAGINA,
+                    "/ventas", params));
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("filas", List.of());
@@ -57,6 +67,9 @@ public class HistorialVentasControlador {
             model.addAttribute("pagina", 1);
             model.addAttribute("paginas", 1);
             model.addAttribute("total", 0);
+            model.addAttribute("paginacion", PaginacionModelo.crear(
+                    1, 0, VentaServicio.VENTAS_POR_PAGINA,
+                    "/ventas", Map.of()));
         }
 
         return "ventas/historial";
@@ -69,19 +82,40 @@ public class HistorialVentasControlador {
     public String misVentas(
             @RequestParam(name = "desde", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
             @RequestParam(name = "hasta", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+            @RequestParam(name = "pagina", defaultValue = "1") int pagina,
             Authentication autenticacion,
             Model model) {
         try {
             String usuario = autenticacion != null ? autenticacion.getName() : null;
-            var resultado = ventaServicio.listarMisVentas(usuario, desde, hasta);
+            var resultado = ventaServicio.listarMisVentas(usuario, desde, hasta, pagina);
             model.addAttribute("filas", resultado.filas());
             model.addAttribute("desde", resultado.desde());
             model.addAttribute("hasta", resultado.hasta());
+            model.addAttribute("total", resultado.total());
+            model.addAttribute("pagina", resultado.pagina());
+            model.addAttribute("paginas", resultado.paginas());
+
+            Map<String, Object> params = new LinkedHashMap<>();
+            if (resultado.desde() != null) {
+                params.put("desde", resultado.desde().toString());
+            }
+            if (resultado.hasta() != null) {
+                params.put("hasta", resultado.hasta().toString());
+            }
+            model.addAttribute("paginacion", PaginacionModelo.crear(
+                    resultado.pagina(), resultado.total(), VentaServicio.VENTAS_POR_PAGINA,
+                    "/ventas/mias", params));
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("filas", List.of());
             model.addAttribute("desde", desde);
             model.addAttribute("hasta", hasta);
+            model.addAttribute("total", 0);
+            model.addAttribute("pagina", 1);
+            model.addAttribute("paginas", 1);
+            model.addAttribute("paginacion", PaginacionModelo.crear(
+                    1, 0, VentaServicio.VENTAS_POR_PAGINA,
+                    "/ventas/mias", Map.of()));
         }
         return "ventas/mis-ventas";
     }

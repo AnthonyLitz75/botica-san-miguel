@@ -36,7 +36,7 @@ import java.util.Optional;
 @Service
 public class VentaServicio {
     private static final BigDecimal CERO = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
-    public static final int VENTAS_POR_PAGINA = 20;
+    public static final int VENTAS_POR_PAGINA = 25;
 
     /**
      * Resultado paginado del historial de ventas con totales y filtros efectivos.
@@ -64,7 +64,13 @@ public class VentaServicio {
     public record MisVentas(
             List<VentaResumenVista> filas,
             LocalDate desde,
-            LocalDate hasta) {
+            LocalDate hasta,
+            int total,
+            int pagina,
+            int paginas) {
+        public MisVentas(List<VentaResumenVista> filas, LocalDate desde, LocalDate hasta) {
+            this(filas, desde, hasta, filas != null ? filas.size() : 0, 1, 1);
+        }
     }
 
     private final UsuarioRepositorio usuarioRepositorio;
@@ -248,6 +254,10 @@ public class VentaServicio {
      * Rango máximo de 30 días, por defecto hoy según Clock.
      */
     public MisVentas listarMisVentas(String nombreUsuario, LocalDate desde, LocalDate hasta) {
+        return listarMisVentas(nombreUsuario, desde, hasta, 1);
+    }
+
+    public MisVentas listarMisVentas(String nombreUsuario, LocalDate desde, LocalDate hasta, int pagina) {
         var usuario = validarSoloVendedor(nombreUsuario);
         LocalDate hoy = LocalDate.now(clock);
 
@@ -272,8 +282,12 @@ public class VentaServicio {
         }
 
         var filtro = new FiltroVentasFormulario(desdeEfectivo, hastaEfectivo, usuario.idUsuario(), null, null);
-        var filas = ventaRepositorio.listar(filtro, 1000, 0);
-        return new MisVentas(filas, desdeEfectivo, hastaEfectivo);
+        int total = ventaRepositorio.contar(filtro);
+        int paginas = Math.max(1, (total + VENTAS_POR_PAGINA - 1) / VENTAS_POR_PAGINA);
+        int actual = Math.min(Math.max(1, pagina), paginas);
+        int offset = (actual - 1) * VENTAS_POR_PAGINA;
+        var filas = ventaRepositorio.listar(filtro, VENTAS_POR_PAGINA, offset);
+        return new MisVentas(filas, desdeEfectivo, hastaEfectivo, total, actual, paginas);
     }
 
     private Usuario validarSoloVendedor(String nombreUsuario) {

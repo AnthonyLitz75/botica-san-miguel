@@ -21,4 +21,16 @@ public record FiltroVentasFormulario(
     public static FiltroVentasFormulario vacio() {
         return new FiltroVentasFormulario(null, null, null, null, null, null);
     }
+
+    public java.util.Map<String, Object> aParametros(LocalDate desdeEfectivo, LocalDate hastaEfectivo) {
+        java.util.Map<String, Object> params = new java.util.LinkedHashMap<>();
+        LocalDate d = desde != null ? desde : desdeEfectivo;
+        LocalDate h = hasta != null ? hasta : hastaEfectivo;
+        if (d != null) params.put("desde", d.toString());
+        if (h != null) params.put("hasta", h.toString());
+        if (idVendedor != null) params.put("idVendedor", idVendedor);
+        if (comprobante != null && !comprobante.isBlank()) params.put("comprobante", comprobante);
+        if (metodoPago != null) params.put("metodoPago", metodoPago.name());
+        return params;
+    }
 }

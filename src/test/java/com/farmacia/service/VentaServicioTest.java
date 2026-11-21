@@ -257,7 +257,7 @@ class VentaServicioTest {
         when(ventas.sumarTotal(any())).thenReturn(new BigDecimal("150.00"));
         var venta = new VentaResumenVista(1, "B001-00000001", HOY.atTime(10, 0), 7, "Vendedor", null,
                 new BigDecimal("150.00"), BigDecimal.ZERO, new BigDecimal("150.00"));
-        when(ventas.listar(any(), eq(20), eq(0))).thenReturn(List.of(venta));
+        when(ventas.listar(any(), eq(25), eq(0))).thenReturn(List.of(venta));
 
         VentaServicio.Historial resultado = servicio.listarHistorial("admin", FiltroVentasFormulario.vacio());
 
@@ -281,20 +281,37 @@ class VentaServicioTest {
     }
 
     @Test
-    @DisplayName("CA-1.6: cálculo correcto de páginas y offset en paginación")
+    @DisplayName("CA-1.6: cálculo correcto de páginas y offset en paginación con tamaño 25")
     void listarHistorial_calculoPaginacion() {
         when(usuarios.buscarPorNombreUsuario("admin")).thenReturn(Optional.of(usuario(1, "ADMINISTRADOR")));
-        when(ventas.contar(any())).thenReturn(45);
-        when(ventas.sumarTotal(any())).thenReturn(new BigDecimal("450.00"));
-        when(ventas.listar(any(), eq(20), eq(40))).thenReturn(List.of());
+        when(ventas.contar(any())).thenReturn(55);
+        when(ventas.sumarTotal(any())).thenReturn(new BigDecimal("550.00"));
+        when(ventas.listar(any(), eq(25), eq(50))).thenReturn(List.of());
 
         FiltroVentasFormulario filtro = new FiltroVentasFormulario(HOY.minusDays(10), HOY, null, null, 3);
         VentaServicio.Historial resultado = servicio.listarHistorial("admin", filtro, 3);
 
-        assertEquals(45, resultado.total());
+        assertEquals(55, resultado.total());
         assertEquals(3, resultado.paginas());
         assertEquals(3, resultado.pagina());
-        verify(ventas).listar(any(), eq(20), eq(40));
+        verify(ventas).listar(any(), eq(25), eq(50));
+    }
+
+    @Test
+    @DisplayName("Cálculo de paginación: clamp cuando la página solicitada excede el máximo")
+    void listarHistorial_clampPaginaExcedida() {
+        when(usuarios.buscarPorNombreUsuario("admin")).thenReturn(Optional.of(usuario(1, "ADMINISTRADOR")));
+        when(ventas.contar(any())).thenReturn(55);
+        when(ventas.sumarTotal(any())).thenReturn(new BigDecimal("550.00"));
+        when(ventas.listar(any(), eq(25), eq(50))).thenReturn(List.of());
+
+        FiltroVentasFormulario filtro = new FiltroVentasFormulario(HOY.minusDays(10), HOY, null, null, 9999);
+        VentaServicio.Historial resultado = servicio.listarHistorial("admin", filtro, 9999);
+
+        assertEquals(55, resultado.total());
+        assertEquals(3, resultado.paginas());
+        assertEquals(3, resultado.pagina());
+        verify(ventas).listar(any(), eq(25), eq(50));
     }
 
     @Test

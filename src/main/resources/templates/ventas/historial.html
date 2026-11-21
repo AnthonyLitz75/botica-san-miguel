@@ -218,15 +218,7 @@
                     </table>
                 </div>
 
-                <nav class="flex items-center justify-between p-4 border-t border-line" aria-label="Paginación" th:if="${paginas > 1}">
-                    <a class="btn s text-xs" th:if="${pagina > 1}"
-                        th:href="@{/ventas(desde=${filtro.desde() != null ? filtro.desde() : desdeEfectivo},hasta=${filtro.hasta() != null ? filtro.hasta() : hastaEfectivo},idVendedor=${filtro.idVendedor()},comprobante=${filtro.comprobante()},metodoPago=${filtro.metodoPago()},pagina=${pagina - 1})}">Anterior</a>
-                    <span th:unless="${pagina > 1}"></span>
-                    <span class="text-xs text-ink-3 font-semibold" th:text="|Página ${pagina} de ${paginas}|">Página 1 de 1</span>
-                    <a class="btn s text-xs" th:if="${pagina < paginas}"
-                        th:href="@{/ventas(desde=${filtro.desde() != null ? filtro.desde() : desdeEfectivo},hasta=${filtro.hasta() != null ? filtro.hasta() : hastaEfectivo},idVendedor=${filtro.idVendedor()},comprobante=${filtro.comprobante()},metodoPago=${filtro.metodoPago()},pagina=${pagina + 1})}">Siguiente</a>
-                    <span th:unless="${pagina < paginas}"></span>
-                </nav>
+                <div th:replace="~{fragmentos/paginacion :: control(${paginacion})}"></div>
             </div>
         </main>
     </div>

@@ -173,7 +173,7 @@ class HistorialVentasControladorTest {
                 LocalDate.of(2026, 11, 13),
                 LocalDate.of(2026, 11, 13));
 
-        when(ventaServicio.listarMisVentas(eq("vendedor_demo"), any(), any())).thenReturn(misVentas);
+        when(ventaServicio.listarMisVentas(eq("vendedor_demo"), any(), any(), anyInt())).thenReturn(misVentas);
 
         mvc.perform(get("/ventas/mias").with(user("vendedor_demo").roles("VENDEDOR")))
                 .andExpect(status().isOk())
@@ -190,7 +190,7 @@ class HistorialVentasControladorTest {
     @Test
     @DisplayName("CA-4.2: rango inválido en mis ventas muestra mensaje sin lanzar 500")
     void misVentas_errorRango() throws Exception {
-        when(ventaServicio.listarMisVentas(eq("vendedor_demo"), any(), any()))
+        when(ventaServicio.listarMisVentas(eq("vendedor_demo"), any(), any(), anyInt()))
                 .thenThrow(new IllegalArgumentException("El rango de fechas no puede superar los 30 días hacia atrás"));
 
         mvc.perform(get("/ventas/mias")
