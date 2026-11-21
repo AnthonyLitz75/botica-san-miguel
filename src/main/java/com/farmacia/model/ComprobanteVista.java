@@ -59,16 +59,5 @@ public record ComprobanteVista(
             BigDecimal precioUnitario,
             BigDecimal descuentoImporte,
             BigDecimal importe) {
-
-        public Linea(
-                String codigoMedicamento,
-                String medicamento,
-                String numeroLote,
-                Integer cantidad,
-                BigDecimal precioUnitario,
-                BigDecimal descuentoImporte,
-                BigDecimal importe) {
-            this(codigoMedicamento, medicamento, numeroLote, null, cantidad, precioUnitario, descuentoImporte, importe);
-        }
     }
 }
