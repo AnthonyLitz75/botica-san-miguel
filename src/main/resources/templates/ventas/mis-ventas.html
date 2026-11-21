@@ -121,7 +121,7 @@
                                 <td class="r font-bold text-ink" th:text="${'S/ ' + #numbers.formatDecimal(fila.total(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</td>
                                 <td class="r">
                                     <div class="flex items-center justify-end gap-1.5">
-                                        <a class="ibtn" th:href="@{/ventas/{id}(id=${fila.idVenta()})}"
+                                        <a class="ibtn lnk" th:href="@{/ventas/{id}(id=${fila.idVenta()})}"
                                            th:attr="aria-label=${'Ver comprobante ' + fila.numeroComprobante()}"
                                            title="Ver comprobante">
                                             <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
