@@ -74,4 +74,63 @@ class OrdenCompraRepositorioPersistenciaTest extends AbstractRepositorioIntegrat
         assertEquals("Laboratorios Medifarma Inactivo", orden2.razonSocialProveedor());
         assertEquals(idProveedorInactivo, orden2.idProveedor());
     }
+
+    @Test
+    @DisplayName("listarVista con filtro de estado retorna unicamente las ordenes del estado solicitado")
+    void listarVistaConFiltroEstado() {
+        Integer id1 = repositorio.guardar("OC-2026-0010", idUsuario, idProveedorActivo, new BigDecimal("100.00"), "Pendiente");
+        Integer id2 = repositorio.guardar("OC-2026-0011", idUsuario, idProveedorActivo, new BigDecimal("200.00"), "Para cancelar");
+        repositorio.actualizarEstado(id2, "CANCELADA");
+
+        List<OrdenCompraListadoVista> pendientes = repositorio.listarVista("PENDIENTE");
+        assertNotNull(pendientes);
+        assertTrue(pendientes.stream().allMatch(o -> "PENDIENTE".equals(o.estado())));
+        assertTrue(pendientes.stream().anyMatch(o -> o.idOrden().equals(id1)));
+        assertFalse(pendientes.stream().anyMatch(o -> o.idOrden().equals(id2)));
+
+        List<OrdenCompraListadoVista> canceladas = repositorio.listarVista("CANCELADA");
+        assertNotNull(canceladas);
+        assertTrue(canceladas.stream().allMatch(o -> "CANCELADA".equals(o.estado())));
+        assertTrue(canceladas.stream().anyMatch(o -> o.idOrden().equals(id2)));
+    }
+
+    @Test
+    @DisplayName("buscarVistaPorId retorna OrdenCompraListadoVista para orden existente y Optional.empty para inexistente")
+    void buscarVistaPorId() {
+        Integer idOrden = repositorio.guardar("OC-2026-0020", idUsuario, idProveedorActivo, new BigDecimal("350.50"), "Buscar vista");
+
+        var encontradaOpt = repositorio.buscarVistaPorId(idOrden);
+        assertTrue(encontradaOpt.isPresent(), "Debe encontrar la orden registrada");
+        OrdenCompraListadoVista vista = encontradaOpt.get();
+        assertEquals("OC-2026-0020", vista.numeroOrden());
+        assertEquals("Droguería Farmaperú S.A.C.", vista.razonSocialProveedor());
+        assertEquals(idProveedorActivo, vista.idProveedor());
+        assertEquals("PENDIENTE", vista.estado());
+        assertEquals(new BigDecimal("350.50"), vista.totalEstimado());
+
+        var noExisteOpt = repositorio.buscarVistaPorId(999999);
+        assertTrue(noExisteOpt.isEmpty(), "Para ID inexistente debe retornar Optional vacio");
+    }
+
+    @Test
+    @DisplayName("contarPorEstado retorna diccionario con conteo por estado y suma en TODAS")
+    void contarPorEstadoRetornaConteosCorrectos() {
+        Integer id1 = repositorio.guardar("OC-2026-0030", idUsuario, idProveedorActivo, new BigDecimal("50.00"), "O1");
+        Integer id2 = repositorio.guardar("OC-2026-0031", idUsuario, idProveedorActivo, new BigDecimal("75.00"), "O2");
+        repositorio.actualizarEstado(id2, "RECIBIDA");
+
+        var conteos = repositorio.contarPorEstado();
+        assertNotNull(conteos);
+        assertTrue(conteos.containsKey("TODAS"));
+        assertTrue(conteos.containsKey("PENDIENTE"));
+        assertTrue(conteos.containsKey("PARCIALMENTE_RECIBIDA"));
+        assertTrue(conteos.containsKey("RECIBIDA"));
+        assertTrue(conteos.containsKey("CANCELADA"));
+
+        assertEquals(2, conteos.get("TODAS"));
+        assertEquals(1, conteos.get("PENDIENTE"));
+        assertEquals(0, conteos.get("PARCIALMENTE_RECIBIDA"));
+        assertEquals(1, conteos.get("RECIBIDA"));
+        assertEquals(0, conteos.get("CANCELADA"));
+    }
 }
