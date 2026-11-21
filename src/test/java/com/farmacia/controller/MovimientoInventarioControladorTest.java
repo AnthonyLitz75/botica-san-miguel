@@ -98,15 +98,17 @@ class MovimientoInventarioControladorTest {
                 new MovimientoInventario(1, 2, null, null, null, "SALIDA", LocalDateTime.now(), "Ajuste por merma"),
                 new MovimientoInventario(2, 2, 1, null, 10, "ENTRADA", LocalDateTime.now(), "Recepción orden 10")
         );
-        when(servicio.listar()).thenReturn(lista);
+        var kardex = new MovimientoInventarioServicio.Kardex(lista, 2, 1, 1);
+        when(servicio.listarKardex(any(), eq(1))).thenReturn(kardex);
 
         mvc.perform(get("/movimientos").with(user("almacen1").roles("ALMACENERO")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("movimientos/listado"))
                 .andExpect(model().attributeExists("movimientos"))
-                .andExpect(model().attribute("movimientos", hasSize(2)));
+                .andExpect(model().attribute("movimientos", hasSize(2)))
+                .andExpect(model().attributeExists("paginacion"));
 
-        verify(servicio).listar();
+        verify(servicio).listarKardex(any(), eq(1));
     }
 
     // -------------------------------------------------------------------------
@@ -115,15 +117,17 @@ class MovimientoInventarioControladorTest {
     @Test
     @DisplayName("Escenario 5: Usuario con rol ADMINISTRADOR accede a /movimientos (200 OK y vista correcta)")
     void listar_conRolAdministrador_retornaVistaListadoYModelo() throws Exception {
-        when(servicio.listar()).thenReturn(List.of());
+        var kardex = new MovimientoInventarioServicio.Kardex(List.of(), 0, 1, 1);
+        when(servicio.listarKardex(any(), eq(1))).thenReturn(kardex);
 
         mvc.perform(get("/movimientos").with(user("admin1").roles("ADMINISTRADOR")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("movimientos/listado"))
                 .andExpect(model().attributeExists("movimientos"))
-                .andExpect(model().attribute("movimientos", hasSize(0)));
+                .andExpect(model().attribute("movimientos", hasSize(0)))
+                .andExpect(model().attributeExists("paginacion"));
 
-        verify(servicio).listar();
+        verify(servicio).listarKardex(any(), eq(1));
     }
 
     // -------------------------------------------------------------------------

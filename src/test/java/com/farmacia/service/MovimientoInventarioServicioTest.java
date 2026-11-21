@@ -100,32 +100,46 @@ class MovimientoInventarioServicioTest {
     @Test
     void listarKardex_conPaginacion_calculaOffsetYPaginacion() {
         var filtro = com.farmacia.dto.FiltroMovimientosFormulario.vacio();
-        when(movimientoRepositorio.contar(filtro)).thenReturn(45);
-        when(movimientoRepositorio.listar(filtro, 20, 40)).thenReturn(List.of(
-                new MovimientoInventario(41, 1, null, null, null, "SALIDA", LocalDateTime.now(), "Ajuste", "Otra salida", "Admin", null)
+        when(movimientoRepositorio.contar(filtro)).thenReturn(55);
+        when(movimientoRepositorio.listar(filtro, 25, 50)).thenReturn(List.of(
+                new MovimientoInventario(51, 1, null, null, null, "SALIDA", LocalDateTime.now(), "Ajuste", "Otra salida", "Admin", null)
         ));
 
         var kardex = servicio.listarKardex(filtro, 3);
 
-        assertEquals(45, kardex.total());
+        assertEquals(55, kardex.total());
         assertEquals(3, kardex.pagina());
         assertEquals(3, kardex.paginas());
         assertEquals(1, kardex.filas().size());
         verify(movimientoRepositorio).contar(filtro);
-        verify(movimientoRepositorio).listar(filtro, 20, 40);
+        verify(movimientoRepositorio).listar(filtro, 25, 50);
     }
 
     @Test
     void listarKardex_paginaMenorQueUno_ajustaAPaginaUno() {
         var filtro = com.farmacia.dto.FiltroMovimientosFormulario.vacio();
         when(movimientoRepositorio.contar(filtro)).thenReturn(10);
-        when(movimientoRepositorio.listar(filtro, 20, 0)).thenReturn(List.of());
+        when(movimientoRepositorio.listar(filtro, 25, 0)).thenReturn(List.of());
 
         var kardex = servicio.listarKardex(filtro, 0);
 
         assertEquals(1, kardex.pagina());
         assertEquals(1, kardex.paginas());
-        verify(movimientoRepositorio).listar(filtro, 20, 0);
+        verify(movimientoRepositorio).listar(filtro, 25, 0);
+    }
+
+    @Test
+    void listarKardex_paginaMayorQueMaximo_ajustaAUltimaPagina() {
+        var filtro = com.farmacia.dto.FiltroMovimientosFormulario.vacio();
+        when(movimientoRepositorio.contar(filtro)).thenReturn(55);
+        when(movimientoRepositorio.listar(filtro, 25, 50)).thenReturn(List.of());
+
+        var kardex = servicio.listarKardex(filtro, 9999);
+
+        assertEquals(55, kardex.total());
+        assertEquals(3, kardex.pagina());
+        assertEquals(3, kardex.paginas());
+        verify(movimientoRepositorio).listar(filtro, 25, 50);
     }
 
     @Test

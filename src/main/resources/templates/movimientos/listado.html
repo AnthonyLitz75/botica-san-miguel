@@ -174,20 +174,7 @@
                     </table>
                 </div>
 
-                <nav class="flex items-center justify-between mt-4" aria-label="Paginación" th:if="${paginas != null and paginas > 1}">
-                    <a class="btn s inventario-boton boton-secundario" th:if="${pagina > 1}"
-                        th:href="@{/movimientos(tipo=${filtro != null ? filtro.tipo() : null},desde=${filtro != null ? filtro.desde() : null},hasta=${filtro != null ? filtro.hasta() : null},motivo=${filtro != null ? filtro.motivo() : null},idMedicamento=${filtro != null ? filtro.idMedicamento() : null},numeroLote=${filtro != null ? filtro.numeroLote() : null},idUsuario=${filtro != null ? filtro.idUsuario() : null},pagina=${pagina - 1})}">Anterior</a>
-                    <span th:unless="${pagina > 1}"></span>
-                    <span class="text-sm text-ink-3 font-semibold" th:text="|Página ${pagina} de ${paginas}|">Página 1 de 1</span>
-                    <a class="btn s inventario-boton boton-secundario" th:if="${pagina < paginas}"
-                        th:href="@{/movimientos(tipo=${filtro != null ? filtro.tipo() : null},desde=${filtro != null ? filtro.desde() : null},hasta=${filtro != null ? filtro.hasta() : null},motivo=${filtro != null ? filtro.motivo() : null},idMedicamento=${filtro != null ? filtro.idMedicamento() : null},numeroLote=${filtro != null ? filtro.numeroLote() : null},idUsuario=${filtro != null ? filtro.idUsuario() : null},pagina=${pagina + 1})}">Siguiente</a>
-                    <span th:unless="${pagina < paginas}"></span>
-                </nav>
-
-                <div class="lbl mt-3 resultados-pie"
-                    th:text="${(total != null ? total : #lists.size(movimientos)) + ((total != null ? total : #lists.size(movimientos)) == 1 ? ' movimiento registrado' : ' movimientos registrados')}">
-                    0 movimientos registrados
-                </div>
+                <div th:replace="~{fragmentos/paginacion :: control(${paginacion})}"></div>
             </section>
         </main>
     </div>

@@ -20,4 +20,16 @@ public record FiltroMovimientosFormulario(
     public static FiltroMovimientosFormulario vacio() {
         return new FiltroMovimientosFormulario(null, null, null, null, null, null, null, null);
     }
+
+    public java.util.Map<String, Object> aParametros() {
+        java.util.Map<String, Object> params = new java.util.LinkedHashMap<>();
+        if (tipo != null && !tipo.isBlank()) params.put("tipo", tipo);
+        if (desde != null) params.put("desde", desde.toString());
+        if (hasta != null) params.put("hasta", hasta.toString());
+        if (motivo != null && !motivo.isBlank()) params.put("motivo", motivo);
+        if (idMedicamento != null) params.put("idMedicamento", idMedicamento);
+        if (numeroLote != null && !numeroLote.isBlank()) params.put("numeroLote", numeroLote);
+        if (idUsuario != null) params.put("idUsuario", idUsuario);
+        return params;
+    }
 }

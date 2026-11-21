@@ -83,8 +83,8 @@ public class MovimientoInventarioRepositorio {
 
         public List<MovimientoInventario> listar(FiltroMovimientosFormulario filtro) {
                 int pagina = (filtro != null && filtro.pagina() != null && filtro.pagina() > 0) ? filtro.pagina() : 1;
-                int offset = (pagina - 1) * 20;
-                return listar(filtro, 20, offset);
+                int offset = (pagina - 1) * 25;
+                return listar(filtro, 25, offset);
         }
 
         /**

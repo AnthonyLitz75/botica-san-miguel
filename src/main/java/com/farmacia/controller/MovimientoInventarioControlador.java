@@ -1,6 +1,7 @@
 package com.farmacia.controller;
 
 import com.farmacia.dto.FiltroMovimientosFormulario;
+import com.farmacia.dto.PaginacionModelo;
 import com.farmacia.model.MovimientoInventario;
 import com.farmacia.service.MedicamentoServicio;
 import com.farmacia.service.MovimientoInventarioServicio;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/movimientos")
@@ -44,26 +46,26 @@ public class MovimientoInventarioControlador {
                 paginaEfectiva = filtro.pagina();
             }
 
-            if (paginaEfectiva == null && esVacio(filtro)) {
-                List<MovimientoInventario> movimientos = servicio.listar();
-                model.addAttribute("movimientos", movimientos);
-                model.addAttribute("total", movimientos.size());
-                model.addAttribute("pagina", 1);
-                model.addAttribute("paginas", 1);
-            } else {
-                int paginaNum = paginaEfectiva != null && paginaEfectiva > 0 ? paginaEfectiva : 1;
-                var kardex = servicio.listarKardex(filtro, paginaNum);
-                model.addAttribute("movimientos", kardex.filas());
-                model.addAttribute("total", kardex.total());
-                model.addAttribute("pagina", kardex.pagina());
-                model.addAttribute("paginas", kardex.paginas());
-            }
+            int paginaNum = paginaEfectiva != null && paginaEfectiva > 0 ? paginaEfectiva : 1;
+            var kardex = servicio.listarKardex(filtro, paginaNum);
+            model.addAttribute("movimientos", kardex.filas());
+            model.addAttribute("total", kardex.total());
+            model.addAttribute("pagina", kardex.pagina());
+            model.addAttribute("paginas", kardex.paginas());
+
+            Map<String, Object> params = filtro != null ? filtro.aParametros() : Map.of();
+            model.addAttribute("paginacion", PaginacionModelo.crear(
+                    kardex.pagina(), kardex.total(), MovimientoInventarioServicio.MOVIMIENTOS_POR_PAGINA,
+                    "/movimientos", params));
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("movimientos", List.of());
             model.addAttribute("total", 0);
             model.addAttribute("pagina", 1);
             model.addAttribute("paginas", 1);
+            model.addAttribute("paginacion", PaginacionModelo.crear(
+                    1, 0, MovimientoInventarioServicio.MOVIMIENTOS_POR_PAGINA,
+                    "/movimientos", Map.of()));
         }
 
         return "movimientos/listado";

@@ -22,7 +22,7 @@ import java.util.Optional;
 @Service
 public class MovimientoInventarioServicio {
 
-        public static final int MOVIMIENTOS_POR_PAGINA = 20;
+        public static final int MOVIMIENTOS_POR_PAGINA = 25;
 
         public record Kardex(
                 List<MovimientoInventario> filas,
