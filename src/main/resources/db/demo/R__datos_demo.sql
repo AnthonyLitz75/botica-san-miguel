@@ -70,6 +70,10 @@ BEGIN
     FROM medicamento WHERE codigo = 'MED-001';
 
     INSERT INTO lote (id_medicamento, numero_lote, fecha_vencimiento, stock_actual)
+    SELECT id_medicamento, 'PAR-DEMO-B', CURRENT_DATE + INTERVAL '2 years 6 months', 40
+    FROM medicamento WHERE codigo = 'MED-001';
+
+    INSERT INTO lote (id_medicamento, numero_lote, fecha_vencimiento, stock_actual)
     SELECT id_medicamento, 'AMX-DEMO-016', CURRENT_DATE + INTERVAL '2 years', 500
     FROM medicamento WHERE codigo = 'MED-016';
 
@@ -84,6 +88,18 @@ BEGIN
     FROM nuevo_movimiento m CROSS JOIN lote l
     JOIN medicamento med ON med.id_medicamento = l.id_medicamento
     WHERE med.codigo = 'MED-001' AND l.numero_lote = 'PAR-DEMO-A';
+
+    WITH nuevo_movimiento_b AS (
+        INSERT INTO movimiento_inventario (id_usuario, tipo, motivo)
+        SELECT id_usuario, 'ENTRADA', 'Existencias iniciales de demostracion lote B'
+        FROM usuario WHERE nombre_usuario = 'almacen_demo'
+        RETURNING id_movimiento
+    )
+    INSERT INTO detalle_movimiento (id_movimiento, id_lote, cantidad)
+    SELECT m.id_movimiento, l.id_lote, 40
+    FROM nuevo_movimiento_b m CROSS JOIN lote l
+    JOIN medicamento med ON med.id_medicamento = l.id_medicamento
+    WHERE med.codigo = 'MED-001' AND l.numero_lote = 'PAR-DEMO-B';
 
     WITH nueva_orden AS (
         INSERT INTO orden_compra
@@ -124,5 +140,29 @@ BEGIN
     UPDATE usuario SET ultimo_acceso = CURRENT_TIMESTAMP - INTERVAL '2 hours' WHERE nombre_usuario = 'admin_demo' AND ultimo_acceso IS NULL;
     UPDATE usuario SET ultimo_acceso = CURRENT_TIMESTAMP - INTERVAL '1 day' WHERE nombre_usuario = 'almacen_demo' AND ultimo_acceso IS NULL;
     UPDATE usuario SET ultimo_acceso = TIMESTAMP '2026-11-12 10:00:00' WHERE nombre_usuario = 'compras_demo' AND ultimo_acceso IS NULL;
+END;
+$$;
+
+-- Asegurar lote B de Paracetamol para repetibilidad E2E en bases ya inicializadas
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM lote WHERE numero_lote = 'PAR-DEMO-B') THEN
+        INSERT INTO lote (id_medicamento, numero_lote, fecha_vencimiento, stock_actual)
+        SELECT id_medicamento, 'PAR-DEMO-B', CURRENT_DATE + INTERVAL '2 years 6 months', 40
+        FROM medicamento WHERE codigo = 'MED-001';
+
+        WITH nuevo_movimiento_b AS (
+            INSERT INTO movimiento_inventario (id_usuario, tipo, motivo)
+            SELECT id_usuario, 'ENTRADA', 'Existencias iniciales de demostracion lote B'
+            FROM usuario WHERE nombre_usuario = 'almacen_demo'
+            LIMIT 1
+            RETURNING id_movimiento
+        )
+        INSERT INTO detalle_movimiento (id_movimiento, id_lote, cantidad)
+        SELECT m.id_movimiento, l.id_lote, 40
+        FROM nuevo_movimiento_b m CROSS JOIN lote l
+        JOIN medicamento med ON med.id_medicamento = l.id_medicamento
+        WHERE med.codigo = 'MED-001' AND l.numero_lote = 'PAR-DEMO-B';
+    END IF;
 END;
 $$;

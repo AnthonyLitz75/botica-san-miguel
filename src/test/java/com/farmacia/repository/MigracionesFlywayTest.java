@@ -66,7 +66,7 @@ class MigracionesFlywayTest extends AbstractRepositorioIntegrationTest {
 
             assertEquals(4, contar(esquema, "usuario"));
             assertEquals(3, contar(esquema, "medicamento"));
-            assertEquals(2, contar(esquema, "lote"));
+            assertEquals(3, contar(esquema, "lote"));
             assertEquals(2, contar(esquema, "proveedor"));
             assertEquals(1, contar(esquema, "orden_compra"));
 

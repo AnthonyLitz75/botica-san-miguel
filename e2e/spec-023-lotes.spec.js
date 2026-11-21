@@ -195,4 +195,40 @@ test.describe('Spec 023 (Tercera Pasada): Botón desactivar y Pantalla de Lotes'
     const boxVolver = await btnVolver.boundingBox();
     expect(boxVolver.y).toBeGreaterThan(boxHeading.y);
   });
+
+  test('PARTE 3: Prioridad de salida en Lotes - Paracetamol con 2 lotes (Sale primero y 2.º en la cola), Ibuprofeno y Amoxicilina con Lote único', async ({ page }) => {
+    await iniciarSesion(page, 'admin_demo', 'AdminDemo2026!');
+    await page.setViewportSize({ width: 1600, height: 900 });
+
+    // 1. Paracetamol (ID 1): 2 lotes vigentes con stock
+    await page.goto('/medicamentos/1/lotes');
+    await expect(page.getByRole('heading', { level: 1, name: /Lotes de Paracetamol/i })).toBeVisible();
+
+    const filaParA = page.locator('table tbody tr', { hasText: 'PAR-DEMO-A' });
+    await expect(filaParA).toBeVisible();
+    await expect(filaParA.locator('.fefo-badge')).toHaveText(/Sale primero/);
+    await expect(filaParA).toContainText('1.º en la cola');
+
+    const filaParB = page.locator('table tbody tr', { hasText: 'PAR-DEMO-B' });
+    await expect(filaParB).toBeVisible();
+    await expect(filaParB).toContainText('2.º en la cola');
+    await expect(filaParB.locator('.fefo-badge')).toHaveCount(0); // Sin badge verde
+
+    // Captura visual oficial de Lotes con los 2 lotes de Paracetamol (1600x900)
+    await page.screenshot({ path: 'e2e/evidencias/visual/20-lotes.png' });
+
+    // 2. Ibuprofeno (ID 2): Lote único sin badge
+    await page.goto('/medicamentos/2/lotes');
+    await expect(page.getByRole('heading', { level: 1, name: /Lotes de Ibuprofeno/i })).toBeVisible();
+    await expect(page.locator('table tbody tr')).toHaveCount(1);
+    await expect(page.locator('table tbody tr').first()).toContainText('Lote único');
+    await expect(page.locator('.fefo-badge')).toHaveCount(0);
+
+    // 3. Amoxicilina (ID 3): Lote único sin badge
+    await page.goto('/medicamentos/3/lotes');
+    await expect(page.getByRole('heading', { level: 1, name: /Lotes de Amoxicilina/i })).toBeVisible();
+    await expect(page.locator('table tbody tr')).toHaveCount(1);
+    await expect(page.locator('table tbody tr').first()).toContainText('Lote único');
+    await expect(page.locator('.fefo-badge')).toHaveCount(0);
+  });
 });
