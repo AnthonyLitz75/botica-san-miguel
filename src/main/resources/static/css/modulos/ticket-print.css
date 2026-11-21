@@ -123,16 +123,6 @@
   text-align: right;
 }
 
-/* Código QR Simulado para Ticket */
-.ticket .qr {
-  width: 96px;
-  height: 96px;
-  margin: 10px auto 0;
-  background: conic-gradient(#111 25%, #fff 0 50%, #111 0 75%, #fff 0) 0 0 / 16px 16px;
-  border: 6px solid #ffffff;
-  outline: 2px solid #111111;
-}
-
 /* Reglas Estrictas de Impresión Térmica de 80 mm */
 @media print {
   @page {
@@ -182,10 +172,6 @@
     padding: 4mm 2mm !important;
     margin: 0 !important;
     font-size: 9pt !important;
-  }
-
-  .ticket .qr {
-    display: block !important;
   }
 
   .comprobante-tabla {

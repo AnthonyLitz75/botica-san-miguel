@@ -201,4 +201,16 @@ class VentaWebControladorTest {
                 .andExpect(content().string(not(containsString("20601234567"))))
                 .andExpect(content().string(not(containsString("Av. Universitaria 1234 - Lima"))));
     }
+
+    @Test
+    @DisplayName("CA-3.1 y CA-3.2: Comprobante no contiene recuadro QR ni texto que lo mencione, y mantiene número visible")
+    void comprobante_sinRecuadroQRNiMencion() throws Exception {
+        when(ventaServicio.obtenerComprobante(12, "vendedor1")).thenReturn(Optional.of(comprobante()));
+
+        mvc.perform(get("/ventas/12").with(user("vendedor1").roles("VENDEDOR")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("B001-00000012")))
+                .andExpect(content().string(not(containsString("class=\"qr\""))))
+                .andExpect(content().string(not(containsString("QR"))));
+    }
 }
