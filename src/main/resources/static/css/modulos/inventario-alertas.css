@@ -172,6 +172,37 @@
   margin: 0 16px 16px;
 }
 
+/* Pantalla de Lotes de Medicamento (AyE) */
+.resumen-registro {
+  background: #ffffff;
+  border: 1px solid var(--line, #dfe6e3);
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 767px) {
+  .resumen-registro {
+    grid-template-columns: 1fr;
+  }
+}
+
+.banner-fefo {
+  background-color: var(--pine-50, #e9f4f0);
+  border: 1px solid var(--pine-100, #d3ebe3);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: var(--ink-2, #33463f);
+  font-size: 13px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
 /* Árbol Jerárquico de Categorías Farmacológicas */
 .tr {
   display: flex;

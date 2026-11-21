@@ -10,54 +10,61 @@
     <aside th:replace="~{fragmentos/navegacion :: lateral('Medicamentos')}"></aside>
     <div class="inventario-area">
         <header th:replace="~{fragmentos/navegacion :: cabecera('Medicamentos', 'Inventario')}"></header>
-        <main id="contenido" class="inventario-contenido">
-            <div class="inventario-titulo">
+        <main id="contenido" class="page inventario-contenido">
+            <div class="head">
                 <div>
-                    <p class="seccion-etiqueta">INVENTARIO / EXISTENCIAS POR LOTE</p>
-                    <h1 th:text="${'Lotes de ' + medicamento.nombre()}">Lotes</h1>
+                    <div class="eyebrow">INVENTARIO / EXISTENCIAS POR LOTE</div>
+                    <h1 class="text-3xl font-extrabold tracking-tight text-ink" th:text="${'Lotes de ' + medicamento.nombre()}">Lotes</h1>
+                    <div class="sub">Trazabilidad por lote, vencimiento y rotación FEFO.</div>
                 </div>
-                <a class="inventario-boton boton-secundario" th:href="@{/medicamentos}">
-                    <span class="icono icono-arrow-left" aria-hidden="true"></span>Volver a medicamentos
-                </a>
+                <div class="row" style="align-items:center">
+                    <a class="btn s" th:href="@{/medicamentos}">
+                        <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                        Volver a medicamentos
+                    </a>
+                </div>
             </div>
 
-            <dl class="resumen-registro">
+            <dl class="card pad resumen-registro grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div>
-                    <dt>Código</dt>
-                    <dd><span class="codigo-medicamento" th:text="${medicamento.codigo()}"></span></dd>
+                    <dt class="text-[11px] font-bold uppercase tracking-wider text-ink-3 mb-1">Código</dt>
+                    <dd class="m-0"><span class="mono font-bold text-pine-700 text-sm codigo-medicamento" th:text="${medicamento.codigo()}"></span></dd>
                 </div>
                 <div>
-                    <dt>Medicamento</dt>
-                    <dd class="nombre-medicamento" th:text="${medicamento.nombre()}"></dd>
+                    <dt class="text-[11px] font-bold uppercase tracking-wider text-ink-3 mb-1">Medicamento</dt>
+                    <dd class="m-0 font-semibold text-ink text-sm nombre-medicamento" th:text="${medicamento.nombre()}"></dd>
                 </div>
                 <div>
-                    <dt>Unidad de control</dt>
-                    <dd><span class="unidad-medicamento" th:text="${medicamento.unidadControl()}"></span></dd>
+                    <dt class="text-[11px] font-bold uppercase tracking-wider text-ink-3 mb-1">Unidad de control</dt>
+                    <dd class="m-0"><span class="chip unidad-medicamento" th:text="${medicamento.unidadControl()}"></span></dd>
                 </div>
             </dl>
 
-            <div class="p-3 mb-4 rounded-lg bg-emerald-50/80 border border-emerald-200 text-xs text-emerald-900 flex items-start gap-2.5 shadow-sm" th:unless="${#lists.isEmpty(lotes)}">
-                <span class="icono icono-circle-check text-emerald-600 mt-0.5" aria-hidden="true"></span>
+            <div class="banner-fefo flex items-start gap-3 p-3.5 mb-6 rounded-xl bg-pine-50 border border-pine-100 text-[13px] text-ink-2 shadow-sm" th:unless="${#lists.isEmpty(lotes)}">
+                <svg class="ico text-pine-700 flex-shrink-0 mt-0.5" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>
+                </svg>
                 <div>
-                    <strong class="font-semibold text-emerald-950">Política de Inventario FEFO (First Expired, First Out):</strong>
+                    <strong class="font-bold text-ink">Política de Inventario FEFO (First Expired, First Out):</strong>
                     <span> Los lotes se ordenan dinámicamente mediante una <em>Cola de Prioridad</em> según la fecha de vencimiento más próxima para garantizar el despacho preferente del stock más antiguo.</span>
                 </div>
             </div>
 
-            <section class="inventario-resultados" aria-labelledby="titulo-resultados">
-                <div class="resultados-cabecera">
-                    <h2 id="titulo-resultados">
-                        Lotes registrados
-                        <span class="cantidad-resultados" th:text="${#lists.size(lotes)}"></span>
-                    </h2>
-                </div>
+            <!-- Listado de lotes -->
+            <div class="sec">
+                <h2 id="titulo-resultados">Listado de lotes</h2>
+                <span class="cnt cantidad-resultados" th:text="${#lists.size(lotes)}">0</span>
+            </div>
 
-                <div class="inventario-vacio" th:if="${#lists.isEmpty(lotes)}">
-                    <span class="icono icono-package" aria-hidden="true"></span>
-                    <p>No hay lotes registrados para este medicamento.</p>
-                </div>
+            <div class="card pad text-center py-12 inventario-vacio" th:if="${#lists.isEmpty(lotes)}">
+                <svg class="mx-auto text-slate-300 mb-2" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>
+                </svg>
+                <p class="text-sm font-semibold text-ink-2">No hay lotes registrados para este medicamento.</p>
+            </div>
 
-                <div class="tabla-contenedor inventario-tabla tabla-detalles" th:unless="${#lists.isEmpty(lotes)}"
+            <div class="card overflow-hidden" th:unless="${#lists.isEmpty(lotes)}">
+                <div class="tabla-contenedor inventario-tabla tabla-detalles overflow-x-auto"
                     role="region" aria-label="Lotes, tabla desplazable">
                     <table>
                         <thead>
@@ -65,27 +72,27 @@
                                 <th scope="col">Número de lote</th>
                                 <th scope="col">Fecha de vencimiento</th>
                                 <th scope="col">Prioridad de salida</th>
-                                <th scope="col" class="numero">Stock actual</th>
+                                <th scope="col" class="r">Stock actual</th>
                                 <th scope="col">Unidad</th>
-                                <th scope="col" th:if="${puedeRegistrarSalida}">Acciones</th>
+                                <th scope="col" class="r" th:if="${puedeRegistrarSalida}">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="lote : ${lotes}" class="hover:bg-slate-50/80 transition-colors duration-150">
                                 <td>
-                                    <span class="codigo-medicamento" th:text="${lote.numeroLote()}"></span>
+                                    <span class="mono font-bold codigo-medicamento" th:text="${lote.numeroLote()}"></span>
                                 </td>
-                                <td class="fecha-registro"
+                                <td class="text-xs text-ink-2 fecha-registro"
                                     th:text="${#temporals.format(lote.fechaVencimiento(), 'dd/MM/yyyy')}">
                                 </td>
                                 <td>
                                     <div class="flex flex-col items-start gap-1" th:if="${idsLotesPrioritarios.contains(lote.idLote())}">
-                                        <span class="fefo-badge inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-sm cursor-help transition-transform hover:scale-105"
+                                        <span class="fefo-badge badge t-ok"
                                             title="Algoritmo FEFO: Primer lote a despachar ordenado en Cola de Prioridad por menor fecha de vencimiento"
                                             aria-label="Lote prioritario por vencimiento según FEFO">
                                             <span class="fefo-indicador" aria-hidden="true"></span>Prioritario FEFO
                                         </span>
-                                        <span class="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
+                                        <span class="text-[11px] text-pine-700 font-semibold flex items-center gap-1">
                                             <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>1° en Cola de Prioridad
                                         </span>
                                     </div>
@@ -94,36 +101,36 @@
                                         <span class="text-[11px] text-slate-400">Reserva secundaria</span>
                                     </div>
                                 </td>
-                                <td class="numero">
-                                    <span class="stock-minimo-badge"
-                                        th:classappend="${lote.stockActual() > 0 ? 'stock-disponible' : 'stock-agotado'}"
+                                <td class="r">
+                                    <span class="num font-bold stock-minimo-badge"
+                                        th:classappend="${lote.stockActual() > 0 ? 'ok stock-disponible' : 'bad stock-agotado'}"
                                         th:text="${lote.stockActual()}"></span>
                                 </td>
                                 <td>
-                                    <span class="unidad-medicamento" th:text="${medicamento.unidadControl()}"></span>
+                                    <span class="chip unidad-medicamento" th:text="${medicamento.unidadControl()}"></span>
                                 </td>
-                                <td th:if="${puedeRegistrarSalida}">
-                                    <a class="enlace-lotes inline-flex items-center gap-1 font-medium text-emerald-700 hover:text-emerald-800 transition-colors" th:if="${lote.stockActual() > 0}"
+                                <td class="r" th:if="${puedeRegistrarSalida}">
+                                    <a class="lnk enlace-lotes inline-flex items-center gap-1.5 font-bold text-pine-700 bg-pine-50 hover:bg-pine-100 px-2.5 py-1.5 rounded-lg text-xs transition-colors focus-visible:outline-2 focus-visible:outline-pine-700" th:if="${lote.stockActual() > 0}"
                                         th:href="@{/lotes/{id}/salida(id=${lote.idLote()})}"
                                         th:data-lote-id="${lote.idLote()}"
                                         th:data-lote-num="${lote.numeroLote()}"
                                         th:data-stock="${lote.stockActual()}"
+                                        th:attr="aria-label=${'Registrar salida del lote ' + lote.numeroLote()}"
                                         data-modal-open="modal-registrar-salida">
-                                        <span class="icono icono-arrow-left-right" aria-hidden="true"></span>Registrar
-                                        salida
+                                        <svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg>
+                                        Registrar salida
                                     </a>
-                                    <span class="estado-registro estado-cancelado"
+                                    <span class="text-xs font-semibold text-rose-600 estado-registro estado-cancelado"
                                         th:unless="${lote.stockActual() > 0}">Sin existencias</span>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-
-                <p class="resultados-pie"
-                    th:text="${#lists.size(lotes)} + (${#lists.size(lotes) == 1} ? ' lote registrado' : ' lotes registrados')">
-                </p>
-            </section>
+            </div>
+            <div class="lbl mt-3 resultados-pie"
+                th:text="${#lists.size(lotes)} + (${#lists.size(lotes) == 1} ? ' lote registrado' : ' lotes registrados')">
+            </div>
         </main>
     </div>
 

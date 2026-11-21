@@ -172,6 +172,9 @@ test.describe('Spec 023 (Tercera Pasada): Botón desactivar y Pantalla de Lotes'
     // f) Contador inline "Lotes registrados [n]"
     const secContador = page.locator('.sec .cnt');
     await expect(secContador).toBeVisible();
+
+    // Captura visual 20-lotes.png a 1600x900
+    await page.screenshot({ path: 'e2e/evidencias/visual/20-lotes.png' });
   });
 
   test('PARTE 2 (Responsivo): Pantalla Lotes no causa scroll horizontal de página a 320 px', async ({ page }) => {
