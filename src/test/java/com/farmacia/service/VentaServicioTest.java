@@ -175,6 +175,15 @@ class VentaServicioTest {
     }
 
     @Test
+    @DisplayName("CA-1.1: confirmar venta sin método de pago lanza IllegalArgumentException")
+    void rechazaMetodoPagoNulo() {
+        var error = assertThrows(IllegalArgumentException.class,
+                () -> servicio.confirmar("vendedor", null, null, List.of(linea(5, 4))));
+        assertEquals("El método de pago es obligatorio", error.getMessage());
+        verifyNoInteractions(prioridad, lotes, ventas, movimientos);
+    }
+
+    @Test
     @DisplayName("CA-1.4: un cliente inexistente se rechaza sin tocar el stock")
     void rechazaClienteInexistente() {
         when(clientes.buscarPorId(99)).thenReturn(Optional.empty());
