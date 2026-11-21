@@ -21,9 +21,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class AuditoriaSeguridadOyente {
     private final AuditoriaServicio auditoria;
+    private final com.farmacia.service.UsuarioServicio usuarioServicio;
+
+    public AuditoriaSeguridadOyente(AuditoriaServicio auditoria, com.farmacia.service.UsuarioServicio usuarioServicio) {
+        this.auditoria = auditoria;
+        this.usuarioServicio = usuarioServicio;
+    }
 
     public AuditoriaSeguridadOyente(AuditoriaServicio auditoria) {
-        this.auditoria = auditoria;
+        this(auditoria, null);
     }
 
     /**
@@ -32,6 +38,9 @@ public class AuditoriaSeguridadOyente {
      */
     @EventListener
     public void inicioDeSesion(InteractiveAuthenticationSuccessEvent evento) {
+        if (usuarioServicio != null) {
+            usuarioServicio.registrarAcceso(evento.getAuthentication().getName());
+        }
         auditoria.registrarAcceso(evento.getAuthentication().getName(), AccionAuditoria.INICIO_SESION,
                 "EXITO", null, ip(evento.getAuthentication()));
     }

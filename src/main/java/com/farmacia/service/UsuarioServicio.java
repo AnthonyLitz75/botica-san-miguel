@@ -182,6 +182,10 @@ public class UsuarioServicio {
                 "cuenta activada para usuario: " + existente.nombreUsuario());
     }
 
+    public void registrarAcceso(String nombreUsuario) {
+        repositorio.registrarAcceso(nombreUsuario);
+    }
+
     private void expirarSesionesDeUsuario(String nombreUsuario) {
         if (sessionRegistry == null) {
             return;
