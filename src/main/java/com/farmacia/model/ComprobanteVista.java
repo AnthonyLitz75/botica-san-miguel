@@ -1,6 +1,7 @@
 package com.farmacia.model;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -53,9 +54,21 @@ public record ComprobanteVista(
             String codigoMedicamento,
             String medicamento,
             String numeroLote,
+            LocalDate fechaVencimiento,
             Integer cantidad,
             BigDecimal precioUnitario,
             BigDecimal descuentoImporte,
             BigDecimal importe) {
+
+        public Linea(
+                String codigoMedicamento,
+                String medicamento,
+                String numeroLote,
+                Integer cantidad,
+                BigDecimal precioUnitario,
+                BigDecimal descuentoImporte,
+                BigDecimal importe) {
+            this(codigoMedicamento, medicamento, numeroLote, null, cantidad, precioUnitario, descuentoImporte, importe);
+        }
     }
 }

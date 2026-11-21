@@ -1,6 +1,7 @@
 package com.farmacia.repository;
 
 import com.farmacia.dto.FiltroVentasFormulario;
+import com.farmacia.model.DetalleVenta;
 import com.farmacia.model.MetodoPago;
 import com.farmacia.model.VentaResumenVista;
 import org.junit.jupiter.api.AfterEach;
@@ -223,5 +224,50 @@ class VentaRepositorioPersistenciaTest extends AbstractRepositorioIntegrationTes
         assertEquals(MetodoPago.YAPE_PLIN, resultado.get(0).metodoPago());
         assertEquals(1, repositorio.contar(filtroYape));
         assertEquals(0, new BigDecimal("20.00").compareTo(repositorio.sumarTotal(filtroYape)));
+    }
+
+    @Test
+    @DisplayName("T1701 / CA-1.1, CA-1.2: el comprobante trae fechaVencimiento por linea, incluida una venta que cruza dos lotes")
+    void buscarComprobante_incluyeFechaVencimientoPorLinea_cruzandoDosLotes() {
+        int idMed = jdbcTemplate.queryForObject("""
+                INSERT INTO medicamento (codigo, nombre, presentacion, unidad_control, precio_venta, stock_minimo)
+                VALUES ('MED-VENC', 'Amoxicilina 500mg', 'Caja x 30', 'UNIDAD', 15.00, 5)
+                RETURNING id_medicamento
+                """, Integer.class);
+
+        LocalDate vencLote1 = LocalDate.of(2027, 5, 31);
+        LocalDate vencLote2 = LocalDate.of(2027, 12, 31);
+
+        int idLote1 = jdbcTemplate.queryForObject("""
+                INSERT INTO lote (id_medicamento, numero_lote, fecha_vencimiento, stock_actual)
+                VALUES (?, 'LT-2027A', ?, 10)
+                RETURNING id_lote
+                """, Integer.class, idMed, vencLote1);
+
+        int idLote2 = jdbcTemplate.queryForObject("""
+                INSERT INTO lote (id_medicamento, numero_lote, fecha_vencimiento, stock_actual)
+                VALUES (?, 'LT-2027B', ?, 20)
+                RETURNING id_lote
+                """, Integer.class, idMed, vencLote2);
+
+        int idVenta = repositorio.insertar(idVendedor1, idCliente1, new BigDecimal("45.00"), BigDecimal.ZERO,
+                new BigDecimal("45.00"), "B001-00000777", MetodoPago.EFECTIVO);
+
+        repositorio.insertarDetalle(idVenta, new DetalleVenta(idLote1, 1, new BigDecimal("15.00"), BigDecimal.ZERO, new BigDecimal("15.00")));
+        repositorio.insertarDetalle(idVenta, new DetalleVenta(idLote2, 2, new BigDecimal("15.00"), BigDecimal.ZERO, new BigDecimal("30.00")));
+
+        var comprobanteOpt = repositorio.buscarComprobante(idVenta);
+        assertTrue(comprobanteOpt.isPresent());
+
+        var comprobante = comprobanteOpt.get();
+        assertEquals(2, comprobante.lineas().size());
+
+        var linea1 = comprobante.lineas().get(0);
+        assertEquals("LT-2027A", linea1.numeroLote());
+        assertEquals(vencLote1, linea1.fechaVencimiento(), "La linea 1 debe incluir la fecha de vencimiento del lote 1");
+
+        var linea2 = comprobante.lineas().get(1);
+        assertEquals("LT-2027B", linea2.numeroLote());
+        assertEquals(vencLote2, linea2.fechaVencimiento(), "La linea 2 debe incluir la fecha de vencimiento del lote 2");
     }
 }
