@@ -396,6 +396,11 @@ test.describe('Spec 023: Fase 1 — Pruebas de estilos computados y tokens', () 
     await page.goto('/movimientos', { waitUntil: 'domcontentloaded' });
     await expect(page.getByRole('heading', { level: 1, name: 'Movimientos de inventario' })).toBeVisible();
     await page.screenshot({ path: 'e2e/evidencias/visual/13-movimientos.png' });
+
+    // 21-paginacion.png (Movimientos, página 1, mostrando el control de paginación al pie)
+    const navPaginacion = page.locator('nav[aria-label="Paginación"]');
+    await navPaginacion.scrollIntoViewIfNeeded();
+    await page.screenshot({ path: 'e2e/evidencias/visual/21-paginacion.png' });
   });
 
   test('T2310: Capturas Grupo 4 (10-clientes, 11-proveedores, 08-categorias, 12-usuarios) a 1600x900', async ({ page }) => {
@@ -528,6 +533,7 @@ test.describe('Spec 023: Fase 1 — Pruebas de estilos computados y tokens', () 
       '17-modal-nuevo-usuario.png',
       '18-modal-nuevo-medicamento.png',
       '19-modal-registrar-salida.png',
+      '21-paginacion.png',
     ];
 
     const dirVisual = path.resolve('e2e/evidencias/visual');
