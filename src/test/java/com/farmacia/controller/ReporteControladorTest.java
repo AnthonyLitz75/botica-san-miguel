@@ -107,6 +107,7 @@ class ReporteControladorTest {
         when(reporteServicio.normalizarFiltro(any())).thenReturn(filtro);
         when(reporteServicio.ventasPorDia(eq("admin"), eq(filtro))).thenReturn(List.of(fila));
         when(reporteServicio.calcularBarrasGrafico(any(), eq(desde), eq(hasta))).thenReturn(barrasMock);
+        when(reporteServicio.generarResumenGrafico(any(), eq(desde), eq(hasta))).thenReturn("Resumen de ventas del 08/11/2026 al 14/11/2026");
 
         mvc.perform(get("/reportes/ventas")
                 .param("desde", "2026-11-08")

@@ -1,6 +1,7 @@
 package com.farmacia.controller;
 
 import com.farmacia.dto.FiltroReporteFormulario;
+import com.farmacia.model.BarraGraficoVista;
 import com.farmacia.model.CompraReporteVista;
 import com.farmacia.model.EstadoComprasResumenVista;
 import com.farmacia.model.InventarioReporteVista;
@@ -12,6 +13,8 @@ import com.farmacia.service.ReporteServicio;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -57,6 +60,23 @@ public class ReporteControlador {
             model.addAttribute("subtotal", subtotal);
             model.addAttribute("descuento", descuento);
             model.addAttribute("total", total);
+
+            if (efectivo.desde() != null && efectivo.hasta() != null) {
+                long diasRango = ChronoUnit.DAYS.between(efectivo.desde(), efectivo.hasta()) + 1;
+                if (diasRango > 31) {
+                    model.addAttribute("avisoGrafico", "Acota el rango a 31 días para ver el gráfico");
+                } else if (!reporte.isEmpty() && total.compareTo(BigDecimal.ZERO) > 0) {
+                    List<BarraGraficoVista> barras = reporteServicio.calcularBarrasGrafico(reporte, efectivo.desde(), efectivo.hasta());
+                    String resumenGrafico = reporteServicio.generarResumenGrafico(barras, efectivo.desde(), efectivo.hasta());
+                    BigDecimal maximoDia = barras.stream()
+                            .map(BarraGraficoVista::total)
+                            .max(Comparator.naturalOrder())
+                            .orElse(BigDecimal.ZERO);
+                    model.addAttribute("barras", barras);
+                    model.addAttribute("resumenGrafico", resumenGrafico);
+                    model.addAttribute("maximoDia", maximoDia);
+                }
+            }
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("reporte", List.of());
