@@ -40,7 +40,7 @@
 
             <div class="sec">
                 <h2>Listado de usuarios</h2>
-                <span class="cnt" th:text="${#lists.size(usuarios)}">0</span>
+                <span class="cnt" th:text="${total != null ? total : #lists.size(usuarios)}">0</span>
             </div>
 
             <div class="card pad text-center py-12" th:if="${#lists.isEmpty(usuarios)}">
@@ -137,6 +137,7 @@
                         </tbody>
                     </table>
                 </div>
+                <div th:replace="~{fragmentos/paginacion :: control(${paginacion})}"></div>
             </div>
 
             <!-- Diálogo modal accesible para restablecer contraseña -->

@@ -34,7 +34,7 @@ public class AuditoriaServicio {
     private static final int MAX_DETALLE = 500;
     private static final int MAX_ID = 40;
 
-    public static final int EVENTOS_POR_PAGINA = 50;
+    public static final int EVENTOS_POR_PAGINA = 25;
     private static final int MAX_FILAS_CSV = 10_000;
     private static final int DIAS_POR_DEFECTO = 7;
 

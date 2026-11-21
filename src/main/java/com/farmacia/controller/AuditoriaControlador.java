@@ -1,6 +1,7 @@
 package com.farmacia.controller;
 
 import com.farmacia.dto.FiltroAuditoriaFormulario;
+import com.farmacia.dto.PaginacionModelo;
 import com.farmacia.service.AccionAuditoria;
 import com.farmacia.service.AuditoriaServicio;
 import org.springframework.http.HttpHeaders;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /** Consulta de la bitácora de auditoría para el ADMINISTRADOR (spec 014, US-4). */
 @Controller
@@ -38,9 +40,19 @@ public class AuditoriaControlador {
         model.addAttribute("resultados", RESULTADOS);
         model.addAttribute("entidades", ENTIDADES);
         try {
-            model.addAttribute("consulta", servicio.consultar(autenticacion.getName(), filtro, pagina));
+            var consulta = servicio.consultar(autenticacion.getName(), filtro, pagina);
+            model.addAttribute("consulta", consulta);
+            Map<String, Object> params = filtro != null
+                    ? filtro.aParametros(consulta.desde(), consulta.hasta())
+                    : Map.of();
+            model.addAttribute("paginacion", PaginacionModelo.crear(
+                    consulta.pagina(), consulta.total(), AuditoriaServicio.EVENTOS_POR_PAGINA,
+                    "/auditoria", params));
         } catch (IllegalArgumentException error) {
             model.addAttribute("error", error.getMessage());
+            model.addAttribute("paginacion", PaginacionModelo.crear(
+                    1, 0, AuditoriaServicio.EVENTOS_POR_PAGINA,
+                    "/auditoria", Map.of()));
         }
         return "auditoria/listado";
     }

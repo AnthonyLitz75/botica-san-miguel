@@ -16,4 +16,17 @@ public record FiltroAuditoriaFormulario(
     public static FiltroAuditoriaFormulario vacio() {
         return new FiltroAuditoriaFormulario(null, null, null, null, null, null);
     }
+
+    public java.util.Map<String, Object> aParametros(LocalDate desdeEfectivo, LocalDate hastaEfectivo) {
+        java.util.Map<String, Object> params = new java.util.LinkedHashMap<>();
+        LocalDate d = desde != null ? desde : desdeEfectivo;
+        LocalDate h = hasta != null ? hasta : hastaEfectivo;
+        if (d != null) params.put("desde", d.toString());
+        if (h != null) params.put("hasta", h.toString());
+        if (usuario != null && !usuario.isBlank()) params.put("usuario", usuario);
+        if (accion != null && !accion.isBlank()) params.put("accion", accion);
+        if (entidad != null && !entidad.isBlank()) params.put("entidad", entidad);
+        if (resultado != null && !resultado.isBlank()) params.put("resultado", resultado);
+        return params;
+    }
 }

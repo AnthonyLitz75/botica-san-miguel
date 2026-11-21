@@ -1,5 +1,6 @@
 package com.farmacia.controller;
 
+import com.farmacia.dto.PaginacionModelo;
 import com.farmacia.dto.UsuarioClaveFormulario;
 import com.farmacia.dto.UsuarioFormulario;
 import com.farmacia.model.Usuario;
@@ -7,6 +8,7 @@ import com.farmacia.model.UsuarioListadoVista;
 import com.farmacia.service.UsuarioServicio;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -34,17 +37,45 @@ public class UsuarioControlador {
     }
 
     @GetMapping
-    public String listar(Model model, Authentication autenticacion) {
-        List<UsuarioListadoVista> usuarios = servicio.listarParaListado(autenticacion.getName());
-        if (usuarios == null || usuarios.isEmpty()) {
-            List<Usuario> lista = servicio.listar(autenticacion.getName());
+    public String listar(@RequestParam(name = "pagina", defaultValue = "1") int pagina,
+                         Model model, Authentication autenticacion) {
+        String usuario = autenticacion != null ? autenticacion.getName() : null;
+        UsuarioServicio.UsuariosPaginados paginados = null;
+        try {
+            paginados = servicio.listarParaListado(usuario, pagina);
+        } catch (Exception ignored) {
+            // fallback si no está configurado
+        }
+
+        if (paginados == null) {
+            List<UsuarioListadoVista> listaVista = servicio.listarParaListado(usuario);
+            if (listaVista != null && !listaVista.isEmpty()) {
+                paginados = new UsuarioServicio.UsuariosPaginados(listaVista, listaVista.size(), 1, 1);
+            }
+        }
+
+        List<UsuarioListadoVista> usuarios = paginados != null ? paginados.filas() : List.of();
+        int total = paginados != null ? paginados.total() : 0;
+        int pagActual = paginados != null ? paginados.pagina() : 1;
+        int paginas = paginados != null ? paginados.paginas() : 1;
+
+        if (usuarios.isEmpty()) {
+            List<Usuario> lista = servicio.listar(usuario);
             if (lista != null && !lista.isEmpty()) {
                 usuarios = lista.stream()
                         .map(u -> new UsuarioListadoVista(u.idUsuario(), u.nombre(), u.nombreUsuario(), u.rol(), u.activo(), null))
                         .toList();
+                total = usuarios.size();
             }
         }
+
         model.addAttribute("usuarios", usuarios);
+        model.addAttribute("total", total);
+        model.addAttribute("pagina", pagActual);
+        model.addAttribute("paginas", paginas);
+        model.addAttribute("paginacion", PaginacionModelo.crear(
+                pagActual, total, UsuarioServicio.USUARIOS_POR_PAGINA,
+                "/usuarios", Map.of()));
         model.addAttribute("formularioClave", new UsuarioClaveFormulario(""));
         return "usuarios/listado";
     }

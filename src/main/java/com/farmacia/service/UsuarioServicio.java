@@ -63,6 +63,14 @@ public class UsuarioServicio {
         this.clock = clock != null ? clock : Clock.system(FormatoUltimoAcceso.ZONA_LIMA);
     }
 
+    public static final int USUARIOS_POR_PAGINA = 25;
+
+    public record UsuariosPaginados(
+            List<UsuarioListadoVista> filas,
+            int total,
+            int pagina,
+            int paginas) {}
+
     public List<Usuario> listar(String usuarioAutenticado) {
         validarAdministrador(usuarioAutenticado);
         return repositorio.listar();
@@ -71,6 +79,16 @@ public class UsuarioServicio {
     public List<UsuarioListadoVista> listarParaListado(String usuarioAutenticado) {
         validarAdministrador(usuarioAutenticado);
         return repositorio.listarParaListado();
+    }
+
+    public UsuariosPaginados listarParaListado(String usuarioAutenticado, int pagina) {
+        validarAdministrador(usuarioAutenticado);
+        int total = repositorio.contar();
+        int paginas = Math.max(1, (total + USUARIOS_POR_PAGINA - 1) / USUARIOS_POR_PAGINA);
+        int actual = Math.min(Math.max(1, pagina), paginas);
+        int offset = (actual - 1) * USUARIOS_POR_PAGINA;
+        List<UsuarioListadoVista> filas = repositorio.listarParaListado(USUARIOS_POR_PAGINA, offset);
+        return new UsuariosPaginados(filas, total, actual, paginas);
     }
 
     public Optional<Usuario> buscarPorId(Integer idUsuario, String usuarioAutenticado) {

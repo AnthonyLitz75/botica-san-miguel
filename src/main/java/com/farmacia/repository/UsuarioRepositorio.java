@@ -133,6 +133,23 @@ public class UsuarioRepositorio {
         return jdbcTemplate.query(sql, MAPEO_USUARIO_LISTADO);
     }
 
+    public List<UsuarioListadoVista> listarParaListado(int limite, int offset) {
+        String sql = """
+                SELECT id_usuario, nombre, nombre_usuario,
+                       rol, activo, ultimo_acceso
+                FROM usuario
+                ORDER BY nombre ASC, id_usuario ASC
+                LIMIT ? OFFSET ?
+                """;
+        return jdbcTemplate.query(sql, MAPEO_USUARIO_LISTADO, limite, offset);
+    }
+
+    public int contar() {
+        String sql = "SELECT COUNT(*) FROM usuario";
+        Integer cuenta = jdbcTemplate.queryForObject(sql, Integer.class);
+        return cuenta == null ? 0 : cuenta;
+    }
+
     public boolean registrarAcceso(String nombreUsuario, LocalDateTime fechaHora) {
         String sql = """
                 UPDATE usuario

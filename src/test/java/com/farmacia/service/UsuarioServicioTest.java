@@ -277,4 +277,38 @@ class UsuarioServicioTest {
         assertTrue(ok);
         verify(repositorio).registrarAcceso(eq("vend1"), any(LocalDateTime.class));
     }
+
+    @Test
+    @DisplayName("listarParaListado con paginación calcula offset y páginas con tamaño 25")
+    void listarParaListadoPaginado_calculaOffsetYPaginas() {
+        var admin = new Usuario(1, "Admin", "admin", "pass", "ADMINISTRADOR", true);
+        when(repositorio.buscarPorNombreUsuario("admin")).thenReturn(Optional.of(admin));
+        when(repositorio.contar()).thenReturn(60);
+        when(repositorio.listarParaListado(25, 25)).thenReturn(List.of());
+
+        var paginados = servicio.listarParaListado("admin", 2);
+
+        assertEquals(60, paginados.total());
+        assertEquals(3, paginados.paginas());
+        assertEquals(2, paginados.pagina());
+        verify(repositorio).listarParaListado(25, 25);
+    }
+
+    @Test
+    @DisplayName("listarParaListado con paginación aplica clamp si página excede límites")
+    void listarParaListadoPaginado_aplicaClamp() {
+        var admin = new Usuario(1, "Admin", "admin", "pass", "ADMINISTRADOR", true);
+        when(repositorio.buscarPorNombreUsuario("admin")).thenReturn(Optional.of(admin));
+        when(repositorio.contar()).thenReturn(60);
+        when(repositorio.listarParaListado(25, 0)).thenReturn(List.of());
+        when(repositorio.listarParaListado(25, 50)).thenReturn(List.of());
+
+        var bajo = servicio.listarParaListado("admin", -1);
+        assertEquals(1, bajo.pagina());
+        verify(repositorio).listarParaListado(25, 0);
+
+        var alto = servicio.listarParaListado("admin", 999);
+        assertEquals(3, alto.pagina());
+        verify(repositorio).listarParaListado(25, 50);
+    }
 }
