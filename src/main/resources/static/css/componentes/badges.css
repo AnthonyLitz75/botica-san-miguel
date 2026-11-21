@@ -58,6 +58,12 @@
   border-color: #bfdbfe;
 }
 
+.t-pur {
+  background-color: #f3e8ff;
+  color: #7e22ce;
+  border-color: #e9d5ff;
+}
+
 /* Chips de Metadatos */
 .chip {
   display: inline-flex;

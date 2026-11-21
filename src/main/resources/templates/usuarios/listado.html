@@ -76,7 +76,7 @@
                                 </td>
                                 <td>
                                     <span class="badge"
-                                        th:classappend="${u.rol() == 'ADMINISTRADOR' ? 'bg-purple-100 text-purple-800' :
+                                        th:classappend="${u.rol() == 'ADMINISTRADOR' ? 't-pur' :
                                                         (u.rol() == 'COMPRAS' ? 't-blue' :
                                                         (u.rol() == 'ALMACENERO' ? 't-amber' : 't-ok'))}"
                                         th:text="${u.rol()}">ROL</span>

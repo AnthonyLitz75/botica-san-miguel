@@ -230,4 +230,29 @@ test.describe('Spec 023: Fase 1 — Pruebas de estilos computados y tokens', () 
     await page.screenshot({ path: 'e2e/evidencias/visual/13-movimientos.png' });
   });
 
+  test('T2310: Capturas Grupo 4 (10-clientes, 11-proveedores, 08-categorias, 12-usuarios) a 1600x900', async ({ page }) => {
+    await page.setViewportSize({ width: 1600, height: 900 });
+    await iniciarSesion(page, 'admin_demo', 'AdminDemo2026!');
+
+    // 10-clientes.png
+    await page.goto('/clientes', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 1, name: 'Clientes' })).toBeVisible();
+    await page.screenshot({ path: 'e2e/evidencias/visual/10-clientes.png' });
+
+    // 11-proveedores.png
+    await page.goto('/proveedores', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 1, name: 'Proveedores' })).toBeVisible();
+    await page.screenshot({ path: 'e2e/evidencias/visual/11-proveedores.png' });
+
+    // 08-categorias.png
+    await page.goto('/categorias', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 1, name: 'Árbol de categorías' })).toBeVisible();
+    await page.screenshot({ path: 'e2e/evidencias/visual/08-categorias.png' });
+
+    // 12-usuarios.png
+    await page.goto('/usuarios', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 1, name: 'Gestión de usuarios' })).toBeVisible();
+    await page.screenshot({ path: 'e2e/evidencias/visual/12-usuarios.png' });
+  });
+
 });
