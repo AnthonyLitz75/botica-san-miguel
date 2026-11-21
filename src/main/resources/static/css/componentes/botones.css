@@ -106,6 +106,88 @@ button:active {
   justify-content: center;
 }
 
+/* Botón de Icono Cuadrado Compacto (.ibtn) — Canónico para tablas y acciones */
+.ibtn,
+button.ibtn,
+a.ibtn {
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  max-height: 34px;
+  padding: 0;
+  margin: 0;
+  border: 1px solid var(--line, #dfe6e3);
+  border-radius: 9px;
+  display: inline-grid;
+  place-items: center;
+  color: var(--ink-2, #33463f);
+  background: #ffffff;
+  box-sizing: border-box;
+  cursor: pointer;
+  line-height: 1;
+  text-decoration: none;
+  font-family: inherit;
+  font-size: 13px;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.ibtn:hover,
+button.ibtn:hover,
+a.ibtn:hover {
+  background: #f7f9f8;
+  color: var(--ink, #10201b);
+  border-color: #cfd8d4;
+}
+
+/* Variante Peligro (.ibtn.dng) */
+.ibtn.dng,
+button.ibtn.dng,
+a.ibtn.dng {
+  color: var(--rose, #be123c);
+  border-color: #fecdd3;
+  background: #ffffff;
+}
+
+.ibtn.dng:hover,
+button.ibtn.dng:hover,
+a.ibtn.dng:hover {
+  background: var(--rose-bg, #ffe4e6) !important;
+  background-color: var(--rose-bg, #ffe4e6) !important;
+  border-color: var(--rose, #be123c) !important;
+  color: var(--rose, #be123c) !important;
+}
+
+.ibtn:focus-visible,
+button.ibtn:focus-visible,
+a.ibtn:focus-visible {
+  outline: 2px solid var(--pine-700, #166a55);
+  outline-offset: 2px;
+}
+
+.ibtn.dng:focus-visible,
+button.ibtn.dng:focus-visible,
+a.ibtn.dng:focus-visible {
+  outline: 2px solid var(--rose, #be123c);
+  outline-offset: 2px;
+}
+
+.inventario-acciones,
+.acciones-tabla {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.inventario-acciones form,
+.acciones-tabla form {
+  margin: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
 /* Botones de Icono Cuadrados (.btn-ico) */
 .btn-ico {
   width: 36px;

@@ -82,19 +82,22 @@
                         <div sec:authorize="hasRole('ADMINISTRADOR')" class="flex items-center gap-1.5 ml-2">
                             <a class="ibtn"
                                th:href="@{/categorias/nueva(padreId=${nodo.id()})}"
-                               title="Añadir subcategoría aquí">
-                                <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>
+                               title="Añadir subcategoría aquí"
+                               aria-label="Añadir subcategoría">
+                                <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>
                             </a>
                             <a class="ibtn boton-icono"
                                th:href="@{/categorias/{id}/editar(id=${nodo.id()})}"
-                               title="Editar categoría">
-                                <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                               title="Editar categoría"
+                               aria-label="Editar categoría">
+                                <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
                             </a>
                             <form th:action="@{/categorias/{id}/desactivar(id=${nodo.id()})}" method="post" class="inline"
-                                  onsubmit="return confirm('¿Está seguro de desactivar esta categoría?');" style="margin:0">
+                                  onsubmit="return confirm('¿Está seguro de desactivar esta categoría?');" style="margin:0;display:inline-flex;align-items:center;">
                                 <button type="submit" class="ibtn dng boton-icono"
-                                        title="Desactivar categoría">
-                                    <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>
+                                        title="Desactivar categoría"
+                                        aria-label="Desactivar categoría">
+                                    <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>
                                 </button>
                             </form>
                         </div>

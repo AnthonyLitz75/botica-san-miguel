@@ -155,7 +155,7 @@
                                     </a>
                                 </td>
                                 <td class="r" th:if="${esAdministrador}">
-                                    <div class="inline-flex gap-1.5 inventario-acciones">
+                                    <div class="inline-flex items-center justify-end gap-1.5 inventario-acciones">
                                         <a class="ibtn boton-icono"
                                             th:href="@{/medicamentos/{id}/editar(id=${medicamento.idMedicamento()})}"
                                             title="Editar medicamento"
@@ -164,7 +164,7 @@
                                         </a>
                                         <form method="post" th:if="${medicamento.activo()}"
                                             th:action="@{/medicamentos/{id}/desactivar(id=${medicamento.idMedicamento()})}"
-                                            onsubmit="return confirm('¿Desactivar este medicamento? Se conservará su historial.');" style="margin:0">
+                                            onsubmit="return confirm('¿Desactivar este medicamento? Se conservará su historial.');" style="margin:0;display:inline-flex;align-items:center;">
                                             <button class="ibtn dng boton-icono accion-desactivar" type="submit"
                                                 title="Desactivar medicamento"
                                                 th:attr="aria-label=${'Desactivar ' + medicamento.nombre()}">
@@ -173,7 +173,7 @@
                                         </form>
                                         <form method="post" th:unless="${medicamento.activo()}"
                                             th:action="@{/medicamentos/{id}/activar(id=${medicamento.idMedicamento()})}"
-                                            onsubmit="return confirm('¿Activar este medicamento?');" style="margin:0">
+                                            onsubmit="return confirm('¿Activar este medicamento?');" style="margin:0;display:inline-flex;align-items:center;">
                                             <button class="ibtn boton-icono text-pine-700" type="submit" title="Activar medicamento"
                                                 th:attr="aria-label=${'Activar ' + medicamento.nombre()}">
                                                 <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>

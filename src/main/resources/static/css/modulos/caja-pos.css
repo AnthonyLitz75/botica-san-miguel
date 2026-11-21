@@ -222,27 +222,53 @@
 }
 
 /* Botón Cuadrado Compacto (.ibtn) */
-.ibtn {
+.ibtn,
+button.ibtn,
+a.ibtn {
   width: 34px;
   height: 34px;
+  min-height: 34px;
+  max-height: 34px;
+  padding: 0;
+  margin: 0;
   border: 1px solid var(--line, #dfe6e3);
   border-radius: 9px;
   display: inline-grid;
   place-items: center;
   color: var(--ink-2, #33463f);
   background: #ffffff;
+  box-sizing: border-box;
   cursor: pointer;
+  line-height: 1;
+  text-decoration: none;
+  font-family: inherit;
+  font-size: 13px;
+  flex-shrink: 0;
   transition: all 0.15s ease;
 }
 
-.ibtn.dng {
-  color: var(--rose, #be123c);
-  border-color: #fecdd3;
+.ibtn:hover,
+button.ibtn:hover,
+a.ibtn:hover {
+  background: #f7f9f8;
+  color: var(--ink, #10201b);
+  border-color: #cfd8d4;
 }
 
-.ibtn.dng:hover {
+.ibtn.dng,
+button.ibtn.dng,
+a.ibtn.dng {
+  color: var(--rose, #be123c);
+  border-color: #fecdd3;
+  background: #ffffff;
+}
+
+.ibtn.dng:hover,
+button.ibtn.dng:hover,
+a.ibtn.dng:hover {
   background: var(--rose-bg, #ffe4e6);
   border-color: var(--rose, #be123c);
+  color: var(--rose, #be123c);
 }
 
 /* Tarjeta de Cliente Asignado (.cli) */

@@ -111,7 +111,7 @@
                                         <form method="post" th:if="${u.activo()}"
                                             th:action="@{/usuarios/{id}/desactivar(id=${u.idUsuario()})}"
                                             onsubmit="return confirm('¿Desactivar este usuario? Se conservará su historial y no podrá acceder.');"
-                                            style="margin:0;display:inline;">
+                                            style="margin:0;display:inline-flex;align-items:center;">
                                             <button class="ibtn dng" type="submit" title="Desactivar usuario"
                                                 th:attr="aria-label=${'Desactivar ' + u.nombreUsuario()}">
                                                 <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -123,7 +123,7 @@
                                         <!-- Activar -->
                                         <form method="post" th:unless="${u.activo()}"
                                             th:action="@{/usuarios/{id}/activar(id=${u.idUsuario()})}"
-                                            style="margin:0;display:inline;">
+                                            style="margin:0;display:inline-flex;align-items:center;">
                                             <button class="ibtn" type="submit" title="Activar usuario"
                                                 th:attr="aria-label=${'Activar ' + u.nombreUsuario()}">
                                                 <svg class="ico text-pine-700" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
