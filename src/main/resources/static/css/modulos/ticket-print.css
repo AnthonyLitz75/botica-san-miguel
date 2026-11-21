@@ -141,12 +141,19 @@
 
   aside,
   header,
+  nav,
+  button,
+  .btn,
   .no-imprimir,
   .inventario-lateral,
   .inventario-cabecera,
   .ann,
   .stage > .ann,
-  .saltar-contenido {
+  .saltar-contenido,
+  #btn-abrir-sidebar,
+  #btn-cerrar-sidebar,
+  #sidebar-backdrop,
+  .sidebar-backdrop {
     display: none !important;
   }
 
