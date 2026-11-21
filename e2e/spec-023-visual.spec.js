@@ -185,4 +185,29 @@ test.describe('Spec 023: Fase 1 — Pruebas de estilos computados y tokens', () 
     await page.screenshot({ path: 'e2e/evidencias/visual/04-medicamentos.png' });
   });
 
+  test('T2308: Capturas Grupo 2 (02-ticket, 09-historial-ventas, 07-reportes-ventas) a 1600x900', async ({ page }) => {
+    await page.setViewportSize({ width: 1600, height: 900 });
+    await iniciarSesion(page, 'admin_demo', 'AdminDemo2026!');
+
+    // 09-historial-ventas.png
+    await page.goto('/ventas', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 1, name: 'Historial de ventas' })).toBeVisible();
+    await page.screenshot({ path: 'e2e/evidencias/visual/09-historial-ventas.png' });
+
+    // 02-ticket.png (navegar al comprobante de la primera venta disponible)
+    const primerComprobanteLnk = page.locator('table tbody tr a.lnk').first();
+    if (await primerComprobanteLnk.isVisible()) {
+      await primerComprobanteLnk.click();
+    } else {
+      await page.goto('/ventas/1', { waitUntil: 'domcontentloaded' });
+    }
+    await expect(page.locator('#comprobante')).toBeVisible();
+    await page.screenshot({ path: 'e2e/evidencias/visual/02-ticket.png' });
+
+    // 07-reportes-ventas.png
+    await page.goto('/reportes/ventas', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 1, name: 'Ventas por período' })).toBeVisible();
+    await page.screenshot({ path: 'e2e/evidencias/visual/07-reportes-ventas.png' });
+  });
+
 });

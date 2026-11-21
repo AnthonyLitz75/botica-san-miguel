@@ -100,7 +100,7 @@
                                     P.U. S/ 10.00
                                 </span>
                             </div>
-                            <div class="text-[11px] text-slate-500 font-mono">
+                            <div style="color: #555;" class="font-mono text-xs">
                                 <span th:text="${'   Lote ' + linea.numeroLote() + (linea.fechaVencimiento() != null ? (' · Venc ' + #temporals.format(linea.fechaVencimiento(), 'MM/yyyy')) : '')}">   Lote LOT-A · Venc 12/2026</span>
                             </div>
                         </div>
