@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.farmacia.config.SeguridadConfiguracion;
 import com.farmacia.dto.FiltroReporteFormulario;
+import com.farmacia.model.BarraGraficoVista;
 import com.farmacia.model.MedicamentoRotacionVista;
 import com.farmacia.model.VentasDiaVista;
 import com.farmacia.service.ReporteServicio;
@@ -92,6 +93,70 @@ class ReporteControladorTest {
                 .andExpect(model().attributeExists("reporte", "totalVentas", "subtotal", "descuento", "total"))
                 .andExpect(content().string(containsString("10/11/2026")))
                 .andExpect(content().string(containsString("90.00")));
+    }
+
+    @Test
+    @DisplayName("T2102: GET /reportes/ventas con rango de 7 días agrega barras y resumenGrafico al modelo")
+    void ventas_rangoSieteDias_incluyeBarrasYResumenEnModelo() throws Exception {
+        LocalDate desde = LocalDate.of(2026, 11, 8);
+        LocalDate hasta = LocalDate.of(2026, 11, 14);
+        var filtro = new FiltroReporteFormulario(desde, hasta, 10, null, null);
+        var fila = new VentasDiaVista(desde, 2, new BigDecimal("100.00"), BigDecimal.ZERO, new BigDecimal("100.00"));
+        var barrasMock = List.of(new BarraGraficoVista(desde, new BigDecimal("100.00"), 100));
+
+        when(reporteServicio.normalizarFiltro(any())).thenReturn(filtro);
+        when(reporteServicio.ventasPorDia(eq("admin"), eq(filtro))).thenReturn(List.of(fila));
+        when(reporteServicio.calcularBarrasGrafico(any(), eq(desde), eq(hasta))).thenReturn(barrasMock);
+
+        mvc.perform(get("/reportes/ventas")
+                .param("desde", "2026-11-08")
+                .param("hasta", "2026-11-14")
+                .with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("reportes/ventas"))
+                .andExpect(model().attributeExists("barras", "resumenGrafico"))
+                .andExpect(model().attributeDoesNotExist("avisoGrafico"));
+    }
+
+    @Test
+    @DisplayName("T2102: GET /reportes/ventas con rango > 31 días no agrega barras y agrega avisoGrafico")
+    void ventas_rangoMayor31Dias_noIncluyeBarrasYAgregaAviso() throws Exception {
+        LocalDate desde = LocalDate.of(2026, 10, 1);
+        LocalDate hasta = LocalDate.of(2026, 11, 5); // 36 días
+        var filtro = new FiltroReporteFormulario(desde, hasta, 10, null, null);
+        var fila = new VentasDiaVista(desde, 1, new BigDecimal("50.00"), BigDecimal.ZERO, new BigDecimal("50.00"));
+
+        when(reporteServicio.normalizarFiltro(any())).thenReturn(filtro);
+        when(reporteServicio.ventasPorDia(eq("admin"), eq(filtro))).thenReturn(List.of(fila));
+
+        mvc.perform(get("/reportes/ventas")
+                .param("desde", "2026-10-01")
+                .param("hasta", "2026-11-05")
+                .with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("reportes/ventas"))
+                .andExpect(model().attributeDoesNotExist("barras"))
+                .andExpect(model().attribute("avisoGrafico", "Acota el rango a 31 días para ver el gráfico"))
+                .andExpect(model().attributeExists("reporte"));
+    }
+
+    @Test
+    @DisplayName("T2102: GET /reportes/ventas con rango sin ventas no agrega barras al modelo (CA-1.4)")
+    void ventas_rangoSinVentas_noAgregaBarras() throws Exception {
+        LocalDate desde = LocalDate.of(2026, 11, 8);
+        LocalDate hasta = LocalDate.of(2026, 11, 14);
+        var filtro = new FiltroReporteFormulario(desde, hasta, 10, null, null);
+
+        when(reporteServicio.normalizarFiltro(any())).thenReturn(filtro);
+        when(reporteServicio.ventasPorDia(eq("admin"), eq(filtro))).thenReturn(List.of());
+
+        mvc.perform(get("/reportes/ventas")
+                .param("desde", "2026-11-08")
+                .param("hasta", "2026-11-14")
+                .with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("reportes/ventas"))
+                .andExpect(model().attributeDoesNotExist("barras"));
     }
 
     @Test
