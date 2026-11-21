@@ -18,6 +18,7 @@ import com.farmacia.dto.UsuarioFormulario;
 import com.farmacia.model.Usuario;
 import com.farmacia.model.UsuarioListadoVista;
 import com.farmacia.repository.UsuarioRepositorio;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -269,11 +270,11 @@ class UsuarioServicioTest {
     }
 
     @Test
-    @DisplayName("registrarAcceso delega al repositorio")
+    @DisplayName("registrarAcceso delega al repositorio calculando LocalDateTime en America/Lima")
     void registrarAccesoDelegaAlRepositorio() {
-        when(repositorio.registrarAcceso("vend1")).thenReturn(true);
+        when(repositorio.registrarAcceso(eq("vend1"), any(LocalDateTime.class))).thenReturn(true);
         boolean ok = servicio.registrarAcceso("vend1");
         assertTrue(ok);
-        verify(repositorio).registrarAcceso("vend1");
+        verify(repositorio).registrarAcceso(eq("vend1"), any(LocalDateTime.class));
     }
 }
