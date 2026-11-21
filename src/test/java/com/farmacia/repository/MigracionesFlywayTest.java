@@ -96,6 +96,22 @@ class MigracionesFlywayTest extends AbstractRepositorioIntegrationTest {
         });
     }
 
+    @Test
+    @DisplayName("La tabla usuario posee columna ultimo_acceso que admite NULL")
+    void columnaUltimoAccesoExisteYAdmiteNull() {
+        Integer existeColumna = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*) FROM information_schema.columns
+                WHERE table_schema = 'public' AND table_name = 'usuario' AND column_name = 'ultimo_acceso'
+                """, Integer.class);
+        assertEquals(1, existeColumna, "Debe existir la columna ultimo_acceso en la tabla usuario");
+
+        String esNullable = jdbcTemplate.queryForObject("""
+                SELECT is_nullable FROM information_schema.columns
+                WHERE table_schema = 'public' AND table_name = 'usuario' AND column_name = 'ultimo_acceso'
+                """, String.class);
+        assertEquals("YES", esNullable, "La columna ultimo_acceso debe admitir NULL");
+    }
+
     private int contar(String esquema, String tabla) {
         // Identificadores constantes de esta prueba (no provienen del usuario).
         return jdbcTemplate.queryForObject(
