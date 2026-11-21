@@ -538,4 +538,29 @@ test.describe('Spec 023: Fase 1 — Pruebas de estilos computados y tokens', () 
     }
   });
 
+  test('Ajuste de textos Categorías: sin jerga técnica (n-ario, taxonómica)', async ({ page }) => {
+    await page.setViewportSize({ width: 1600, height: 900 });
+    await iniciarSesion(page, 'admin_demo', 'AdminDemo2026!');
+    await page.goto('/categorias', { waitUntil: 'domcontentloaded' });
+
+    // 1. Subtítulo de la cabecera
+    const subtitulo = page.locator('.head .sub');
+    await expect(subtitulo).toHaveText('Organiza los medicamentos por categorías y subcategorías.');
+
+    // 2. Título de la sección del árbol
+    const tituloSeccion = page.locator('#titulo-arbol');
+    await expect(tituloSeccion).toHaveText('Categorías');
+
+    // 3. Texto de ayuda junto al título
+    const ayudaSeccion = page.locator('.sec .lbl');
+    await expect(ayudaSeccion).toHaveText('Usa + para añadir una subcategoría y el lápiz para editar.');
+
+    // 4. No debe aparecer "n-ari" en ninguna parte de la página
+    const contenidoPagina = await page.content();
+    expect(contenidoPagina.toLowerCase()).not.toContain('n-ari');
+
+    // Captura visual 08-categorias.png a 1600x900
+    await page.screenshot({ path: 'e2e/evidencias/visual/08-categorias.png' });
+  });
+
 });

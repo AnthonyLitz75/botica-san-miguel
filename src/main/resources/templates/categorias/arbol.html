@@ -13,7 +13,7 @@
                 <div>
                     <div class="eyebrow">CATÁLOGO / TAXONOMÍA</div>
                     <h1 class="text-3xl font-extrabold tracking-tight text-ink">Árbol de categorías</h1>
-                    <div class="sub">Navega y administra la jerarquía de medicamentos en estructura de árbol n-ario.</div>
+                    <div class="sub">Organiza los medicamentos por categorías y subcategorías.</div>
                 </div>
                 <div sec:authorize="hasRole('ADMINISTRADOR')" class="row" style="align-items:center">
                     <a class="btn p inventario-boton boton-principal" th:href="@{/categorias/nueva}" data-modal-open="modal-nueva-categoria">
@@ -36,9 +36,9 @@
             <!-- Contenido del Árbol -->
             <section class="inventario-resultados" aria-labelledby="titulo-arbol">
                 <div class="sec" style="margin-top:0">
-                    <h2 id="titulo-arbol">Jerarquía taxonómica</h2>
+                    <h2 id="titulo-arbol">Categorías</h2>
                     <span class="cnt cantidad-resultados" th:text="${totalCategorias}">0</span>
-                    <span class="lbl text-xs text-ink-3 font-normal" style="color: var(--ink-3); font-size: 12px; font-weight: normal;">Estructura N-aria · usa [+] para añadir una subcategoría</span>
+                    <span class="lbl text-xs text-ink-3 font-normal" style="color: var(--ink-3); font-size: 12px; font-weight: normal;">Usa + para añadir una subcategoría y el lápiz para editar.</span>
                 </div>
 
                 <div class="card pad inventario-vacio text-center" th:if="${totalCategorias == 0}">

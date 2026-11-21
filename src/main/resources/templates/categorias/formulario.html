@@ -15,7 +15,7 @@
                 <div>
                     <div class="eyebrow">CATÁLOGO / TAXONOMÍA</div>
                     <h1 class="text-3xl font-extrabold tracking-tight text-ink" th:text="${esEdicion ? 'Editar Categoría' : 'Nueva Categoría'}">Nueva Categoría</h1>
-                    <div class="sub" th:text="${esEdicion ? 'Actualiza el nombre o reubica la categoría en otro nodo padre sin generar ciclos.' : 'Ingresa el nombre y selecciona el nodo padre para insertarla en el árbol n-ario.'}">
+                    <div class="sub" th:text="${esEdicion ? 'Actualiza el nombre o reubica la categoría en otro nodo padre sin generar ciclos.' : 'Ingresa el nombre y selecciona el nodo padre para organizarla en el catálogo.'}">
                         Formulario de categoría
                     </div>
                 </div>
@@ -45,7 +45,7 @@
                         </div>
                         <div>
                             <h2 class="text-xl font-bold text-ink" th:text="${esEdicion ? 'Ficha de Categoría' : 'Nueva Categoría en el Árbol'}">Nueva Categoría</h2>
-                            <p class="text-xs text-ink-3 mt-0.5">Define la posición taxonómica dentro de la estructura N-aria.</p>
+                            <p class="text-xs text-ink-3 mt-0.5">Define la ubicación dentro de las categorías y subcategorías.</p>
                         </div>
                     </div>
 
