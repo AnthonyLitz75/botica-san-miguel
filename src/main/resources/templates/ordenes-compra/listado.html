@@ -34,28 +34,28 @@
 
             <!-- Chips de filtro por estado (Boceto 05, CA-3.1 y CA-3.2) -->
             <div class="row flex-wrap mb-5 gap-2.5 items-center" th:if="${conteosPorEstado != null}" role="navigation" aria-label="Filtro rápido por estado de orden">
-                <a class="btn text-xs font-bold py-2 px-3.5 transition-all duration-150 rounded-lg no-underline"
-                    th:classappend="${estadoSeleccionado == null || estadoSeleccionado == '' ? 'btn p' : 'btn s'}"
+                <a class="btn no-underline transition-all duration-150" style="padding:7px 14px; font-size:13.5px;"
+                    th:classappend="${estadoSeleccionado == null || estadoSeleccionado == '' ? 'p' : 's'}"
                     th:href="@{/ordenes-compra}">
                     <span th:text="|Todas · ${conteosPorEstado.getOrDefault('TODAS', 0)}|">Todas · 0</span>
                 </a>
-                <a class="btn text-xs font-bold py-2 px-3.5 transition-all duration-150 rounded-lg no-underline"
-                    th:classappend="${estadoSeleccionado == 'PENDIENTE' ? 'btn p' : 'btn s'}"
+                <a class="btn no-underline transition-all duration-150" style="padding:7px 14px; font-size:13.5px;"
+                    th:classappend="${estadoSeleccionado == 'PENDIENTE' ? 'p' : 's'}"
                     th:href="@{/ordenes-compra(estado='PENDIENTE')}">
                     <span th:text="|Pendientes · ${conteosPorEstado.getOrDefault('PENDIENTE', 0)}|">Pendientes · 0</span>
                 </a>
-                <a class="btn text-xs font-bold py-2 px-3.5 transition-all duration-150 rounded-lg no-underline"
-                    th:classappend="${estadoSeleccionado == 'PARCIALMENTE_RECIBIDA' ? 'btn p' : 'btn s'}"
+                <a class="btn no-underline transition-all duration-150" style="padding:7px 14px; font-size:13.5px;"
+                    th:classappend="${estadoSeleccionado == 'PARCIALMENTE_RECIBIDA' ? 'p' : 's'}"
                     th:href="@{/ordenes-compra(estado='PARCIALMENTE_RECIBIDA')}">
                     <span th:text="|Parciales · ${conteosPorEstado.getOrDefault('PARCIALMENTE_RECIBIDA', 0)}|">Parciales · 0</span>
                 </a>
-                <a class="btn text-xs font-bold py-2 px-3.5 transition-all duration-150 rounded-lg no-underline"
-                    th:classappend="${estadoSeleccionado == 'RECIBIDA' ? 'btn p' : 'btn s'}"
+                <a class="btn no-underline transition-all duration-150" style="padding:7px 14px; font-size:13.5px;"
+                    th:classappend="${estadoSeleccionado == 'RECIBIDA' ? 'p' : 's'}"
                     th:href="@{/ordenes-compra(estado='RECIBIDA')}">
                     <span th:text="|Recibidas · ${conteosPorEstado.getOrDefault('RECIBIDA', 0)}|">Recibidas · 0</span>
                 </a>
-                <a class="btn text-xs font-bold py-2 px-3.5 transition-all duration-150 rounded-lg no-underline"
-                    th:classappend="${estadoSeleccionado == 'CANCELADA' ? 'btn p' : 'btn s'}"
+                <a class="btn no-underline transition-all duration-150" style="padding:7px 14px; font-size:13.5px;"
+                    th:classappend="${estadoSeleccionado == 'CANCELADA' ? 'p' : 's'}"
                     th:href="@{/ordenes-compra(estado='CANCELADA')}">
                     <span th:text="|Canceladas · ${conteosPorEstado.getOrDefault('CANCELADA', 0)}|">Canceladas · 0</span>
                 </a>
@@ -96,7 +96,7 @@
                                     12/11/2026 09:20
                                 </td>
                                 <td>
-                                    <span class="font-semibold text-ink nombre-proveedor"
+                                    <span class="font-bold text-ink nombre-proveedor"
                                         th:text="${orden.razonSocialProveedor()}">Droguería Farmaperú S.A.C.</span>
                                 </td>
                                 <td>

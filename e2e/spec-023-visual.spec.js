@@ -210,4 +210,24 @@ test.describe('Spec 023: Fase 1 — Pruebas de estilos computados y tokens', () 
     await page.screenshot({ path: 'e2e/evidencias/visual/07-reportes-ventas.png' });
   });
 
+  test('T2309: Capturas Grupo 3 (05-ordenes-compra, 06-auditoria, 13-movimientos) a 1600x900', async ({ page }) => {
+    await page.setViewportSize({ width: 1600, height: 900 });
+    await iniciarSesion(page, 'admin_demo', 'AdminDemo2026!');
+
+    // 05-ordenes-compra.png
+    await page.goto('/ordenes-compra', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 1, name: 'Órdenes de compra' })).toBeVisible();
+    await page.screenshot({ path: 'e2e/evidencias/visual/05-ordenes-compra.png' });
+
+    // 06-auditoria.png
+    await page.goto('/auditoria', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 1, name: 'Auditoría' })).toBeVisible();
+    await page.screenshot({ path: 'e2e/evidencias/visual/06-auditoria.png' });
+
+    // 13-movimientos.png
+    await page.goto('/movimientos', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 1, name: 'Movimientos de inventario' })).toBeVisible();
+    await page.screenshot({ path: 'e2e/evidencias/visual/13-movimientos.png' });
+  });
+
 });
