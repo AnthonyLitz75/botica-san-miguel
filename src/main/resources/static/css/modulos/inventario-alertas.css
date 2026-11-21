@@ -233,13 +233,14 @@
 /* Barras e Histogramas de Reportes en CSS (Spec 021, Boceto 07) */
 .grafico-scroll-contenedor {
   overflow-x: auto;
+  max-width: 100%;
   -webkit-overflow-scrolling: touch;
 }
 
 .bars {
   display: flex;
   align-items: flex-end;
-  gap: 8px;
+  gap: 10px;
   height: 150px;
   padding-top: 10px;
   margin-bottom: 22px;
@@ -248,8 +249,8 @@
 
 .bars div {
   flex: 1 1 0;
-  min-width: 16px;
-  background: linear-gradient(180deg, var(--pine-600, #1b7f66), var(--pine-700, #166a55));
+  min-width: 14px;
+  background: linear-gradient(180deg, #1b7f66, #166a55);
   border-radius: 6px 6px 0 0;
   position: relative;
   min-height: 6px;
@@ -270,17 +271,17 @@
 }
 
 .bars div:focus-visible {
-  outline: 2px solid var(--color-foco, #0284c7);
+  outline: 2px solid #166a55;
   outline-offset: 2px;
 }
 
 .bars small {
   position: absolute;
-  bottom: -22px;
+  bottom: -20px;
   left: 50%;
   transform: translateX(-50%);
   font-size: 11px;
-  color: var(--ink-3, #5b6d66);
+  color: #5b6d66;
   white-space: nowrap;
 }
 

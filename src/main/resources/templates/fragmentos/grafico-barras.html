@@ -28,9 +28,9 @@
                          class="barra-item"
                          th:classappend="${b.porcentajeAltura() == 0} ? 'barra-cero' : ''"
                          tabindex="0"
-                         th:style="|height: ${b.porcentajeAltura()}%;|"
+                         th:style="${b.porcentajeAltura() > 0 ? ('height: ' + b.porcentajeAltura() + '%;') : 'height: 0;'}"
                          th:title="${#temporals.format(b.fecha(), 'dd/MM') + ': S/ ' + #numbers.formatDecimal(b.total(), 1, 'COMMA', 2, 'POINT')}">
-                        <small th:text="${#temporals.format(b.fecha(), 'dd/MM')}">01/01</small>
+                        <small th:text="${#lists.size(barras) > 14 ? #temporals.format(b.fecha(), 'dd') : #temporals.format(b.fecha(), 'dd/MM')}">01/01</small>
                     </div>
                 </div>
             </div>
