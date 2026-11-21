@@ -479,4 +479,24 @@ class PreparacionVentaServicioTest {
         assertEquals(new BigDecimal("21.00"), deshecho2.total());
     }
 
+    @Test
+    void modificarCantidad_medicamentoMuestraMedicaPrecioCero() {
+        var medGratis = new Medicamento(15, "MED-015", "Muestra Médica", "500 mg", "Sobres", "SOBRES",
+                BigDecimal.ZERO, 10, true);
+        var medRepo = mock(MedicamentoRepositorio.class);
+        when(medRepo.buscarPorId(15)).thenReturn(Optional.of(medGratis));
+
+        var prioridad = mock(LotePrioridadServicio.class);
+        when(prioridad.planificarSalida(eq(15), anyInt())).thenAnswer(inv ->
+                List.of(new AsignacionLoteFefo(8, "LT-8", LocalDate.now().plusDays(10), 9, inv.getArgument(1))));
+
+        var servicio = servicio(medRepo, usuarioRepo(), prioridad);
+        servicio.agregar("vendedor", new PreparacionVentaCambioFormulario(15, 2));
+
+        var vista = servicio.modificarCantidad("vendedor", 15, 1);
+        assertNotNull(vista);
+        assertEquals(BigDecimal.ZERO.setScale(2), vista.subtotal());
+        assertEquals(BigDecimal.ZERO.setScale(2), vista.descuentoTotal());
+        assertEquals(BigDecimal.ZERO.setScale(2), vista.total());
+    }
 }
