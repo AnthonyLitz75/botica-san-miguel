@@ -48,7 +48,7 @@ test.describe('Spec 023: Fase 1 — Pruebas de estilos computados y tokens', () 
   test('T2302: estilos computados de componentes en pantalla representativa (boton primario, tarjeta, campo 42 px, badge, KPI)', async ({ page }) => {
     await page.setViewportSize({ width: 1600, height: 900 });
     await iniciarSesion(page, 'admin_demo', 'AdminDemo2026!');
-    await page.goto('/alertas', { waitUntil: 'domcontentloaded' });
+    await page.goto('/medicamentos', { waitUntil: 'domcontentloaded' });
 
     // 1. Tarjeta (.card): fondo blanco y radio 16 px (CA-3.2)
     const card = page.locator('.card').first();
@@ -65,8 +65,6 @@ test.describe('Spec 023: Fase 1 — Pruebas de estilos computados y tokens', () 
     expect(btnBg).toBe('rgb(22, 106, 85)');
 
     // 3. Campo de texto (.inp): alto 42 px, radio 10 px (CA-3.3)
-    // Ir a /medicamentos para encontrar un .inp
-    await page.goto('/medicamentos', { waitUntil: 'domcontentloaded' });
     const inp = page.locator('.inp').first();
     await expect(inp).toBeVisible();
     const inpHeight = await inp.evaluate((el) => window.getComputedStyle(el).height);
