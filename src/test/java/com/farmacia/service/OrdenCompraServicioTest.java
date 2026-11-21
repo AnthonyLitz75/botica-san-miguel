@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -212,6 +213,35 @@ class OrdenCompraServicioTest {
             assertNotNull(resultado);
             assertTrue(resultado.isEmpty());
             verify(detalleRepositorio, times(1)).listarVistaPorOrden(40);
+        }
+
+        @Test
+        @DisplayName("listarVista: delega en ordenRepositorio.listarVista con el estado proporcionado")
+        void listarVista_delegaEnRepositorio() {
+            var vista = new OrdenCompraListadoVista(1, "OC-001", 10, 20, "Droguería Test",
+                    LocalDateTime.now(), "PENDIENTE", new BigDecimal("100.00"), "Obs");
+            when(ordenRepositorio.listarVista("PENDIENTE")).thenReturn(List.of(vista));
+
+            List<OrdenCompraListadoVista> resultado = servicio.listarVista("PENDIENTE");
+
+            assertNotNull(resultado);
+            assertEquals(1, resultado.size());
+            assertEquals(vista, resultado.get(0));
+            verify(ordenRepositorio).listarVista("PENDIENTE");
+        }
+
+        @Test
+        @DisplayName("contarPorEstado: delega en ordenRepositorio.contarPorEstado")
+        void contarPorEstado_delegaEnRepositorio() {
+            var conteos = Map.of("TODAS", 5, "PENDIENTE", 2, "RECIBIDA", 3);
+            when(ordenRepositorio.contarPorEstado()).thenReturn(conteos);
+
+            Map<String, Integer> resultado = servicio.contarPorEstado();
+
+            assertNotNull(resultado);
+            assertEquals(5, resultado.get("TODAS"));
+            assertEquals(2, resultado.get("PENDIENTE"));
+            verify(ordenRepositorio).contarPorEstado();
         }
     }
 
