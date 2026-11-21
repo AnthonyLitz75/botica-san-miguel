@@ -294,7 +294,7 @@
 }
 
 .cli .lbl {
-  font-size: 12px;
+  font-size: 11.5px;
   color: var(--ink-3, #5b6d66);
   line-height: 1.3;
   overflow: hidden;

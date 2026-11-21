@@ -165,4 +165,24 @@ test.describe('Spec 023: Fase 1 — Pruebas de estilos computados y tokens', () 
     expect(labelsLotesSinFor.length).toBe(0);
   });
 
+  test('T2307: Capturas Grupo 1 (01-caja, 03-alertas, 04-medicamentos) a 1600x900', async ({ page }) => {
+    await page.setViewportSize({ width: 1600, height: 900 });
+    await iniciarSesion(page, 'admin_demo', 'AdminDemo2026!');
+
+    // 01-caja.png
+    await page.goto('/ventas/nueva', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 1, name: 'Caja' })).toBeVisible();
+    await page.screenshot({ path: 'e2e/evidencias/visual/01-caja.png' });
+
+    // 03-alertas.png
+    await page.goto('/alertas', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 1, name: /Alertas de inventario/i })).toBeVisible();
+    await page.screenshot({ path: 'e2e/evidencias/visual/03-alertas.png' });
+
+    // 04-medicamentos.png
+    await page.goto('/medicamentos', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 1, name: 'Medicamentos' })).toBeVisible();
+    await page.screenshot({ path: 'e2e/evidencias/visual/04-medicamentos.png' });
+  });
+
 });
