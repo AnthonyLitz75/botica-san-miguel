@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <!-- Fragmento Gráfico de Barras y Estado de Aviso (Spec 021, Boceto 07) -->
+    <div th:fragment="grafico(barras, resumen, maximo, aviso)">
+        <!-- Aviso cuando el rango supera 31 días (CA-1.5) -->
+        <div class="card pad mb-6" th:if="${aviso != null}">
+            <div class="flex items-center gap-3 text-ink-2 py-3 px-2">
+                <svg class="ico text-amber-500 flex-none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <span class="text-sm font-semibold text-ink-2" th:text="${aviso}">Acota el rango a 31 días para ver el gráfico</span>
+            </div>
+        </div>
+
+        <!-- Gráfico de ventas netas por día (CA-1.1 a CA-1.6) -->
+        <div class="card pad mb-6" th:if="${aviso == null and barras != null and not #lists.isEmpty(barras)}">
+            <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                <h2 class="text-base font-bold text-ink mb-0">Ventas netas por día</h2>
+                <span class="lbl text-xs text-ink-3 font-semibold"
+                      th:text="${'S/ · máx. S/ ' + #numbers.formatDecimal(maximo != null ? maximo : 0, 1, 'COMMA', 2, 'POINT')}">S/ · máx. S/ 0.00</span>
+            </div>
+            <!-- Contenedor con scroll interno para pantallas angostas (320px) sin scroll de página -->
+            <div class="grafico-scroll-contenedor overflow-x-auto w-full pb-6 pt-2">
+                <div class="bars" role="img" th:attr="aria-label=${resumen}">
+                    <div th:each="b : ${barras}"
+                         class="barra-item"
+                         th:classappend="${b.porcentajeAltura() == 0} ? 'barra-cero' : ''"
+                         tabindex="0"
+                         th:style="|height: ${b.porcentajeAltura()}%;|"
+                         th:title="${#temporals.format(b.fecha(), 'dd/MM') + ': S/ ' + #numbers.formatDecimal(b.total(), 1, 'COMMA', 2, 'POINT')}">
+                        <small th:text="${#temporals.format(b.fecha(), 'dd/MM')}">01/01</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

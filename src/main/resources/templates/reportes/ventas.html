@@ -118,20 +118,8 @@
                 </form>
             </div>
 
-            <!-- Gráfico de Barras CSS cuando hay datos (Boceto 07) -->
-            <div class="card pad mb-6" th:unless="${#lists.isEmpty(reporte)}">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-base font-bold text-ink mb-0">Evolución de ventas netas por día</h2>
-                    <span class="lbl">Importe en soles (S/)</span>
-                </div>
-                <div class="bars mb-6">
-                    <div th:each="fila : ${reporte}"
-                        th:style="|height: ${total > 0 ? T(java.lang.Math).max(12, T(java.lang.Math).min(140, (fila.total() * 140 / total).intValue())) : 20}px;|"
-                        th:title="${#temporals.format(fila.fecha(), 'dd/MM') + ': S/ ' + #numbers.formatDecimal(fila.total(), 1, 'POINT', 2, 'POINT')}">
-                        <small th:text="${#temporals.format(fila.fecha(), 'dd/MM')}">01/01</small>
-                    </div>
-                </div>
-            </div>
+            <!-- Gráfico de ventas netas por día o aviso (Spec 021, Boceto 07) -->
+            <div th:replace="~{fragmentos/grafico-barras :: grafico(barras=${barras}, resumen=${resumenGrafico}, maximo=${maximoDia}, aviso=${avisoGrafico})}"></div>
 
             <!-- Tabla de datos -->
             <div class="sec">
