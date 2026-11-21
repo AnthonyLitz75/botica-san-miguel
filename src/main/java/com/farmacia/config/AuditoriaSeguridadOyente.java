@@ -2,7 +2,11 @@ package com.farmacia.config;
 
 import com.farmacia.service.AccionAuditoria;
 import com.farmacia.service.AuditoriaServicio;
+import com.farmacia.service.UsuarioServicio;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent;
@@ -17,13 +21,17 @@ import org.springframework.stereotype.Component;
  * Patrón Observer: escucha los eventos que publica Spring Security y los registra en la bitácora
  * (spec 014, US-2) sin acoplar la seguridad a la auditoría. Solo usa el nombre de usuario; nunca lee
  * las credenciales del evento.
+ * Actualiza también el último acceso del usuario de forma resiliente (spec 020, US-1 / RNF-02).
  */
 @Component
 public class AuditoriaSeguridadOyente {
-    private final AuditoriaServicio auditoria;
-    private final com.farmacia.service.UsuarioServicio usuarioServicio;
+    private static final Logger log = LoggerFactory.getLogger(AuditoriaSeguridadOyente.class);
 
-    public AuditoriaSeguridadOyente(AuditoriaServicio auditoria, com.farmacia.service.UsuarioServicio usuarioServicio) {
+    private final AuditoriaServicio auditoria;
+    private final UsuarioServicio usuarioServicio;
+
+    @Autowired
+    public AuditoriaSeguridadOyente(AuditoriaServicio auditoria, UsuarioServicio usuarioServicio) {
         this.auditoria = auditoria;
         this.usuarioServicio = usuarioServicio;
     }
@@ -38,10 +46,17 @@ public class AuditoriaSeguridadOyente {
      */
     @EventListener
     public void inicioDeSesion(InteractiveAuthenticationSuccessEvent evento) {
+        String nombreUsuario = evento.getAuthentication().getName();
         if (usuarioServicio != null) {
-            usuarioServicio.registrarAcceso(evento.getAuthentication().getName());
+            try {
+                usuarioServicio.registrarAcceso(nombreUsuario);
+            } catch (Exception excepcion) {
+                // RNF-02: una falla al actualizar el último acceso no interrumpe el login ni la auditoría
+                log.warn("No se pudo actualizar el último acceso para el usuario {}: {}",
+                        nombreUsuario, excepcion.getMessage());
+            }
         }
-        auditoria.registrarAcceso(evento.getAuthentication().getName(), AccionAuditoria.INICIO_SESION,
+        auditoria.registrarAcceso(nombreUsuario, AccionAuditoria.INICIO_SESION,
                 "EXITO", null, ip(evento.getAuthentication()));
     }
 
