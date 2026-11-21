@@ -424,6 +424,7 @@ test.describe('Spec 023: Fase 1 — Pruebas de estilos computados y tokens', () 
   });
 
   test('T2311: Capturas Modales 14 a 19 a 1600x900', async ({ page }) => {
+    test.setTimeout(60000);
     await page.setViewportSize({ width: 1600, height: 900 });
     await iniciarSesion(page, 'admin_demo', 'AdminDemo2026!');
 
@@ -432,6 +433,8 @@ test.describe('Spec 023: Fase 1 — Pruebas de estilos computados y tokens', () 
     await page.getByRole('link', { name: /Nuevo cliente/i }).click();
     const modalCliente = page.locator('#modal-nuevo-cliente');
     await expect(modalCliente).toHaveClass(/activo|on/);
+    await expect.poll(async () => await modalCliente.evaluate(el => window.getComputedStyle(el).opacity)).toBe('1');
+    await page.waitForTimeout(300);
     await page.screenshot({ path: 'e2e/evidencias/visual/14-modal-nuevo-cliente.png' });
 
     // 15-modal-nuevo-proveedor.png (con estado de error en RUC del boceto 15)
@@ -439,6 +442,7 @@ test.describe('Spec 023: Fase 1 — Pruebas de estilos computados y tokens', () 
     await page.getByRole('link', { name: /Nuevo proveedor/i }).click();
     const modalProv = page.locator('#modal-nuevo-proveedor');
     await expect(modalProv).toHaveClass(/activo|on/);
+    await expect.poll(async () => await modalProv.evaluate(el => window.getComputedStyle(el).opacity)).toBe('1');
     // Simular estado visual del boceto 15
     await page.evaluate(() => {
       const rucInput = document.querySelector('#modal-ruc');
@@ -455,6 +459,7 @@ test.describe('Spec 023: Fase 1 — Pruebas de estilos computados y tokens', () 
         help.textContent = 'El RUC debe tener 11 dígitos (ingresaste 10).';
       }
     });
+    await page.waitForTimeout(300);
     await page.screenshot({ path: 'e2e/evidencias/visual/15-modal-nuevo-proveedor.png' });
 
     // 16-modal-nueva-categoria.png
@@ -462,6 +467,8 @@ test.describe('Spec 023: Fase 1 — Pruebas de estilos computados y tokens', () 
     await page.getByRole('link', { name: /Nueva categoría/i }).click();
     const modalCat = page.locator('#modal-nueva-categoria');
     await expect(modalCat).toHaveClass(/activo|on/);
+    await expect.poll(async () => await modalCat.evaluate(el => window.getComputedStyle(el).opacity)).toBe('1');
+    await page.waitForTimeout(300);
     await page.screenshot({ path: 'e2e/evidencias/visual/16-modal-nueva-categoria.png' });
 
     // 17-modal-nuevo-usuario.png
@@ -469,6 +476,8 @@ test.describe('Spec 023: Fase 1 — Pruebas de estilos computados y tokens', () 
     await page.getByRole('link', { name: /Nuevo usuario/i }).click();
     const modalUser = page.locator('#modal-nuevo-usuario');
     await expect(modalUser).toHaveClass(/activo|on/);
+    await expect.poll(async () => await modalUser.evaluate(el => window.getComputedStyle(el).opacity)).toBe('1');
+    await page.waitForTimeout(300);
     await page.screenshot({ path: 'e2e/evidencias/visual/17-modal-nuevo-usuario.png' });
 
     // 18-modal-nuevo-medicamento.png
@@ -476,18 +485,17 @@ test.describe('Spec 023: Fase 1 — Pruebas de estilos computados y tokens', () 
     await page.getByRole('link', { name: /Nuevo medicamento/i }).click();
     const modalMed = page.locator('#modal-nuevo-medicamento');
     await expect(modalMed).toHaveClass(/activo|on/);
+    await expect.poll(async () => await modalMed.evaluate(el => window.getComputedStyle(el).opacity)).toBe('1');
+    await page.waitForTimeout(300);
     await page.screenshot({ path: 'e2e/evidencias/visual/18-modal-nuevo-medicamento.png' });
 
-    // 19-modal-registrar-salida.png
-    await page.goto('/medicamentos/1/lotes', { waitUntil: 'domcontentloaded' });
-    const btnSalida = page.locator('a[data-modal-open="modal-registrar-salida"]').first();
-    if (await btnSalida.isVisible()) {
-      await btnSalida.click();
-    } else {
-      await page.locator('#modal-registrar-salida').evaluate(el => el.classList.add('activo', 'on'));
-    }
+    // 19-modal-registrar-salida.png (abierto desde /movimientos)
+    await page.goto('/movimientos', { waitUntil: 'domcontentloaded' });
+    await page.locator('a[data-modal-open="modal-registrar-salida"]').first().click();
     const modalSalida = page.locator('#modal-registrar-salida');
     await expect(modalSalida).toHaveClass(/activo|on/);
+    await expect.poll(async () => await modalSalida.evaluate(el => window.getComputedStyle(el).opacity)).toBe('1');
+    await page.waitForTimeout(300);
     await page.screenshot({ path: 'e2e/evidencias/visual/19-modal-registrar-salida.png' });
   });
 
