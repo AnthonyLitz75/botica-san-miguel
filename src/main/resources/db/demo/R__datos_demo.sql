@@ -25,15 +25,15 @@ BEGIN
         RETURN;
     END IF;
 
-    INSERT INTO usuario (nombre, nombre_usuario, clave_hash, rol) VALUES
+    INSERT INTO usuario (nombre, nombre_usuario, clave_hash, rol, ultimo_acceso) VALUES
     ('Administrador de prueba', 'admin_demo',
-     '{bcrypt}' || crypt('AdminDemo2026!', gen_salt('bf', 10)), 'ADMINISTRADOR'),
+     '{bcrypt}' || crypt('AdminDemo2026!', gen_salt('bf', 10)), 'ADMINISTRADOR', CURRENT_TIMESTAMP - INTERVAL '2 hours'),
     ('Almacenero de prueba', 'almacen_demo',
-     '{bcrypt}' || crypt('FarmaciaDemo2026!', gen_salt('bf', 10)), 'ALMACENERO'),
+     '{bcrypt}' || crypt('FarmaciaDemo2026!', gen_salt('bf', 10)), 'ALMACENERO', CURRENT_TIMESTAMP - INTERVAL '1 day'),
     ('Compras de prueba', 'compras_demo',
-     '{bcrypt}' || crypt('ComprasDemo2026!', gen_salt('bf', 10)), 'COMPRAS'),
+     '{bcrypt}' || crypt('ComprasDemo2026!', gen_salt('bf', 10)), 'COMPRAS', TIMESTAMP '2026-11-12 10:00:00'),
     ('Vendedor de prueba', 'vendedor_demo',
-     '{bcrypt}' || crypt('VendedorDemo2026!', gen_salt('bf', 10)), 'VENDEDOR');
+     '{bcrypt}' || crypt('VendedorDemo2026!', gen_salt('bf', 10)), 'VENDEDOR', NULL);
 
     INSERT INTO categoria (nombre, id_padre) VALUES
     ('Analgésicos', NULL);
@@ -115,5 +115,14 @@ BEGIN
         SELECT id_medicamento, 'AMX-DEMO-016', CURRENT_DATE + INTERVAL '2 years', 500
         FROM medicamento WHERE codigo = 'MED-016';
     END IF;
+END;
+$$;
+
+-- Asegurar fechas de ultimo acceso de Spec 020 para repetibilidad E2E en bases ya inicializadas
+DO $$
+BEGIN
+    UPDATE usuario SET ultimo_acceso = CURRENT_TIMESTAMP - INTERVAL '2 hours' WHERE nombre_usuario = 'admin_demo' AND ultimo_acceso IS NULL;
+    UPDATE usuario SET ultimo_acceso = CURRENT_TIMESTAMP - INTERVAL '1 day' WHERE nombre_usuario = 'almacen_demo' AND ultimo_acceso IS NULL;
+    UPDATE usuario SET ultimo_acceso = TIMESTAMP '2026-11-12 10:00:00' WHERE nombre_usuario = 'compras_demo' AND ultimo_acceso IS NULL;
 END;
 $$;
