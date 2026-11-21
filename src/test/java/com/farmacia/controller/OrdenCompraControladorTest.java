@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -91,6 +92,26 @@ class OrdenCompraControladorTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("ordenes-compra/listado"))
                 .andExpect(model().attributeExists("conteosPorEstado"));
+
+        verify(servicio).listarVista(null);
+    }
+
+    @Test
+    @DisplayName("CA-3.1: listar con estado en blanco normaliza a null y consulta todas las ordenes")
+    void listarConEstadoEnBlancoNormalizaANull() throws Exception {
+        when(servicio.listarVista(null)).thenReturn(List.of());
+        when(servicio.contarPorEstado()).thenReturn(Map.of(
+                "TODAS", 0,
+                "PENDIENTE", 0,
+                "PARCIALMENTE_RECIBIDA", 0,
+                "RECIBIDA", 0,
+                "CANCELADA", 0));
+
+        mvc.perform(get("/ordenes-compra")
+                        .param("estado", "   ")
+                        .with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("ordenes-compra/listado"));
 
         verify(servicio).listarVista(null);
     }
