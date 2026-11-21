@@ -48,8 +48,11 @@ class CategoriaControladorTest {
     @MockitoBean
     private com.farmacia.service.AuditoriaServicio auditoriaServicio;
 
+    @MockitoBean
+    private com.farmacia.service.AlertaInventarioServicio alertaInventarioServicio;
+
     @Test
-    @DisplayName("GET /categorias muestra el árbol con atributos del modelo")
+    @DisplayName("GET /categorias muestra el árbol con atributos del modelo e información de usuario en navegación")
     void getCategoriasMuestraArbol() throws Exception {
         ArbolCategorias arbol = new ArbolCategorias();
         arbol.insertar(1, "Analgésicos", null);
@@ -59,7 +62,9 @@ class CategoriaControladorTest {
         mvc.perform(get("/categorias").with(user("admin").roles("ADMINISTRADOR")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("categorias/arbol"))
-                .andExpect(model().attributeExists("arbol", "categorias", "totalCategorias", "raices", "stockPorRama", "alertasPorRama"));
+                .andExpect(model().attributeExists("arbol", "categorias", "totalCategorias", "raices", "stockPorRama", "alertasPorRama"))
+                .andExpect(model().attribute("nombreUsuario", "admin"))
+                .andExpect(model().attribute("rolUsuario", "Administrador"));
     }
 
     @Test

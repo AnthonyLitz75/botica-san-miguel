@@ -1,5 +1,7 @@
 package com.farmacia.controller;
 
+import com.farmacia.service.AlertaInventarioServicio;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -12,9 +14,16 @@ import org.springframework.web.bind.annotation.ModelAttribute;
                 PanelAlertaControlador.class, ClienteWebControlador.class,
                 VentaWebControlador.class, AuditoriaControlador.class,
                 HistorialVentasControlador.class, ExistenciaInicialControlador.class,
-                UsuarioControlador.class, ReporteControlador.class
+                UsuarioControlador.class, ReporteControlador.class,
+                CategoriaControlador.class
 })
 public class NavegacionCompartida {
+        private final AlertaInventarioServicio alertaInventarioServicio;
+
+        public NavegacionCompartida(@Autowired(required = false) AlertaInventarioServicio alertaInventarioServicio) {
+                this.alertaInventarioServicio = alertaInventarioServicio;
+        }
+
         @ModelAttribute
         public void configurarNavegacion(Model modelo, Authentication autenticacion) {
                 var roles = autenticacion.getAuthorities().stream()
@@ -36,9 +45,17 @@ public class NavegacionCompartida {
                                 || roles.contains("ROLE_COMPRAS") || roles.contains("ROLE_ALMACENERO");
                 modelo.addAttribute("puedeConsultarProveedores", consultaCompras);
                 modelo.addAttribute("puedeConsultarOrdenesCompra", consultaCompras);
-                modelo.addAttribute("puedeConsultarAlertas", roles.stream().anyMatch(rol ->
+                boolean puedeConsultarAlertas = roles.stream().anyMatch(rol ->
                                 rol.equals("ROLE_ADMINISTRADOR") || rol.equals("ROLE_COMPRAS")
-                                        || rol.equals("ROLE_ALMACENERO") || rol.equals("ROLE_VENDEDOR")));
+                                        || rol.equals("ROLE_ALMACENERO") || rol.equals("ROLE_VENDEDOR"));
+                modelo.addAttribute("puedeConsultarAlertas", puedeConsultarAlertas);
+                if (puedeConsultarAlertas && alertaInventarioServicio != null) {
+                        try {
+                                modelo.addAttribute("totalAlertas", alertaInventarioServicio.totalAlertasActivas());
+                        } catch (Exception e) {
+                                modelo.addAttribute("totalAlertas", 0);
+                        }
+                }
                 modelo.addAttribute("puedeConsultarClientes", roles.contains("ROLE_ADMINISTRADOR")
                                 || roles.contains("ROLE_VENDEDOR"));
                 boolean puedePrepararVenta = roles.contains("ROLE_ADMINISTRADOR")

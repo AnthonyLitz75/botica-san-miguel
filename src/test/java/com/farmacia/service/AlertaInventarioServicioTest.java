@@ -398,5 +398,26 @@ class AlertaInventarioServicioTest {
             org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                     () -> new AlertaInventarioServicio(medicamentos, lotes, clock, 0));
         }
+
+        @Test
+        @DisplayName("totalAlertasActivas suma agotados, stock bajo, vencidos y por vencer")
+        void totalAlertasActivasSumaTodasLasCategorias() {
+            when(medicamentos.listarResumenStock(hoy)).thenReturn(List.of(
+                    resumen(1, 0, 10, 0),
+                    resumen(2, 5, 10, 0),
+                    resumen(3, 20, 10, 0)
+            ));
+            when(lotes.listarVencidos(hoy)).thenReturn(List.of(
+                    new AlertaVencimientoVista(1, 1, "MED-1", "Medicamento 1", "LOT-1", hoy.minusDays(1), 5, "UNIDAD", -1L, "VENCIDO")
+            ));
+            when(lotes.listarPorVencer(hoy, fechaHorizonte90Dias)).thenReturn(List.of(
+                    new AlertaVencimientoVista(2, 2, "MED-2", "Medicamento 2", "LOT-2", hoy.plusDays(10), 10, "UNIDAD", 10L, "POR_VENCER"),
+                    new AlertaVencimientoVista(3, 2, "MED-2", "Medicamento 2", "LOT-3", hoy.plusDays(20), 15, "UNIDAD", 20L, "POR_VENCER")
+            ));
+
+            int total = servicio.totalAlertasActivas();
+
+            assertEquals(5, total);
+        }
     }
 }

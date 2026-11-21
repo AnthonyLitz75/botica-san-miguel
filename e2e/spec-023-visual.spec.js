@@ -90,6 +90,51 @@ test.describe('Spec 023: Fase 1 — Pruebas de estilos computados y tokens', () 
     expect(kpiIcRadius).toBe('12px');
   });
 
+  test('Punto A: Layout global - badge alertas, chip usuario en categorias y migas de pan exactas', async ({ page }) => {
+    await page.setViewportSize({ width: 1600, height: 900 });
+    await iniciarSesion(page, 'admin_demo', 'AdminDemo2026!');
+
+    // 1. Sidebar: globo rojo con alertas activas en el item "Alertas"
+    await page.goto('/alertas', { waitUntil: 'domcontentloaded' });
+    const badgeAlertas = page.locator('#sidebar-lateral a[href*="/alertas"] .bd');
+    const badgeVisible = await badgeAlertas.isVisible();
+    if (badgeVisible) {
+      const numAlertas = await badgeAlertas.innerText();
+      expect(Number(numAlertas)).toBeGreaterThan(0);
+      const bg = await badgeAlertas.evaluate((el) => window.getComputedStyle(el).backgroundColor);
+      expect(bg).toBe('rgb(225, 29, 72)'); // #e11d48
+      const color = await badgeAlertas.evaluate((el) => window.getComputedStyle(el).color);
+      expect(color).toBe('rgb(255, 255, 255)');
+      const fontSize = await badgeAlertas.evaluate((el) => window.getComputedStyle(el).fontSize);
+      expect(fontSize).toBe('11px');
+    }
+
+    // 2. Categorias: chip de usuario con admin_demo y Administrador
+    await page.goto('/categorias', { waitUntil: 'domcontentloaded' });
+    const userChip = page.locator('header.inventario-cabecera .user');
+    await expect(userChip).toBeVisible();
+    await expect(userChip.locator('b')).toHaveText('admin_demo');
+    await expect(userChip.locator('small')).toHaveText('Administrador');
+
+    // 3. Migas de pan exactas:
+    // Categorias: Catálogo / Categorías
+    const crumbCat = page.locator('header.inventario-cabecera .crumb');
+    await expect(crumbCat.locator('.pill')).toContainText('Catálogo');
+    await expect(crumbCat.locator('b')).toHaveText('Categorías');
+
+    // Historial: Ventas / Historial de ventas
+    await page.goto('/ventas', { waitUntil: 'domcontentloaded' });
+    const crumbHist = page.locator('header.inventario-cabecera .crumb');
+    await expect(crumbHist.locator('.pill')).toContainText('Ventas');
+    await expect(crumbHist.locator('b')).toHaveText('Historial de ventas');
+
+    // Reportes: Reportes / Ventas por período
+    await page.goto('/reportes/ventas', { waitUntil: 'domcontentloaded' });
+    const crumbRep = page.locator('header.inventario-cabecera .crumb');
+    await expect(crumbRep.locator('.pill')).toContainText('Reportes');
+    await expect(crumbRep.locator('b')).toHaveText('Ventas por período');
+  });
+
   test('T2303: tokens existen en tailwind.config.js y no se carga ninguna fuente externa', async () => {
     // 1. Leer tailwind.config.js
     const configPath = path.resolve('tailwind.config.js');

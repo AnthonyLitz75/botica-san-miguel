@@ -39,6 +39,12 @@ public class AlertaInventarioServicio {
         return diasPorVencer;
     }
 
+    public int totalAlertasActivas() {
+        PanelAlertasVista panel = consultarAlertas();
+        return panel.agotados().size() + panel.stockBajo().size()
+                + panel.vencidos().size() + panel.porVencer().size();
+    }
+
     public PanelAlertasVista consultarAlertas() {
         List<AlertaStockVista> stock = alertasStock();
         LocalDate hoy = LocalDate.now(clock);
