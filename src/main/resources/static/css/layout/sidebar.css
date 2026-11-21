@@ -4,8 +4,8 @@
    ========================================================================== */
 
 .pagina-inventario {
-  background: #f3f6f5;
-  color: #1e2d27;
+  background: var(--bg, #f3f5f4);
+  color: var(--ink, #10201b);
   font-size: 14px;
   min-height: 100vh;
   overflow-x: hidden;
@@ -13,6 +13,7 @@
 }
 
 body.pagina-inventario {
+  background: var(--bg, #f3f5f4);
   overflow-x: hidden;
   max-width: 100vw;
 }
@@ -152,23 +153,29 @@ aside.inventario-lateral {
 
 .inventario-nav a[aria-current="page"],
 .it.on {
-  background: #ffffff;
-  color: #064e3b;
+  background: var(--pine-50, #e9f4f0);
+  color: var(--pine-800, #143a31);
   font-weight: 700;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
 }
 
 .inventario-nav a[aria-current="page"] .ico,
 .it.on .ico {
-  color: #064e3b;
-  stroke: #064e3b;
+  color: var(--pine-800, #143a31);
+  stroke: var(--pine-800, #143a31);
   opacity: 1;
 }
 
 .inventario-nav a[aria-current="page"]::before,
 .it.on::before {
-  display: none;
+  content: "";
+  position: absolute;
+  left: -14px;
+  top: 8px;
+  bottom: 8px;
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+  background: #34d399;
 }
 
 .it .ico {
