@@ -154,6 +154,36 @@ class MovimientoInventarioControladorTest {
         verify(servicio).listarDetalles(10);
     }
 
+    @Test
+    @DisplayName("Escenario 6c: Consulta de movimiento proveniente de venta por ADMINISTRADOR incluye enlace a comprobante")
+    void detalle_conMovimientoVentaYAdministrador_incluyeEnlaceComprobante() throws Exception {
+        var movimiento = new MovimientoInventario(20, 1, null, 105, null, "SALIDA", LocalDateTime.now(), "Venta B001-00000105", "Venta", "Admin", null);
+        when(servicio.buscarPorId(20)).thenReturn(Optional.of(movimiento));
+        when(servicio.listarDetalles(20)).thenReturn(List.of());
+        when(servicio.resolverEnlaceOrigen(eq(movimiento), any())).thenReturn("/ventas/105");
+
+        mvc.perform(get("/movimientos/20").with(user("admin1").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("movimientos/detalle"))
+                .andExpect(model().attribute("movimiento", movimiento))
+                .andExpect(model().attribute("enlaceOrigen", "/ventas/105"));
+    }
+
+    @Test
+    @DisplayName("Escenario 6d: Consulta de movimiento de venta por ALMACENERO no incluye enlace a comprobante (sin permiso)")
+    void detalle_conMovimientoVentaYAlmacenero_enlaceOrigenEsNulo() throws Exception {
+        var movimiento = new MovimientoInventario(20, 1, null, 105, null, "SALIDA", LocalDateTime.now(), "Venta B001-00000105", "Venta", "Admin", null);
+        when(servicio.buscarPorId(20)).thenReturn(Optional.of(movimiento));
+        when(servicio.listarDetalles(20)).thenReturn(List.of());
+        when(servicio.resolverEnlaceOrigen(eq(movimiento), any())).thenReturn(null);
+
+        mvc.perform(get("/movimientos/20").with(user("almacen1").roles("ALMACENERO")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("movimientos/detalle"))
+                .andExpect(model().attribute("movimiento", movimiento))
+                .andExpect(model().attributeDoesNotExist("enlaceOrigen"));
+    }
+
     // -------------------------------------------------------------------------
     // Escenario 6b: GET /movimientos/{id} con ALMACENERO cuando no existe retorna 404
     // -------------------------------------------------------------------------

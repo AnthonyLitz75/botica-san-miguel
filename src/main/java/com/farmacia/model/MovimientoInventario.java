@@ -43,4 +43,14 @@ public record MovimientoInventario(
         }
         return "Otra salida";
     }
+
+    public String responsableTexto() {
+        if (responsable != null && !responsable.isBlank()) {
+            return responsable;
+        }
+        if (idUsuario != null) {
+            return "Usuario #" + idUsuario;
+        }
+        return "—";
+    }
 }

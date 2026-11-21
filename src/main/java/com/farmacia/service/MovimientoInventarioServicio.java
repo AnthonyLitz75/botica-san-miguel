@@ -11,6 +11,7 @@ import com.farmacia.repository.MedicamentoRepositorio;
 import com.farmacia.repository.MovimientoInventarioRepositorio;
 import com.farmacia.repository.UsuarioRepositorio;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -93,6 +94,28 @@ public class MovimientoInventarioServicio {
 
         public Optional<MovimientoInventario> buscarPorId(Integer idMovimiento) {
                 return repositorio.buscarPorId(idMovimiento);
+        }
+
+        /**
+         * Resuelve el enlace de auditoría hacia la entidad de origen (venta u orden de compra)
+         * basándose en datos estructurados y validando los permisos del usuario autenticado (Ajuste 023).
+         */
+        public String resolverEnlaceOrigen(MovimientoInventario movimiento, Authentication authentication) {
+                if (movimiento == null || authentication == null) {
+                        return null;
+                }
+                boolean puedeVerVentas = authentication.getAuthorities().stream()
+                                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMINISTRADOR") || a.getAuthority().equals("ROLE_VENDEDOR"));
+                boolean puedeVerOrdenes = authentication.getAuthorities().stream()
+                                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMINISTRADOR") || a.getAuthority().equals("ROLE_COMPRAS") || a.getAuthority().equals("ROLE_ALMACENERO"));
+
+                if (movimiento.idVenta() != null && puedeVerVentas) {
+                        return "/ventas/" + movimiento.idVenta();
+                }
+                if (movimiento.idOrden() != null && puedeVerOrdenes) {
+                        return "/ordenes-compra/" + movimiento.idOrden();
+                }
+                return null;
         }
 
         @Transactional(rollbackFor = Exception.class)

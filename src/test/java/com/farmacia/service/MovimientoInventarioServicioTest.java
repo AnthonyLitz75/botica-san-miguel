@@ -18,10 +18,15 @@ import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -374,5 +379,66 @@ class MovimientoInventarioServicioTest {
         verify(loteRepositorio).descontarStock(idLote, cantidadSolicitada);
         verify(movimientoRepositorio, never()).registrarSalida(anyInt(), anyString());
         verify(movimientoRepositorio, never()).registrarDetalle(anyInt(), anyInt(), anyInt());
+    }
+
+    // -------------------------------------------------------------------------
+    // Pruebas TDD: Detalle de Movimiento (Ajuste 023)
+    // -------------------------------------------------------------------------
+
+    @Test
+    void responsableTexto_cuandoTieneNombre_retornaNombreCompleto() {
+        var mov = new MovimientoInventario(1, 2, null, null, null, "SALIDA", LocalDateTime.now(), "Motivo", "Origen", "Juan Pérez", null);
+        assertEquals("Juan Pérez", mov.responsableTexto());
+    }
+
+    @Test
+    void responsableTexto_cuandoNombreEsNuloOBlanco_retornaFallbackUsuarioId() {
+        var movConId = new MovimientoInventario(1, 4, null, null, null, "SALIDA", LocalDateTime.now(), "Motivo", "Origen", null, null);
+        assertEquals("Usuario #4", movConId.responsableTexto());
+
+        var movBlanco = new MovimientoInventario(1, 5, null, null, null, "SALIDA", LocalDateTime.now(), "Motivo", "Origen", "   ", null);
+        assertEquals("Usuario #5", movBlanco.responsableTexto());
+    }
+
+    @Test
+    void responsableTexto_cuandoNoTieneNombreNiIdUsuario_retornaGuion() {
+        var mov = new MovimientoInventario(1, null, null, null, null, "SALIDA", LocalDateTime.now(), "Motivo", "Origen", null, null);
+        assertEquals("—", mov.responsableTexto());
+    }
+
+    @Test
+    void resolverEnlaceOrigen_conVentaYRolAdmin_retornaEnlaceComprobante() {
+        var mov = new MovimientoInventario(10, 1, null, 42, null, "SALIDA", LocalDateTime.now(), "Venta B001-00000042", "Venta", "Admin", null);
+        Authentication auth = mock(Authentication.class);
+        when(auth.getAuthorities()).thenReturn((Collection) List.of(new SimpleGrantedAuthority("ROLE_ADMINISTRADOR")));
+
+        assertEquals("/ventas/42", servicio.resolverEnlaceOrigen(mov, auth));
+    }
+
+    @Test
+    void resolverEnlaceOrigen_conVentaYRolAlmacenero_retornaNullPorPermisos() {
+        var mov = new MovimientoInventario(10, 1, null, 42, null, "SALIDA", LocalDateTime.now(), "Venta B001-00000042", "Venta", "Admin", null);
+        Authentication auth = mock(Authentication.class);
+        when(auth.getAuthorities()).thenReturn((Collection) List.of(new SimpleGrantedAuthority("ROLE_ALMACENERO")));
+
+        assertNull(servicio.resolverEnlaceOrigen(mov, auth));
+    }
+
+    @Test
+    void resolverEnlaceOrigen_conOrdenYRolAlmacenero_retornaEnlaceOrden() {
+        var mov = new MovimientoInventario(11, 2, 1, null, 15, "ENTRADA", LocalDateTime.now(), "OC-0015", "Recepción de compra", "Almacén", null);
+        Authentication auth = mock(Authentication.class);
+        when(auth.getAuthorities()).thenReturn((Collection) List.of(new SimpleGrantedAuthority("ROLE_ALMACENERO")));
+
+        assertEquals("/ordenes-compra/15", servicio.resolverEnlaceOrigen(mov, auth));
+    }
+
+    @Test
+    void resolverEnlaceOrigen_sinVentaNiOrden_retornaNull() {
+        var mov = new MovimientoInventario(12, 1, null, null, null, "ENTRADA", LocalDateTime.now(), "Existencia inicial", "Existencia inicial", "Admin", null);
+        Authentication auth = mock(Authentication.class);
+        when(auth.getAuthorities()).thenReturn((Collection) List.of(new SimpleGrantedAuthority("ROLE_ADMINISTRADOR")));
+
+        assertNull(servicio.resolverEnlaceOrigen(mov, auth));
     }
 }

@@ -6,6 +6,7 @@ import com.farmacia.model.MovimientoInventario;
 import com.farmacia.service.MedicamentoServicio;
 import com.farmacia.service.MovimientoInventarioServicio;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -85,7 +86,7 @@ public class MovimientoInventarioControlador {
     }
 
     @GetMapping("/{id}")
-    public String detalle(@PathVariable("id") Integer id, Model model) {
+    public String detalle(@PathVariable("id") Integer id, Authentication authentication, Model model) {
         MovimientoInventario movimiento = servicio.buscarPorId(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
@@ -93,6 +94,11 @@ public class MovimientoInventarioControlador {
 
         model.addAttribute("movimiento", movimiento);
         model.addAttribute("detalles", servicio.listarDetalles(id));
+
+        String enlaceOrigen = servicio.resolverEnlaceOrigen(movimiento, authentication);
+        if (enlaceOrigen != null) {
+            model.addAttribute("enlaceOrigen", enlaceOrigen);
+        }
 
         return "movimientos/detalle";
     }
