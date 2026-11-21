@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import fs from 'node:fs';
+import path from 'node:path';
 
 /**
  * e2e/spec-023-visual.spec.js
@@ -88,6 +90,62 @@ test.describe('Spec 023: Fase 1 — Pruebas de estilos computados y tokens', () 
     expect(kpiIcHeight).toBe('44px');
     const kpiIcRadius = await kpiIc.evaluate((el) => window.getComputedStyle(el).borderRadius);
     expect(kpiIcRadius).toBe('12px');
+  });
+
+  test('T2303: tokens existen en tailwind.config.js y no se carga ninguna fuente externa', async () => {
+    // 1. Leer tailwind.config.js
+    const configPath = path.resolve('tailwind.config.js');
+    expect(fs.existsSync(configPath)).toBeTruthy();
+    const configContenido = fs.readFileSync(configPath, 'utf-8');
+
+    // Tokens de color requeridos por spec (CA-1.1)
+    expect(configContenido).toContain("50: '#e9f4f0'");
+    expect(configContenido).toContain("100: '#d3ebe3'");
+    expect(configContenido).toContain("600: '#1b7f66'");
+    expect(configContenido).toContain("700: '#166a55'");
+    expect(configContenido).toContain("800: '#143a31'");
+    expect(configContenido).toContain("900: '#0f2a24'");
+
+    expect(configContenido).toContain("DEFAULT: '#10201b'");
+    expect(configContenido).toContain("2: '#33463f'");
+    expect(configContenido).toContain("3: '#5b6d66'");
+
+    expect(configContenido).toContain("line: '#dfe6e3'");
+    expect(configContenido).toContain("bg: '#f3f5f4'");
+    expect(configContenido).toContain("card: '#ffffff'");
+
+    expect(configContenido).toContain("amber:");
+    expect(configContenido).toContain("rose:");
+    expect(configContenido).toContain("blue:");
+    expect(configContenido).toContain("ok:");
+
+    // 2. Verificar que no se carguen fuentes externas (CA-1.2) en las plantillas HTML
+    const templatesDir = path.resolve('src/main/resources/templates');
+    const listarHtmls = (dir) => {
+      let resultados = [];
+      const lista = fs.readdirSync(dir);
+      for (const item of lista) {
+        const itemPath = path.join(dir, item);
+        const stat = fs.statSync(itemPath);
+        if (stat.isDirectory()) {
+          resultados = resultados.concat(listarHtmls(itemPath));
+        } else if (item.endsWith('.html')) {
+          resultados.push(itemPath);
+        }
+      }
+      return resultados;
+    };
+
+    const htmlFiles = listarHtmls(templatesDir);
+    expect(htmlFiles.length).toBeGreaterThan(0);
+
+    for (const file of htmlFiles) {
+      const contenido = fs.readFileSync(file, 'utf-8');
+      expect(contenido).not.toContain('fonts.googleapis.com');
+      expect(contenido).not.toContain('fonts.gstatic.com');
+      expect(contenido).not.toContain('use.typekit.net');
+      expect(contenido).not.toContain('font-awesome');
+    }
   });
 
 });
