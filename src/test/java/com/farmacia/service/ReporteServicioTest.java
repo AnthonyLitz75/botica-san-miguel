@@ -324,4 +324,124 @@ class ReporteServicioTest {
         org.junit.jupiter.api.Assertions.assertTrue(csv.contains("OC-001,2026-11-13,Droguería Alfa,PENDIENTE,350.00,100,0,100\r\n"));
         verify(auditoriaServicio).registrarCambio(eq(AccionAuditoria.EXPORTAR), eq("REPORTE_COMPRAS"), any(), any());
     }
+
+    @Test
+    @DisplayName("T2101: calcularBarrasGrafico rellena días sin ventas con altura 0 y calcula alturas proporcionales")
+    void calcularBarrasGrafico_rellenaDiasFaltantesYCalculaAlturas() {
+        LocalDate desde = LocalDate.of(2026, 11, 8);
+        LocalDate hasta = LocalDate.of(2026, 11, 14); // 7 días exactos
+
+        var ventas = List.of(
+                new VentasDiaVista(LocalDate.of(2026, 11, 8), 2, new BigDecimal("100.00"), BigDecimal.ZERO, new BigDecimal("100.00")),
+                new VentasDiaVista(LocalDate.of(2026, 11, 10), 4, new BigDecimal("200.00"), BigDecimal.ZERO, new BigDecimal("200.00")),
+                new VentasDiaVista(LocalDate.of(2026, 11, 14), 1, new BigDecimal("50.00"), BigDecimal.ZERO, new BigDecimal("50.00"))
+        );
+
+        var barras = reporteServicio.calcularBarrasGrafico(ventas, desde, hasta);
+
+        assertEquals(7, barras.size());
+        // Día 08/11: total 100, altura 50%
+        assertEquals(LocalDate.of(2026, 11, 8), barras.get(0).fecha());
+        assertEquals(new BigDecimal("100.00"), barras.get(0).total());
+        assertEquals(50, barras.get(0).porcentajeAltura());
+
+        // Día 09/11: faltante -> total 0, altura 0%
+        assertEquals(LocalDate.of(2026, 11, 9), barras.get(1).fecha());
+        assertEquals(BigDecimal.ZERO, barras.get(1).total());
+        assertEquals(0, barras.get(1).porcentajeAltura());
+
+        // Día 10/11: tope máximo 200 -> altura 100%
+        assertEquals(LocalDate.of(2026, 11, 10), barras.get(2).fecha());
+        assertEquals(new BigDecimal("200.00"), barras.get(2).total());
+        assertEquals(100, barras.get(2).porcentajeAltura());
+
+        // Días 11, 12, 13: faltantes -> total 0, altura 0%
+        for (int i = 3; i <= 5; i++) {
+            assertEquals(BigDecimal.ZERO, barras.get(i).total());
+            assertEquals(0, barras.get(i).porcentajeAltura());
+        }
+
+        // Día 14/11: total 50 -> altura 25%
+        assertEquals(LocalDate.of(2026, 11, 14), barras.get(6).fecha());
+        assertEquals(new BigDecimal("50.00"), barras.get(6).total());
+        assertEquals(25, barras.get(6).porcentajeAltura());
+    }
+
+    @Test
+    @DisplayName("T2101: calcularBarrasGrafico con ventas vacías o máximo cero retorna barras con altura 0")
+    void calcularBarrasGrafico_maximoCero_retornaBarrasConAlturaCero() {
+        LocalDate desde = LocalDate.of(2026, 11, 10);
+        LocalDate hasta = LocalDate.of(2026, 11, 12); // 3 días
+
+        var barras = reporteServicio.calcularBarrasGrafico(List.of(), desde, hasta);
+
+        assertEquals(3, barras.size());
+        for (var b : barras) {
+            assertEquals(BigDecimal.ZERO, b.total());
+            assertEquals(0, b.porcentajeAltura());
+        }
+    }
+
+    @Test
+    @DisplayName("T2101: calcularBarrasGrafico con un solo día asigna 100% si hay venta y 0% si no hay")
+    void calcularBarrasGrafico_unSoloDia() {
+        LocalDate unico = LocalDate.of(2026, 11, 10);
+
+        var ventasCon = List.of(new VentasDiaVista(unico, 1, new BigDecimal("80.00"), BigDecimal.ZERO, new BigDecimal("80.00")));
+        var barrasCon = reporteServicio.calcularBarrasGrafico(ventasCon, unico, unico);
+        assertEquals(1, barrasCon.size());
+        assertEquals(new BigDecimal("80.00"), barrasCon.get(0).total());
+        assertEquals(100, barrasCon.get(0).porcentajeAltura());
+
+        var barrasSin = reporteServicio.calcularBarrasGrafico(List.of(), unico, unico);
+        assertEquals(1, barrasSin.size());
+        assertEquals(BigDecimal.ZERO, barrasSin.get(0).total());
+        assertEquals(0, barrasSin.get(0).porcentajeAltura());
+    }
+
+    @Test
+    @DisplayName("T2101: calcularBarrasGrafico con empates de máximos asigna 100% a todos los días con tope")
+    void calcularBarrasGrafico_empatesDeMaximos() {
+        LocalDate d1 = LocalDate.of(2026, 11, 10);
+        LocalDate d2 = LocalDate.of(2026, 11, 11);
+
+        var ventas = List.of(
+                new VentasDiaVista(d1, 3, new BigDecimal("300.00"), BigDecimal.ZERO, new BigDecimal("300.00")),
+                new VentasDiaVista(d2, 2, new BigDecimal("300.00"), BigDecimal.ZERO, new BigDecimal("300.00"))
+        );
+
+        var barras = reporteServicio.calcularBarrasGrafico(ventas, d1, d2);
+        assertEquals(2, barras.size());
+        assertEquals(100, barras.get(0).porcentajeAltura());
+        assertEquals(100, barras.get(1).porcentajeAltura());
+    }
+
+    @Test
+    @DisplayName("T2101: calcularBarrasGrafico aplica mínimo visual de 2% para ventas positivas muy pequeñas")
+    void calcularBarrasGrafico_minimoVisualDosPorCiento() {
+        LocalDate d1 = LocalDate.of(2026, 11, 10);
+        LocalDate d2 = LocalDate.of(2026, 11, 11);
+
+        // Máximo 10,000 y venta de 1 -> (1 / 10000) * 100 = 0.01% -> mínimo 2%
+        var ventas = List.of(
+                new VentasDiaVista(d1, 5, new BigDecimal("10000.00"), BigDecimal.ZERO, new BigDecimal("10000.00")),
+                new VentasDiaVista(d2, 1, new BigDecimal("1.00"), BigDecimal.ZERO, new BigDecimal("1.00"))
+        );
+
+        var barras = reporteServicio.calcularBarrasGrafico(ventas, d1, d2);
+        assertEquals(2, barras.size());
+        assertEquals(100, barras.get(0).porcentajeAltura());
+        assertEquals(2, barras.get(1).porcentajeAltura());
+    }
+
+    @Test
+    @DisplayName("T2101: calcularBarrasGrafico lanza IllegalArgumentException si desde es posterior a hasta o fechas nulas")
+    void calcularBarrasGrafico_fechasInvalidas_lanzaExcepcion() {
+        LocalDate d1 = LocalDate.of(2026, 11, 12);
+        LocalDate d2 = LocalDate.of(2026, 11, 10);
+
+        assertThrows(IllegalArgumentException.class, () -> reporteServicio.calcularBarrasGrafico(List.of(), d1, d2));
+        assertThrows(IllegalArgumentException.class, () -> reporteServicio.calcularBarrasGrafico(List.of(), null, d2));
+        assertThrows(IllegalArgumentException.class, () -> reporteServicio.calcularBarrasGrafico(List.of(), d1, null));
+    }
 }

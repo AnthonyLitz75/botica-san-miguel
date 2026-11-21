@@ -1,6 +1,7 @@
 package com.farmacia.service;
 
 import com.farmacia.dto.FiltroReporteFormulario;
+import com.farmacia.model.BarraGraficoVista;
 import com.farmacia.model.CompraReporteVista;
 import com.farmacia.model.EstadoComprasResumenVista;
 import com.farmacia.model.InventarioReporteVista;
@@ -198,6 +199,10 @@ public class ReporteServicio {
 
     public Clock clock() {
         return clock;
+    }
+
+    public List<BarraGraficoVista> calcularBarrasGrafico(List<VentasDiaVista> ventas, LocalDate desde, LocalDate hasta) {
+        return List.of();
     }
 
     private void validarAdministrador(String usuarioAutenticado) {
