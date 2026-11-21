@@ -148,4 +148,23 @@ test.describe('Spec 023: Fase 1 — Pruebas de estilos computados y tokens', () 
     }
   });
 
+  test('T2316: asociacion de labels en preparacion.html y lotes/listado.html, y <title> en error.html', async () => {
+    // 1. Verificar error.html
+    const errorHtmlPath = path.resolve('src/main/resources/templates/fragmentos/error.html');
+    const errorHtml = fs.readFileSync(errorHtmlPath, 'utf-8');
+    expect(errorHtml).toContain('<title>');
+
+    // 2. Verificar preparacion.html: todos los <label> deben tener atributo for
+    const preparacionHtmlPath = path.resolve('src/main/resources/templates/ventas/preparacion.html');
+    const preparacionHtml = fs.readFileSync(preparacionHtmlPath, 'utf-8');
+    const labelsPrepSinFor = [...preparacionHtml.matchAll(/<label\b(?![^>]*\bfor=)[^>]*>/gi)];
+    expect(labelsPrepSinFor.length).toBe(0);
+
+    // 3. Verificar lotes/listado.html: todos los <label> deben tener atributo for
+    const lotesHtmlPath = path.resolve('src/main/resources/templates/lotes/listado.html');
+    const lotesHtml = fs.readFileSync(lotesHtmlPath, 'utf-8');
+    const labelsLotesSinFor = [...lotesHtml.matchAll(/<label\b(?![^>]*\bfor=)[^>]*>/gi)];
+    expect(labelsLotesSinFor.length).toBe(0);
+  });
+
 });
