@@ -43,44 +43,34 @@
             </div>
 
             <div class="card pad mb-5">
-                <form class="inventario-filtros" th:action="@{/movimientos}" method="get" role="search" aria-label="Filtros del kardex de inventario">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 w-full">
-                        <div>
+                <form th:action="@{/movimientos}" method="get" role="search" aria-label="Filtros del kardex de inventario">
+                    <div class="row items-end flex-wrap gap-3" style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap">
+                        <div style="width:160px">
                             <label for="tipo">Tipo</label>
                             <div class="inp">
-                                <select id="tipo" name="tipo" class="w-full bg-transparent border-0 outline-none text-sm text-ink font-semibold cursor-pointer">
+                                <select id="tipo" name="tipo">
                                     <option value="">Todos los tipos</option>
                                     <option value="ENTRADA" th:selected="${filtro != null and filtro.tipo() == 'ENTRADA'}">ENTRADA</option>
                                     <option value="SALIDA" th:selected="${filtro != null and filtro.tipo() == 'SALIDA'}">SALIDA</option>
                                 </select>
                             </div>
                         </div>
-                        <div>
+                        <div style="width:150px">
                             <label for="desde">Desde</label>
                             <div class="inp">
-                                <input type="date" id="desde" name="desde" th:value="${filtro != null ? filtro.desde() : null}"
-                                    class="w-full bg-transparent border-0 outline-none text-sm text-ink font-medium">
+                                <input type="date" id="desde" name="desde" th:value="${filtro != null ? filtro.desde() : null}">
                             </div>
                         </div>
-                        <div>
+                        <div style="width:150px">
                             <label for="hasta">Hasta</label>
                             <div class="inp">
-                                <input type="date" id="hasta" name="hasta" th:value="${filtro != null ? filtro.hasta() : null}"
-                                    class="w-full bg-transparent border-0 outline-none text-sm text-ink font-medium">
+                                <input type="date" id="hasta" name="hasta" th:value="${filtro != null ? filtro.hasta() : null}">
                             </div>
                         </div>
-                        <div>
-                            <label for="motivo">Motivo</label>
-                            <div class="inp">
-                                <input type="search" id="motivo" name="motivo" th:value="${filtro != null ? filtro.motivo() : null}"
-                                    placeholder="Buscar en motivo..."
-                                    class="w-full bg-transparent border-0 outline-none text-sm text-ink font-medium">
-                            </div>
-                        </div>
-                        <div>
+                        <div style="width:200px">
                             <label for="idMedicamento">Medicamento</label>
                             <div class="inp">
-                                <select id="idMedicamento" name="idMedicamento" class="w-full bg-transparent border-0 outline-none text-sm text-ink font-semibold cursor-pointer">
+                                <select id="idMedicamento" name="idMedicamento">
                                     <option value="">Todos los medicamentos</option>
                                     <option th:each="m : ${medicamentos}" th:value="${m.idMedicamento()}"
                                         th:text="${m.codigo() + ' - ' + m.nombre()}"
@@ -88,32 +78,29 @@
                                 </select>
                             </div>
                         </div>
-                        <div>
+                        <div style="width:150px">
                             <label for="numeroLote">N° Lote</label>
                             <div class="inp">
                                 <input type="search" id="numeroLote" name="numeroLote" th:value="${filtro != null ? filtro.numeroLote() : null}"
-                                    placeholder="Buscar lote..."
-                                    class="w-full bg-transparent border-0 outline-none text-sm text-ink font-medium font-mono">
+                                    placeholder="Buscar lote...">
                             </div>
                         </div>
-                        <div class="sm:col-span-2">
+                        <div style="width:180px">
                             <label for="idUsuario">Responsable</label>
                             <div class="inp">
-                                <select id="idUsuario" name="idUsuario" class="w-full bg-transparent border-0 outline-none text-sm text-ink font-semibold cursor-pointer">
+                                <select id="idUsuario" name="idUsuario">
                                     <option value="">Todos los responsables</option>
                                     <option th:each="u : ${usuarios}" th:value="${u.idUsuario()}"
-                                        th:text="${u.nombre() + ' (' + u.rol() + ')'}"
+                                        th:text="${u.nombre()}"
                                         th:selected="${filtro != null and filtro.idUsuario() == u.idUsuario()}"></option>
                                 </select>
                             </div>
                         </div>
-                    </div>
-                    <div class="filtro-acciones flex gap-2 justify-end mt-4 pt-3 border-t border-line">
-                        <button class="btn p inventario-boton boton-principal transition-all duration-150 active:scale-95" type="submit">
+                        <button class="btn p" type="submit">
                             <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 3H2l8 9.46V19l4 2v-8.54z"/></svg>
                             <span>Filtrar</span>
                         </button>
-                        <a class="btn s inventario-boton boton-secundario transition-all duration-150 active:scale-95" th:href="@{/movimientos}">
+                        <a class="btn s" th:href="@{/movimientos}">
                             <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
                             <span>Limpiar</span>
                         </a>

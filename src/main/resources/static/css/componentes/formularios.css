@@ -33,11 +33,22 @@
 .inp input,
 .inp select {
   width: 100%;
-  border: none;
-  background: transparent;
-  outline: none;
+  border: none !important;
+  background: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  min-height: auto !important;
   font: inherit;
   color: #10201b;
+}
+
+.inp input:focus,
+.inp select:focus {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
 }
 
 .inp:focus-within {
@@ -119,8 +130,8 @@
   pointer-events: none;
 }
 
-.inventario-filtros input,
-.inventario-filtros select {
+.inventario-filtros input:not(.inp input),
+.inventario-filtros select:not(.inp select) {
   min-height: 44px;
   width: 100%;
   min-width: 0;
@@ -136,12 +147,12 @@
     background-color 0.18s ease;
 }
 
-.inventario-filtros input {
+.inventario-filtros input:not(.inp input) {
   padding-left: 42px;
 }
 
-.inventario-filtros input:focus,
-.inventario-filtros select:focus {
+.inventario-filtros input:not(.inp input):focus,
+.inventario-filtros select:not(.inp select):focus {
   background: #ffffff;
   border-color: #156552;
   box-shadow: 0 0 0 3px rgba(21, 101, 82, 0.14);
@@ -151,6 +162,33 @@
 .filtro-acciones {
   display: flex;
   gap: 10px;
+}
+
+/* Títulos con contador inline estilo píldora (.sec y .cnt) */
+.sec {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 26px 0 12px;
+}
+
+.sec h2 {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--ink, #10201b);
+}
+
+.sec .cnt,
+.contador-pill {
+  background: var(--pine-50, #e9f4f0);
+  color: var(--pine-700, #166a55);
+  font-weight: 800;
+  font-size: 12px;
+  border-radius: 999px;
+  padding: 2px 9px;
+  display: inline-flex;
+  align-items: center;
 }
 
 /* Formularios Tradicionales de Edición */

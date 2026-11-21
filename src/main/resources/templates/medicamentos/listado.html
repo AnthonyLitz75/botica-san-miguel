@@ -26,29 +26,29 @@
             </div>
 
             <!-- Filtros de búsqueda -->
-            <form class="card pad mb-6 inventario-filtros" th:action="@{/medicamentos}" method="get" role="search">
-                <div class="row">
-                    <div class="filtro-busqueda" style="flex:1">
+            <form class="card pad mb-6" th:action="@{/medicamentos}" method="get" role="search">
+                <div class="row items-end gap-4" style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap">
+                    <div style="flex:1;min-width:240px">
                         <label for="buscar">Nombre o código</label>
                         <div class="inp">
                             <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                            <input type="search" id="buscar" name="buscar" th:value="${buscar}" class="w-full bg-transparent border-0 outline-none text-ink text-sm"
+                            <input type="search" id="buscar" name="buscar" th:value="${buscar}"
                                 placeholder="Buscar por nombre o código (ej. MED-001)">
                         </div>
                     </div>
-                    <div class="filtro-estado" style="width:180px">
+                    <div style="width:180px">
                         <label for="activo">Estado</label>
                         <div class="inp">
-                            <select id="activo" name="activo" class="w-full bg-transparent border-0 outline-none text-ink font-semibold text-sm cursor-pointer">
+                            <select id="activo" name="activo">
                                 <option value="true" th:selected="${activo}">Activos</option>
                                 <option value="false" th:selected="${!activo}">Inactivos</option>
                             </select>
                         </div>
                     </div>
-                    <div class="filtro-categoria" style="width:240px">
+                    <div style="width:240px">
                         <label for="categoria">Categoría</label>
                         <div class="inp">
-                            <select id="categoria" name="categoria" class="w-full bg-transparent border-0 outline-none text-ink font-semibold text-sm cursor-pointer">
+                            <select id="categoria" name="categoria">
                                 <option value="">Todas las categorías</option>
                                 <option th:each="cat : ${categorias}"
                                     th:value="${cat.idCategoria()}"
@@ -57,16 +57,14 @@
                             </select>
                         </div>
                     </div>
-                    <div class="filtro-acciones flex gap-2">
-                        <button class="btn p inventario-boton boton-principal" type="submit">
-                            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                            Buscar
-                        </button>
-                        <a class="btn s inventario-boton boton-secundario" th:href="@{/medicamentos(activo=${activo})}">
-                            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
-                            Limpiar
-                        </a>
-                    </div>
+                    <button class="btn p" type="submit">
+                        <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        Buscar
+                    </button>
+                    <a class="btn s" th:href="@{/medicamentos(activo=${activo})}">
+                        <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                        Limpiar
+                    </a>
                 </div>
             </form>
 

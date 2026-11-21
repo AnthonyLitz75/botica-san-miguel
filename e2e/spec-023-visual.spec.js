@@ -135,6 +135,48 @@ test.describe('Spec 023: Fase 1 — Pruebas de estilos computados y tokens', () 
     await expect(crumbRep.locator('b')).toHaveText('Ventas por período');
   });
 
+  test('Punto B: Patrones repetidos - filtros en una fila, sin doble borde en buscadores y contador en pildora inline', async ({ page }) => {
+    await page.setViewportSize({ width: 1600, height: 900 });
+    await iniciarSesion(page, 'admin_demo', 'AdminDemo2026!');
+
+    // 1. Buscador con lupa sin doble borde en /medicamentos
+    await page.goto('/medicamentos', { waitUntil: 'domcontentloaded' });
+    const inputBuscar = page.locator('#buscar');
+    await expect(inputBuscar).toBeVisible();
+    const inputBorderStyle = await inputBuscar.evaluate((el) => window.getComputedStyle(el).borderStyle);
+    expect(inputBorderStyle).toBe('none');
+
+    // 2. Filtros de medicamentos en una sola fila a 1600px
+    const btnBuscarMed = page.locator('button:has-text("Buscar")').first();
+    const btnLimpiarMed = page.locator('a:has-text("Limpiar")').first();
+    const topBuscar = await btnBuscarMed.evaluate((el) => el.getBoundingClientRect().top);
+    const topLimpiar = await btnLimpiarMed.evaluate((el) => el.getBoundingClientRect().top);
+    expect(Math.abs(topBuscar - topLimpiar)).toBeLessThan(5);
+
+    // 3. Proveedores: Limpiar en la misma fila que Buscar
+    await page.goto('/proveedores', { waitUntil: 'domcontentloaded' });
+    const btnBuscarProv = page.locator('button:has-text("Buscar")').first();
+    const btnLimpiarProv = page.locator('a:has-text("Limpiar")').first();
+    const topBuscarProv = await btnBuscarProv.evaluate((el) => el.getBoundingClientRect().top);
+    const topLimpiarProv = await btnLimpiarProv.evaluate((el) => el.getBoundingClientRect().top);
+    expect(Math.abs(topBuscarProv - topLimpiarProv)).toBeLessThan(5);
+
+    // 4. Contadores de listado en pildora inline al lado del h2
+    for (const ruta of ['/medicamentos', '/proveedores', '/movimientos', '/ventas', '/auditoria', '/usuarios']) {
+      await page.goto(ruta, { waitUntil: 'domcontentloaded' });
+      const secH2 = page.locator('.sec h2').first();
+      await expect(secH2).toBeVisible();
+      const secCnt = page.locator('.sec .cnt').first();
+      await expect(secCnt).toBeVisible();
+      const h2Top = await secH2.evaluate((el) => el.getBoundingClientRect().top);
+      const cntTop = await secCnt.evaluate((el) => el.getBoundingClientRect().top);
+      // Deben estar inline (diferencia de alineación vertical menor a 15px)
+      expect(Math.abs(h2Top - cntTop)).toBeLessThan(15);
+      const cntRadius = await secCnt.evaluate((el) => window.getComputedStyle(el).borderRadius);
+      expect(cntRadius).toBe('999px');
+    }
+  });
+
   test('T2303: tokens existen en tailwind.config.js y no se carga ninguna fuente externa', async () => {
     // 1. Leer tailwind.config.js
     const configPath = path.resolve('tailwind.config.js');

@@ -27,30 +27,29 @@
             </div>
 
             <div class="card pad mb-5">
-                <form class="row inventario-filtros" th:action="@{/proveedores}" method="get" role="search" style="margin:0">
-                    <div style="flex:1">
+                <form class="row items-end flex-wrap gap-4" th:action="@{/proveedores}" method="get" role="search" style="display:flex;align-items:flex-end;gap:16px;margin:0;flex-wrap:wrap">
+                    <div style="flex:1;min-width:260px">
                         <label for="buscar">RUC o razón social</label>
-                        <div class="inp grow entrada-busqueda">
+                        <div class="inp">
                             <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                             <input type="search" id="buscar" name="buscar" th:value="${buscar}"
-                                placeholder="Buscar por RUC (11 dígitos) o razón social"
-                                class="w-full bg-transparent border-0 outline-none text-sm text-ink font-medium">
+                                placeholder="Buscar por RUC (11 dígitos) o razón social">
                         </div>
                     </div>
                     <div style="width:200px" class="filtro-estado">
                         <label for="activo">Estado</label>
                         <div class="inp">
-                            <select id="activo" name="activo" class="w-full bg-transparent border-0 outline-none text-sm text-ink font-semibold cursor-pointer">
+                            <select id="activo" name="activo">
                                 <option value="true" th:selected="${activo}">Activos</option>
                                 <option value="false" th:selected="${!activo}">Inactivos</option>
                             </select>
                         </div>
                     </div>
-                    <button class="btn p inventario-boton boton-principal" type="submit">
+                    <button class="btn p" type="submit">
                         <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                         <span>Buscar</span>
                     </button>
-                    <a class="btn s inventario-boton boton-secundario" th:href="@{/proveedores(activo=${activo})}">
+                    <a class="btn s" th:href="@{/proveedores(activo=${activo})}">
                         <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
                         <span>Limpiar</span>
                     </a>
