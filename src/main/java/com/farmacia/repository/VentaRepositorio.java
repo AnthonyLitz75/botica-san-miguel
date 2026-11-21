@@ -6,6 +6,7 @@ import com.farmacia.model.DetalleVenta;
 import com.farmacia.model.MetodoPago;
 import com.farmacia.model.VentaResumenVista;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +61,7 @@ public class VentaRepositorio {
 
     public Optional<ComprobanteVista> buscarComprobante(Integer idVenta) {
         String sqlLineas = """
-                SELECT m.codigo, m.nombre, l.numero_lote, d.cantidad,
+                SELECT m.codigo, m.nombre, l.numero_lote, l.fecha_vencimiento, d.cantidad,
                        d.precio_unitario, d.descuento_importe, d.importe
                 FROM detalle_venta d
                 JOIN lote l ON l.id_lote = d.id_lote
@@ -73,6 +74,7 @@ public class VentaRepositorio {
                         fila.getString("codigo"),
                         fila.getString("nombre"),
                         fila.getString("numero_lote"),
+                        fila.getObject("fecha_vencimiento", LocalDate.class),
                         fila.getInt("cantidad"),
                         fila.getBigDecimal("precio_unitario"),
                         fila.getBigDecimal("descuento_importe"),
