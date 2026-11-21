@@ -86,19 +86,16 @@
                                     th:text="${#temporals.format(lote.fechaVencimiento(), 'dd/MM/yyyy')}">
                                 </td>
                                 <td>
-                                    <div class="flex flex-col items-start gap-1" th:if="${idsLotesPrioritarios.contains(lote.idLote())}">
+                                    <div class="flex flex-col items-start gap-0.5" th:if="${lote.tieneBadgeSalePrimero()}">
                                         <span class="fefo-badge badge t-ok"
                                             title="Algoritmo FEFO: Primer lote a despachar ordenado en Cola de Prioridad por menor fecha de vencimiento"
-                                            aria-label="Lote prioritario por vencimiento según FEFO">
-                                            <span class="fefo-indicador" aria-hidden="true"></span>Prioritario FEFO
+                                            aria-label="Lote prioritario por vencimiento según FEFO: Sale primero">
+                                            <span class="fefo-indicador" aria-hidden="true"></span>Sale primero
                                         </span>
-                                        <span class="text-[11px] text-pine-700 font-semibold flex items-center gap-1">
-                                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>1° en Cola de Prioridad
-                                        </span>
+                                        <span class="text-[11px] text-ink-3 font-normal" th:text="${lote.textoPosicionCola()}">1.º en la cola</span>
                                     </div>
-                                    <div class="flex flex-col items-start gap-0.5" th:unless="${idsLotesPrioritarios.contains(lote.idLote())}">
-                                        <span class="fefo-secundario text-slate-400 text-xs">—</span>
-                                        <span class="text-[11px] text-slate-400">Reserva secundaria</span>
+                                    <div class="flex flex-col items-start gap-0.5" th:unless="${lote.tieneBadgeSalePrimero()}">
+                                        <span class="text-xs text-ink-3" th:text="${lote.textoPrioridad()}">—</span>
                                     </div>
                                 </td>
                                 <td class="r">

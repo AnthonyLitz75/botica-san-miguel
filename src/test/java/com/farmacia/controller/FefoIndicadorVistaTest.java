@@ -1,5 +1,6 @@
 package com.farmacia.controller;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -8,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.farmacia.config.SeguridadConfiguracion;
 import com.farmacia.model.Lote;
 import com.farmacia.model.LoteDisponibleVista;
+import com.farmacia.model.LoteFilaVista;
 import com.farmacia.model.Medicamento;
 import com.farmacia.service.LotePrioridadServicio;
 import com.farmacia.service.LoteServicio;
@@ -57,6 +59,9 @@ class FefoIndicadorVistaTest {
         when(lotes.listarDisponiblesConMedicamento()).thenReturn(disponibles);
         when(lotes.buscarPorId(2)).thenReturn(Optional.of(new Lote(2, 4, "LT-002", primerVencimiento, 8)));
         when(prioridad.identificarLotesPrioritarios(disponibles)).thenReturn(Set.of(2));
+        when(prioridad.calcularFilasLotes(any())).thenReturn(List.of(
+                new LoteFilaVista(2, 4, "LT-002", primerVencimiento, 8, true, "Sale primero", "1.º en la cola"),
+                new LoteFilaVista(1, 4, "LT-001", primerVencimiento.plusDays(20), 12, false, "2.º en la cola", "2.º en la cola")));
     }
 
     @Test
@@ -64,7 +69,9 @@ class FefoIndicadorVistaTest {
         mvc.perform(get("/medicamentos/4/lotes").sessionAttr(
                         HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, contexto()))
                 .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Prioritario FEFO")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Sale primero")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("1.º en la cola")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("2.º en la cola")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("LT-002")));
     }
 

@@ -1,6 +1,8 @@
 package com.farmacia.service;
 
+import com.farmacia.model.Lote;
 import com.farmacia.model.LoteDisponibleVista;
+import com.farmacia.model.LoteFilaVista;
 import com.farmacia.service.politica.PoliticaFefo;
 import com.farmacia.service.politica.PoliticaSeleccionLotes;
 import java.time.Clock;
@@ -123,5 +125,123 @@ class LotePrioridadServicioTest {
     private LoteDisponibleVista lote(int id, int medicamento, LocalDate vencimiento, int stock) {
         return new LoteDisponibleVista(id, medicamento, "MED-" + medicamento, "Medicamento", "LT-" + id,
                 vencimiento, stock, "UNIDAD");
+    }
+
+    private Lote loteModel(int id, LocalDate vencimiento, int stock) {
+        return new Lote(id, 4, "LT-" + id, vencimiento, stock);
+    }
+
+    @Test
+    @DisplayName("a) Lote único vigente con stock: muestra 'Lote único', sin badge")
+    void calcularFilasLotes_loteUnicoVigente_muestraLoteUnicoSinBadge() {
+        var servicio = new LotePrioridadServicio(mock(LoteRepositorio.class), RELOJ, new PoliticaFefo());
+        var lotes = List.of(loteModel(1, HOY.plusDays(30), 10));
+
+        var filas = servicio.calcularFilasLotes(lotes);
+
+        assertEquals(1, filas.size());
+        assertFalse(filas.get(0).tieneBadgeSalePrimero());
+        assertEquals("Lote único", filas.get(0).textoPrioridad());
+        assertNull(filas.get(0).textoPosicionCola());
+    }
+
+    @Test
+    @DisplayName("b) 2+ lotes vigentes: primero con badge 'Sale primero' y posiciones 1.º/2.º/3.º")
+    void calcularFilasLotes_multiplesLotesVigentes_primeroSalePrimeroYPosiciones() {
+        var servicio = new LotePrioridadServicio(mock(LoteRepositorio.class), RELOJ, new PoliticaFefo());
+        var lotes = List.of(
+                loteModel(1, HOY.plusDays(60), 20),
+                loteModel(2, HOY.plusDays(10), 15),
+                loteModel(3, HOY.plusDays(90), 5));
+
+        var filas = servicio.calcularFilasLotes(lotes);
+
+        assertEquals(3, filas.size());
+        // Fila 0 corresponde a lote 1 (orden original preservado): es 2.º en la cola
+        assertEquals(1, filas.get(0).idLote());
+        assertFalse(filas.get(0).tieneBadgeSalePrimero());
+        assertEquals("2.º en la cola", filas.get(0).textoPrioridad());
+        assertEquals("2.º en la cola", filas.get(0).textoPosicionCola());
+
+        // Fila 1 corresponde a lote 2 (vence antes): es 1.º en la cola, con badge "Sale primero"
+        assertEquals(2, filas.get(1).idLote());
+        assertTrue(filas.get(1).tieneBadgeSalePrimero());
+        assertEquals("Sale primero", filas.get(1).textoPrioridad());
+        assertEquals("1.º en la cola", filas.get(1).textoPosicionCola());
+
+        // Fila 2 corresponde a lote 3: es 3.º en la cola
+        assertEquals(3, filas.get(2).idLote());
+        assertFalse(filas.get(2).tieneBadgeSalePrimero());
+        assertEquals("3.º en la cola", filas.get(2).textoPrioridad());
+        assertEquals("3.º en la cola", filas.get(2).textoPosicionCola());
+    }
+
+    @Test
+    @DisplayName("c) Lote con stock 0: muestra '—' y no cuenta en la cola")
+    void calcularFilasLotes_loteConStockCero_muestraGuionYNoCuenta() {
+        var servicio = new LotePrioridadServicio(mock(LoteRepositorio.class), RELOJ, new PoliticaFefo());
+        var lotes = List.of(
+                loteModel(1, HOY.plusDays(30), 10),
+                loteModel(2, HOY.plusDays(10), 0));
+
+        var filas = servicio.calcularFilasLotes(lotes);
+
+        assertEquals(2, filas.size());
+        // Lote 1 es el único vigente con stock: "Lote único"
+        assertEquals(1, filas.get(0).idLote());
+        assertFalse(filas.get(0).tieneBadgeSalePrimero());
+        assertEquals("Lote único", filas.get(0).textoPrioridad());
+
+        // Lote 2 con stock 0: muestra "—"
+        assertEquals(2, filas.get(1).idLote());
+        assertFalse(filas.get(1).tieneBadgeSalePrimero());
+        assertEquals("—", filas.get(1).textoPrioridad());
+        assertNull(filas.get(1).textoPosicionCola());
+    }
+
+    @Test
+    @DisplayName("d) Lote vencido: muestra '—' y no cuenta en la cola")
+    void calcularFilasLotes_loteVencido_muestraGuionYNoCuenta() {
+        var servicio = new LotePrioridadServicio(mock(LoteRepositorio.class), RELOJ, new PoliticaFefo());
+        var lotes = List.of(
+                loteModel(1, HOY.minusDays(1), 50),
+                loteModel(2, HOY.plusDays(20), 10));
+
+        var filas = servicio.calcularFilasLotes(lotes);
+
+        assertEquals(2, filas.size());
+        // Lote 1 vencido: muestra "—"
+        assertEquals(1, filas.get(0).idLote());
+        assertFalse(filas.get(0).tieneBadgeSalePrimero());
+        assertEquals("—", filas.get(0).textoPrioridad());
+        assertNull(filas.get(0).textoPosicionCola());
+
+        // Lote 2 es el único vigente con stock: "Lote único"
+        assertEquals(2, filas.get(1).idLote());
+        assertFalse(filas.get(1).tieneBadgeSalePrimero());
+        assertEquals("Lote único", filas.get(1).textoPrioridad());
+    }
+
+    @Test
+    @DisplayName("e) Criterio FEFO: desempata por menor id_lote cuando la fecha de vencimiento es igual")
+    void calcularFilasLotes_empateFechaVencimiento_desempataPorIdLote() {
+        var servicio = new LotePrioridadServicio(mock(LoteRepositorio.class), RELOJ, new PoliticaFefo());
+        var lotes = List.of(
+                loteModel(5, HOY.plusDays(10), 10),
+                loteModel(2, HOY.plusDays(10), 10));
+
+        var filas = servicio.calcularFilasLotes(lotes);
+
+        assertEquals(2, filas.size());
+        // Lote 5 tiene id 5 > 2: 2.º en la cola
+        assertEquals(5, filas.get(0).idLote());
+        assertFalse(filas.get(0).tieneBadgeSalePrimero());
+        assertEquals("2.º en la cola", filas.get(0).textoPrioridad());
+
+        // Lote 2 tiene id 2 < 5: 1.º en la cola con badge "Sale primero"
+        assertEquals(2, filas.get(1).idLote());
+        assertTrue(filas.get(1).tieneBadgeSalePrimero());
+        assertEquals("Sale primero", filas.get(1).textoPrioridad());
+        assertEquals("1.º en la cola", filas.get(1).textoPosicionCola());
     }
 }

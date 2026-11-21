@@ -44,7 +44,8 @@ public class LoteControlador {
 
                 model.addAttribute("medicamento", medicamento);
                 var lotes = loteServicio.listarPorMedicamento(idMedicamento);
-                model.addAttribute("lotes", lotes);
+                var lotesFilas = prioridadServicio.calcularFilasLotes(lotes);
+                model.addAttribute("lotes", lotesFilas);
                 model.addAttribute("idsLotesPrioritarios", prioridadServicio.identificarLotesPrioritarios(
                                 loteServicio.listarDisponiblesPorMedicamento(idMedicamento)));
 
