@@ -20,8 +20,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.farmacia.config.SeguridadConfiguracion;
 import com.farmacia.dto.UsuarioFormulario;
 import com.farmacia.model.Usuario;
+import com.farmacia.model.UsuarioListadoVista;
 import com.farmacia.service.UsuarioDetallesServicio;
 import com.farmacia.service.UsuarioServicio;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -93,6 +95,21 @@ class UsuarioControladorTest {
                 .andExpect(content().string(not(containsString("{bcrypt}"))))
                 .andExpect(content().string(not(containsString("HASH_SECRETO"))))
                 .andExpect(content().string(not(containsString("OTRO_HASH"))));
+    }
+
+    @Test
+    @DisplayName("CA-2.1 y CA-2.2: GET /usuarios muestra la columna Último acceso y formatea fecha relativa y title")
+    void listar_muestraColumnaUltimoAccesoConFormato() throws Exception {
+        var u1 = new UsuarioListadoVista(1, "Administrador Uno", "admin1", "ADMINISTRADOR", true, LocalDateTime.now());
+        var u2 = new UsuarioListadoVista(2, "Vendedor Dos", "vendedor2", "VENDEDOR", true, null);
+
+        when(servicio.listarParaListado("admin")).thenReturn(List.of(u1, u2));
+
+        mvc.perform(get("/usuarios").with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Último acceso")))
+                .andExpect(content().string(containsString("Hoy ")))
+                .andExpect(content().string(containsString("Nunca")));
     }
 
     // -------------------------------------------------------------------------

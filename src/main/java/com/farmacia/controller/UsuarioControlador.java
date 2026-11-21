@@ -36,9 +36,9 @@ public class UsuarioControlador {
     @GetMapping
     public String listar(Model model, Authentication autenticacion) {
         List<UsuarioListadoVista> usuarios = servicio.listarParaListado(autenticacion.getName());
-        if (usuarios == null) {
+        if (usuarios == null || usuarios.isEmpty()) {
             List<Usuario> lista = servicio.listar(autenticacion.getName());
-            if (lista != null) {
+            if (lista != null && !lista.isEmpty()) {
                 usuarios = lista.stream()
                         .map(u -> new UsuarioListadoVista(u.idUsuario(), u.nombre(), u.nombreUsuario(), u.rol(), u.activo(), null))
                         .toList();

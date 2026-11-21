@@ -59,6 +59,7 @@
                                 <th scope="col">Nombre completo</th>
                                 <th scope="col">Rol</th>
                                 <th scope="col" class="c">Estado</th>
+                                <th scope="col">Último acceso</th>
                                 <th scope="col" class="r">Acciones</th>
                             </tr>
                         </thead>
@@ -85,6 +86,7 @@
                                         th:classappend="${u.activo()} ? 't-ok' : 't-rose'"
                                         th:text="${u.activo()} ? 'ACTIVO' : 'INACTIVO'">ACTIVO</span>
                                 </td>
+                                <td class="lbl" th:title="${u.ultimoAccesoTitulo()}" th:text="${u.ultimoAccesoTexto()}">Nunca</td>
                                 <td class="r">
                                     <div class="flex items-center justify-end gap-1.5">
                                         <a class="ibtn" th:href="@{/usuarios/{id}/editar(id=${u.idUsuario()})}"
