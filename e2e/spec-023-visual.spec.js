@@ -323,4 +323,43 @@ test.describe('Spec 023: Fase 1 — Pruebas de estilos computados y tokens', () 
     await page.screenshot({ path: 'e2e/evidencias/visual/19-modal-registrar-salida.png' });
   });
 
+  test('T2312: Captura 00-login-sin-cambios y verificacion de las 20 capturas en e2e/evidencias/visual/', async ({ page }) => {
+    await page.setViewportSize({ width: 1600, height: 900 });
+    // 00-login-sin-cambios.png
+    await page.goto('/acceso/login', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('button', { name: /Iniciar sesión/i })).toBeVisible();
+    await page.screenshot({ path: 'e2e/evidencias/visual/00-login-sin-cambios.png' });
+
+    // Verificar existencia de las 20 capturas
+    const esperadas = [
+      '00-login-sin-cambios.png',
+      '01-caja.png',
+      '02-ticket.png',
+      '03-alertas.png',
+      '04-medicamentos.png',
+      '05-ordenes-compra.png',
+      '06-auditoria.png',
+      '07-reportes-ventas.png',
+      '08-categorias.png',
+      '09-historial-ventas.png',
+      '10-clientes.png',
+      '11-proveedores.png',
+      '12-usuarios.png',
+      '13-movimientos.png',
+      '14-modal-nuevo-cliente.png',
+      '15-modal-nuevo-proveedor.png',
+      '16-modal-nueva-categoria.png',
+      '17-modal-nuevo-usuario.png',
+      '18-modal-nuevo-medicamento.png',
+      '19-modal-registrar-salida.png',
+    ];
+
+    const dirVisual = path.resolve('e2e/evidencias/visual');
+    expect(fs.existsSync(dirVisual)).toBeTruthy();
+    for (const archivo of esperadas) {
+      const ruta = path.join(dirVisual, archivo);
+      expect(fs.existsSync(ruta), `Falta la captura: ${archivo}`).toBeTruthy();
+    }
+  });
+
 });
