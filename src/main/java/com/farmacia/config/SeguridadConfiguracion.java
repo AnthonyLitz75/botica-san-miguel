@@ -11,6 +11,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
 import java.time.Clock;
 
 @Configuration
@@ -215,6 +216,9 @@ public class SeguridadConfiguracion {
                                                 // Seguridad por defecto (spec 013): toda ruta no declarada se deniega.
                                                 // Una ruta nueva debe tener su regla aquí y su caso en MatrizRutasTest.
                                                 .anyRequest().denyAll())
+                                .headers(headers -> headers
+                                                .referrerPolicy(referrer -> referrer
+                                                                .policy(ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)))
                                 .formLogin(formulario -> formulario
                                                 .loginPage("/login")
                                                 .loginProcessingUrl("/login")
