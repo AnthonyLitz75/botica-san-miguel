@@ -128,8 +128,9 @@ public class OrdenCompraControlador {
                         return "ordenes-compra/formulario";
                 }
 
+                Integer idOrden;
                 try {
-                        servicio.guardar(autenticacion.getName(), formulario);
+                        idOrden = servicio.guardar(autenticacion.getName(), formulario);
                 } catch (IllegalArgumentException excepcion) {
                         resultado.reject(
                                         "orden.invalida",
@@ -143,7 +144,7 @@ public class OrdenCompraControlador {
                                 "mensaje",
                                 "Orden de compra registrada correctamente");
 
-                return "redirect:/ordenes-compra";
+                return "redirect:/ordenes-compra/" + idOrden;
         }
 
         @GetMapping("/{idOrden}/recepcion")

@@ -46,7 +46,7 @@
                 th:action="@{/ordenes-compra/{id}/recepcion(id=${orden.idOrden()})}"
                 th:object="${formulario}" method="post">
 
-                <div class="sec justify-between">
+                <div class="sec justify-between flex-wrap gap-2">
                     <div>
                         <h2>Productos de la orden</h2>
                         <p class="text-sm text-ink-3 font-normal mt-0.5">Selecciona solo las líneas que llegaron en esta entrega física.</p>
@@ -127,7 +127,6 @@
                                     </td>
                                     <td class="r recepcion-cantidad-celda">
                                         <label class="campo-recepcion inline-block">
-                                            <span class="solo-lector sr-only">Cantidad recibida</span>
                                             <input class="recepcion-cantidad text-right font-bold w-24 px-2.5 py-1.5 rounded-lg border border-line bg-white text-sm disabled:bg-slate-100 disabled:cursor-not-allowed"
                                                 type="number" data-campo="cantidad"
                                                 min="1" step="1" disabled
