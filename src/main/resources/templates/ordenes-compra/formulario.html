@@ -18,17 +18,13 @@
                     <h1>Nueva orden de compra</h1>
                     <div class="sub">Emite una solicitud de compra formal a proveedores activos.</div>
                 </div>
-                <div class="row items-center">
-                    <a class="btn s inventario-boton boton-secundario" th:href="@{/ordenes-compra}">
-                        <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-                        <span>Volver a órdenes</span>
-                    </a>
-                </div>
             </div>
 
-            <div class="max-w-3xl">
-                <form th:action="@{/ordenes-compra}" method="post" th:object="${formulario}"
-                    class="card pad proveedor-formulario orden-formulario space-y-6">
+            <form th:action="@{/ordenes-compra}" method="post" th:object="${formulario}"
+                class="flex flex-col lg:flex-row gap-6 items-start w-full">
+
+                <!-- Columna Izquierda: Formulario -->
+                <div class="card pad w-full lg:max-w-[720px] space-y-6">
 
                     <div class="note aviso-operacion aviso-error" th:if="${#fields.hasAnyErrors()}" role="alert" style="background:#fff8f9;border-color:#fecdd3;color:#be123c">
                         <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg>
@@ -38,7 +34,7 @@
                     </div>
 
                     <fieldset class="border-0 p-0 m-0">
-                        <legend class="text-xs uppercase tracking-wider font-bold text-pine-700 mb-4 pb-2 border-b border-line w-full">
+                        <legend class="text-base font-semibold text-ink mb-4 pb-2 border-b border-line w-full">
                             Datos del proveedor
                         </legend>
                         <div>
@@ -52,15 +48,15 @@
                                         th:text="${proveedor.razonSocial()}">Distribuidora Farmacéutica S.A.C.</option>
                                 </select>
                             </div>
-                            <div class="lbl mt-1 campo-ayuda">La orden se generará en estado PENDIENTE y no modificará el stock hasta su recepción.</div>
+                            <div class="text-xs text-ink-3 font-normal mt-1 campo-ayuda">La orden queda como Pendiente y no cambia el stock hasta que registres la recepción.</div>
                             <p class="error text-xs text-rose-600 font-semibold mt-1" id="error-idProveedor"
                                 th:if="${#fields.hasErrors('idProveedor')}" th:errors="*{idProveedor}"></p>
                         </div>
                     </fieldset>
 
                     <fieldset class="border-0 p-0 m-0">
-                        <legend class="text-xs uppercase tracking-wider font-bold text-pine-700 mb-4 pb-2 border-b border-line w-full">
-                            Detalle del medicamento solicitado
+                        <legend class="text-base font-semibold text-ink mb-4 pb-2 border-b border-line w-full">
+                            Medicamento solicitado
                         </legend>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="md:col-span-2">
@@ -104,51 +100,119 @@
                                     th:if="${#fields.hasErrors('detalles[0].costoUnitario')}" th:errors="*{detalles[0].costoUnitario}"></p>
                             </div>
 
-                            <div class="md:col-span-2 card pad bg-pine-50/60 border border-pine-100 flex items-center justify-between orden-calculo-previo">
-                                <span class="text-sm font-semibold text-pine-900">Importe estimado de la orden:</span>
-                                <strong id="importe-previo" class="text-2xl font-extrabold text-pine-800">S/ 0.00</strong>
-                            </div>
-
                             <div class="md:col-span-2">
                                 <label for="observaciones">Observaciones <span class="campo-opcional text-ink-3 font-normal">(opcional)</span></label>
                                 <textarea id="observaciones" th:field="*{observaciones}" maxlength="500" rows="3"
                                     placeholder="Condiciones de entrega, plazo acordado o notas para almacén..."
-                                    class="w-full p-3 rounded-xl border border-line bg-white text-sm text-ink focus:outline-none focus:ring-2 focus:ring-pine-700/20"></textarea>
+                                    class="w-full p-3 rounded-xl border border-line bg-white text-sm text-ink font-sans focus:outline-none focus:ring-2 focus:ring-pine-700/20"></textarea>
                             </div>
                         </div>
-                    </fieldset>
 
-                    <div class="pt-4 border-t border-line flex justify-end gap-3 proveedor-formulario-acciones">
-                        <a class="btn s inventario-boton boton-secundario" th:href="@{/ordenes-compra}">
-                            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
-                            <span>Cancelar</span>
-                        </a>
-                        <button class="btn p inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md" type="submit">
-                            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
-                            <span>Guardar orden</span>
-                        </button>
+                        <!-- Botones al final para móviles (< 1024px) -->
+                        <div class="pt-4 border-t border-line flex lg:hidden justify-end gap-3 mt-6">
+                            <a class="btn s inventario-boton boton-secundario" th:href="@{/ordenes-compra}">
+                                <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                                <span>Cancelar</span>
+                            </a>
+                            <button class="btn p inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md" type="submit">
+                                <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                                <span>Emitir orden</span>
+                            </button>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <!-- Columna Derecha: Tarjeta Sticky Resumen de la orden (para ≥ 1024px) -->
+                <div class="w-full lg:w-[360px] lg:sticky lg:top-24 flex flex-col gap-4">
+                    <div class="card pad space-y-4">
+                        <h3 class="text-base font-bold text-ink m-0 pb-3 border-b border-line flex items-center gap-2">
+                            <svg class="ico text-pine-700" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/></svg>
+                            <span>Resumen de la orden</span>
+                        </h3>
+
+                        <dl class="space-y-3 m-0 text-sm">
+                            <div>
+                                <dt class="text-xs uppercase tracking-wider font-semibold text-ink-3">Proveedor</dt>
+                                <dd id="resumen-proveedor" class="m-0 font-bold text-ink mt-0.5 truncate">— Sin seleccionar —</dd>
+                            </div>
+                            <div>
+                                <dt class="text-xs uppercase tracking-wider font-semibold text-ink-3">Medicamento</dt>
+                                <dd id="resumen-medicamento" class="m-0 font-bold text-ink mt-0.5 truncate">— Sin seleccionar —</dd>
+                            </div>
+                            <div>
+                                <dt class="text-xs uppercase tracking-wider font-semibold text-ink-3">Cálculo estimado</dt>
+                                <dd id="resumen-calculo" class="m-0 text-ink-2 font-medium mt-0.5">—</dd>
+                            </div>
+                        </dl>
+
+                        <div class="pt-3 border-t border-line">
+                            <div class="text-xs uppercase tracking-wider font-semibold text-ink-3 mb-1">Importe estimado total</div>
+                            <div class="flex items-baseline justify-between">
+                                <strong id="importe-previo" aria-live="polite" class="text-3xl font-extrabold text-pine-800">S/ 0.00</strong>
+                            </div>
+                        </div>
+
+                        <!-- Botones integrados en la tarjeta lateral para escritorio -->
+                        <div class="hidden lg:flex flex-col gap-2.5 pt-3 border-t border-line">
+                            <button class="btn p w-full justify-center inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md" type="submit">
+                                <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                                <span>Emitir orden</span>
+                            </button>
+                            <a class="btn s w-full justify-center inventario-boton boton-secundario" th:href="@{/ordenes-compra}">
+                                <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                                <span>Cancelar</span>
+                            </a>
+                        </div>
                     </div>
-                </form>
-            </div>
+                </div>
+            </form>
         </main>
     </div>
 
     <script th:src="@{/js/formularios.js}" defer></script>
     <script>
+        const selectProveedor = document.getElementById("idProveedor");
+        const selectMed = document.getElementById("medicamento");
         const inputCantidad = document.getElementById("cantidad");
         const inputCosto = document.getElementById("costo");
         const importePrevio = document.getElementById("importe-previo");
+        const resumenProveedor = document.getElementById("resumen-proveedor");
+        const resumenMedicamento = document.getElementById("resumen-medicamento");
+        const resumenCalculo = document.getElementById("resumen-calculo");
 
-        function actualizarImporteEstimado() {
-            const cant = Number.parseFloat(inputCantidad.value) || 0;
-            const costo = Number.parseFloat(inputCosto.value) || 0;
+        function actualizarResumenOrden() {
+            const cant = Number.parseFloat(inputCantidad?.value) || 0;
+            const costo = Number.parseFloat(inputCosto?.value) || 0;
             const total = cant >= 0 && costo >= 0 ? cant * costo : 0;
-            importePrevio.textContent = "S/ " + total.toFixed(2);
+
+            if (importePrevio) {
+                importePrevio.textContent = "S/ " + total.toFixed(2);
+            }
+
+            if (resumenProveedor && selectProveedor) {
+                const optProv = selectProveedor.options[selectProveedor.selectedIndex];
+                resumenProveedor.textContent = (optProv && optProv.value) ? optProv.text : "— Sin seleccionar —";
+            }
+
+            if (resumenMedicamento && selectMed) {
+                const optMed = selectMed.options[selectMed.selectedIndex];
+                resumenMedicamento.textContent = (optMed && optMed.value) ? optMed.text : "— Sin seleccionar —";
+            }
+
+            if (resumenCalculo) {
+                if (cant > 0 && costo >= 0) {
+                    resumenCalculo.textContent = `${cant} × S/ ${costo.toFixed(2)}`;
+                } else {
+                    resumenCalculo.textContent = "—";
+                }
+            }
         }
 
-        inputCantidad.addEventListener("input", actualizarImporteEstimado);
-        inputCosto.addEventListener("input", actualizarImporteEstimado);
-        actualizarImporteEstimado();
+        selectProveedor?.addEventListener("change", actualizarResumenOrden);
+        selectMed?.addEventListener("change", actualizarResumenOrden);
+        inputCantidad?.addEventListener("input", actualizarResumenOrden);
+        inputCosto?.addEventListener("input", actualizarResumenOrden);
+        actualizarResumenOrden();
     </script>
 </body>
 
