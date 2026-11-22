@@ -277,7 +277,7 @@ export function pintarEstado(estado, catalogoMedicamentos = []) {
       divFefo.appendChild(punto);
 
       const badgeFefo = document.createElement("i");
-      badgeFefo.textContent = "FEFO";
+      badgeFefo.textContent = "Vence primero";
       divFefo.appendChild(badgeFefo);
 
       // Lotes asignados según política FEFO

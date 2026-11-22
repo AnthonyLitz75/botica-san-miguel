@@ -86,7 +86,7 @@ export function actualizarSugerencias(termino, catalogo = [], onSeleccionar) {
     if (tieneStock) {
       const pres = med.presentacion || "Caja de unidades";
       const lote = med.loteFefoSugerido || (med.codigo === "MED-001" ? "LOT-A (12/2026)" : med.codigo === "MED-006" ? "LOT-F (03/2027)" : "LOT-A (12/2026)");
-      detalleTexto = `${pres} · lote FEFO ${lote}`;
+      detalleTexto = `${pres} · lote ${lote}`;
     } else {
       detalleTexto = "Sin stock disponible";
     }
