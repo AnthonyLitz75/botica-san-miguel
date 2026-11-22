@@ -63,7 +63,7 @@
   color: #74827b;
 }
 
-.proveedor-campos input,
+.proveedor-campos input:not([type="checkbox"]):not([type="radio"]),
 .proveedor-campos select,
 .proveedor-campos textarea {
   width: 100%;
@@ -81,13 +81,25 @@
     background-color 0.18s ease;
 }
 
-.proveedor-campos input:focus,
+.proveedor-campos input:not([type="checkbox"]):not([type="radio"]):focus,
 .proveedor-campos select:focus,
 .proveedor-campos textarea:focus {
   background: #ffffff;
   border-color: #156552;
   box-shadow: 0 0 0 3px rgba(21, 101, 82, 0.14);
   outline: none;
+}
+
+.proveedor-campos input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  max-width: 18px;
+  max-height: 18px;
+  flex: none;
+  accent-color: #166a55;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .proveedor-campos textarea {
