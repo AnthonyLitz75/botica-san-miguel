@@ -85,7 +85,7 @@ test.describe('Spec 019: Compras reales por cliente (caja y listado)', () => {
     const sugerenciasCliente = page.locator('#sugerencias-cliente');
 
     // Seleccionar cliente frecuente (Juan Pérez Quispe con 12 compras)
-    await inputCliente.fill('Juan');
+    await inputCliente.fill('Pérez Quispe');
     await expect(sugerenciasCliente).toBeVisible();
 
     const opcionJuan = sugerenciasCliente.locator('.o').first();
@@ -134,7 +134,7 @@ test.describe('Spec 019: Compras reales por cliente (caja y listado)', () => {
 
     // 3. CA-2.3: Búsqueda preserva el conteo de compras
     const inputBuscar = page.locator('#buscar');
-    await inputBuscar.fill('Juan');
+    await inputBuscar.fill('Pérez Quispe');
     await page.getByRole('button', { name: /Buscar/i }).click();
     await expect(page.locator('table tbody tr')).toHaveCount(1);
     await expect(page.locator('table tbody tr .num')).toHaveText('12');

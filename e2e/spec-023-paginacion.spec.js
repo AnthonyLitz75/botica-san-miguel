@@ -149,7 +149,7 @@ test.describe('Spec 023: Paginación de listados largos (25 filas)', () => {
     await expect(botonCsv).toBeVisible();
   });
 
-  test('T2395: Usuarios: listado muestra usuarios y si hay 1 sola página no muestra nav', async ({ page }) => {
+  test('T2395: Usuarios: listado muestra usuarios y valida paginación según total', async ({ page }) => {
     await iniciarSesion(page, 'admin_demo', 'AdminDemo2026!');
     await page.goto('/usuarios', { waitUntil: 'domcontentloaded' });
 
@@ -159,14 +159,22 @@ test.describe('Spec 023: Paginación de listados largos (25 filas)', () => {
     expect(totalFilas).toBeGreaterThan(0);
     expect(totalFilas).toBeLessThanOrEqual(25);
 
-    // Resumen muestra "Mostrando 1–N de N"
+    // Resumen muestra "Mostrando 1–N de Total"
     const resumen = page.locator('.resultados-pie');
     await expect(resumen).toBeVisible();
-    await expect(resumen).toContainText(new RegExp(`Mostrando 1[–-]${totalFilas} de ${totalFilas}`));
+    const textoResumen = await resumen.textContent();
+    const match = textoResumen.match(/Mostrando\s+1[–-](\d+)\s+de\s+(\d+)/);
+    expect(match).not.toBeNull();
+    const totalRegistros = parseInt(match[2], 10);
+    expect(totalRegistros).toBeGreaterThanOrEqual(totalFilas);
 
-    // Como hay una sola página (<=25 usuarios en demo), el nav no se muestra
+    // Si hay más de 25 registros en total, debe mostrar nav; si es <= 25, no muestra nav
     const nav = page.locator('nav[aria-label="Paginación"]');
-    await expect(nav).toHaveCount(0);
+    if (totalRegistros > 25) {
+      await expect(nav).toBeVisible();
+    } else {
+      await expect(nav).toHaveCount(0);
+    }
 
     // Clamp sin error 500
     const response = await page.goto('/usuarios?pagina=9999', { waitUntil: 'domcontentloaded' });

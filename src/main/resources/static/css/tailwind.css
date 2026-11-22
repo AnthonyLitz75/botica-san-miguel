@@ -4419,18 +4419,6 @@ body.modal-abierto {
   width: 100%;
 }
 
-.min-w-\[130px\] {
-  min-width: 130px;
-}
-
-.min-w-\[140px\] {
-  min-width: 140px;
-}
-
-.min-w-\[34px\] {
-  min-width: 34px;
-}
-
 .min-w-\[105px\] {
   min-width: 105px;
 }
@@ -4441,6 +4429,10 @@ body.modal-abierto {
 
 .min-w-\[120px\] {
   min-width: 120px;
+}
+
+.min-w-\[34px\] {
+  min-width: 34px;
 }
 
 .max-w-2xl {
