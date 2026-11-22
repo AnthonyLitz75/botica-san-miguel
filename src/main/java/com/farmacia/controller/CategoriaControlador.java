@@ -59,7 +59,7 @@ public class CategoriaControlador {
         return "categorias/formulario";
     }
 
-    @PostMapping("/nueva")
+    @PostMapping({"", "/nueva"})
     public String guardarCategoria(
             @Valid @ModelAttribute("formulario") CategoriaFormulario formulario,
             BindingResult bindingResult,
