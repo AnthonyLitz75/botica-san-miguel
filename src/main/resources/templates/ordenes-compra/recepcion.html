@@ -9,20 +9,13 @@
     <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
     <aside th:replace="~{fragmentos/navegacion :: lateral('Órdenes de compra')}"></aside>
     <div class="inventario-area">
-        <header th:replace="~{fragmentos/navegacion :: cabecera('Órdenes de compra', 'Recepción')}"></header>
+        <header th:replace="~{fragmentos/navegacion :: cabecera('Órdenes de compra', 'Compras')}"></header>
         <main id="contenido" class="inventario-contenido">
             <div class="head">
                 <div>
                     <div class="eyebrow seccion-etiqueta">Almacén / Ingreso de mercadería</div>
                     <h1>Registrar recepción</h1>
                     <div class="sub recepcion-intro">Confirma qué productos llegaron, con su lote y vencimiento.</div>
-                </div>
-                <div class="row items-center">
-                    <a class="btn s inventario-boton boton-secundario"
-                        th:href="@{/ordenes-compra/{id}(id=${orden.idOrden()})}">
-                        <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-                        <span>Volver al detalle</span>
-                    </a>
                 </div>
             </div>
 
@@ -56,14 +49,18 @@
                 <div class="sec justify-between">
                     <div>
                         <h2>Productos de la orden</h2>
-                        <p class="lbl">Selecciona solo las líneas que llegaron en esta entrega física.</p>
+                        <p class="text-sm text-ink-3 font-normal mt-0.5">Selecciona solo las líneas que llegaron en esta entrega física.</p>
                     </div>
                     <span class="badge t-blue recepcion-seleccion-resumen font-bold" id="resumen-seleccion" aria-live="polite">
                         0 productos seleccionados
                     </span>
                 </div>
 
-                <div class="note aviso-operacion aviso-error mb-4" id="error-seleccion" role="alert" hidden style="background:#fff8f9;border-color:#fecdd3;color:#be123c">
+                <div class="text-sm text-ink-3 font-normal mb-3" id="pista-recepcion">
+                    Marca los productos que llegaron para poder guardar la recepción.
+                </div>
+
+                <div class="note aviso-operacion aviso-error mb-4" id="error-seleccion" hidden style="display: none !important; background:#fff8f9;border-color:#fecdd3;color:#be123c">
                     <svg class="ico flex-none" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
                     <span>Selecciona al menos un producto para registrar la recepción.</span>
                 </div>
@@ -72,95 +69,99 @@
                     <p class="note aviso-operacion aviso-error mb-4">Activa JavaScript para seleccionar y enviar las líneas recibidas.</p>
                 </noscript>
 
-                <div class="card overflow-hidden tabla-contenedor recepcion-tabla-contenedor mb-5" th:if="${!#lists.isEmpty(lineas)}"
-                    role="region" aria-label="Productos pendientes de recepción, tabla desplazable">
-                    <table class="recepcion-tabla">
-                        <thead>
-                            <tr>
-                                <th scope="col">Producto</th>
-                                <th scope="col" class="c">Solicitado</th>
-                                <th scope="col" class="c">Recibido</th>
-                                <th scope="col" class="c">Saldo actual</th>
-                                <th scope="col" class="c">Incluir</th>
-                                <th scope="col">Lote y vencimiento</th>
-                                <th scope="col" class="r">Cantidad</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="linea, iterStat : ${lineas}"
-                                class="hover:bg-pine-50/20 transition-colors duration-150"
-                                th:classappend="${linea.cantidadPendiente() == 0 ? 'linea-completa opacity-50 bg-slate-50' : ''}"
-                                th:attr="data-pendiente=${linea.cantidadPendiente()}">
-                                <td class="recepcion-producto">
-                                    <span class="mono codigo-medicamento" th:text="${linea.codigo()}">MED-000</span>
-                                    <div class="font-bold text-ink" th:text="${linea.nombre()}">Medicamento</div>
-                                </td>
-                                <td class="c font-semibold text-ink" th:text="${linea.cantidadSolicitada()}">0</td>
-                                <td class="c text-ink-3" th:text="${linea.cantidadRecibida()}">0</td>
-                                <td class="c">
-                                    <span class="num cantidad-pendiente font-bold"
-                                        th:classappend="${linea.cantidadPendiente() == 0 ? 'ok sin-pendiente' : 'low'}"
-                                        data-saldo th:text="${linea.cantidadPendiente()}">0</span>
-                                </td>
-                                <td class="c">
-                                    <label class="recepcion-selector inline-flex items-center gap-1.5 cursor-pointer font-semibold text-xs text-ink-2">
-                                        <input type="checkbox" class="recepcion-incluir rounded text-pine-700 focus:ring-pine-700 cursor-pointer"
-                                            th:disabled="${linea.cantidadPendiente() == 0}"
-                                            th:attr="aria-label=${'Incluir ' + linea.nombre()}, aria-controls=${'campos-recepcion-' + iterStat.index}">
-                                        <span>Recibir</span>
-                                    </label>
-                                    <input type="hidden" data-campo="idDetalleOrden" disabled
-                                        th:value="${linea.idDetalleOrden()}">
-                                </td>
-                                <td>
-                                    <div class="recepcion-campos grid grid-cols-1 md:grid-cols-2 gap-2" th:id="${'campos-recepcion-' + iterStat.index}">
-                                        <label class="campo-recepcion text-xs block">
-                                            <span class="lbl block mb-1">N.º de lote</span>
-                                            <input type="text" data-campo="numeroLote" maxlength="50"
-                                                placeholder="Ej. L-2026-04" disabled
-                                                class="w-full px-2.5 py-1.5 rounded-lg border border-line bg-white text-xs font-mono disabled:bg-slate-100 disabled:cursor-not-allowed">
+                <div class="card overflow-hidden mb-5">
+                    <div class="tabla-contenedor recepcion-tabla-contenedor" th:if="${!#lists.isEmpty(lineas)}"
+                        role="region" aria-label="Productos pendientes de recepción, tabla desplazable">
+                        <table class="recepcion-tabla">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Producto</th>
+                                    <th scope="col" class="c">Solicitado</th>
+                                    <th scope="col" class="c">Recibido</th>
+                                    <th scope="col" class="c">Saldo actual</th>
+                                    <th scope="col" class="c">Recibir</th>
+                                    <th scope="col">Lote y vencimiento</th>
+                                    <th scope="col" class="r">Cantidad</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="linea, iterStat : ${lineas}"
+                                    class="hover:bg-pine-50/20 transition-colors duration-150"
+                                    th:classappend="${linea.cantidadPendiente() == 0 ? 'linea-completa opacity-50 bg-slate-50' : ''}"
+                                    th:attr="data-pendiente=${linea.cantidadPendiente()}">
+                                    <td class="recepcion-producto">
+                                        <span class="mono codigo-medicamento" th:text="${linea.codigo()}">MED-000</span>
+                                        <div class="font-bold text-ink" th:text="${linea.nombre()}">Medicamento</div>
+                                    </td>
+                                    <td class="c font-semibold text-ink" th:text="${linea.cantidadSolicitada()}">0</td>
+                                    <td class="c text-ink-3" th:text="${linea.cantidadRecibida()}">0</td>
+                                    <td class="c">
+                                        <span class="num cantidad-pendiente font-bold"
+                                            th:classappend="${linea.cantidadPendiente() == 0 ? 'ok sin-pendiente' : 'low'}"
+                                            data-saldo th:text="${linea.cantidadPendiente()}">0</span>
+                                    </td>
+                                    <td class="c">
+                                        <label class="recepcion-selector inline-flex items-center justify-center cursor-pointer">
+                                            <input type="checkbox" class="recepcion-incluir rounded text-pine-700 focus:ring-pine-700 cursor-pointer"
+                                                th:disabled="${linea.cantidadPendiente() == 0}"
+                                                th:attr="aria-label=${'Recibir ' + linea.nombre()}, aria-controls=${'campos-recepcion-' + iterStat.index}">
                                         </label>
-                                        <label class="campo-recepcion text-xs block">
-                                            <span class="lbl block mb-1">Vencimiento</span>
-                                            <input type="date" data-campo="fechaVencimiento" disabled
-                                                th:attr="min=${minFechaVencimiento}"
-                                                class="w-full px-2.5 py-1.5 rounded-lg border border-line bg-white text-xs disabled:bg-slate-100 disabled:cursor-not-allowed">
+                                        <input type="hidden" data-campo="idDetalleOrden" disabled
+                                            th:value="${linea.idDetalleOrden()}">
+                                    </td>
+                                    <td>
+                                        <div class="recepcion-campos grid grid-cols-1 md:grid-cols-2 gap-2" th:id="${'campos-recepcion-' + iterStat.index}">
+                                            <label class="campo-recepcion text-xs block">
+                                                <span class="lbl block mb-1">N.º de lote</span>
+                                                <input type="text" data-campo="numeroLote" maxlength="50"
+                                                    placeholder="Ej. L-2026-04" disabled
+                                                    class="w-full px-2.5 py-1.5 rounded-lg border border-line bg-white text-xs font-mono disabled:bg-slate-100 disabled:cursor-not-allowed">
+                                            </label>
+                                            <label class="campo-recepcion text-xs block">
+                                                <span class="lbl block mb-1">Vencimiento</span>
+                                                <input type="date" data-campo="fechaVencimiento" disabled
+                                                    th:attr="min=${minFechaVencimiento}"
+                                                    class="w-full px-2.5 py-1.5 rounded-lg border border-line bg-white text-xs disabled:bg-slate-100 disabled:cursor-not-allowed">
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td class="r recepcion-cantidad-celda">
+                                        <label class="campo-recepcion inline-block">
+                                            <span class="solo-lector sr-only">Cantidad recibida</span>
+                                            <input class="recepcion-cantidad text-right font-bold w-24 px-2.5 py-1.5 rounded-lg border border-line bg-white text-sm disabled:bg-slate-100 disabled:cursor-not-allowed"
+                                                type="number" data-campo="cantidad"
+                                                min="1" step="1" disabled
+                                                th:attr="max=${linea.cantidadPendiente()}, aria-label=${'Cantidad recibida de ' + linea.nombre()}">
                                         </label>
-                                    </div>
-                                </td>
-                                <td class="r recepcion-cantidad-celda">
-                                    <label class="campo-recepcion inline-block">
-                                        <span class="solo-lector sr-only">Cantidad recibida</span>
-                                        <input class="recepcion-cantidad text-right font-bold w-24 px-2.5 py-1.5 rounded-lg border border-line bg-white text-sm disabled:bg-slate-100 disabled:cursor-not-allowed"
-                                            type="number" data-campo="cantidad"
-                                            min="1" step="1" disabled
-                                            th:attr="max=${linea.cantidadPendiente()}, aria-label=${'Cantidad recibida de ' + linea.nombre()}">
-                                    </label>
-                                    <div class="lbl mt-1 text-xs recepcion-restante">Quedan <strong data-restante
-                                        th:text="${linea.cantidadPendiente()}">0</strong></div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                                        <div class="lbl mt-1 text-xs recepcion-restante">Quedan <strong data-restante
+                                            th:text="${linea.cantidadPendiente()}">0</strong></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-                <div class="card pad text-center inventario-vacio mb-5" th:if="${#lists.isEmpty(lineas)}">
-                    <svg class="mx-auto mb-3 text-ok" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
-                    <p class="text-ink-2 font-bold">Esta orden no tiene cantidades pendientes de recibir.</p>
-                </div>
+                    <div class="pad text-center inventario-vacio" th:if="${#lists.isEmpty(lineas)}">
+                        <svg class="mx-auto mb-3 text-ok" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                        <p class="text-ink-2 font-bold">Esta orden no tiene cantidades pendientes de recibir.</p>
+                    </div>
 
-                <div class="card pad mb-5 recepcion-nota">
-                    <label for="motivo">Nota de recepción <span class="campo-opcional text-ink-3 font-normal">(opcional)</span></label>
-                    <div class="inp mt-1">
-                        <input id="motivo" type="text" th:field="*{motivo}" maxlength="250"
-                            placeholder="Ej. Entrega parcial, cajas dañadas o incidencia del proveedor"
-                            class="w-full bg-transparent border-0 outline-none text-sm text-ink">
+                    <div class="p-5 border-t border-line recepcion-nota w-full">
+                        <label for="motivo" class="text-sm font-semibold text-ink">Nota de recepción <span class="campo-opcional text-ink-3 font-normal text-xs">(opcional)</span></label>
+                        <div class="inp mt-1.5 w-full">
+                            <input id="motivo" type="text" th:field="*{motivo}" maxlength="250"
+                                placeholder="Ej. Entrega parcial, cajas dañadas o incidencia del proveedor"
+                                class="w-full bg-transparent border-0 outline-none text-sm text-ink">
+                        </div>
                     </div>
                 </div>
 
                 <div class="flex items-center justify-end gap-3 proveedor-formulario-acciones">
                     <a class="btn s inventario-boton boton-secundario"
-                        th:href="@{/ordenes-compra/{id}(id=${orden.idOrden()})}">Volver sin guardar</a>
+                        th:href="@{/ordenes-compra/{id}(id=${orden.idOrden()})}">
+                        <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                        <span>Cancelar</span>
+                    </a>
                     <button class="btn p inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md" type="submit"
                         th:disabled="${#lists.isEmpty(lineas)}">
                         <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>

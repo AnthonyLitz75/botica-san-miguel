@@ -16,6 +16,15 @@ if (formularioRecepcion) {
             campo.disabled = !activa;
             campo.required = activa && campo.dataset.campo !== "idDetalleOrden";
         });
+
+        if (activa) {
+            if (cantidad && !cantidad.value) {
+                cantidad.value = fila.dataset.pendiente || "";
+            }
+        } else if (cantidad) {
+            cantidad.value = "";
+        }
+
         actualizarSaldo(fila);
         actualizarResumen();
     }
@@ -28,6 +37,11 @@ if (formularioRecepcion) {
 
     function actualizarResumen() {
         const seleccionadas = filas.filter((fila) => fila.querySelector(".recepcion-incluir").checked);
+        if (seleccionadas.length > 0 && errorSeleccion) {
+            errorSeleccion.removeAttribute("role");
+            errorSeleccion.hidden = true;
+            errorSeleccion.style.display = "none";
+        }
         const unidades = seleccionadas.reduce((total, fila) => {
             return total + Number(fila.querySelector(".recepcion-cantidad").value || 0);
         }, 0);
@@ -49,12 +63,16 @@ if (formularioRecepcion) {
         const seleccionadas = filas.filter((fila) => fila.querySelector(".recepcion-incluir").checked);
         if (seleccionadas.length === 0) {
             evento.preventDefault();
+            errorSeleccion.setAttribute("role", "alert");
             errorSeleccion.hidden = false;
+            errorSeleccion.style.removeProperty("display");
             filas[0]?.querySelector(".recepcion-incluir").focus();
             return;
         }
 
+        errorSeleccion.removeAttribute("role");
         errorSeleccion.hidden = true;
+        errorSeleccion.style.display = "none";
         seleccionadas.forEach((fila, indice) => {
             fila.querySelectorAll("[data-campo]").forEach((campo) => {
                 campo.name = `detalles[${indice}].${campo.dataset.campo}`;

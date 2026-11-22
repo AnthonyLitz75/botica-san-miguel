@@ -346,9 +346,8 @@
 
 .recepcion-nota {
   display: grid;
-  max-width: 560px;
+  width: 100%;
   gap: 7px;
-  margin: 20px 0 0;
 }
 .recepcion-nota label {
   font-size: 13px;
