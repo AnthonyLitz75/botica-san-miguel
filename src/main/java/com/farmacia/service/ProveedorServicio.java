@@ -1,13 +1,16 @@
 package com.farmacia.service;
 
+import com.farmacia.dto.ProveedorFormulario;
+import com.farmacia.exception.ValidacionContactoException;
 import com.farmacia.model.Proveedor;
 import com.farmacia.repository.ProveedorRepositorio;
-import org.springframework.stereotype.Service;
-import com.farmacia.dto.ProveedorFormulario;
-import java.util.Optional;
-import org.springframework.transaction.annotation.Transactional;
-
+import com.farmacia.util.NormalizadorContacto;
 import java.util.List;
+import java.util.Optional;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ProveedorServicio {
@@ -28,10 +31,27 @@ public class ProveedorServicio {
     @Transactional(rollbackFor = Exception.class)
     public void guardar(ProveedorFormulario formulario) {
         ProveedorFormulario limpio = limpiarDatos(formulario);
-        repositorio.guardar(limpio);
-        // El repositorio no devuelve el id: el proveedor se identifica por su RUC (único).
-        auditoria.registrarCambio(AccionAuditoria.CREAR, ENTIDAD, limpio.ruc(),
-                "razon_social: " + limpio.razonSocial());
+        ValidadorUnicidadContacto.validar(
+                repositorio::buscarTitularPorCorreo,
+                repositorio::buscarTitularPorTelefono,
+                limpio.correo(),
+                limpio.telefono(),
+                null);
+
+        try {
+            repositorio.guardar(limpio);
+            // El repositorio no devuelve el id: el proveedor se identifica por su RUC (único).
+            auditoria.registrarCambio(AccionAuditoria.CREAR, ENTIDAD, limpio.ruc(),
+                    "razon_social: " + limpio.razonSocial());
+        } catch (DataIntegrityViolationException ex) {
+            ValidacionContactoException errorContacto = ValidadorUnicidadContacto.traducirExcepcionIndice(
+                    ex, repositorio::buscarTitularPorCorreo, repositorio::buscarTitularPorTelefono,
+                    limpio.correo(), limpio.telefono(), null);
+            if (errorContacto != null) {
+                throw errorContacto;
+            }
+            throw ex;
+        }
     }
 
     public Optional<Proveedor> buscarPorId(Integer id) {
@@ -41,27 +61,44 @@ public class ProveedorServicio {
     @Transactional(rollbackFor = Exception.class)
     public boolean actualizar(Integer id, ProveedorFormulario formulario) {
         ProveedorFormulario limpio = limpiarDatos(formulario);
-        var anterior = repositorio.buscarPorId(id);
-        int filasActualizadas = repositorio.actualizar(id, limpio);
-        if (filasActualizadas == 1) {
-            String detalle = anterior.map(a -> new DiferenciaCampos()
-                    .campo("ruc", a.ruc(), limpio.ruc())
-                    .campo("razon_social", a.razonSocial(), limpio.razonSocial())
-                    .campo("telefono", a.telefono(), limpio.telefono())
-                    .campo("correo", a.correo(), limpio.correo())
-                    .campo("direccion", a.direccion(), limpio.direccion())
-                    .describir()).orElse(null);
-            auditoria.registrarCambio(AccionAuditoria.EDITAR, ENTIDAD, id, detalle);
+        ValidadorUnicidadContacto.validar(
+                repositorio::buscarTitularPorCorreo,
+                repositorio::buscarTitularPorTelefono,
+                limpio.correo(),
+                limpio.telefono(),
+                id);
+
+        try {
+            var anterior = repositorio.buscarPorId(id);
+            int filasActualizadas = repositorio.actualizar(id, limpio);
+            if (filasActualizadas == 1) {
+                String detalle = anterior.map(a -> new DiferenciaCampos()
+                        .campo("ruc", a.ruc(), limpio.ruc())
+                        .campo("razon_social", a.razonSocial(), limpio.razonSocial())
+                        .campo("telefono", a.telefono(), limpio.telefono())
+                        .campo("correo", a.correo(), limpio.correo())
+                        .campo("direccion", a.direccion(), limpio.direccion())
+                        .describir()).orElse(null);
+                auditoria.registrarCambio(AccionAuditoria.EDITAR, ENTIDAD, id, detalle);
+            }
+            return filasActualizadas == 1;
+        } catch (DataIntegrityViolationException ex) {
+            ValidacionContactoException errorContacto = ValidadorUnicidadContacto.traducirExcepcionIndice(
+                    ex, repositorio::buscarTitularPorCorreo, repositorio::buscarTitularPorTelefono,
+                    limpio.correo(), limpio.telefono(), id);
+            if (errorContacto != null) {
+                throw errorContacto;
+            }
+            throw ex;
         }
-        return filasActualizadas == 1;
     }
 
     private ProveedorFormulario limpiarDatos(ProveedorFormulario formulario) {
         return new ProveedorFormulario(
                 formulario.ruc().strip(),
                 formulario.razonSocial().strip(),
-                limpiarOpcional(formulario.telefono()),
-                limpiarOpcional(formulario.correo()),
+                NormalizadorContacto.normalizarTelefono(formulario.telefono()),
+                NormalizadorContacto.normalizarCorreo(formulario.correo()),
                 limpiarOpcional(formulario.direccion()));
     }
 

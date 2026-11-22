@@ -81,7 +81,31 @@ class ClienteServicioPersistenciaTest extends AbstractRepositorioIntegrationTest
         assertEquals(1L, filtroDoc.get(0).compras());
     }
 
+    @Test
+    void rechazaTelefonoYCorreoDuplicadosConBaseReal() {
+        Integer id1 = servicio.guardar(new ClienteFormulario(
+                "DNI", "44556677", "Cliente Original", "987000111", "original@test.com"));
+
+        // Mismo teléfono -> lanza ValidacionContactoException
+        var exTel = assertThrows(com.farmacia.exception.ValidacionContactoException.class, () ->
+                servicio.guardar(new ClienteFormulario("DNI", "44556678", "Cliente 2", " 987000111 ", "otro@test.com")));
+        assertTrue(exTel.tieneError("telefono"));
+        assertEquals("Este teléfono ya está registrado a nombre de Cliente Original.", exTel.getError("telefono"));
+
+        // Mismo correo con distinta capitalización -> lanza ValidacionContactoException
+        var exCor = assertThrows(com.farmacia.exception.ValidacionContactoException.class, () ->
+                servicio.guardar(new ClienteFormulario("DNI", "44556679", "Cliente 3", "987000222", " Original@Test.Com ")));
+        assertTrue(exCor.tieneError("correo"));
+        assertEquals("Este correo ya está registrado a nombre de Cliente Original.", exCor.getError("correo"));
+
+        // Editar propio registro con mismos datos es permitido
+        assertTrue(servicio.actualizar(id1, new ClienteFormulario(
+                "DNI", "44556677", "Cliente Original Actualizado", "987000111", "original@test.com")));
+    }
+
     private ClienteFormulario formulario(String tipo, String numero, String nombre) {
-        return new ClienteFormulario(tipo, numero, nombre, "987654321", "ana@example.com");
+        String numLimpio = numero.strip();
+        String tel = "9" + String.format("%08d", Math.abs(numLimpio.hashCode()) % 100000000);
+        return new ClienteFormulario(tipo, numero, nombre, tel, "cli_" + numLimpio + "@example.com");
     }
 }

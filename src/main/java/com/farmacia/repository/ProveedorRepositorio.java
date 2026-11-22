@@ -138,4 +138,34 @@ public class ProveedorRepositorio {
 
         return jdbcTemplate.update(sql, id);
     }
+
+    public Optional<String> buscarTitularPorCorreo(String correo, Integer idExcluir) {
+        if (correo == null || correo.isBlank()) {
+            return Optional.empty();
+        }
+        String sql = """
+                SELECT razon_social
+                FROM proveedor
+                WHERE correo = ? AND (CAST(? AS INTEGER) IS NULL OR id_proveedor <> ?)
+                LIMIT 1
+                """;
+        List<String> resultados = jdbcTemplate.query(
+                sql, (rs, rowNum) -> rs.getString("razon_social"), correo, idExcluir, idExcluir);
+        return resultados.isEmpty() ? Optional.empty() : Optional.of(resultados.get(0));
+    }
+
+    public Optional<String> buscarTitularPorTelefono(String telefono, Integer idExcluir) {
+        if (telefono == null || telefono.isBlank()) {
+            return Optional.empty();
+        }
+        String sql = """
+                SELECT razon_social
+                FROM proveedor
+                WHERE telefono = ? AND (CAST(? AS INTEGER) IS NULL OR id_proveedor <> ?)
+                LIMIT 1
+                """;
+        List<String> resultados = jdbcTemplate.query(
+                sql, (rs, rowNum) -> rs.getString("razon_social"), telefono, idExcluir, idExcluir);
+        return resultados.isEmpty() ? Optional.empty() : Optional.of(resultados.get(0));
+    }
 }

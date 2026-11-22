@@ -1,13 +1,16 @@
 package com.farmacia.service;
 
 import com.farmacia.dto.ClienteFormulario;
+import com.farmacia.exception.ValidacionContactoException;
 import com.farmacia.model.Cliente;
 import com.farmacia.model.ClienteResumenVista;
 import com.farmacia.repository.ClienteRepositorio;
+import com.farmacia.util.NormalizadorContacto;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,10 +67,27 @@ public class ClienteServicio {
         if (repositorio.existeDocumento(limpio.tipoDocumento(), limpio.numeroDocumento(), null)) {
             throw new DuplicateKeyException("Ya existe un cliente con este documento");
         }
-        Integer id = repositorio.guardar(limpio);
-        // Datos personales: la bitácora no guarda documento, nombre ni contacto del cliente.
-        auditoria.registrarCambio(AccionAuditoria.CREAR, ENTIDAD, id, "tipo_documento: " + limpio.tipoDocumento());
-        return id;
+        ValidadorUnicidadContacto.validar(
+                repositorio::buscarTitularPorCorreo,
+                repositorio::buscarTitularPorTelefono,
+                limpio.correo(),
+                limpio.telefono(),
+                null);
+
+        try {
+            Integer id = repositorio.guardar(limpio);
+            // Datos personales: la bitácora no guarda documento, nombre ni contacto del cliente.
+            auditoria.registrarCambio(AccionAuditoria.CREAR, ENTIDAD, id, "tipo_documento: " + limpio.tipoDocumento());
+            return id;
+        } catch (DataIntegrityViolationException ex) {
+            ValidacionContactoException errorContacto = ValidadorUnicidadContacto.traducirExcepcionIndice(
+                    ex, repositorio::buscarTitularPorCorreo, repositorio::buscarTitularPorTelefono,
+                    limpio.correo(), limpio.telefono(), null);
+            if (errorContacto != null) {
+                throw errorContacto;
+            }
+            throw ex;
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -81,30 +101,49 @@ public class ClienteServicio {
         if (repositorio.existeDocumento(limpio.tipoDocumento(), limpio.numeroDocumento(), id)) {
             throw new DuplicateKeyException("Ya existe un cliente con este documento");
         }
-        boolean actualizado = repositorio.actualizar(id, limpio) == 1;
-        if (actualizado) {
-            var a = anterior.get();
-            // Datos personales: solo se registran los nombres de los campos modificados.
-            String detalle = new DiferenciaCampos()
-                    .campoSinValores("tipo_documento", a.tipoDocumento(), limpio.tipoDocumento())
-                    .campoSinValores("numero_documento", a.numeroDocumento(), limpio.numeroDocumento())
-                    .campoSinValores("nombre_completo", a.nombreCompleto(), limpio.nombreCompleto())
-                    .campoSinValores("telefono", a.telefono(), limpio.telefono())
-                    .campoSinValores("correo", a.correo(), limpio.correo())
-                    .describir();
-            auditoria.registrarCambio(AccionAuditoria.EDITAR, ENTIDAD, id, "Campos modificados: " + detalle);
+        ValidadorUnicidadContacto.validar(
+                repositorio::buscarTitularPorCorreo,
+                repositorio::buscarTitularPorTelefono,
+                limpio.correo(),
+                limpio.telefono(),
+                id);
+
+        try {
+            boolean actualizado = repositorio.actualizar(id, limpio) == 1;
+            if (actualizado) {
+                var a = anterior.get();
+                // Datos personales: solo se registran los nombres de los campos modificados.
+                String detalle = new DiferenciaCampos()
+                        .campoSinValores("tipo_documento", a.tipoDocumento(), limpio.tipoDocumento())
+                        .campoSinValores("numero_documento", a.numeroDocumento(), limpio.numeroDocumento())
+                        .campoSinValores("nombre_completo", a.nombreCompleto(), limpio.nombreCompleto())
+                        .campoSinValores("telefono", a.telefono(), limpio.telefono())
+                        .campoSinValores("correo", a.correo(), limpio.correo())
+                        .describir();
+                auditoria.registrarCambio(AccionAuditoria.EDITAR, ENTIDAD, id, "Campos modificados: " + detalle);
+            }
+            return actualizado;
+        } catch (DataIntegrityViolationException ex) {
+            ValidacionContactoException errorContacto = ValidadorUnicidadContacto.traducirExcepcionIndice(
+                    ex, repositorio::buscarTitularPorCorreo, repositorio::buscarTitularPorTelefono,
+                    limpio.correo(), limpio.telefono(), id);
+            if (errorContacto != null) {
+                throw errorContacto;
+            }
+            throw ex;
         }
-        return actualizado;
     }
 
     private ClienteFormulario limpiarDatos(ClienteFormulario formulario) {
         if (formulario == null) {
             throw new IllegalArgumentException("Los datos del cliente son obligatorios");
         }
-        return new ClienteFormulario(limpiarObligatorio(formulario.tipoDocumento()).toUpperCase(),
+        return new ClienteFormulario(
+                limpiarObligatorio(formulario.tipoDocumento()).toUpperCase(),
                 limpiarObligatorio(formulario.numeroDocumento()),
                 limpiarObligatorio(formulario.nombreCompleto()),
-                limpiarOpcional(formulario.telefono()), limpiarOpcional(formulario.correo()));
+                NormalizadorContacto.normalizarTelefono(formulario.telefono()),
+                NormalizadorContacto.normalizarCorreo(formulario.correo()));
     }
 
     private String limpiarObligatorio(String valor) {

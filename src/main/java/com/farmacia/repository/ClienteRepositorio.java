@@ -88,6 +88,36 @@ public class ClienteRepositorio {
                 formulario.nombreCompleto(), formulario.telefono(), formulario.correo(), id);
     }
 
+    public Optional<String> buscarTitularPorCorreo(String correo, Integer idExcluir) {
+        if (correo == null || correo.isBlank()) {
+            return Optional.empty();
+        }
+        String sql = """
+                SELECT nombre_completo
+                FROM cliente
+                WHERE correo = ? AND (CAST(? AS INTEGER) IS NULL OR id_cliente <> ?)
+                LIMIT 1
+                """;
+        List<String> resultados = jdbcTemplate.query(
+                sql, (rs, rowNum) -> rs.getString("nombre_completo"), correo, idExcluir, idExcluir);
+        return resultados.isEmpty() ? Optional.empty() : Optional.of(resultados.get(0));
+    }
+
+    public Optional<String> buscarTitularPorTelefono(String telefono, Integer idExcluir) {
+        if (telefono == null || telefono.isBlank()) {
+            return Optional.empty();
+        }
+        String sql = """
+                SELECT nombre_completo
+                FROM cliente
+                WHERE telefono = ? AND (CAST(? AS INTEGER) IS NULL OR id_cliente <> ?)
+                LIMIT 1
+                """;
+        List<String> resultados = jdbcTemplate.query(
+                sql, (rs, rowNum) -> rs.getString("nombre_completo"), telefono, idExcluir, idExcluir);
+        return resultados.isEmpty() ? Optional.empty() : Optional.of(resultados.get(0));
+    }
+
     private Cliente mapear(Integer id, String tipo, String numero, String nombre, String telefono, String correo) {
         return new Cliente(id, tipo, numero, nombre, telefono, correo);
     }
