@@ -1,6 +1,7 @@
 package com.farmacia.controller;
 
 import com.farmacia.dto.ClienteFormulario;
+import com.farmacia.exception.ValidacionContactoException;
 import com.farmacia.model.Cliente;
 import com.farmacia.model.ClienteResumenVista;
 import com.farmacia.service.ClienteServicio;
@@ -58,5 +59,15 @@ public class ClienteControlador {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente no encontrado");
         }
         return detalle(id);
+    }
+
+    @ExceptionHandler(ValidacionContactoException.class)
+    public ResponseEntity<Map<String, Object>> manejarErrorContacto(ValidacionContactoException ex) {
+        Map<String, Object> cuerpo = new LinkedHashMap<>();
+        cuerpo.put("error", "Conflicto en datos de contacto");
+        cuerpo.put("mensaje", ex.getMessage());
+        cuerpo.put("errores", ex.getErroresPorCampo());
+        cuerpo.put("campos", ex.getErroresPorCampo());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(cuerpo);
     }
 }

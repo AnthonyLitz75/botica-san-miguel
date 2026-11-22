@@ -306,4 +306,64 @@ class ClienteWebControladorTest {
 
         verify(servicio).actualizar(eq(8), any(ClienteFormulario.class));
     }
+
+    @Test
+    @DisplayName("Escenario 17: POST /clientes con contacto duplicado rechaza los campos correspondientes en HTML")
+    void guardar_conContactoDuplicado_retornaFormularioConErroresPorCampo() throws Exception {
+        when(servicio.guardar(any())).thenThrow(new com.farmacia.exception.ValidacionContactoException(
+                java.util.Map.of("telefono", "Este teléfono ya está registrado a nombre de Pedro Pérez.",
+                                 "correo", "Este correo ya está registrado a nombre de María Gómez.")));
+
+        mvc.perform(post("/clientes")
+                        .with(user("vendedor1").roles("VENDEDOR"))
+                        .with(csrf())
+                        .param("tipoDocumento", "DNI")
+                        .param("numeroDocumento", "12345678")
+                        .param("nombreCompleto", "Carlos López")
+                        .param("telefono", "999888777")
+                        .param("correo", "carlos@example.com"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("clientes/formulario"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().attributeHasFieldErrorCode("formulario", "telefono", "telefono.duplicado"))
+                .andExpect(model().attributeHasFieldErrorCode("formulario", "correo", "correo.duplicado"));
+    }
+
+    @Test
+    @DisplayName("Escenario 18: POST /clientes via AJAX con contacto duplicado retorna 400 Bad Request y JSON de errores")
+    void guardar_conContactoDuplicadoAjax_retornaBadRequestJson() throws Exception {
+        when(servicio.guardar(any())).thenThrow(new com.farmacia.exception.ValidacionContactoException(
+                java.util.Map.of("telefono", "Este teléfono ya está registrado a nombre de Pedro Pérez.")));
+
+        mvc.perform(post("/clientes")
+                        .with(user("vendedor1").roles("VENDEDOR"))
+                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .param("tipoDocumento", "DNI")
+                        .param("numeroDocumento", "12345678")
+                        .param("nombreCompleto", "Carlos López")
+                        .param("telefono", "999888777"))
+                .andExpect(status().isBadRequest())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.errores.telefono")
+                        .value("Este teléfono ya está registrado a nombre de Pedro Pérez."));
+    }
+
+    @Test
+    @DisplayName("Escenario 19: POST /clientes/{id}/editar con contacto duplicado rechaza los campos en HTML")
+    void actualizar_conContactoDuplicado_retornaFormularioConErroresPorCampo() throws Exception {
+        when(servicio.actualizar(eq(8), any())).thenThrow(new com.farmacia.exception.ValidacionContactoException(
+                java.util.Map.of("correo", "Este correo ya está registrado a nombre de Otra Empresa S.A.")));
+
+        mvc.perform(post("/clientes/8/editar")
+                        .with(user("admin1").roles("ADMINISTRADOR"))
+                        .with(csrf())
+                        .param("tipoDocumento", "RUC")
+                        .param("numeroDocumento", "20123456789")
+                        .param("nombreCompleto", "Botica Renovada")
+                        .param("correo", "contacto@otraempresa.com"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("clientes/formulario"))
+                .andExpect(model().attribute("idCliente", 8))
+                .andExpect(model().attributeHasFieldErrorCode("formulario", "correo", "correo.duplicado"));
+    }
 }

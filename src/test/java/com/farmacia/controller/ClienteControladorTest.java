@@ -84,6 +84,19 @@ class ClienteControladorTest {
     }
 
     @Test
+    void validaContactoDuplicadoEnCreacionYRetorna400ConCampos() throws Exception {
+        when(servicio.guardar(any())).thenThrow(new com.farmacia.exception.ValidacionContactoException(
+                java.util.Map.of("telefono", "Este teléfono ya está registrado a nombre de Juan Pérez.",
+                                 "correo", "Este correo ya está registrado a nombre de María Gómez.")));
+
+        mvc.perform(post("/api/clientes").header("Authorization", credenciales("vendedor"))
+                        .contentType("application/json").content(CLIENTE_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errores.telefono").value("Este teléfono ya está registrado a nombre de Juan Pérez."))
+                .andExpect(jsonPath("$.errores.correo").value("Este correo ya está registrado a nombre de María Gómez."));
+    }
+
+    @Test
     void actualizaClienteExistenteYDevuelve404CuandoNoExiste() throws Exception {
         Cliente cliente = new Cliente(4, "DNI", "12345678", "Ana Pérez", "987654321", "ana@example.com");
         when(servicio.actualizar(org.mockito.ArgumentMatchers.eq(4), any())).thenReturn(true);

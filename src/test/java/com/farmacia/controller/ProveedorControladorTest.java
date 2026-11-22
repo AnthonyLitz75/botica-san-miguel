@@ -430,4 +430,68 @@ class ProveedorControladorTest {
                 .with(csrf()))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @DisplayName("POST /proveedores con contacto duplicado rechaza campos correspondientes en HTML")
+    void guardar_conContactoDuplicado_rechazaCamposCorrespondientes() throws Exception {
+        org.mockito.Mockito.doThrow(new com.farmacia.exception.ValidacionContactoException(
+                java.util.Map.of("telefono", "Este teléfono ya está registrado a nombre de Droguería Central.",
+                                 "correo", "Este correo ya está registrado a nombre de Droguería Central.")))
+                .when(servicio).guardar(any(ProveedorFormulario.class));
+
+        mvc.perform(post("/proveedores")
+                .with(user("compras").roles("COMPRAS"))
+                .with(csrf())
+                .param("ruc", "20123456789")
+                .param("razonSocial", "Drogueria Duplicada SAC")
+                .param("telefono", "014567890")
+                .param("correo", "contacto@duplicada.pe")
+                .param("direccion", "Av. Principal 123"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("proveedores/formulario"))
+                .andExpect(model().attributeHasFieldErrorCode("formulario", "telefono", "telefono.duplicado"))
+                .andExpect(model().attributeHasFieldErrorCode("formulario", "correo", "correo.duplicado"));
+    }
+
+    @Test
+    @DisplayName("POST /proveedores via AJAX con contacto duplicado retorna 400 Bad Request y JSON de errores")
+    void guardar_conContactoDuplicadoAjax_retornaBadRequestJson() throws Exception {
+        org.mockito.Mockito.doThrow(new com.farmacia.exception.ValidacionContactoException(
+                java.util.Map.of("correo", "Este correo ya está registrado a nombre de Droguería Central.")))
+                .when(servicio).guardar(any(ProveedorFormulario.class));
+
+        mvc.perform(post("/proveedores")
+                .with(user("compras").roles("COMPRAS"))
+                .with(csrf())
+                .header("X-Requested-With", "XMLHttpRequest")
+                .param("ruc", "20123456789")
+                .param("razonSocial", "Drogueria Duplicada SAC")
+                .param("correo", "contacto@duplicada.pe"))
+                .andExpect(status().isBadRequest())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.errores.correo")
+                        .value("Este correo ya está registrado a nombre de Droguería Central."));
+    }
+
+    @Test
+    @DisplayName("POST /proveedores/{id}/editar con contacto duplicado rechaza campos en HTML")
+    void actualizar_conContactoDuplicado_rechazaCampos() throws Exception {
+        Proveedor prov = crearProveedorPrueba(1, "20100000001", "Drogueria Central SAC");
+        when(servicio.buscarPorId(1)).thenReturn(Optional.of(prov));
+        when(servicio.actualizar(eq(1), any(ProveedorFormulario.class)))
+                .thenThrow(new com.farmacia.exception.ValidacionContactoException(
+                        java.util.Map.of("telefono", "Este teléfono ya está registrado a nombre de Otro Proveedor.")));
+
+        mvc.perform(post("/proveedores/1/editar")
+                .with(user("compras").roles("COMPRAS"))
+                .with(csrf())
+                .param("ruc", "20100000001")
+                .param("razonSocial", "Drogueria Central SAC")
+                .param("telefono", "019998877")
+                .param("correo", "contacto@central.pe")
+                .param("direccion", "Av. Principal 123"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("proveedores/formulario"))
+                .andExpect(model().attribute("idProveedor", 1))
+                .andExpect(model().attributeHasFieldErrorCode("formulario", "telefono", "telefono.duplicado"));
+    }
 }

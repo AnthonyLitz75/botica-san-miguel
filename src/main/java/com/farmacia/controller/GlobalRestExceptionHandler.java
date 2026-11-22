@@ -17,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.farmacia.exception.RecursoNoEncontradoException;
 import com.farmacia.exception.ReglaNegocioException;
+import com.farmacia.exception.ValidacionContactoException;
 
 /**
  * Controlador global centralizado para el manejo estandarizado de excepciones en endpoints REST,
@@ -32,6 +33,21 @@ public class GlobalRestExceptionHandler {
     private static final URI TIPO_ERROR_NEGOCIO = URI.create("urn:problem-type:regla-negocio");
     private static final URI TIPO_ERROR_DUPLICADO = URI.create("urn:problem-type:conflicto-duplicado");
     private static final URI TIPO_ERROR_NO_ENCONTRADO = URI.create("urn:problem-type:recurso-no-encontrado");
+
+    @ExceptionHandler(ValidacionContactoException.class)
+    public ResponseEntity<ProblemDetail> manejarValidacionContacto(ValidacionContactoException excepcion) {
+        String primerMensaje = excepcion.getErroresPorCampo().values().stream()
+                .findFirst()
+                .orElse("Conflicto en datos de contacto");
+
+        ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, primerMensaje);
+        problema.setTitle("Error de Validación de Contacto");
+        problema.setType(TIPO_ERROR_VALIDACION);
+        problema.setProperty("mensaje", primerMensaje);
+        problema.setProperty("error", primerMensaje);
+        problema.setProperty("campos", excepcion.getErroresPorCampo());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problema);
+    }
 
     @ExceptionHandler(ReglaNegocioException.class)
     public ResponseEntity<ProblemDetail> manejarReglaNegocio(ReglaNegocioException excepcion) {

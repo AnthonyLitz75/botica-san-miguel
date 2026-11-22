@@ -93,11 +93,13 @@ class ReporteRepositorioPersistenciaTest extends AbstractRepositorioIntegrationT
     }
 
     private Integer insertarProveedor(String ruc, String razonSocial) {
+        String correo = "prov_" + ruc + "@test.pe";
+        String telefono = "9" + (ruc.length() >= 8 ? ruc.substring(ruc.length() - 8) : ruc);
         return jdbcTemplate.queryForObject("""
                 INSERT INTO proveedor (ruc, razon_social, direccion, telefono, correo, activo)
-                VALUES (?, ?, 'Direccion Test', '999888777', 'prov@test.pe', true)
+                VALUES (?, ?, 'Direccion Test', ?, ?, true)
                 RETURNING id_proveedor
-                """, Integer.class, ruc, razonSocial);
+                """, Integer.class, ruc, razonSocial, telefono, correo);
     }
 
     private Integer insertarOrden(String num, Integer idProv, LocalDateTime fh, String estado, BigDecimal total) {

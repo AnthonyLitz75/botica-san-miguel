@@ -133,3 +133,15 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 480px) {
+  .ov {
+    padding: 16px 8px;
+  }
+  .md .mh,
+  .md .mb,
+  .md .mf {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}

@@ -96,4 +96,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       btn.classList.remove("opacity-80", "cursor-wait");
     });
   });
+
+  // -------------------------------------------------------------
+  // 3. Foco accesible en el primer campo con error al cargar
+  // -------------------------------------------------------------
+  const primerError = document.querySelector('[aria-invalid="true"], .inp.err input, .inp.err select');
+  if (primerError) {
+    setTimeout(() => primerError.focus(), 50);
+  }
 });
