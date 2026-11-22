@@ -14,23 +14,25 @@
             </div>
         </div>
 
-        <!-- Gráfico de ventas netas por día (CA-1.1 a CA-1.6) -->
+        <!-- Gráfico de ventas netas por día (CA-1.1 a CA-1.6, Ajuste 023) -->
         <div class="card pad mb-6" th:if="${aviso == null and barras != null and not #lists.isEmpty(barras)}">
             <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
                 <h2 class="text-base font-bold text-ink mb-0">Ventas netas por día</h2>
                 <span class="lbl text-xs text-ink-3 font-semibold"
-                      th:text="${'S/ · máx. S/ ' + #numbers.formatDecimal(maximo != null ? maximo : 0, 1, 'COMMA', 2, 'POINT')}">S/ · máx. S/ 0.00</span>
+                      th:text="${'Mayor venta del día: S/ ' + #numbers.formatDecimal(maximo != null ? maximo : 0, 1, 'COMMA', 2, 'POINT')}">Mayor venta del día: S/ 0.00</span>
             </div>
             <!-- Contenedor con scroll interno para pantallas angostas (320px) sin scroll de página -->
             <div class="grafico-scroll-contenedor overflow-x-auto w-full pb-6 pt-2">
                 <div class="bars" role="img" th:attr="aria-label=${resumen}">
-                    <div th:each="b : ${barras}"
+                    <div th:each="b, iterStat : ${barras}"
                          class="barra-item"
                          th:classappend="${b.porcentajeAltura() == 0} ? 'barra-cero' : ''"
                          tabindex="0"
                          th:style="|height: ${b.porcentajeAltura()}%;|"
-                         th:title="${#temporals.format(b.fecha(), 'dd/MM') + ': S/ ' + #numbers.formatDecimal(b.total(), 1, 'COMMA', 2, 'POINT')}">
-                        <small th:text="${#temporals.format(b.fecha(), 'dd/MM')}">01/01</small>
+                         th:title="${#temporals.format(b.fecha(), 'dd/MM') + ': S/ ' + #numbers.formatDecimal(b.total(), 1, 'COMMA', 2, 'POINT')}"
+                         th:attr="aria-label=${#temporals.format(b.fecha(), 'dd/MM/yyyy') + ': S/ ' + #numbers.formatDecimal(b.total(), 1, 'COMMA', 2, 'POINT')}">
+                        <small th:if="${iterStat.first or iterStat.last or (iterStat.index % 5 == 0)}"
+                               th:text="${#temporals.format(b.fecha(), 'dd/MM')}">01/01</small>
                     </div>
                 </div>
             </div>

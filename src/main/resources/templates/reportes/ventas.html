@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragmentos/head :: recursos('Reporte de ventas por período')}">
-    <title>Reporte de ventas por período | Botica San Miguel</title>
+<head th:replace="~{fragmentos/head :: recursos('Ventas por período')}">
+    <title>Ventas por período | Botica San Miguel</title>
 </head>
 
 <body class="pagina-inventario">
@@ -12,76 +12,21 @@
         <header th:replace="~{fragmentos/navegacion :: cabecera('Ventas por período', 'Reportes')}"></header>
         <main id="contenido" class="inventario-contenido">
 
-            <div class="head">
-                <div>
-                    <div class="eyebrow">REPORTES / GESTIÓN</div>
-                    <h1>Ventas por período</h1>
-                    <div class="sub">Consolidado diario de ventas, subtotales, descuentos aplicados e importes netos.</div>
-                </div>
-                <div class="flex items-center gap-3">
-                    <a th:href="@{/reportes/ventas.csv(desde=${filtro.desde()}, hasta=${filtro.hasta()})}" class="btn s">
-                        <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5M12 15V3"/>
-                        </svg>
-                        <span>Exportar CSV</span>
-                    </a>
-                </div>
-            </div>
+            <div th:replace="~{fragmentos/reportes :: cabecera('Ventas por período', 'Consolidado diario de ventas, subtotales, descuentos aplicados e importes netos.', @{/reportes/ventas.csv(desde=${filtro.desde()}, hasta=${filtro.hasta()})})}"></div>
 
-            <!-- Subnavegación de reportes (Boceto 07) -->
-            <div class="flex items-center gap-2 mb-6 flex-wrap">
-                <a th:href="@{/reportes/ventas}" class="btn p text-xs py-2 px-3.5">Ventas por período</a>
-                <a th:href="@{/reportes/mas-vendidos}" class="btn s text-xs py-2 px-3.5">Más vendidos</a>
-                <a th:href="@{/reportes/mermas}" class="btn s text-xs py-2 px-3.5">Mermas</a>
-                <a th:href="@{/reportes/inventario}" class="btn s text-xs py-2 px-3.5">Inventario</a>
-                <a th:href="@{/reportes/compras}" class="btn s text-xs py-2 px-3.5">Estado de compras</a>
-                <a th:href="@{/reportes/panel}" class="btn s text-xs py-2 px-3.5">Panel resumen</a>
-            </div>
+            <!-- Subnavegación de reportes unificada -->
+            <div th:replace="~{fragmentos/reportes :: pestanas('ventas')}"></div>
 
             <div class="aviso-operacion aviso-error shadow-sm mb-4" th:if="${error != null}" role="alert">
                 <span class="icono icono-circle-alert" aria-hidden="true"></span>
                 <span th:text="${error}">Error en los filtros.</span>
             </div>
 
-            <!-- KPIs de Totales (Boceto 07) -->
+            <!-- KPIs de Totales -->
             <div class="kpis" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
-                <div class="card kpi">
-                    <div class="ic t-ok">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <div class="t">Total recaudado</div>
-                        <div class="n" th:text="${'S/ ' + #numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}">S/ 0.00</div>
-                        <div class="d" th:text="${totalVentas + (totalVentas == 1 ? ' venta en el rango' : ' ventas en el rango')}">0 ventas</div>
-                    </div>
-                </div>
-                <div class="card kpi">
-                    <div class="ic t-blue">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/>
-                            <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <div class="t">Subtotal</div>
-                        <div class="n" th:text="${'S/ ' + #numbers.formatDecimal(subtotal, 1, 'COMMA', 2, 'POINT')}">S/ 0.00</div>
-                        <div class="d">Antes de descuentos</div>
-                    </div>
-                </div>
-                <div class="card kpi">
-                    <div class="ic t-amber">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <path d="M22 3H2l8 9.46V19l4 2v-8.54z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <div class="t">Descuentos</div>
-                        <div class="n text-rose-600" th:text="${'S/ ' + #numbers.formatDecimal(descuento, 1, 'COMMA', 2, 'POINT')}">S/ 0.00</div>
-                        <div class="d">Rebajas aplicadas</div>
-                    </div>
-                </div>
+                <div th:replace="~{fragmentos/reportes :: kpi('recaudado', 't-ok', 'Total recaudado', ${'S/ ' + #numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}, ${totalVentas + (totalVentas == 1 ? ' venta en el rango' : ' ventas en el rango')}, null)}"></div>
+                <div th:replace="~{fragmentos/reportes :: kpi('subtotal', 't-blue', 'Subtotal', ${'S/ ' + #numbers.formatDecimal(subtotal, 1, 'COMMA', 2, 'POINT')}, 'Antes de descuentos', null)}"></div>
+                <div th:replace="~{fragmentos/reportes :: kpi('descuentos', 't-amber', 'Descuentos', ${'S/ ' + #numbers.formatDecimal(descuento, 1, 'COMMA', 2, 'POINT')}, 'Rebajas aplicadas', 'text-rose-600')}"></div>
             </div>
 
             <!-- Filtros de fecha -->
@@ -91,7 +36,7 @@
                         <div class="w-full sm:w-[230px]">
                             <label for="desde">Desde</label>
                             <div class="inp">
-                                <svg class="ico text-ink-3 flex-none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <svg class="ico text-ink-3 flex-none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                                     <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
                                 </svg>
                                 <input type="date" id="desde" name="desde" th:value="${filtro.desde()}" class="w-full bg-transparent border-0 focus:outline-none text-ink font-semibold">
@@ -100,7 +45,7 @@
                         <div class="w-full sm:w-[230px]">
                             <label for="hasta">Hasta</label>
                             <div class="inp">
-                                <svg class="ico text-ink-3 flex-none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <svg class="ico text-ink-3 flex-none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                                     <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
                                 </svg>
                                 <input type="date" id="hasta" name="hasta" th:value="${filtro.hasta()}" class="w-full bg-transparent border-0 focus:outline-none text-ink font-semibold">
@@ -108,7 +53,7 @@
                         </div>
                         <div>
                             <button type="submit" class="btn p" style="height:42px;">
-                                <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                                     <path d="M22 3H2l8 9.46V19l4 2v-8.54z"/>
                                 </svg>
                                 <span>Filtrar</span>
@@ -145,7 +90,7 @@
                         <tbody>
                             <tr th:if="${#lists.isEmpty(reporte)}">
                                 <td colspan="5" class="text-center py-12 text-ink-3">
-                                    <svg class="mx-auto text-slate-300 mb-2" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <svg class="mx-auto text-slate-300 mb-2" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                                         <circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>
                                     </svg>
                                     <p class="text-sm font-semibold text-ink-2">No se registraron ventas en el rango de fechas seleccionado.</p>
@@ -155,7 +100,11 @@
                                 <td class="font-medium text-ink" th:text="${#temporals.format(fila.fecha(), 'dd/MM/yyyy')}">01/01/2026</td>
                                 <td class="c font-bold text-ink-2" th:text="${fila.cantidadVentas()}">1</td>
                                 <td class="r text-xs text-ink-3" th:text="${'S/ ' + #numbers.formatDecimal(fila.subtotal(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</td>
-                                <td class="r text-xs text-rose-600" th:text="${'S/ ' + #numbers.formatDecimal(fila.descuento(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</td>
+                                <td class="r text-xs">
+                                    <span th:if="${fila.descuento() != null and fila.descuento().compareTo(T(java.math.BigDecimal).ZERO) > 0}" class="text-rose-600"
+                                          th:text="${'S/ ' + #numbers.formatDecimal(fila.descuento(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</span>
+                                    <span th:unless="${fila.descuento() != null and fila.descuento().compareTo(T(java.math.BigDecimal).ZERO) > 0}" class="text-ink-3">—</span>
+                                </td>
                                 <td class="r font-bold text-pine-800" th:text="${'S/ ' + #numbers.formatDecimal(fila.total(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</td>
                             </tr>
                         </tbody>
@@ -164,7 +113,11 @@
                                 <td class="font-bold text-ink">TOTAL GENERAL</td>
                                 <td class="c font-bold text-ink" th:text="${totalVentas}">0</td>
                                 <td class="r font-bold text-ink-3" th:text="${'S/ ' + #numbers.formatDecimal(subtotal, 1, 'COMMA', 2, 'POINT')}">S/ 0.00</td>
-                                <td class="r font-bold text-rose-600" th:text="${'S/ ' + #numbers.formatDecimal(descuento, 1, 'COMMA', 2, 'POINT')}">S/ 0.00</td>
+                                <td class="r font-bold text-xs">
+                                    <span th:if="${descuento != null and descuento.compareTo(T(java.math.BigDecimal).ZERO) > 0}" class="text-rose-600"
+                                          th:text="${'S/ ' + #numbers.formatDecimal(descuento, 1, 'COMMA', 2, 'POINT')}">S/ 0.00</span>
+                                    <span th:unless="${descuento != null and descuento.compareTo(T(java.math.BigDecimal).ZERO) > 0}" class="text-ink-3">—</span>
+                                </td>
                                 <td class="r font-extrabold text-pine-800 text-base" th:text="${'S/ ' + #numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}">S/ 0.00</td>
                             </tr>
                         </tfoot>
