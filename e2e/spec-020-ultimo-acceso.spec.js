@@ -49,7 +49,11 @@ test.describe('Spec 020: Último acceso de los usuarios', () => {
     await expect(thUltimoAcceso).toBeVisible();
 
     // 6. Verificar fila de vendedor_demo: debe mostrar "Hoy HH:mm"
-    const filaVendedor = page.locator('table tbody tr:has(.mono:text("vendedor_demo"))');
+    let filaVendedor = page.locator('table tbody tr:has(.mono:text("vendedor_demo"))');
+    if (await filaVendedor.count() === 0) {
+      await page.goto('/usuarios?pagina=2', { waitUntil: 'domcontentloaded' });
+      filaVendedor = page.locator('table tbody tr:has(.mono:text("vendedor_demo"))');
+    }
     await expect(filaVendedor).toBeVisible();
     const celdaAccesoVendedor = filaVendedor.locator('td.lbl');
     await expect(celdaAccesoVendedor).toBeVisible();
@@ -80,7 +84,11 @@ test.describe('Spec 020: Último acceso de los usuarios', () => {
     await expect(page.locator('.aviso-operacion.aviso-exito')).toContainText('Usuario registrado correctamente', { timeout: 15000 });
 
     // 8. Verificar que el usuario recién creado muestra "Nunca" en Último acceso
-    const filaNuevo = page.locator(`table tbody tr:has(.mono:text("${usuarioNuevo}"))`);
+    let filaNuevo = page.locator(`table tbody tr:has(.mono:text("${usuarioNuevo}"))`);
+    if (await filaNuevo.count() === 0) {
+      await page.goto('/usuarios?pagina=2', { waitUntil: 'domcontentloaded' });
+      filaNuevo = page.locator(`table tbody tr:has(.mono:text("${usuarioNuevo}"))`);
+    }
     await expect(filaNuevo).toBeVisible();
     const celdaAccesoNuevo = filaNuevo.locator('td.lbl');
     await expect(celdaAccesoNuevo).toHaveText('Nunca');
