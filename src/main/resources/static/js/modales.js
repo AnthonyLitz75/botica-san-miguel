@@ -277,9 +277,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (inpMotivoExistencias) {
                 inpMotivoExistencias.value = 'Existencias iniciales';
             }
-            const chkAcumularExistencias = modal.querySelector('#modal-existencias-confirmarAcumulacion');
-            if (chkAcumularExistencias) {
-                chkAcumularExistencias.checked = false;
+            const chkSumarExistencias = modal.querySelector('#modal-existencias-confirmarAcumulacion');
+            if (chkSumarExistencias) {
+                chkSumarExistencias.checked = false;
             }
         }
     }
@@ -306,14 +306,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (modalId === 'modal-confirmar') {
             const btnCancelar = modal.querySelector('#modal-confirmar-cancelar');
             if (btnCancelar) {
-                setTimeout(() => btnCancelar.focus(), 50);
+                requestAnimationFrame(() => btnCancelar.focus());
                 return;
             }
         }
 
         const primerControl = modal.querySelector('input:not([type="hidden"]):not([readonly]), select, textarea, button:not(.btn-cerrar-modal)');
         if (primerControl) {
-            setTimeout(() => primerControl.focus(), 50);
+            requestAnimationFrame(() => {
+                if (!modal.contains(document.activeElement) || document.activeElement === document.body) {
+                    primerControl.focus();
+                }
+            });
         }
     }
 
