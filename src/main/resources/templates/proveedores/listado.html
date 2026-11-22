@@ -19,7 +19,7 @@
                 </div>
                 <div class="row items-center" th:if="${puedeGestionarProveedores}">
                     <a class="btn p inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md"
-                        th:href="@{/proveedores/nuevo}" data-modal-open="modal-nuevo-proveedor">
+                        th:href="@{/proveedores/nuevo}" data-modal-open="modal-nuevo-proveedor" data-modo="crear" th:attr="data-action=@{/proveedores}">
                         <svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>
                         <span>Nuevo proveedor</span>
                     </a>
@@ -109,7 +109,16 @@
                                         <a class="ibtn boton-icono"
                                             th:href="@{/proveedores/{id}/editar(id=${proveedor.idProveedor()})}"
                                             title="Editar proveedor"
-                                            th:attr="aria-label=${'Editar ' + proveedor.razonSocial()}">
+                                            data-modal-open="modal-nuevo-proveedor"
+                                            data-modo="editar"
+                                            th:attr="aria-label=${'Editar ' + proveedor.razonSocial()},
+                                                     data-action=@{/proveedores/{id}/editar(id=${proveedor.idProveedor()})},
+                                                     data-titulo=${'Editar ' + proveedor.razonSocial()},
+                                                     data-ruc=${proveedor.ruc()},
+                                                     data-razon-social=${proveedor.razonSocial()},
+                                                     data-telefono=${proveedor.telefono()},
+                                                     data-correo=${proveedor.correo()},
+                                                     data-direccion=${proveedor.direccion()}">
                                             <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
                                         </a>
                                         <form method="post" th:if="${proveedor.activo()}"

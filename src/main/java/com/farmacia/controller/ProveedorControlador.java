@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/proveedores")
@@ -136,11 +137,17 @@ public class ProveedorControlador {
     }
 
     @PostMapping("/{id}/editar")
-    public String actualizar(
+    public Object actualizar(
             @PathVariable("id") Integer id,
             @Valid @ModelAttribute("formulario") ProveedorFormulario formulario,
             BindingResult resultado,
-            Model model) {
+            Model model,
+            RedirectAttributes redireccion,
+            @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
+            @RequestHeader(value = "Accept", required = false) String accept) {
+
+        boolean esAjax = "XMLHttpRequest".equalsIgnoreCase(requestedWith)
+                || (accept != null && accept.contains("application/json"));
 
         servicio.buscarPorId(id).orElseThrow(
                 () -> new ResponseStatusException(
@@ -150,6 +157,13 @@ public class ProveedorControlador {
         model.addAttribute("idProveedor", id);
 
         if (resultado.hasErrors()) {
+            if (esAjax) {
+                Map<String, String> errores = new LinkedHashMap<>();
+                for (FieldError err : resultado.getFieldErrors()) {
+                    errores.putIfAbsent(err.getField(), err.getDefaultMessage());
+                }
+                return ResponseEntity.badRequest().body(Map.of("errores", errores));
+            }
             return "proveedores/formulario";
         }
 
@@ -161,11 +175,23 @@ public class ProveedorControlador {
                         HttpStatus.NOT_FOUND,
                         "Proveedor no encontrado");
             }
+            if (esAjax) {
+                return ResponseEntity.ok(Map.of("ok", true, "url", "/proveedores"));
+            }
+            redireccion.addFlashAttribute("mensaje", "Cambios del proveedor guardados correctamente.");
+            return "redirect:/proveedores";
         } catch (ValidacionContactoException excepcion) {
+            if (esAjax) {
+                return ResponseEntity.badRequest().body(Map.of("errores", excepcion.getErroresPorCampo()));
+            }
             excepcion.getErroresPorCampo().forEach((campo, msg) ->
                     resultado.rejectValue(campo, campo + ".duplicado", msg));
             return "proveedores/formulario";
         } catch (DuplicateKeyException excepcion) {
+            if (esAjax) {
+                return ResponseEntity.badRequest().body(Map.of("errores",
+                        Map.of("ruc", "Ya existe un proveedor con este RUC")));
+            }
             resultado.rejectValue(
                     "ruc",
                     "ruc.duplicado",
@@ -173,8 +199,6 @@ public class ProveedorControlador {
 
             return "proveedores/formulario";
         }
-
-        return "redirect:/proveedores";
     }
 
     @PostMapping("/{id}/desactivar")

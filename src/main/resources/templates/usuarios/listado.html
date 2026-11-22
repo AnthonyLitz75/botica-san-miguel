@@ -19,7 +19,7 @@
                     <div class="sub">Administra las cuentas de acceso, roles y contraseñas del personal.</div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <a class="btn p" th:href="@{/usuarios/nuevo}" data-modal-open="modal-nuevo-usuario">
+                    <a class="btn p" th:href="@{/usuarios/nuevo}" data-modal-open="modal-nuevo-usuario" data-modo="crear" th:attr="data-action=@{/usuarios}">
                         <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M5 12h14M12 5v14"/>
                         </svg>
@@ -90,7 +90,15 @@
                                 <td class="r">
                                     <div class="flex items-center justify-end gap-1.5">
                                         <a class="ibtn" th:href="@{/usuarios/{id}/editar(id=${u.idUsuario()})}"
-                                            title="Editar usuario" th:attr="aria-label=${'Editar ' + u.nombre()}">
+                                            title="Editar usuario"
+                                            data-modal-open="modal-nuevo-usuario"
+                                            data-modo="editar"
+                                            th:attr="aria-label=${'Editar a ' + u.nombre()},
+                                                     data-action=@{/usuarios/{id}/editar(id=${u.idUsuario()})},
+                                                     data-titulo=${'Editar a ' + u.nombre()},
+                                                     data-nombre=${u.nombre()},
+                                                     data-usuario=${u.nombreUsuario()},
+                                                     data-rol=${u.rol()}">
                                             <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                                 <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
                                             </svg>
@@ -246,7 +254,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="full">
+                    <div id="modal-contenedor-clave" class="full">
                         <label for="modal-clave-user">Contraseña inicial <span class="req">*</span></label>
                         <div class="inp">
                             <svg class="ico text-ink-3" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
