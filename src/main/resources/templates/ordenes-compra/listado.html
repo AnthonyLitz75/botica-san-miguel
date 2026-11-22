@@ -64,7 +64,7 @@
             <section class="inventario-resultados registro-listado" aria-labelledby="titulo-resultados">
                 <div class="sec">
                     <h2 id="titulo-resultados">Listado de órdenes</h2>
-                    <span class="cnt cantidad-resultados" th:text="${#lists.size(ordenes)}">0</span>
+                    <span class="cnt cantidad-resultados" th:text="${total != null ? total : #lists.size(ordenes)}">0</span>
                 </div>
 
                 <div class="card pad text-center inventario-vacio" th:if="${#lists.isEmpty(ordenes)}">
@@ -122,10 +122,7 @@
                     </table>
                 </div>
 
-                <div class="lbl mt-3 resultados-pie"
-                    th:text="${#lists.size(ordenes)} + (${#lists.size(ordenes) == 1} ? ' orden registrada' : ' órdenes registradas')">
-                    0 órdenes registradas
-                </div>
+                <div th:replace="~{fragmentos/paginacion :: control(${paginacion})}"></div>
             </section>
         </main>
     </div>

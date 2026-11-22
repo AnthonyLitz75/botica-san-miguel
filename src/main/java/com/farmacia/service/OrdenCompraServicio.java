@@ -42,6 +42,10 @@ public class OrdenCompraServicio {
         private final LoteRepositorio loteRepositorio;
         private final MovimientoInventarioRepositorio movimientoRepositorio;
         private final Clock clock;
+
+        public static final int ORDENES_POR_PAGINA = 25;
+
+        public record OrdenesPaginadas(List<OrdenCompraListadoVista> filas, int total, int pagina, int paginas) {}
         private final AuditoriaServicio auditoria;
 
         public OrdenCompraServicio(
@@ -73,6 +77,15 @@ public class OrdenCompraServicio {
 
         public List<OrdenCompraListadoVista> listarVista(String estado) {
                 return ordenRepositorio.listarVista(estado);
+        }
+
+        public OrdenesPaginadas listarVista(String estado, int pagina) {
+                int total = ordenRepositorio.contar(estado);
+                int paginas = Math.max(1, (total + ORDENES_POR_PAGINA - 1) / ORDENES_POR_PAGINA);
+                int actual = Math.min(Math.max(1, pagina), paginas);
+                int offset = (actual - 1) * ORDENES_POR_PAGINA;
+                List<OrdenCompraListadoVista> filas = ordenRepositorio.listarVista(estado, ORDENES_POR_PAGINA, offset);
+                return new OrdenesPaginadas(filas, total, actual, paginas);
         }
 
         public Map<String, Integer> contarPorEstado() {

@@ -1,28 +1,31 @@
 package com.farmacia.controller;
 
-import com.farmacia.service.OrdenCompraServicio;
-import com.farmacia.dto.RecepcionOrdenFormulario;
+import com.farmacia.dto.DetalleOrdenCompraFormulario;
 import com.farmacia.dto.DetalleRecepcionFormulario;
+import com.farmacia.dto.OrdenCompraFormulario;
+import com.farmacia.dto.PaginacionModelo;
+import com.farmacia.dto.RecepcionOrdenFormulario;
 import com.farmacia.model.LineaRecepcionVista;
+import com.farmacia.service.MedicamentoServicio;
+import com.farmacia.service.OrdenCompraServicio;
+import com.farmacia.service.ProveedorServicio;
+import jakarta.validation.Valid;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import com.farmacia.service.ProveedorServicio;
-import com.farmacia.service.MedicamentoServicio;
-import com.farmacia.dto.OrdenCompraFormulario;
-import com.farmacia.dto.DetalleOrdenCompraFormulario;
-import java.util.List;
-import jakarta.validation.Valid;
-import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/ordenes-compra")
@@ -45,6 +48,7 @@ public class OrdenCompraControlador {
         @GetMapping
         public String listar(
                         @RequestParam(name = "estado", required = false) String estado,
+                        @RequestParam(name = "pagina", defaultValue = "1") int pagina,
                         Model model,
                         Authentication autenticacion) {
 
@@ -55,10 +59,22 @@ public class OrdenCompraControlador {
 
                 String estadoNormalizado = (estado != null && !estado.isBlank()) ? estado.strip().toUpperCase() : null;
 
-                model.addAttribute("ordenes", servicio.listarVista(estadoNormalizado));
+                var ordenesPaginadas = servicio.listarVista(estadoNormalizado, pagina);
+                model.addAttribute("ordenes", ordenesPaginadas.filas());
+                model.addAttribute("total", ordenesPaginadas.total());
+                model.addAttribute("pagina", ordenesPaginadas.pagina());
+                model.addAttribute("paginas", ordenesPaginadas.paginas());
                 model.addAttribute("estadoSeleccionado", estadoNormalizado);
                 model.addAttribute("conteosPorEstado", servicio.contarPorEstado());
                 model.addAttribute("puedeCrearOrden", puedeCrearOrden);
+
+                Map<String, Object> params = new LinkedHashMap<>();
+                if (estadoNormalizado != null) {
+                        params.put("estado", estadoNormalizado);
+                }
+                model.addAttribute("paginacion", PaginacionModelo.crear(
+                                ordenesPaginadas.pagina(), ordenesPaginadas.total(), OrdenCompraServicio.ORDENES_POR_PAGINA,
+                                "/ordenes-compra", params));
 
                 return "ordenes-compra/listado";
         }

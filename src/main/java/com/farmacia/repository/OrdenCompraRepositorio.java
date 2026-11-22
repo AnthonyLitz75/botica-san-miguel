@@ -23,6 +23,50 @@ public class OrdenCompraRepositorio {
                 this.jdbcTemplate = jdbcTemplate;
         }
 
+        public int contar(String estado) {
+                StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM orden_compra oc");
+                List<Object> parametros = new ArrayList<>();
+                if (estado != null && !estado.isBlank()) {
+                        sql.append(" WHERE oc.estado = ?");
+                        parametros.add(estado.strip());
+                }
+                Integer total = jdbcTemplate.queryForObject(sql.toString(), Integer.class, parametros.toArray());
+                return total != null ? total : 0;
+        }
+
+        public List<OrdenCompraListadoVista> listarVista(String estado, int limite, int offset) {
+                StringBuilder sql = new StringBuilder("""
+                                SELECT oc.id_orden, oc.numero_orden, oc.id_usuario, oc.id_proveedor,
+                                       p.razon_social AS razon_social_proveedor,
+                                       oc.fecha_hora, oc.estado, oc.total_estimado, oc.observaciones
+                                FROM orden_compra oc
+                                LEFT JOIN proveedor p ON oc.id_proveedor = p.id_proveedor
+                                """);
+
+                List<Object> parametros = new ArrayList<>();
+                if (estado != null && !estado.isBlank()) {
+                        sql.append(" WHERE oc.estado = ?");
+                        parametros.add(estado.strip());
+                }
+                sql.append(" ORDER BY oc.fecha_hora DESC, oc.id_orden DESC LIMIT ? OFFSET ?");
+                parametros.add(limite);
+                parametros.add(offset);
+
+                return jdbcTemplate.query(
+                                sql.toString(),
+                                (fila, numeroFila) -> new OrdenCompraListadoVista(
+                                                fila.getInt("id_orden"),
+                                                fila.getString("numero_orden"),
+                                                fila.getInt("id_usuario"),
+                                                fila.getInt("id_proveedor"),
+                                                fila.getString("razon_social_proveedor"),
+                                                fila.getObject("fecha_hora", LocalDateTime.class),
+                                                fila.getString("estado"),
+                                                fila.getBigDecimal("total_estimado"),
+                                                fila.getString("observaciones")),
+                                parametros.toArray());
+        }
+
         public List<OrdenCompraListadoVista> listarVista(String estado) {
                 StringBuilder sql = new StringBuilder("""
                                 SELECT oc.id_orden, oc.numero_orden, oc.id_usuario, oc.id_proveedor,
