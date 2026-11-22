@@ -26,7 +26,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden'; // Evita scroll de fondo
 
-        // Foco al primer control editable
+        // Foco al primer control editable (o botón cancelar si es confirmación)
+        if (modalId === 'modal-confirmar') {
+            const btnCancelar = modal.querySelector('#modal-confirmar-cancelar');
+            if (btnCancelar) {
+                setTimeout(() => btnCancelar.focus(), 50);
+                return;
+            }
+        }
+
         const primerControl = modal.querySelector('input:not([type="hidden"]), select, textarea, button:not(.btn-cerrar-modal)');
         if (primerControl) {
             setTimeout(() => primerControl.focus(), 50);
@@ -43,6 +51,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         modalActivo.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
 
+        if (formularioPendienteConfirmacion) {
+            formularioPendienteConfirmacion = null;
+        }
+
         if (ultimoElementoFoco && typeof ultimoElementoFoco.focus === 'function') {
             ultimoElementoFoco.focus();
         }
@@ -50,8 +62,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         modalActivo = null;
     }
 
+    // Variable para rastrear el formulario pendiente de confirmación (Spec 023)
+    let formularioPendienteConfirmacion = null;
+
     // Interceptar clics en disparadores de modales (Progressive Enhancement)
     document.addEventListener('click', (e) => {
+        // Confirmar acción en modal de confirmación
+        if (e.target.closest('#modal-confirmar-accion')) {
+            e.preventDefault();
+            const formulario = formularioPendienteConfirmacion;
+            cerrarModalActivo();
+            if (formulario) {
+                formulario._confirmado = true;
+                if (typeof formulario.requestSubmit === 'function') {
+                    formulario.requestSubmit();
+                } else {
+                    formulario.submit();
+                }
+            }
+            return;
+        }
+
+        // Cancelar acción en modal de confirmación
+        if (e.target.closest('#modal-confirmar-cancelar')) {
+            e.preventDefault();
+            cerrarModalActivo();
+            return;
+        }
+
         const disparador = e.target.closest('[data-modal-open]');
         if (disparador) {
             const modalId = disparador.getAttribute('data-modal-open');
@@ -206,6 +244,48 @@ document.addEventListener('DOMContentLoaded', async () => {
             primerInputConError.focus();
         }
     }
+
+    // Intercepción de formularios con confirmación previa (Spec 023)
+    document.addEventListener('submit', (e) => {
+        const formulario = e.target;
+        const disparador = e.submitter || document.activeElement;
+        const titulo = disparador?.getAttribute?.('data-confirmar-titulo') || formulario?.getAttribute?.('data-confirmar-titulo');
+
+        if (!titulo) return;
+
+        if (formulario._confirmado) {
+            delete formulario._confirmado;
+            return; // Permite el envío real
+        }
+
+        e.preventDefault();
+
+        const modalConfirmar = document.getElementById('modal-confirmar');
+        if (!modalConfirmar) {
+            // Si el modal no existe en el DOM, permitir degradación progresiva
+            formulario._confirmado = true;
+            if (typeof formulario.requestSubmit === 'function') {
+                formulario.requestSubmit();
+            } else {
+                formulario.submit();
+            }
+            return;
+        }
+
+        const mensaje = disparador?.getAttribute?.('data-confirmar-mensaje') || formulario?.getAttribute?.('data-confirmar-mensaje') || 'Esta acción no se puede deshacer.';
+        const boton = disparador?.getAttribute?.('data-confirmar-boton') || formulario?.getAttribute?.('data-confirmar-boton') || 'Desactivar';
+
+        const elTitulo = modalConfirmar.querySelector('#modal-confirmar-titulo');
+        const elMensaje = modalConfirmar.querySelector('#modal-confirmar-mensaje');
+        const elBoton = modalConfirmar.querySelector('#modal-confirmar-accion');
+
+        if (elTitulo) elTitulo.textContent = titulo;
+        if (elMensaje) elMensaje.textContent = mensaje;
+        if (elBoton) elBoton.textContent = boton;
+
+        formularioPendienteConfirmacion = formulario;
+        abrirModal('modal-confirmar', disparador);
+    }, true);
 
     document.addEventListener('submit', async (e) => {
         const formulario = e.target;

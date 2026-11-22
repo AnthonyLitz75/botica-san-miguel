@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+    <!-- Modal Reutilizable de Confirmación de Acción (Spec 023) -->
+    <div th:fragment="modal" id="modal-confirmar" class="ov modal-confirmar-backdrop" role="alertdialog" aria-modal="true" aria-labelledby="modal-confirmar-titulo" aria-describedby="modal-confirmar-mensaje" aria-hidden="true">
+        <div class="md md-confirmar">
+            <div class="mh">
+                <div class="fi-warn" aria-hidden="true">
+                    <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <div class="confirmar-textos" style="flex: 1;">
+                    <h3 id="modal-confirmar-titulo">¿Confirmar acción?</h3>
+                    <p id="modal-confirmar-mensaje">Esta acción modificará el estado del registro.</p>
+                </div>
+            </div>
+            <div class="mf">
+                <button type="button" id="modal-confirmar-cancelar" class="btn s">Cancelar</button>
+                <button type="button" id="modal-confirmar-accion" class="btn d">Desactivar</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
