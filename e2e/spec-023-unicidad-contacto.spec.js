@@ -32,7 +32,8 @@ test.describe('Spec 023: Unicidad de teléfono y correo en Clientes y Proveedore
     const nombreB = `Cliente Beta ${ts}`;
 
     // 1. Crear cliente A con teléfono y correo únicos desde el modal
-    await page.goto('/clientes', { waitUntil: 'domcontentloaded' });
+    await page.goto('/clientes');
+    await page.waitForLoadState('networkidle');
     await page.getByRole('link', { name: /Nuevo cliente/i }).click();
 
     const modalCliente = page.locator('#modal-nuevo-cliente');
@@ -113,11 +114,12 @@ test.describe('Spec 023: Unicidad de teléfono y correo en Clientes y Proveedore
 
     // 4. Editar cliente A sin cambiar teléfono/correo -> guarda con éxito
     await page.locator(`tr:has-text("${nombreA}") a[title="Editar cliente"]`).click();
-    await expect(page.getByRole('heading', { level: 1, name: 'Editar cliente' })).toBeVisible();
+    await expect(modalCliente).toHaveClass(/activo|on/);
+    await expect(modalCliente.locator('h3')).toHaveText(`Editar ${nombreA}`);
 
-    await page.getByRole('button', { name: /Guardar cambios/i }).click();
-    await page.waitForURL((url) => url.pathname === '/clientes', { timeout: 15000 });
-    await expect(page.locator('.aviso-exito')).toContainText('Cambios del cliente guardados correctamente.');
+    await modalCliente.getByRole('button', { name: /Guardar cambios/i }).click();
+    await expect(modalCliente).not.toHaveClass(/activo|on/);
+    await expect(page.locator(`tr:has-text("${nombreA}")`)).toBeVisible();
   });
 
   test('Flujo Proveedores: bloqueo de correo y teléfono duplicados en modal y edición propia', async ({ page }) => {
@@ -137,7 +139,8 @@ test.describe('Spec 023: Unicidad de teléfono y correo en Clientes y Proveedore
     const razonB = `Distribuidora Beta ${ts} S.A.C.`;
 
     // 1. Crear proveedor A con teléfono y correo únicos desde el modal
-    await page.goto('/proveedores', { waitUntil: 'domcontentloaded' });
+    await page.goto('/proveedores');
+    await page.waitForLoadState('networkidle');
     await page.getByRole('link', { name: /Nuevo proveedor/i }).click();
 
     const modalProv = page.locator('#modal-nuevo-proveedor');
@@ -155,7 +158,8 @@ test.describe('Spec 023: Unicidad de teléfono y correo en Clientes y Proveedore
     ]);
 
     // Verificamos que se haya registrado en el listado
-    await page.goto('/proveedores', { waitUntil: 'domcontentloaded' });
+    await page.goto('/proveedores');
+    await page.waitForLoadState('networkidle');
     await expect(page.locator(`text=${razonA}`)).toBeVisible();
 
     // 2. Intentar crear proveedor B con el mismo correo de A
@@ -214,9 +218,11 @@ test.describe('Spec 023: Unicidad de teléfono y correo en Clientes y Proveedore
 
     // 4. Editar proveedor A sin cambiar teléfono/correo -> guarda con éxito
     await page.locator(`tr:has-text("${razonA}") a[title="Editar proveedor"]`).click();
-    await expect(page.getByRole('heading', { level: 1, name: 'Editar proveedor' })).toBeVisible();
+    await expect(modalProv).toHaveClass(/activo|on/);
+    await expect(modalProv.locator('h3')).toHaveText(`Editar ${razonA}`);
 
-    await page.getByRole('button', { name: /Guardar cambios/i }).click();
-    await page.waitForURL((url) => url.pathname === '/proveedores', { timeout: 15000 });
+    await modalProv.getByRole('button', { name: /Guardar cambios/i }).click();
+    await expect(modalProv).not.toHaveClass(/activo|on/);
+    await expect(page.locator(`tr:has-text("${razonA}")`)).toBeVisible();
   });
 });

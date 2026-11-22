@@ -99,7 +99,7 @@ public class CategoriaControlador {
                 return ResponseEntity.ok(Map.of("ok", true, "url", "/categorias?resaltar=" + nuevoId, "id", nuevoId));
             }
             redirectAttributes.addFlashAttribute("mensajeExito", "Categoría '" + formulario.nombre() + "' registrada exitosamente.");
-            return "redirect:/categorias?resaltar=" + nuevoId;
+            return "redirect:/categorias";
         } catch (IllegalArgumentException e) {
             if (esAjax) {
                 return ResponseEntity.badRequest().body(Map.of("errores", Map.of("nombre", e.getMessage())));
@@ -168,7 +168,7 @@ public class CategoriaControlador {
                 return ResponseEntity.ok(Map.of("ok", true, "url", "/categorias?resaltar=" + id, "id", id));
             }
             redirectAttributes.addFlashAttribute("mensajeExito", "Categoría '" + formulario.nombre() + "' actualizada correctamente.");
-            return "redirect:/categorias?resaltar=" + id;
+            return "redirect:/categorias";
         } catch (IllegalArgumentException e) {
             if (esAjax) {
                 return ResponseEntity.badRequest().body(Map.of("errores", Map.of("nombre", e.getMessage())));
