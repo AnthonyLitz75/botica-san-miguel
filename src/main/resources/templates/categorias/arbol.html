@@ -93,10 +93,13 @@
                                 <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
                             </a>
                             <form th:action="@{/categorias/{id}/desactivar(id=${nodo.id()})}" method="post" class="inline"
-                                  onsubmit="return confirm('¿Está seguro de desactivar esta categoría?');" style="margin:0;display:inline-flex;align-items:center;">
-                                <button type="submit" class="ibtn dng boton-icono"
+                                  style="margin:0;display:inline-flex;align-items:center;">
+                                <button type="submit" class="ibtn dng boton-icono accion-desactivar"
                                         title="Desactivar categoría"
-                                        aria-label="Desactivar categoría">
+                                        th:attr="aria-label=${'Desactivar ' + nodo.nombre()},
+                                                 data-confirmar-titulo=${'¿Desactivar ' + nodo.nombre() + '?'},
+                                                 data-confirmar-mensaje='Dejará de aparecer en la estructura y en nuevos medicamentos. Solo se puede desactivar si no tiene subcategorías ni medicamentos asociados.',
+                                                 data-confirmar-boton='Desactivar'">
                                     <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>
                                 </button>
                             </form>
