@@ -286,4 +286,131 @@ class HistorialVentasControladorTest {
                 .andExpect(content().string(not(containsString("<th scope=\"col\" class=\"c\">Estado</th>"))))
                 .andExpect(content().string(not(containsString(">EMITIDA<"))));
     }
+
+    // ------------------------------------------------------------------ spec 023: pulido historial
+
+    @Test
+    @DisplayName("Spec 023: Historial cuando descuento es cero renderiza '—' en gris y no muestra S/ 0.00 ni color rojo")
+    void historial_cuandoDescuentoEsCero_renderizaGuionEnGrisYSinRojo() throws Exception {
+        var fila = new VentaResumenVista(
+                10,
+                "B001-00000010",
+                LocalDateTime.of(2026, 11, 13, 14, 30),
+                2,
+                "vendedor_demo",
+                "Juan Perez",
+                new BigDecimal("50.00"),
+                BigDecimal.ZERO,
+                new BigDecimal("50.00"));
+
+        when(ventaServicio.listarVendedores()).thenReturn(List.of());
+        when(ventaServicio.listarHistorial(eq("admin"), any(), eq(1))).thenReturn(new VentaServicio.Historial(
+                List.of(fila),
+                new BigDecimal("50.00"),
+                1,
+                1,
+                1,
+                LocalDate.of(2026, 10, 14),
+                LocalDate.of(2026, 11, 13)));
+
+        mvc.perform(get("/ventas").with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("ventas/historial"))
+                .andExpect(content().string(containsString(">—<")))
+                .andExpect(content().string(not(containsString("text-rose-600"))))
+                .andExpect(content().string(not(containsString("S/ 0.00"))));
+    }
+
+    @Test
+    @DisplayName("Spec 023: Historial cuando descuento es mayor a cero renderiza monto en rojo")
+    void historial_cuandoDescuentoEsMayorACero_renderizaMontoEnRojo() throws Exception {
+        var fila = new VentaResumenVista(
+                10,
+                "B001-00000010",
+                LocalDateTime.of(2026, 11, 13, 14, 30),
+                2,
+                "vendedor_demo",
+                "Juan Perez",
+                new BigDecimal("50.00"),
+                new BigDecimal("1.70"),
+                new BigDecimal("48.30"));
+
+        when(ventaServicio.listarVendedores()).thenReturn(List.of());
+        when(ventaServicio.listarHistorial(eq("admin"), any(), eq(1))).thenReturn(new VentaServicio.Historial(
+                List.of(fila),
+                new BigDecimal("48.30"),
+                1,
+                1,
+                1,
+                LocalDate.of(2026, 10, 14),
+                LocalDate.of(2026, 11, 13)));
+
+        mvc.perform(get("/ventas").with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("ventas/historial"))
+                .andExpect(content().string(containsString("text-rose-600")))
+                .andExpect(content().string(containsString("S/ 1.70")));
+    }
+
+    @Test
+    @DisplayName("Spec 023: Botones de accion en Historial tienen tooltips exactos 'Ver comprobante' e 'Imprimir comprobante'")
+    void historial_botonesAccion_tienenTooltipsExactos() throws Exception {
+        var fila = new VentaResumenVista(
+                10,
+                "B001-00000010",
+                LocalDateTime.of(2026, 11, 13, 14, 30),
+                2,
+                "vendedor_demo",
+                "Juan Perez",
+                new BigDecimal("50.00"),
+                BigDecimal.ZERO,
+                new BigDecimal("50.00"));
+
+        when(ventaServicio.listarVendedores()).thenReturn(List.of());
+        when(ventaServicio.listarHistorial(eq("admin"), any(), eq(1))).thenReturn(new VentaServicio.Historial(
+                List.of(fila),
+                new BigDecimal("50.00"),
+                1,
+                1,
+                1,
+                LocalDate.of(2026, 10, 14),
+                LocalDate.of(2026, 11, 13)));
+
+        mvc.perform(get("/ventas").with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("ventas/historial"))
+                .andExpect(content().string(containsString("title=\"Ver comprobante\"")))
+                .andExpect(content().string(containsString("title=\"Imprimir comprobante\"")))
+                .andExpect(content().string(not(containsString("title=\"Imprimir comprobante en nueva pestaña\""))));
+    }
+
+    @Test
+    @DisplayName("Spec 023: Botones de accion en Mis ventas tienen tooltips exactos 'Ver comprobante' e 'Imprimir comprobante'")
+    void misVentas_botonesAccion_tienenTooltipsExactos() throws Exception {
+        var fila = new VentaResumenVista(
+                10,
+                "B001-00000010",
+                LocalDateTime.of(2026, 11, 13, 14, 30),
+                2,
+                "vendedor_demo",
+                "Juan Perez",
+                new BigDecimal("50.00"),
+                BigDecimal.ZERO,
+                new BigDecimal("50.00"));
+
+        when(ventaServicio.listarMisVentas(eq("vendedor"), any(), any(), eq(1))).thenReturn(new VentaServicio.MisVentas(
+                List.of(fila),
+                LocalDate.of(2026, 10, 14),
+                LocalDate.of(2026, 11, 13),
+                1,
+                1,
+                1));
+
+        mvc.perform(get("/ventas/mias").with(user("vendedor").roles("VENDEDOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("ventas/mis-ventas"))
+                .andExpect(content().string(containsString("title=\"Ver comprobante\"")))
+                .andExpect(content().string(containsString("title=\"Imprimir comprobante\"")))
+                .andExpect(content().string(not(containsString("title=\"Imprimir comprobante en nueva pestaña\""))));
+    }
 }

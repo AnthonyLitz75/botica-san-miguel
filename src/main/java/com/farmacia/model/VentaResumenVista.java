@@ -38,4 +38,8 @@ public record VentaResumenVista(
     public String metodoPagoVisible() {
         return metodoPago == null ? "—" : metodoPago.etiqueta();
     }
+
+    public boolean tieneDescuento() {
+        return descuentoTotal != null && descuentoTotal.compareTo(BigDecimal.ZERO) > 0;
+    }
 }
