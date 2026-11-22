@@ -108,10 +108,23 @@ public class ClienteWebControlador {
     }
 
     @PostMapping("/{idCliente}/editar")
-    public String actualizar(@PathVariable Integer idCliente,
+    public Object actualizar(@PathVariable Integer idCliente,
             @Valid @ModelAttribute("formulario") ClienteFormulario formulario,
-            BindingResult resultado, Model model, RedirectAttributes redireccion) {
+            BindingResult resultado, Model model, RedirectAttributes redireccion,
+            @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
+            @RequestHeader(value = "Accept", required = false) String accept) {
+
+        boolean esAjax = "XMLHttpRequest".equalsIgnoreCase(requestedWith)
+                || (accept != null && accept.contains("application/json"));
+
         if (resultado.hasErrors()) {
+            if (esAjax) {
+                Map<String, String> errores = new LinkedHashMap<>();
+                for (FieldError err : resultado.getFieldErrors()) {
+                    errores.putIfAbsent(err.getField(), err.getDefaultMessage());
+                }
+                return ResponseEntity.badRequest().body(Map.of("errores", errores));
+            }
             model.addAttribute("idCliente", idCliente);
             return "clientes/formulario";
         }
@@ -119,14 +132,24 @@ public class ClienteWebControlador {
             if (!servicio.actualizar(idCliente, formulario)) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente no encontrado");
             }
+            if (esAjax) {
+                return ResponseEntity.ok(Map.of("ok", true, "url", "/clientes"));
+            }
             redireccion.addFlashAttribute("mensaje", "Cambios del cliente guardados correctamente.");
             return "redirect:/clientes";
         } catch (ValidacionContactoException excepcion) {
+            if (esAjax) {
+                return ResponseEntity.badRequest().body(Map.of("errores", excepcion.getErroresPorCampo()));
+            }
             excepcion.getErroresPorCampo().forEach((campo, msg) ->
                     resultado.rejectValue(campo, campo + ".duplicado", msg));
             model.addAttribute("idCliente", idCliente);
             return "clientes/formulario";
         } catch (DuplicateKeyException | IllegalArgumentException excepcion) {
+            if (esAjax) {
+                return ResponseEntity.badRequest().body(Map.of("error", excepcion.getMessage(),
+                        "errores", Map.of("numeroDocumento", "Ya existe un cliente con este documento")));
+            }
             resultado.reject("cliente.invalido", excepcion.getMessage());
             model.addAttribute("idCliente", idCliente);
             return "clientes/formulario";

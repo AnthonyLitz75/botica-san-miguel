@@ -19,7 +19,7 @@
                 </div>
                 <div class="row items-center">
                     <a class="btn p inventario-boton boton-principal transition-all duration-150 active:scale-95 hover:shadow-md"
-                        th:href="@{/clientes/nuevo}" data-modal-open="modal-nuevo-cliente">
+                        th:href="@{/clientes/nuevo}" data-modal-open="modal-nuevo-cliente" data-modo="crear" th:attr="data-action=@{/clientes}">
                         <svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>
                         <span>Nuevo cliente</span>
                     </a>
@@ -97,7 +97,16 @@
                                     <a class="ibtn boton-icono transition-transform duration-150 hover:scale-105"
                                         th:href="@{/clientes/{id}/editar(id=${cliente.idCliente()})}"
                                         title="Editar cliente"
-                                        th:attr="aria-label=${'Editar ' + cliente.nombreCompleto()}">
+                                        data-modal-open="modal-nuevo-cliente"
+                                        data-modo="editar"
+                                        th:attr="aria-label=${'Editar ' + cliente.nombreCompleto()},
+                                                 data-action=@{/clientes/{id}/editar(id=${cliente.idCliente()})},
+                                                 data-titulo=${'Editar ' + cliente.nombreCompleto()},
+                                                 data-tipo-documento=${cliente.tipoDocumento()},
+                                                 data-numero-documento=${cliente.numeroDocumento()},
+                                                 data-nombre-completo=${cliente.nombreCompleto()},
+                                                 data-telefono=${cliente.telefono()},
+                                                 data-correo=${cliente.correo()}">
                                         <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
                                     </a>
                                 </td>

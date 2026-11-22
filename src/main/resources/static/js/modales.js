@@ -11,6 +11,270 @@ document.addEventListener('DOMContentLoaded', async () => {
     let ultimoElementoFoco = null;
 
     /**
+     * Configura el formulario del modal según el disparador (modo crear, editar o subcategoría).
+     */
+    function configurarFormularioModal(modal, disparador) {
+        const form = modal.querySelector('form');
+        if (!form) return;
+
+        // Guardar estado original del modal y formulario la primera vez
+        const h3Titulo = modal.querySelector('.mh h3');
+        if (h3Titulo && !modal.dataset.tituloOriginal) {
+            modal.dataset.tituloOriginal = h3Titulo.textContent.trim();
+        }
+        const btnSubmit = form.querySelector('button[type="submit"]');
+        const spanBoton = btnSubmit ? (btnSubmit.querySelector('span') || btnSubmit) : null;
+        if (spanBoton && !btnSubmit.dataset.textoOriginal) {
+            btnSubmit.dataset.textoOriginal = spanBoton.textContent.trim();
+        }
+        if (!form.dataset.actionOriginal) {
+            form.dataset.actionOriginal = form.getAttribute('action') || form.action;
+        }
+
+        limpiarErroresModal(modal);
+
+        const modo = disparador?.dataset?.modo || 'crear';
+
+        if (modo === 'editar') {
+            if (disparador.dataset.action) {
+                form.action = disparador.dataset.action;
+            }
+            if (h3Titulo && disparador.dataset.titulo) {
+                h3Titulo.textContent = disparador.dataset.titulo;
+            }
+            if (spanBoton) {
+                spanBoton.textContent = disparador.dataset.boton || 'Guardar cambios';
+            }
+
+            // --- Medicamentos ---
+            const inpCodigoMed = modal.querySelector('#modal-codigo-med');
+            if (inpCodigoMed && disparador.dataset.codigo !== undefined) {
+                inpCodigoMed.value = disparador.dataset.codigo;
+                inpCodigoMed.setAttribute('readonly', 'true');
+                inpCodigoMed.classList.add('bg-gray-100', 'cursor-not-allowed');
+            }
+            const inpNombreMed = modal.querySelector('#modal-nombre-med');
+            if (inpNombreMed && disparador.dataset.nombre !== undefined) {
+                inpNombreMed.value = disparador.dataset.nombre;
+            }
+            const inpConcMed = modal.querySelector('#modal-concentracion-med');
+            if (inpConcMed && disparador.dataset.concentracion !== undefined) {
+                inpConcMed.value = disparador.dataset.concentracion;
+            }
+            const inpPresMed = modal.querySelector('#modal-presentacion-med');
+            if (inpPresMed && disparador.dataset.presentacion !== undefined) {
+                inpPresMed.value = disparador.dataset.presentacion;
+            }
+            const selUnidadMed = modal.querySelector('#modal-unidad-med');
+            if (selUnidadMed && disparador.dataset.unidadControl !== undefined) {
+                selUnidadMed.value = disparador.dataset.unidadControl;
+            }
+            const selCatMed = modal.querySelector('#modal-categoria-med');
+            if (selCatMed && disparador.dataset.idCategoria !== undefined) {
+                selCatMed.value = disparador.dataset.idCategoria || '';
+            }
+            const inpPrecioMed = modal.querySelector('#modal-precio-med');
+            if (inpPrecioMed && disparador.dataset.precioVenta !== undefined) {
+                inpPrecioMed.value = disparador.dataset.precioVenta;
+            }
+            const inpStockMinMed = modal.querySelector('#modal-stockMinimo-med');
+            if (inpStockMinMed && disparador.dataset.stockMinimo !== undefined) {
+                inpStockMinMed.value = disparador.dataset.stockMinimo;
+            }
+
+            // --- Clientes ---
+            const inpTipoDocCli = modal.querySelector('#modal-tipoDocumento');
+            if (inpTipoDocCli && disparador.dataset.tipoDocumento !== undefined) {
+                inpTipoDocCli.value = disparador.dataset.tipoDocumento;
+                const btnToggles = modal.querySelectorAll('.btn-toggle-doc');
+                btnToggles.forEach(btn => {
+                    const activo = btn.dataset.tipo === disparador.dataset.tipoDocumento;
+                    btn.classList.toggle('on', activo);
+                    btn.setAttribute('aria-pressed', activo ? 'true' : 'false');
+                });
+            }
+            const inpNumDocCli = modal.querySelector('#modal-numeroDocumento');
+            if (inpNumDocCli && disparador.dataset.numeroDocumento !== undefined) {
+                inpNumDocCli.value = disparador.dataset.numeroDocumento;
+                const tipo = disparador.dataset.tipoDocumento || 'DNI';
+                inpNumDocCli.setAttribute('maxlength', tipo === 'RUC' ? '11' : '8');
+                inpNumDocCli.setAttribute('data-valida', tipo.toLowerCase());
+            }
+            const inpNomCli = modal.querySelector('#modal-nombreCompleto');
+            if (inpNomCli && disparador.dataset.nombreCompleto !== undefined) {
+                inpNomCli.value = disparador.dataset.nombreCompleto;
+            }
+            const inpTelCli = modal.querySelector('#modal-telefono');
+            if (inpTelCli && disparador.dataset.telefono !== undefined) {
+                inpTelCli.value = disparador.dataset.telefono;
+            }
+            const inpCorreoCli = modal.querySelector('#modal-correo');
+            if (inpCorreoCli && disparador.dataset.correo !== undefined) {
+                inpCorreoCli.value = disparador.dataset.correo;
+            }
+
+            // --- Proveedores ---
+            const inpRucProv = modal.querySelector('#modal-ruc');
+            if (inpRucProv && disparador.dataset.ruc !== undefined) {
+                inpRucProv.value = disparador.dataset.ruc;
+            }
+            const inpRazonProv = modal.querySelector('#modal-razonSocial');
+            if (inpRazonProv && disparador.dataset.razonSocial !== undefined) {
+                inpRazonProv.value = disparador.dataset.razonSocial;
+            }
+            const inpTelProv = modal.querySelector('#modal-telefono-prov');
+            if (inpTelProv && disparador.dataset.telefono !== undefined) {
+                inpTelProv.value = disparador.dataset.telefono;
+            }
+            const inpCorreoProv = modal.querySelector('#modal-correo-prov');
+            if (inpCorreoProv && disparador.dataset.correo !== undefined) {
+                inpCorreoProv.value = disparador.dataset.correo;
+            }
+            const inpDirProv = modal.querySelector('#modal-direccion');
+            if (inpDirProv && disparador.dataset.direccion !== undefined) {
+                inpDirProv.value = disparador.dataset.direccion;
+            }
+
+            // --- Usuarios ---
+            const inpNomUser = modal.querySelector('#modal-nombre-user');
+            if (inpNomUser && disparador.dataset.nombre !== undefined) {
+                inpNomUser.value = disparador.dataset.nombre;
+            }
+            const inpNomUsuario = modal.querySelector('#modal-nombreUsuario');
+            if (inpNomUsuario && disparador.dataset.usuario !== undefined) {
+                inpNomUsuario.value = disparador.dataset.usuario;
+                inpNomUsuario.setAttribute('readonly', 'true');
+                inpNomUsuario.classList.add('bg-gray-100', 'cursor-not-allowed');
+            }
+            const selRolUser = modal.querySelector('#modal-rol-user');
+            if (selRolUser && disparador.dataset.rol !== undefined) {
+                selRolUser.value = disparador.dataset.rol;
+            }
+            const contenedorClave = modal.querySelector('#modal-contenedor-clave');
+            const inpClaveUser = modal.querySelector('#modal-clave-user');
+            if (contenedorClave) {
+                contenedorClave.style.display = 'none';
+            }
+            if (inpClaveUser) {
+                inpClaveUser.removeAttribute('required');
+                inpClaveUser.value = '';
+            }
+
+            // --- Categorías (Editar) ---
+            const inpNomCat = modal.querySelector('#modal-nombre-cat');
+            if (inpNomCat && disparador.dataset.nombre !== undefined) {
+                inpNomCat.value = disparador.dataset.nombre;
+            }
+            const selPadreCat = modal.querySelector('#modal-padre-cat');
+            if (selPadreCat) {
+                selPadreCat.querySelectorAll('option').forEach(opt => {
+                    opt.disabled = false;
+                    if (disparador.dataset.id && opt.value === disparador.dataset.id) {
+                        opt.disabled = true; // No puede ser su propio padre
+                    }
+                });
+                if (disparador.dataset.padreId !== undefined) {
+                    selPadreCat.value = disparador.dataset.padreId || '';
+                }
+            }
+
+        } else if (modo === 'subcategoria') {
+            // --- Categorías (Subcategoría) ---
+            if (disparador.dataset.action) {
+                form.action = disparador.dataset.action;
+            } else if (form.dataset.actionOriginal) {
+                form.action = form.dataset.actionOriginal;
+            }
+            if (h3Titulo && disparador.dataset.titulo) {
+                h3Titulo.textContent = disparador.dataset.titulo;
+            }
+            if (spanBoton) {
+                spanBoton.textContent = disparador.dataset.boton || 'Guardar categoría';
+            }
+            const inpNomCat = modal.querySelector('#modal-nombre-cat');
+            if (inpNomCat) inpNomCat.value = '';
+            const selPadreCat = modal.querySelector('#modal-padre-cat');
+            if (selPadreCat) {
+                selPadreCat.querySelectorAll('option').forEach(opt => opt.disabled = false);
+                selPadreCat.value = disparador.dataset.padreId || '';
+            }
+
+        } else {
+            // --- Modo Crear (Restauración completa) ---
+            if (form.dataset.actionOriginal) {
+                form.action = form.dataset.actionOriginal;
+            }
+            if (h3Titulo && modal.dataset.tituloOriginal) {
+                h3Titulo.textContent = modal.dataset.tituloOriginal;
+            }
+            if (spanBoton && btnSubmit.dataset.textoOriginal) {
+                spanBoton.textContent = btnSubmit.dataset.textoOriginal;
+            }
+
+            // Reset campos
+            form.reset();
+
+            // Medicamento
+            const inpCodigoMed = modal.querySelector('#modal-codigo-med');
+            if (inpCodigoMed) {
+                inpCodigoMed.removeAttribute('readonly');
+                inpCodigoMed.classList.remove('bg-gray-100', 'cursor-not-allowed');
+            }
+            const selCatMed = modal.querySelector('#modal-categoria-med');
+            if (selCatMed) selCatMed.value = '';
+            const inpStockMinMed = modal.querySelector('#modal-stockMinimo-med');
+            if (inpStockMinMed) inpStockMinMed.value = '5';
+
+            // Cliente
+            const inpTipoDocCli = modal.querySelector('#modal-tipoDocumento');
+            if (inpTipoDocCli) {
+                inpTipoDocCli.value = 'DNI';
+                const btnToggles = modal.querySelectorAll('.btn-toggle-doc');
+                btnToggles.forEach(btn => {
+                    const activo = btn.dataset.tipo === 'DNI';
+                    btn.classList.toggle('on', activo);
+                    btn.setAttribute('aria-pressed', activo ? 'true' : 'false');
+                });
+                const inpNumDocCli = modal.querySelector('#modal-numeroDocumento');
+                if (inpNumDocCli) {
+                    inpNumDocCli.setAttribute('maxlength', '8');
+                    inpNumDocCli.setAttribute('data-valida', 'dni');
+                    inpNumDocCli.setAttribute('placeholder', '8 dígitos para DNI');
+                }
+            }
+
+            // Proveedor
+            const inpRucProv = modal.querySelector('#modal-ruc');
+            if (inpRucProv) {
+                inpRucProv.setAttribute('maxlength', '11');
+                inpRucProv.setAttribute('data-valida', 'ruc');
+            }
+
+            // Usuario
+            const inpNomUsuario = modal.querySelector('#modal-nombreUsuario');
+            if (inpNomUsuario) {
+                inpNomUsuario.removeAttribute('readonly');
+                inpNomUsuario.classList.remove('bg-gray-100', 'cursor-not-allowed');
+            }
+            const contenedorClave = modal.querySelector('#modal-contenedor-clave');
+            const inpClaveUser = modal.querySelector('#modal-clave-user');
+            if (contenedorClave) {
+                contenedorClave.style.display = '';
+            }
+            if (inpClaveUser) {
+                inpClaveUser.setAttribute('required', 'true');
+            }
+
+            // Categoría
+            const selPadreCat = modal.querySelector('#modal-padre-cat');
+            if (selPadreCat) {
+                selPadreCat.querySelectorAll('option').forEach(opt => opt.disabled = false);
+                selPadreCat.value = '';
+            }
+        }
+    }
+
+    /**
      * Abre un modal por su ID, gestionando foco y estado accesible.
      * @param {string} modalId 
      * @param {HTMLElement} disparador 
@@ -21,6 +285,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         ultimoElementoFoco = disparador || document.activeElement;
         modalActivo = modal;
+
+        configurarFormularioModal(modal, disparador);
 
         modal.classList.add('activo');
         modal.setAttribute('aria-hidden', 'false');
@@ -35,7 +301,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        const primerControl = modal.querySelector('input:not([type="hidden"]), select, textarea, button:not(.btn-cerrar-modal)');
+        const primerControl = modal.querySelector('input:not([type="hidden"]):not([readonly]), select, textarea, button:not(.btn-cerrar-modal)');
         if (primerControl) {
             setTimeout(() => primerControl.focus(), 50);
         }
@@ -289,7 +555,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.addEventListener('submit', async (e) => {
         const formulario = e.target;
-        const modal = formulario.closest('#modal-nuevo-cliente, #modal-nuevo-proveedor, [data-ajax-modal]');
+        const modal = formulario.closest('#modal-nuevo-cliente, #modal-nuevo-proveedor, #modal-nueva-categoria, #modal-nuevo-usuario, #modal-nuevo-medicamento, [data-ajax-modal]');
         if (!modal || formulario.hasAttribute('data-no-ajax')) return;
 
         e.preventDefault();
@@ -321,7 +587,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (respuesta.ok) {
                 const datos = await respuesta.json().catch(() => ({}));
                 cerrarModalActivo();
-                window.location.href = datos.url || formulario.action || window.location.href;
+                if (datos.url && datos.url.includes('?')) {
+                    window.location.href = datos.url;
+                } else if (window.location.search) {
+                    window.location.reload();
+                } else {
+                    window.location.href = datos.url || formulario.action || window.location.href;
+                }
                 return;
             }
 
@@ -334,6 +606,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const mensajeGeneral = datos.mensaje || datos.error;
                 if (mensajeGeneral.toLowerCase().includes('documento') || mensajeGeneral.toLowerCase().includes('ruc') || mensajeGeneral.toLowerCase().includes('dni')) {
                     mostrarErroresModal(modal, { numeroDocumento: mensajeGeneral, ruc: mensajeGeneral });
+                } else if (mensajeGeneral.toLowerCase().includes('código') || mensajeGeneral.toLowerCase().includes('codigo')) {
+                    mostrarErroresModal(modal, { codigo: mensajeGeneral });
                 }
             }
         } catch (err) {

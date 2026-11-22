@@ -18,7 +18,7 @@
                     <div class="sub">Catálogo maestro de fármacos y existencias en tiempo real.</div>
                 </div>
                 <div class="row" style="align-items:center">
-                    <a class="btn p inventario-boton boton-principal" th:if="${esAdministrador}" th:href="@{/medicamentos/nuevo}" data-modal-open="modal-nuevo-medicamento">
+                    <a class="btn p inventario-boton boton-principal" th:if="${esAdministrador}" th:href="@{/medicamentos/nuevo}" data-modal-open="modal-nuevo-medicamento" data-modo="crear" th:attr="data-action=@{/medicamentos}">
                         <svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>
                         Nuevo medicamento
                     </a>
@@ -159,7 +159,19 @@
                                         <a class="ibtn boton-icono"
                                             th:href="@{/medicamentos/{id}/editar(id=${medicamento.idMedicamento()})}"
                                             title="Editar medicamento"
-                                            th:attr="aria-label=${'Editar ' + medicamento.nombre()}">
+                                            data-modal-open="modal-nuevo-medicamento"
+                                            data-modo="editar"
+                                            th:attr="aria-label=${'Editar ' + medicamento.nombre()},
+                                                     data-action=@{/medicamentos/{id}/editar(id=${medicamento.idMedicamento()})},
+                                                     data-titulo=${'Editar ' + medicamento.nombre()},
+                                                     data-codigo=${medicamento.codigo()},
+                                                     data-nombre=${medicamento.nombre()},
+                                                     data-concentracion=${medicamento.concentracion()},
+                                                     data-presentacion=${medicamento.presentacion()},
+                                                     data-unidad-control=${medicamento.unidadControl()},
+                                                     data-id-categoria=${medicamento.idCategoria()},
+                                                     data-precio-venta=${medicamento.precioVenta()},
+                                                     data-stock-minimo=${medicamento.stockMinimo()}">
                                             <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
                                         </a>
                                         <form method="post" th:if="${medicamento.activo()}"
@@ -197,7 +209,7 @@
     </div>
 
     <!-- Modal Nuevo Medicamento (Spec 015 - Boceto 18) -->
-    <div id="modal-nuevo-medicamento" class="ov" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-med" th:if="${esAdministrador}">
+    <div id="modal-nuevo-medicamento" class="ov" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-med" data-ajax-modal="true" th:if="${esAdministrador}">
         <div class="md" style="max-width: 680px;">
             <div class="mh">
                 <div class="fi2">
