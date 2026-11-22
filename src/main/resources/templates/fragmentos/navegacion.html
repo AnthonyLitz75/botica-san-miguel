@@ -77,9 +77,7 @@
             <div class="sidebar-top-bar">
                 <a class="brand transition-transform duration-200 hover:scale-[1.02]" th:href="@{/medicamentos}">
                     <div class="lg">
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#166a55" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M3 12h18a8 8 0 0 1-8 7h-2a8 8 0 0 1-8-7Z"/><path d="M12 6v4M10 8h4"/><path d="M15 10c2-1 4-3 4-6"/>
-                        </svg>
+                        <img th:src="@{/images/logo-botica-san-miguel-256.png}" alt="Botica San Miguel" width="34" height="34" class="object-contain">
                     </div>
                     <div>
                         <small>Botica</small>
@@ -96,7 +94,7 @@
             <nav th:replace="~{fragmentos/navegacion :: menu(${seccion})}"></nav>
             <div class="foot">
                 <span class="dot" aria-hidden="true"></span>
-                <span>Sistema de Inventario · v1.0</span>
+                <span>Sistema de Inventario</span>
             </div>
         </aside>
         <div th:replace="~{fragmentos/modal-confirmar :: modal}"></div>
