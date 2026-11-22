@@ -94,7 +94,7 @@ public class ExistenciaInicialControlador {
             if (esAjax) {
                 Map<String, String> errores = new LinkedHashMap<>();
                 String msgLower = msg.toLowerCase();
-                if (msgLower.contains("lote") || msgLower.contains("acumular")) {
+                if (msgLower.contains("lote") || msgLower.contains("sumar")) {
                     errores.put("numeroLote", msg);
                 } else if (msgLower.contains("vencimiento")) {
                     errores.put("fechaVencimiento", msg);

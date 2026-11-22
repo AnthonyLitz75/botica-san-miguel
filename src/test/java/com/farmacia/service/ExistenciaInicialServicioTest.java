@@ -193,7 +193,7 @@ class ExistenciaInicialServicioTest {
         var formSinConfirmar = new ExistenciaInicialFormulario(10, "LOTE-DUP", fechaComun, 15, "Inicial", false);
 
         var ex = assertThrows(IllegalArgumentException.class, () -> servicio.registrarExistenciaInicial("almacen1", formSinConfirmar));
-        assertTrue(ex.getMessage().contains("Acumular"));
+        assertEquals("Ese lote ya existe con la misma fecha de vencimiento. Marca «Sumar a un lote que ya existe» para añadir la cantidad.", ex.getMessage());
         verify(movimientoRepositorio, never()).registrarEntradaInicial(anyInt(), anyString());
     }
 

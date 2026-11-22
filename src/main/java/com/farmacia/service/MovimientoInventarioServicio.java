@@ -168,7 +168,7 @@ public class MovimientoInventarioServicio {
                                 throw new IllegalArgumentException("El número de lote ya existe con otra fecha de vencimiento");
                         }
                         if (!Boolean.TRUE.equals(formulario.confirmarAcumulacion())) {
-                                throw new IllegalArgumentException("El lote ya existe. Marca 'Acumular al lote existente' para sumar las existencias");
+                                throw new IllegalArgumentException("Ese lote ya existe con la misma fecha de vencimiento. Marca «Sumar a un lote que ya existe» para añadir la cantidad.");
                         }
                 }
 

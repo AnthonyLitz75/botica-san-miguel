@@ -205,7 +205,7 @@ test.describe('AJUSTE 023 (paso 3): Existencias iniciales en modal y limpieza vi
     await page.goto('/movimientos');
     await page.waitForLoadState('domcontentloaded');
 
-    const loteAcumular = `LOTE-ACUM-${Date.now().toString().slice(-6)}`;
+    const loteSumar = `LOTE-SUMAR-${Date.now().toString().slice(-6)}`;
     const fechaVenc = '2028-11-20';
 
     // 1. Crear el primer registro
@@ -216,7 +216,7 @@ test.describe('AJUSTE 023 (paso 3): Existencias iniciales en modal y limpieza vi
     await expect(modal).toHaveClass(/activo|on/);
 
     await modal.locator('#modal-existencias-idMedicamento').selectOption({ index: 1 });
-    await modal.locator('#modal-existencias-numeroLote').fill(loteAcumular);
+    await modal.locator('#modal-existencias-numeroLote').fill(loteSumar);
     await modal.locator('#modal-existencias-fechaVencimiento').fill(fechaVenc);
     await modal.locator('#modal-existencias-cantidad').fill('20');
     await modal.locator('button[type="submit"]').click();
@@ -229,7 +229,7 @@ test.describe('AJUSTE 023 (paso 3): Existencias iniciales en modal y limpieza vi
     await expect(modal).toHaveClass(/activo|on/);
 
     await modal.locator('#modal-existencias-idMedicamento').selectOption({ index: 1 });
-    await modal.locator('#modal-existencias-numeroLote').fill(loteAcumular);
+    await modal.locator('#modal-existencias-numeroLote').fill(loteSumar);
     await modal.locator('#modal-existencias-fechaVencimiento').fill(fechaVenc);
     await modal.locator('#modal-existencias-cantidad').fill('15');
 
@@ -241,7 +241,7 @@ test.describe('AJUSTE 023 (paso 3): Existencias iniciales en modal y limpieza vi
     await expect(modal).toHaveClass(/activo|on/);
     const errorLote = modal.locator('#error-modal-existencias-numeroLote');
     await expect(errorLote).toBeVisible();
-    await expect(errorLote).toContainText(/ya existe/i);
+    await expect(errorLote).toContainText('Ese lote ya existe con la misma fecha de vencimiento. Marca «Sumar a un lote que ya existe» para añadir la cantidad.');
 
     // 3. Marcar la casilla "Sumar a un lote que ya existe" y reenviar -> éxito
     await modal.locator('#modal-existencias-confirmarAcumulacion').check();

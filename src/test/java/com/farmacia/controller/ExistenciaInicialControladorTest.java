@@ -225,7 +225,7 @@ class ExistenciaInicialControladorTest {
     void registrar_conAjaxErrorNegocio_retorna400JsonError() throws Exception {
         LocalDate futuro = LocalDate.now().plusMonths(6);
         when(movimientoServicio.registrarExistenciaInicial(eq("admin1"), any(ExistenciaInicialFormulario.class)))
-                .thenThrow(new IllegalArgumentException("El lote ya existe. Marca 'Acumular al lote existente' para sumar las existencias"));
+                .thenThrow(new IllegalArgumentException("Ese lote ya existe con la misma fecha de vencimiento. Marca «Sumar a un lote que ya existe» para añadir la cantidad."));
 
         mvc.perform(post("/inventario/existencias-iniciales")
                         .header("X-Requested-With", "XMLHttpRequest")
