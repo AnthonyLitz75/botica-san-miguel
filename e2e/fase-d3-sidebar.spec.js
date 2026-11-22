@@ -462,7 +462,7 @@ test.describe('Fase D.3: Menú lateral responsive y accesibilidad (H-05)', () =>
       await page.setViewportSize({ width: 375, height: 667 });
 
       // Abrir modal de nuevo medicamento en /medicamentos
-      const btnNuevoMed = page.locator('a[data-modal-open="modal-nuevo-medicamento"]');
+      const btnNuevoMed = page.locator('a[data-modal-open="modal-nuevo-medicamento"]').first();
       await expect(btnNuevoMed).toBeVisible();
       await btnNuevoMed.click();
 
