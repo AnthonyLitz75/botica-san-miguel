@@ -19,7 +19,7 @@
                 <div>
                     <div class="eyebrow">VENTAS / COMPROBANTE</div>
                     <h1>Venta confirmada</h1>
-                    <div class="sub">Comprobante emitido con correlativo formal y asignación de lotes FEFO.</div>
+                    <div class="sub">La venta se registró. Imprime el ticket o inicia la siguiente venta.</div>
                 </div>
                 <div class="flex items-center gap-3">
                     <a th:if="${puedeConsultarVentas}" class="btn s" th:href="@{/ventas}">
@@ -51,11 +51,11 @@
                             </svg>
                             <span>Imprimir ticket</span>
                         </button>
-                        <a class="btn s flex-1 justify-center py-2 text-xs" th:href="@{/ventas/nueva}">
+                        <a class="btn s flex-1 justify-center py-2 text-xs" th:href="@{/ventas/preparacion}">
                             <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M5 12h14M12 5v14"/>
                             </svg>
-                            <span>Iniciar siguiente venta</span>
+                            <span>Nueva venta</span>
                         </a>
                     </div>
 
@@ -73,7 +73,7 @@
                             <div th:text="${botica != null && botica.ruc != null ? 'RUC: ' + botica.ruc : 'RUC: 20601234567'}">RUC: </div>
                             <div th:text="${botica != null && botica.direccion != null ? botica.direccion : 'Av. Universitaria 1234 - Lima'}">Dirección</div>
                         <hr>
-                        <b>BOLETA DE VENTA ELECTRÓNICA</b><br>
+                        <b>TICKET DE VENTA</b><br>
                         <span id="titulo-comprobante" class="font-bold text-base tracking-wider" th:text="${comprobante.numeroComprobante()}">B001-00000001</span>
                     </div>
                     <hr>
@@ -157,13 +157,12 @@
 
                 <!-- Panel Informativo Lateral (no imprimible) -->
                 <div class="ann no-imprimir">
-                    <div class="eyebrow mb-1">Impresión térmica</div>
-                    <h3>Ticket estándar 80 mm</h3>
+                    <div class="eyebrow mb-1">VENTAS</div>
+                    <h3>Después de cobrar</h3>
                     <ul class="space-y-2 text-xs text-ink-2">
-                        <li><b>Impresión limpia:</b> Se emite sin menú, navegación lateral ni botones de acción (regla <code>@media print</code>).</li>
-                        <li><b>Trazabilidad por lote:</b> Desglosa el lote de origen y vencimiento asignado bajo política FEFO para el cliente.</li>
-                        <li><b>Correlativo formal:</b> Formato institucional <code>B001-XXXXXXXX</code> auditable en el sistema.</li>
-                        <li><b>Búsqueda en historial:</b> El número de comprobante permite buscarlo directamente en el Historial de ventas.</li>
+                        <li>Imprime el ticket si el cliente lo pide (está formateado a 80 mm).</li>
+                        <li>El número de boleta es <strong th:text="${comprobante.numeroComprobante()}">B001-00000001</strong>; búscalo en Ventas si necesitas reimprimir.</li>
+                        <li>Los lotes y vencimientos se descontaron del inventario.</li>
                     </ul>
                 </div>
             </div>
