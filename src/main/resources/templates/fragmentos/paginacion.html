@@ -7,7 +7,7 @@
      class="paginacion-contenedor flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-line">
     <!-- Texto informativo debajo de la tabla (a la izquierda en escritorio, centrado arriba en móvil) -->
     <div class="lbl resultados-pie text-xs sm:text-sm text-ink-3 font-medium text-center sm:text-left flex-none"
-         th:text="|Mostrando ${p.desde()}–${p.hasta()} de ${p.total()}|">
+         th:text="|Mostrando ${p.desde()}–${p.hasta()} de ${(formatoMiles != null and formatoMiles) ? #numbers.formatInteger(p.total(), 1, 'COMMA') : p.total()}|">
         Mostrando 1–25 de 212
     </div>
 

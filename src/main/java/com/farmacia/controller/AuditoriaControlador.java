@@ -39,6 +39,7 @@ public class AuditoriaControlador {
         model.addAttribute("acciones", Arrays.stream(AccionAuditoria.values()).map(Enum::name).toList());
         model.addAttribute("resultados", RESULTADOS);
         model.addAttribute("entidades", ENTIDADES);
+        model.addAttribute("maxFilasCsv", AuditoriaServicio.MAX_FILAS_CSV);
         try {
             var consulta = servicio.consultar(autenticacion.getName(), filtro, pagina);
             model.addAttribute("consulta", consulta);
