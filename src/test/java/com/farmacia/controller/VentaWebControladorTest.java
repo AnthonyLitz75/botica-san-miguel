@@ -213,4 +213,42 @@ class VentaWebControladorTest {
                 .andExpect(content().string(not(containsString("class=\"qr\""))))
                 .andExpect(content().string(not(containsString("QR"))));
     }
+
+    // ------------------------------------------------------------------ spec 023: enlace historial por rol
+
+    @Test
+    @DisplayName("Spec 023: Comprobante como ADMINISTRADOR renderiza botón Historial hacia /ventas y nunca /ventas/historial")
+    void comprobante_comoAdmin_renderizaBotonHistorialGeneral() throws Exception {
+        when(ventaServicio.obtenerComprobante(12, "admin1")).thenReturn(Optional.of(comprobante()));
+
+        mvc.perform(get("/ventas/12").with(user("admin1").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("ventas/comprobante"))
+                .andExpect(content().string(containsString("href=\"/ventas\"")))
+                .andExpect(content().string(containsString("Historial")))
+                .andExpect(content().string(not(containsString("/ventas/historial"))))
+                .andExpect(content().string(not(containsString("Mis ventas"))));
+    }
+
+    @Test
+    @DisplayName("Spec 023: Comprobante como VENDEDOR renderiza botón Mis ventas hacia /ventas/mias y nunca /ventas/historial")
+    void comprobante_comoVendedor_renderizaBotonMisVentas() throws Exception {
+        when(ventaServicio.obtenerComprobante(12, "vendedor1")).thenReturn(Optional.of(comprobante()));
+
+        mvc.perform(get("/ventas/12").with(user("vendedor1").roles("VENDEDOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("ventas/comprobante"))
+                .andExpect(content().string(containsString("href=\"/ventas/mias\"")))
+                .andExpect(content().string(containsString("Mis ventas")))
+                .andExpect(content().string(not(containsString("/ventas/historial"))));
+    }
+
+    @Test
+    @DisplayName("Spec 023: /ventas/historial no existe y sigue respondiendo 403 Forbidden por seguridad por defecto")
+    void rutaInexistenteVentasHistorial_responde403() throws Exception {
+        mvc.perform(get("/ventas/historial").with(user("admin1").roles("ADMINISTRADOR")))
+                .andExpect(status().isForbidden());
+        mvc.perform(get("/ventas/historial").with(user("vendedor1").roles("VENDEDOR")))
+                .andExpect(status().isForbidden());
+    }
 }
