@@ -78,8 +78,8 @@
             <!-- Filtros de Búsqueda -->
             <div class="card pad mb-6">
                 <form th:action="@{/ventas}" method="get" role="search" aria-label="Filtros del historial de ventas">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
-                        <div>
+                    <div class="flex flex-wrap items-end gap-3">
+                        <div class="flex-1 min-w-[130px]">
                             <label for="desde">Desde</label>
                             <div class="inp">
                                 <svg class="ico text-ink-3 flex-none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -89,7 +89,7 @@
                                     th:value="${filtro.desde() != null ? filtro.desde() : desdeEfectivo}">
                             </div>
                         </div>
-                        <div>
+                        <div class="flex-1 min-w-[130px]">
                             <label for="hasta">Hasta</label>
                             <div class="inp">
                                 <svg class="ico text-ink-3 flex-none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -99,7 +99,7 @@
                                     th:value="${filtro.hasta() != null ? filtro.hasta() : hastaEfectivo}">
                             </div>
                         </div>
-                        <div>
+                        <div class="flex-1 min-w-[140px]">
                             <label for="idVendedor">Vendedor</label>
                             <div class="inp">
                                 <select id="idVendedor" name="idVendedor" class="w-full bg-transparent border-0 focus:outline-none text-ink font-medium">
@@ -109,7 +109,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div>
+                        <div class="flex-1 min-w-[140px]">
                             <label for="metodoPago">Método de pago</label>
                             <div class="inp">
                                 <select id="metodoPago" name="metodoPago" class="w-full bg-transparent border-0 focus:outline-none text-ink font-medium">
@@ -120,7 +120,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div>
+                        <div class="flex-1 min-w-[130px]">
                             <label for="comprobante">N.º de comprobante</label>
                             <div class="inp">
                                 <svg class="ico text-ink-3 flex-none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -130,20 +130,20 @@
                                     th:value="${filtro.comprobante()}" placeholder="B001-0000...">
                             </div>
                         </div>
-                    </div>
-                    <div class="flex items-center gap-3 mt-4 pt-3 border-t border-line">
-                        <button class="btn p" type="submit">
-                            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                <path d="M22 3H2l8 9.46V19l4 2v-8.54z"/>
-                            </svg>
-                            <span>Filtrar</span>
-                        </button>
-                        <a class="btn s" th:href="@{/ventas}">
-                            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                <path d="M18 6 6 18M6 6l12 12"/>
-                            </svg>
-                            <span>Limpiar</span>
-                        </a>
+                        <div class="flex items-center gap-2 flex-none">
+                            <button class="btn p" type="submit">
+                                <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path d="M22 3H2l8 9.46V19l4 2v-8.54z"/>
+                                </svg>
+                                <span>Filtrar</span>
+                            </button>
+                            <a class="btn s" th:href="@{/ventas}">
+                                <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path d="M18 6 6 18M6 6l12 12"/>
+                                </svg>
+                                <span>Limpiar</span>
+                            </a>
+                        </div>
                     </div>
                 </form>
             </div>

@@ -3,16 +3,17 @@
 <body>
 
 <!-- Fragmento principal de paginación para listados largos (Spec 023) -->
-<div th:fragment="control(p)" th:if="${p != null and p.total() > 0}" class="paginacion-contenedor mt-4 pt-2">
-    <!-- Texto informativo debajo de la tabla -->
-    <div class="lbl mb-3 resultados-pie text-sm text-ink-3 font-medium"
+<div th:fragment="control(p)" th:if="${p != null and p.total() > 0}"
+     class="paginacion-contenedor flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-line">
+    <!-- Texto informativo debajo de la tabla (a la izquierda en escritorio, centrado arriba en móvil) -->
+    <div class="lbl resultados-pie text-xs sm:text-sm text-ink-3 font-medium text-center sm:text-left flex-none"
          th:text="|Mostrando ${p.desde()}–${p.hasta()} de ${p.total()}|">
         Mostrando 1–25 de 212
     </div>
 
-    <!-- Navegación de páginas (solo cuando hay más de 1 página) -->
-    <nav th:if="${p.paginas() > 1}" class="paginacion-nav flex items-center justify-between sm:justify-center gap-2" aria-label="Paginación">
-        <!-- Vista Móvil (≤640px): Anterior / Página X de Y / Siguiente (sin scroll a 320px) -->
+    <!-- Navegación de páginas (a la derecha en escritorio, abajo en móvil) -->
+    <nav th:if="${p.paginas() > 1}" class="paginacion-nav w-full sm:w-auto flex items-center justify-center sm:justify-end gap-2" aria-label="Paginación">
+        <!-- Vista Móvil (<640px): Anterior / Página X de Y / Siguiente (sin scroll a 320px) -->
         <div class="flex sm:hidden items-center justify-between w-full max-w-full">
             <!-- Anterior Móvil -->
             <a th:if="${p.urlAnterior() != null}" th:href="${p.urlAnterior()}"
@@ -35,8 +36,8 @@
                   aria-disabled="true">Siguiente</span>
         </div>
 
-        <!-- Vista Escritorio (>640px): Anterior, ventana compacta, Siguiente centrado -->
-        <div class="hidden sm:flex items-center justify-center gap-1.5 flex-wrap">
+        <!-- Vista Escritorio (≥640px): Anterior, ventana compacta, Siguiente -->
+        <div class="hidden sm:flex items-center justify-end gap-1.5 flex-wrap">
             <!-- Anterior Escritorio -->
             <a th:if="${p.urlAnterior() != null}" th:href="${p.urlAnterior()}"
                class="btn s text-xs px-3 py-1.5 rounded-[10px] text-ink-2 border border-line bg-white hover:bg-pine-50 hover:text-pine-700 focus:outline-none focus:ring-2 focus:ring-pine-600 transition-colors"
