@@ -15,6 +15,51 @@ test.describe('Spec 023 (Tercera Pasada): Botón desactivar y Pantalla de Lotes'
     await page.waitForURL((url) => !url.pathname.includes('/acceso/login') && !url.pathname.includes('/login'), { timeout: 15000 });
   }
 
+  async function crearMedicamentoConLotes(page, sufijo, lotes) {
+    const ts = Date.now().toString().slice(-5) + sufijo;
+    const codigoMed = `MED-LT${ts}`;
+    const nombreMed = `Med Lotes ${ts}`;
+
+    // 1. Crear medicamento
+    await page.goto('/medicamentos', { waitUntil: 'domcontentloaded' });
+    await page.getByRole('link', { name: /Nuevo medicamento/i }).click();
+    const modalNuevoMed = page.locator('#modal-nuevo-medicamento');
+    await expect(modalNuevoMed).toHaveClass(/activo|on/);
+
+    await modalNuevoMed.locator('#modal-codigo-med').fill(codigoMed);
+    await modalNuevoMed.locator('#modal-nombre-med').fill(nombreMed);
+    await modalNuevoMed.locator('#modal-presentacion-med').fill('Caja x 30');
+    await modalNuevoMed.locator('#modal-precio-med').fill('15.00');
+    await modalNuevoMed.locator('#modal-stockMinimo-med').fill('5');
+
+    await Promise.all([
+      page.waitForResponse(r => r.url().includes('/medicamentos') && r.request().method() === 'POST'),
+      modalNuevoMed.getByRole('button', { name: /Guardar medicamento/i }).click()
+    ]);
+
+    // 2. Registrar lotes mediante existencias iniciales
+    for (const l of lotes) {
+      await page.goto('/movimientos', { waitUntil: 'domcontentloaded' });
+      const btnAbrir = page.locator('a[data-modal-open="modal-existencias-iniciales"]');
+      await btnAbrir.click();
+      const modal = page.locator('#modal-existencias-iniciales');
+      await expect(modal).toHaveClass(/activo|on/);
+
+      const selectMed = modal.locator('#modal-existencias-idMedicamento');
+      const valorOpt = await selectMed.locator('option', { hasText: codigoMed }).getAttribute('value');
+      await selectMed.selectOption(valorOpt);
+
+      await modal.locator('#modal-existencias-numeroLote').fill(l.numeroLote);
+      await modal.locator('#modal-existencias-fechaVencimiento').fill(l.fechaVencimiento);
+      await modal.locator('#modal-existencias-cantidad').fill(l.cantidad.toString());
+      await modal.locator('button[type="submit"]').click();
+      await expect(modal).not.toHaveClass(/activo|on/);
+      await expect(page.locator('.aviso-exito')).toBeVisible();
+    }
+
+    return { codigoMed, nombreMed };
+  }
+
   test('PARTE 1: Botón de desactivar y de editar en Medicamentos tienen idéntico tamaño (34x34), radio y alineación vertical', async ({ page }) => {
     await iniciarSesion(page, 'admin_demo', 'AdminDemo2026!');
     await page.setViewportSize({ width: 1600, height: 900 });
@@ -196,37 +241,58 @@ test.describe('Spec 023 (Tercera Pasada): Botón desactivar y Pantalla de Lotes'
     expect(boxVolver.y).toBeGreaterThan(boxHeading.y);
   });
 
-  test('PARTE 3: Prioridad de salida en Lotes - Paracetamol con 2 lotes (Sale primero y 2.º en la cola), Ibuprofeno y Amoxicilina con Lote único', async ({ page }) => {
+  test('PARTE 3: Prioridad de salida en Lotes - Medicamento con 2 lotes (Sale primero y 2.º en la cola), y con Lote único', async ({ page }) => {
+    test.setTimeout(90000);
     await iniciarSesion(page, 'admin_demo', 'AdminDemo2026!');
     await page.setViewportSize({ width: 1600, height: 900 });
 
-    // 1. Paracetamol (ID 1): 2 lotes vigentes con stock
-    await page.goto('/medicamentos/1/lotes');
-    await expect(page.getByRole('heading', { level: 1, name: /Lotes de Paracetamol/i })).toBeVisible();
+    const ts = Date.now().toString().slice(-5);
+    const lotePrimero = `LOT-A-${ts}`;
+    const loteSegundo = `LOT-B-${ts}`;
 
-    const filaParA = page.locator('table tbody tr', { hasText: 'PAR-DEMO-A' });
-    await expect(filaParA).toBeVisible();
-    await expect(filaParA.locator('.fefo-badge')).toHaveText(/Sale primero/);
-    await expect(filaParA).toContainText('1.º en la cola');
+    // 1. Crear medicamento propio con 2 lotes vigentes ordenados por FEFO
+    const { codigoMed: medDosLotes } = await crearMedicamentoConLotes(page, '2L', [
+      { numeroLote: lotePrimero, fechaVencimiento: '2027-06-30', cantidad: 30 },
+      { numeroLote: loteSegundo, fechaVencimiento: '2028-12-31', cantidad: 45 }
+    ]);
 
-    const filaParB = page.locator('table tbody tr', { hasText: 'PAR-DEMO-B' });
-    await expect(filaParB).toBeVisible();
-    await expect(filaParB).toContainText('2.º en la cola');
-    await expect(filaParB.locator('.fefo-badge')).toHaveCount(0); // Sin badge verde
+    await page.goto(`/medicamentos?buscar=${encodeURIComponent(medDosLotes)}`, { waitUntil: 'domcontentloaded' });
+    const filaMed = page.locator('table tbody tr', { hasText: medDosLotes });
+    await expect(filaMed).toBeVisible();
+    await filaMed.locator('a.enlace-lotes').click();
+    await page.waitForURL((url) => /\/medicamentos\/\d+\/lotes/.test(url.pathname), { timeout: 15000 });
 
-    // Captura visual oficial de Lotes con los 2 lotes de Paracetamol (1600x900)
+    await expect(page.getByRole('heading', { level: 1, name: /Lotes de /i })).toBeVisible();
+    await expect(page.locator('table tbody tr')).toHaveCount(2);
+
+    // Lote 1 (vence antes): Sale primero y 1.º en la cola
+    const fila1 = page.locator('table tbody tr', { hasText: lotePrimero });
+    await expect(fila1).toBeVisible();
+    await expect(fila1.locator('.fefo-badge')).toHaveText(/Sale primero/);
+    await expect(fila1).toContainText('1.º en la cola');
+
+    // Lote 2 (vence después): 2.º en la cola, sin badge verde
+    const fila2 = page.locator('table tbody tr', { hasText: loteSegundo });
+    await expect(fila2).toBeVisible();
+    await expect(fila2).toContainText('2.º en la cola');
+    await expect(fila2.locator('.fefo-badge')).toHaveCount(0);
+
+    // Captura visual oficial de Lotes con los 2 lotes ordenados (1600x900)
     await page.screenshot({ path: 'e2e/evidencias/visual/20-lotes.png' });
 
-    // 2. Ibuprofeno (ID 2): Lote único sin badge
-    await page.goto('/medicamentos/2/lotes');
-    await expect(page.getByRole('heading', { level: 1, name: /Lotes de Ibuprofeno/i })).toBeVisible();
-    await expect(page.locator('table tbody tr')).toHaveCount(1);
-    await expect(page.locator('table tbody tr').first()).toContainText('Lote único');
-    await expect(page.locator('.fefo-badge')).toHaveCount(0);
+    // 2. Medicamento propio con Lote único sin badge
+    const loteUnico = `LOT-U-${ts}`;
+    const { codigoMed: medUnLote } = await crearMedicamentoConLotes(page, '1L', [
+      { numeroLote: loteUnico, fechaVencimiento: '2027-10-15', cantidad: 20 }
+    ]);
 
-    // 3. Amoxicilina (ID 3): Lote único sin badge
-    await page.goto('/medicamentos/3/lotes');
-    await expect(page.getByRole('heading', { level: 1, name: /Lotes de Amoxicilina/i })).toBeVisible();
+    await page.goto(`/medicamentos?buscar=${encodeURIComponent(medUnLote)}`, { waitUntil: 'domcontentloaded' });
+    const filaMedUnico = page.locator('table tbody tr', { hasText: medUnLote });
+    await expect(filaMedUnico).toBeVisible();
+    await filaMedUnico.locator('a.enlace-lotes').click();
+    await page.waitForURL((url) => /\/medicamentos\/\d+\/lotes/.test(url.pathname), { timeout: 15000 });
+
+    await expect(page.getByRole('heading', { level: 1, name: /Lotes de /i })).toBeVisible();
     await expect(page.locator('table tbody tr')).toHaveCount(1);
     await expect(page.locator('table tbody tr').first()).toContainText('Lote único');
     await expect(page.locator('.fefo-badge')).toHaveCount(0);

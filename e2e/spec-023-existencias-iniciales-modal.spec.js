@@ -8,6 +8,31 @@ async function iniciarSesion(page, usuario = 'admin_demo', clave = 'AdminDemo202
   await page.waitForURL((url) => !url.pathname.includes('/acceso/login') && !url.pathname.includes('/login'), { timeout: 15000 });
 }
 
+async function crearMedicamentoPropio(page) {
+  const ts = Date.now().toString().slice(-6);
+  const codigoMed = `MED-EI-${ts}`;
+  const nombreMed = `Medicamento EI ${ts}`;
+
+  await page.goto('/medicamentos', { waitUntil: 'domcontentloaded' });
+  await page.getByRole('link', { name: /Nuevo medicamento/i }).click();
+
+  const modalNuevoMed = page.locator('#modal-nuevo-medicamento');
+  await expect(modalNuevoMed).toHaveClass(/activo|on/);
+
+  await modalNuevoMed.locator('#modal-codigo-med').fill(codigoMed);
+  await modalNuevoMed.locator('#modal-nombre-med').fill(nombreMed);
+  await modalNuevoMed.locator('#modal-presentacion-med').fill('Caja x 20');
+  await modalNuevoMed.locator('#modal-precio-med').fill('12.50');
+  await modalNuevoMed.locator('#modal-stockMinimo-med').fill('5');
+
+  await Promise.all([
+    page.waitForResponse(r => r.url().includes('/medicamentos') && r.request().method() === 'POST'),
+    modalNuevoMed.getByRole('button', { name: /Guardar medicamento/i }).click()
+  ]);
+
+  return { codigoMed, nombreMed };
+}
+
 test.describe('AJUSTE 023 (paso 3): Existencias iniciales en modal y limpieza visual', () => {
 
   test('a) El botón abre el modal con título, aviso de una línea, motivo precargado y foco dentro del modal', async ({ page }) => {
@@ -45,6 +70,8 @@ test.describe('AJUSTE 023 (paso 3): Existencias iniciales en modal y limpieza vi
     await page.setViewportSize({ width: 1600, height: 900 });
     await iniciarSesion(page, 'admin_demo', 'AdminDemo2026!');
 
+    const { codigoMed } = await crearMedicamentoPropio(page);
+
     await page.goto('/movimientos');
     await page.waitForLoadState('domcontentloaded');
 
@@ -58,9 +85,10 @@ test.describe('AJUSTE 023 (paso 3): Existencias iniciales en modal y limpieza vi
     const fechaFutura = '2028-12-31';
     const motivoUnico = `Apertura-${Date.now().toString().slice(-6)}`;
 
-    // Seleccionar medicamento activo (primer option con valor)
+    // Seleccionar medicamento creado
     const selectMed = modal.locator('#modal-existencias-idMedicamento');
-    await selectMed.selectOption({ index: 1 });
+    const valorOpt = await selectMed.locator('option', { hasText: codigoMed }).getAttribute('value');
+    await selectMed.selectOption(valorOpt);
 
     await modal.locator('#modal-existencias-numeroLote').fill(loteUnico);
     await modal.locator('#modal-existencias-fechaVencimiento').fill(fechaFutura);
@@ -202,6 +230,8 @@ test.describe('AJUSTE 023 (paso 3): Existencias iniciales en modal y limpieza vi
     await page.setViewportSize({ width: 1600, height: 900 });
     await iniciarSesion(page, 'admin_demo', 'AdminDemo2026!');
 
+    const { codigoMed } = await crearMedicamentoPropio(page);
+
     await page.goto('/movimientos');
     await page.waitForLoadState('domcontentloaded');
 
@@ -215,7 +245,10 @@ test.describe('AJUSTE 023 (paso 3): Existencias iniciales en modal y limpieza vi
     const modal = page.locator('#modal-existencias-iniciales');
     await expect(modal).toHaveClass(/activo|on/);
 
-    await modal.locator('#modal-existencias-idMedicamento').selectOption({ index: 1 });
+    const selectMed = modal.locator('#modal-existencias-idMedicamento');
+    const valorOpt = await selectMed.locator('option', { hasText: codigoMed }).getAttribute('value');
+    await selectMed.selectOption(valorOpt);
+
     await modal.locator('#modal-existencias-numeroLote').fill(loteSumar);
     await modal.locator('#modal-existencias-fechaVencimiento').fill(fechaVenc);
     await modal.locator('#modal-existencias-cantidad').fill('20');
@@ -228,7 +261,7 @@ test.describe('AJUSTE 023 (paso 3): Existencias iniciales en modal y limpieza vi
     await btnAbrir.click();
     await expect(modal).toHaveClass(/activo|on/);
 
-    await modal.locator('#modal-existencias-idMedicamento').selectOption({ index: 1 });
+    await selectMed.selectOption(valorOpt);
     await modal.locator('#modal-existencias-numeroLote').fill(loteSumar);
     await modal.locator('#modal-existencias-fechaVencimiento').fill(fechaVenc);
     await modal.locator('#modal-existencias-cantidad').fill('15');
