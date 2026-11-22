@@ -78,8 +78,8 @@
             <!-- Filtros de Búsqueda -->
             <div class="card pad mb-6">
                 <form th:action="@{/ventas}" method="get" role="search" aria-label="Filtros del historial de ventas">
-                    <div class="flex flex-wrap items-end gap-3">
-                        <div class="flex-1 min-w-[130px]">
+                    <div class="flex flex-wrap items-end gap-2 xl:gap-3">
+                        <div class="flex-1 min-w-[105px]">
                             <label for="desde">Desde</label>
                             <div class="inp">
                                 <svg class="ico text-ink-3 flex-none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -89,7 +89,7 @@
                                     th:value="${filtro.desde() != null ? filtro.desde() : desdeEfectivo}">
                             </div>
                         </div>
-                        <div class="flex-1 min-w-[130px]">
+                        <div class="flex-1 min-w-[105px]">
                             <label for="hasta">Hasta</label>
                             <div class="inp">
                                 <svg class="ico text-ink-3 flex-none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -99,7 +99,7 @@
                                     th:value="${filtro.hasta() != null ? filtro.hasta() : hastaEfectivo}">
                             </div>
                         </div>
-                        <div class="flex-1 min-w-[140px]">
+                        <div class="flex-1 min-w-[120px]">
                             <label for="idVendedor">Vendedor</label>
                             <div class="inp">
                                 <select id="idVendedor" name="idVendedor" class="w-full bg-transparent border-0 focus:outline-none text-ink font-medium">
@@ -109,7 +109,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="flex-1 min-w-[140px]">
+                        <div class="flex-1 min-w-[120px]">
                             <label for="metodoPago">Método de pago</label>
                             <div class="inp">
                                 <select id="metodoPago" name="metodoPago" class="w-full bg-transparent border-0 focus:outline-none text-ink font-medium">
@@ -120,7 +120,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="flex-1 min-w-[130px]">
+                        <div class="flex-1 min-w-[110px]">
                             <label for="comprobante">N.º de comprobante</label>
                             <div class="inp">
                                 <svg class="ico text-ink-3 flex-none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">

@@ -1375,6 +1375,30 @@ tbody tr:hover,
   font-size: 12px;
 }
 
+/* Paginación de Listados Largos (Spec 023) */
+
+.paginacion-contenedor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--borde-suave, #dfe6e3);
+}
+
+@media (min-width: 640px) {
+  .paginacion-contenedor {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .paginacion-contenedor .resultados-pie {
+    margin: 0;
+  }
+}
+
 /* Estado Vacío de Tabla */
 
 .inventario-vacio {
@@ -4395,8 +4419,28 @@ body.modal-abierto {
   width: 100%;
 }
 
+.min-w-\[130px\] {
+  min-width: 130px;
+}
+
+.min-w-\[140px\] {
+  min-width: 140px;
+}
+
 .min-w-\[34px\] {
   min-width: 34px;
+}
+
+.min-w-\[105px\] {
+  min-width: 105px;
+}
+
+.min-w-\[110px\] {
+  min-width: 110px;
+}
+
+.min-w-\[120px\] {
+  min-width: 120px;
 }
 
 .max-w-2xl {
@@ -5610,6 +5654,10 @@ body.modal-abierto {
     width: 230px;
   }
 
+  .sm\:w-auto {
+    width: auto;
+  }
+
   .sm\:grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -5622,8 +5670,21 @@ body.modal-abierto {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
-  .sm\:justify-center {
-    justify-content: center;
+  .sm\:flex-row {
+    flex-direction: row;
+  }
+
+  .sm\:justify-end {
+    justify-content: flex-end;
+  }
+
+  .sm\:text-left {
+    text-align: left;
+  }
+
+  .sm\:text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
   }
 }
 
@@ -5664,5 +5725,11 @@ body.modal-abierto {
 
   .lg\:grid-cols-5 {
     grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .xl\:gap-3 {
+    gap: 0.75rem;
   }
 }
