@@ -3,7 +3,7 @@ package com.farmacia.controller;
 import com.farmacia.dto.ExistenciaInicialFormulario;
 import com.farmacia.service.MedicamentoServicio;
 import com.farmacia.service.MovimientoInventarioServicio;
-import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -52,7 +52,7 @@ public class ExistenciaInicialControlador {
             @Valid @ModelAttribute("formulario") ExistenciaInicialFormulario formulario,
             BindingResult validacion,
             Authentication autenticacion,
-            HttpServletRequest request,
+            HttpSession session,
             Model model,
             RedirectAttributes redirectAttributes,
             @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
@@ -78,8 +78,8 @@ public class ExistenciaInicialControlador {
             movimientoServicio.registrarExistenciaInicial(usuario, formulario);
 
             if (esAjax) {
-                if (request != null && request.getSession(true) != null) {
-                    request.getSession().setAttribute("exito", "Existencias iniciales registradas correctamente");
+                if (session != null) {
+                    session.setAttribute("exito", "Existencias iniciales registradas correctamente");
                 }
                 return ResponseEntity.ok(Map.of(
                         "ok", true,

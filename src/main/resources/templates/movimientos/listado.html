@@ -263,10 +263,13 @@
     </div>
 
     <!-- Modal: Registrar existencias iniciales (Spec 023) -->
-    <div id="modal-existencias-iniciales" th:if="${puedeRegistrarSalida}" class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/40 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-existencias-iniciales" data-ajax-modal hidden>
-        <div class="modal-dialog bg-card border border-line rounded-2xl shadow-elevada w-full max-w-lg overflow-hidden animate-in">
+    <div id="modal-existencias-iniciales" th:if="${puedeRegistrarSalida}" class="ov" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-existencias-iniciales" data-ajax-modal>
+        <div class="md">
             <div class="mh">
-                <div>
+                <div class="fi2">
+                    <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>
+                </div>
+                <div style="flex:1">
                     <h3 id="titulo-modal-existencias-iniciales">Registrar existencias iniciales</h3>
                     <p>Úsalo para cargar el stock con el que empiezas, sin necesidad de una orden de compra.</p>
                 </div>

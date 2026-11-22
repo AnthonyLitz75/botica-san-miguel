@@ -30,6 +30,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -269,5 +270,21 @@ class MovimientoInventarioControladorTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("movimientos/listado"))
                 .andExpect(model().attribute("movimientos", hasSize(1)));
+    }
+
+    @Test
+    @DisplayName("Escenario 11: GET /movimientos renderiza botón y modal de existencias iniciales con atributos accesibles")
+    void listar_renderizaBotonYModalExistenciasIniciales() throws Exception {
+        var kardex = new MovimientoInventarioServicio.Kardex(List.of(), 1, 0, 1);
+        when(servicio.listarKardex(any(), eq(1))).thenReturn(kardex);
+
+        mvc.perform(get("/movimientos")
+                        .with(user("almacen1").roles("ALMACENERO")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("data-modal-open=\"modal-existencias-iniciales\"")))
+                .andExpect(content().string(containsString("id=\"modal-existencias-iniciales\"")))
+                .andExpect(content().string(containsString("Registrar existencias iniciales")))
+                .andExpect(content().string(containsString("Úsalo para cargar el stock con el que empiezas, sin necesidad de una orden de compra.")))
+                .andExpect(content().string(containsString("Sumar a un lote que ya existe")));
     }
 }

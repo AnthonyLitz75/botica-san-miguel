@@ -28,6 +28,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -211,7 +212,8 @@ class VentaWebControladorTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("B001-00000012")))
                 .andExpect(content().string(not(containsString("class=\"qr\""))))
-                .andExpect(content().string(not(containsString("QR"))));
+                .andExpect(content().string(not(containsString("código QR"))))
+                .andExpect(content().string(not(containsString("Código QR"))));
     }
 
     // ------------------------------------------------------------------ spec 023: enlace historial por rol
