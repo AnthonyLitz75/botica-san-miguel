@@ -35,6 +35,8 @@ build/
 # Credenciales y configuracion local
 .env
 .env.*
+*.env
+sonar.env
 !.env.example
 application-local.properties
 
