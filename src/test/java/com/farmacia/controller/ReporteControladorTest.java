@@ -477,7 +477,7 @@ class ReporteControladorTest {
     void reportesRaiz_sinSesion_redirigeALogin() throws Exception {
         mvc.perform(get("/reportes"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrlPattern("**/login"));
+                .andExpect(redirectedUrl("/login"));
     }
 
     @Test
