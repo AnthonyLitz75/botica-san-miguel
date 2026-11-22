@@ -10,6 +10,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -460,5 +462,28 @@ class ReporteControladorTest {
                 .andExpect(content().string(containsString("Ventas por período")))
                 .andExpect(content().string(containsString("Más vendidos")))
                 .andExpect(content().string(containsString("Mermas y bajas")));
+    }
+
+    @Test
+    @DisplayName("FUNC-01: GET /reportes con rol ADMINISTRADOR redirige a /reportes/panel (302)")
+    void reportesRaiz_conAdmin_redirigeAPanel() throws Exception {
+        mvc.perform(get("/reportes").with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/reportes/panel"));
+    }
+
+    @Test
+    @DisplayName("FUNC-01: GET /reportes sin sesión redirige al login (302)")
+    void reportesRaiz_sinSesion_redirigeALogin() throws Exception {
+        mvc.perform(get("/reportes"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("**/login"));
+    }
+
+    @Test
+    @DisplayName("FUNC-01: GET /reportes con rol no autorizado responde 403 Forbidden")
+    void reportesRaiz_conRolNoAutorizado_responde403() throws Exception {
+        mvc.perform(get("/reportes").with(user("vendedor").roles("VENDEDOR")))
+                .andExpect(status().isForbidden());
     }
 }
