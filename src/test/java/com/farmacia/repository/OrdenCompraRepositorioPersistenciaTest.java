@@ -11,6 +11,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -132,5 +133,23 @@ class OrdenCompraRepositorioPersistenciaTest extends AbstractRepositorioIntegrat
         assertEquals(0, conteos.get("PARCIALMENTE_RECIBIDA"));
         assertEquals(1, conteos.get("RECIBIDA"));
         assertEquals(0, conteos.get("CANCELADA"));
+    }
+
+    @Test
+    @DisplayName("contar y listarVista con limite y offset paginan correctamente")
+    void contarYPaginacion() {
+        repositorio.guardar("OC-2026-0040", idUsuario, idProveedorActivo, new BigDecimal("10.00"), "P1");
+        repositorio.guardar("OC-2026-0041", idUsuario, idProveedorActivo, new BigDecimal("20.00"), "P2");
+        repositorio.guardar("OC-2026-0042", idUsuario, idProveedorActivo, new BigDecimal("30.00"), "P3");
+
+        int total = repositorio.contar(null);
+        assertTrue(total >= 3);
+
+        List<OrdenCompraListadoVista> pagina1 = repositorio.listarVista(null, 2, 0);
+        assertEquals(2, pagina1.size());
+
+        List<OrdenCompraListadoVista> pagina2 = repositorio.listarVista(null, 2, 2);
+        assertTrue(pagina2.size() >= 1);
+        assertNotEquals(pagina1.get(0).idOrden(), pagina2.get(0).idOrden());
     }
 }

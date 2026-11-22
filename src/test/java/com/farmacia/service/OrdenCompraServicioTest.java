@@ -231,6 +231,25 @@ class OrdenCompraServicioTest {
         }
 
         @Test
+        @DisplayName("listarVista paginado: calcula total, páginas y offset con clamp")
+        void listarVista_paginado_calculaOffsetYPaginacion() {
+            var vista = new OrdenCompraListadoVista(1, "OC-001", 10, 20, "Droguería Test",
+                    LocalDateTime.now(), "PENDIENTE", new BigDecimal("100.00"), "Obs");
+            when(ordenRepositorio.contar("PENDIENTE")).thenReturn(55);
+            when(ordenRepositorio.listarVista("PENDIENTE", 25, 25)).thenReturn(List.of(vista));
+
+            var resultado = servicio.listarVista("PENDIENTE", 2);
+
+            assertNotNull(resultado);
+            assertEquals(55, resultado.total());
+            assertEquals(2, resultado.pagina());
+            assertEquals(3, resultado.paginas());
+            assertEquals(1, resultado.filas().size());
+            verify(ordenRepositorio).contar("PENDIENTE");
+            verify(ordenRepositorio).listarVista("PENDIENTE", 25, 25);
+        }
+
+        @Test
         @DisplayName("contarPorEstado: delega en ordenRepositorio.contarPorEstado")
         void contarPorEstado_delegaEnRepositorio() {
             var conteos = Map.of("TODAS", 5, "PENDIENTE", 2, "RECIBIDA", 3);

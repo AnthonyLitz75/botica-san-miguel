@@ -51,12 +51,12 @@ class OrdenCompraControladorTest {
     private UsuarioDetallesServicio usuarios;
 
     @Test
-    @DisplayName("CA-3.2: ?estado=PENDIENTE filtra por estado en el servicio y pasa estadoSeleccionado al modelo")
+    @DisplayName("CA-3.2: ?estado=PENDIENTE filtra por estado en el servicio y pasa estadoSeleccionado y paginacion al modelo")
     void filtrarPorEstadoPendiente() throws Exception {
         var orden = new OrdenCompraListadoVista(1, "OC-2026-0001", 1, 10, "Droguería Farmaperú",
                 LocalDateTime.now(), "PENDIENTE", new BigDecimal("100.00"), null);
 
-        when(servicio.listarVista("PENDIENTE")).thenReturn(List.of(orden));
+        when(servicio.listarVista("PENDIENTE", 1)).thenReturn(new OrdenCompraServicio.OrdenesPaginadas(List.of(orden), 1, 1, 1));
         when(servicio.contarPorEstado()).thenReturn(Map.of(
                 "TODAS", 4,
                 "PENDIENTE", 1,
@@ -71,15 +71,16 @@ class OrdenCompraControladorTest {
                 .andExpect(view().name("ordenes-compra/listado"))
                 .andExpect(model().attribute("estadoSeleccionado", "PENDIENTE"))
                 .andExpect(model().attributeExists("conteosPorEstado"))
+                .andExpect(model().attributeExists("paginacion"))
                 .andExpect(model().attribute("ordenes", List.of(orden)));
 
-        verify(servicio).listarVista("PENDIENTE");
+        verify(servicio).listarVista("PENDIENTE", 1);
     }
 
     @Test
     @DisplayName("CA-3.1: listar sin estado consulta todas las ordenes y entrega conteos por estado")
     void listarSinEstadoConsultaTodas() throws Exception {
-        when(servicio.listarVista(null)).thenReturn(List.of());
+        when(servicio.listarVista(null, 1)).thenReturn(new OrdenCompraServicio.OrdenesPaginadas(List.of(), 0, 1, 1));
         when(servicio.contarPorEstado()).thenReturn(Map.of(
                 "TODAS", 0,
                 "PENDIENTE", 0,
@@ -91,15 +92,16 @@ class OrdenCompraControladorTest {
                         .with(user("admin").roles("ADMINISTRADOR")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("ordenes-compra/listado"))
-                .andExpect(model().attributeExists("conteosPorEstado"));
+                .andExpect(model().attributeExists("conteosPorEstado"))
+                .andExpect(model().attributeExists("paginacion"));
 
-        verify(servicio).listarVista(null);
+        verify(servicio).listarVista(null, 1);
     }
 
     @Test
     @DisplayName("CA-3.1: listar con estado en blanco normaliza a null y consulta todas las ordenes")
     void listarConEstadoEnBlancoNormalizaANull() throws Exception {
-        when(servicio.listarVista(null)).thenReturn(List.of());
+        when(servicio.listarVista(null, 1)).thenReturn(new OrdenCompraServicio.OrdenesPaginadas(List.of(), 0, 1, 1));
         when(servicio.contarPorEstado()).thenReturn(Map.of(
                 "TODAS", 0,
                 "PENDIENTE", 0,
@@ -111,8 +113,28 @@ class OrdenCompraControladorTest {
                         .param("estado", "   ")
                         .with(user("admin").roles("ADMINISTRADOR")))
                 .andExpect(status().isOk())
-                .andExpect(view().name("ordenes-compra/listado"));
+                .andExpect(view().name("ordenes-compra/listado"))
+                .andExpect(model().attributeExists("paginacion"));
 
-        verify(servicio).listarVista(null);
+        verify(servicio).listarVista(null, 1);
+    }
+
+    @Test
+    @DisplayName("Paginación: ?pagina=2 consulta página 2 con filtro de estado preservado")
+    void listarConPaginacion() throws Exception {
+        when(servicio.listarVista("PENDIENTE", 2)).thenReturn(new OrdenCompraServicio.OrdenesPaginadas(List.of(), 30, 2, 2));
+        when(servicio.contarPorEstado()).thenReturn(Map.of("TODAS", 30, "PENDIENTE", 30));
+
+        mvc.perform(get("/ordenes-compra")
+                        .param("estado", "PENDIENTE")
+                        .param("pagina", "2")
+                        .with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("pagina", 2))
+                .andExpect(model().attribute("paginas", 2))
+                .andExpect(model().attribute("total", 30))
+                .andExpect(model().attributeExists("paginacion"));
+
+        verify(servicio).listarVista("PENDIENTE", 2);
     }
 }
