@@ -38,6 +38,11 @@ public class ReporteControlador {
         this.proveedorServicio = proveedorServicio;
     }
 
+    @GetMapping({"", "/"})
+    public String inicio() {
+        return "redirect:/reportes/panel";
+    }
+
     @GetMapping("/ventas")
     public String ventasPorPeriodo(
             @ModelAttribute("filtro") FiltroReporteFormulario filtro,
