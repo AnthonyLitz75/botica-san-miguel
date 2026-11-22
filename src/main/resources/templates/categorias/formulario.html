@@ -15,7 +15,7 @@
                 <div>
                     <div class="eyebrow">CATÁLOGO / TAXONOMÍA</div>
                     <h1 class="text-3xl font-extrabold tracking-tight text-ink" th:text="${esEdicion ? 'Editar Categoría' : 'Nueva Categoría'}">Nueva Categoría</h1>
-                    <div class="sub" th:text="${esEdicion ? 'Actualiza el nombre o reubica la categoría en otro nodo padre sin generar ciclos.' : 'Ingresa el nombre y selecciona el nodo padre para organizarla en el catálogo.'}">
+                    <div class="sub" th:text="${esEdicion ? 'Actualiza el nombre o reubica la categoría a la que pertenece.' : 'Ingresa el nombre y selecciona a qué categoría pertenece.'}">
                         Formulario de categoría
                     </div>
                 </div>
@@ -44,8 +44,8 @@
                             <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
                         </div>
                         <div>
-                            <h2 class="text-xl font-bold text-ink" th:text="${esEdicion ? 'Ficha de Categoría' : 'Nueva Categoría en el Árbol'}">Nueva Categoría</h2>
-                            <p class="text-xs text-ink-3 mt-0.5">Define la ubicación dentro de las categorías y subcategorías.</p>
+                            <h2 class="text-xl font-bold text-ink" th:text="${esEdicion ? 'Ficha de Categoría' : 'Nueva categoría'}">Nueva categoría</h2>
+                            <p class="text-xs text-ink-3 mt-0.5">Ponle un nombre y, si quieres, elige a qué categoría pertenece.</p>
                         </div>
                     </div>
 
@@ -65,19 +65,19 @@
                         </div>
 
                         <div>
-                            <label for="idPadre" class="text-xs font-bold text-ink-2 mb-1.5 block">Categoría padre (opcional)</label>
+                            <label for="idPadre" class="text-xs font-bold text-ink-2 mb-1.5 block">Categoría principal (opcional)</label>
                             <div class="inp">
                                 <select id="idPadre"
                                         th:field="*{idPadre}"
                                         class="w-full bg-transparent border-0 outline-none text-ink text-sm font-semibold cursor-pointer">
-                                    <option value="">— Ninguna (Categoría raíz / Nivel superior) —</option>
+                                    <option value="">— Ninguna (será una categoría principal) —</option>
                                     <option th:each="padre : ${padresDisponibles}"
                                             th:value="${padre.idCategoria()}"
                                             th:text="${padre.nombre()}">Categoría</option>
                                 </select>
                             </div>
                             <span class="text-xs text-ink-3 mt-1.5 block">
-                                Déjalo vacío si esta categoría representa un grupo principal en la raíz del árbol.
+                                Déjalo vacío si es un grupo principal.
                             </span>
                         </div>
                     </div>

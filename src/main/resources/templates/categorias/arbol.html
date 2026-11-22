@@ -16,7 +16,7 @@
                     <div class="sub">Organiza los medicamentos por categorías y subcategorías.</div>
                 </div>
                 <div sec:authorize="hasRole('ADMINISTRADOR')" class="row" style="align-items:center">
-                    <a class="btn p inventario-boton boton-principal" th:href="@{/categorias/nueva}" data-modal-open="modal-nueva-categoria">
+                    <a class="btn p inventario-boton boton-principal" th:href="@{/categorias/nueva}" data-modal-open="modal-nueva-categoria" data-modo="crear" th:attr="data-action=@{/categorias/nueva}">
                         <svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>
                         Nueva categoría
                     </a>
@@ -54,7 +54,8 @@
                 <div class="card overflow-hidden" th:unless="${totalCategorias == 0}">
                     <div th:each="nodo : ${arbol.recorrerEnProfundidad()}"
                          class="tr"
-                         th:classappend="${#lists.size(arbol.ruta(nodo.id())) == 1 ? 'l0' : (#lists.size(arbol.ruta(nodo.id())) == 2 ? 'l1' : 'l2')}">
+                         th:classappend="${(#lists.size(arbol.ruta(nodo.id())) == 1 ? 'l0' : (#lists.size(arbol.ruta(nodo.id())) == 2 ? 'l1' : 'l2')) + (categoriaResaltada != null and categoriaResaltada == nodo.id() ? ' categoria-resaltada' : '')}"
+                         th:attr="id=${'categoria-' + nodo.id()}">
                         
                         <span class="fi">
                             <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
@@ -80,16 +81,29 @@
                         </div>
 
                         <div sec:authorize="hasRole('ADMINISTRADOR')" class="flex items-center gap-1.5 ml-2">
-                            <a class="ibtn"
+                            <a class="ibtn boton-subcategoria"
                                th:href="@{/categorias/nueva(padreId=${nodo.id()})}"
                                title="Añadir subcategoría aquí"
-                               aria-label="Añadir subcategoría">
+                               aria-label="Añadir subcategoría"
+                               data-modal-open="modal-nueva-categoria"
+                               data-modo="subcategoria"
+                               th:attr="data-padre-id=${nodo.id()},
+                                        data-titulo=${'Nueva subcategoría de ' + nodo.nombre()},
+                                        data-action=@{/categorias/nueva},
+                                        data-boton='Guardar categoría'">
                                 <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>
                             </a>
                             <a class="ibtn boton-icono"
                                th:href="@{/categorias/{id}/editar(id=${nodo.id()})}"
                                title="Editar categoría"
-                               aria-label="Editar categoría">
+                               data-modal-open="modal-nueva-categoria"
+                               data-modo="editar"
+                               th:attr="aria-label=${'Editar ' + nodo.nombre()},
+                                        data-action=@{/categorias/{id}/editar(id=${nodo.id()})},
+                                        data-titulo=${'Editar ' + nodo.nombre()},
+                                        data-id=${nodo.id()},
+                                        data-nombre=${nodo.nombre()},
+                                        data-padre-id=${nodo.idPadre()}">
                                 <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
                             </a>
                             <form th:action="@{/categorias/{id}/desactivar(id=${nodo.id()})}" method="post" class="inline"
@@ -111,7 +125,7 @@
     </div>
 
     <!-- Modal Nueva Categoría (Spec 015 - Boceto 16) -->
-    <div id="modal-nueva-categoria" class="ov" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-categoria" sec:authorize="hasRole('ADMINISTRADOR')">
+    <div id="modal-nueva-categoria" class="ov" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-categoria" data-ajax-modal="true" sec:authorize="hasRole('ADMINISTRADOR')">
         <div class="md">
             <div class="mh">
                 <div class="fi2">
@@ -119,7 +133,7 @@
                 </div>
                 <div style="flex:1">
                     <h3 id="titulo-modal-categoria">Nueva categoría</h3>
-                    <p>Agrupa medicamentos en la estructura jerárquica del catálogo.</p>
+                    <p>Ponle un nombre y, si quieres, elige a qué categoría pertenece.</p>
                 </div>
                 <button type="button" class="ibtn btn-cerrar-modal" aria-label="Cerrar modal">
                     <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
@@ -136,10 +150,10 @@
                         <div class="help">Máximo 100 caracteres. Debe ser descriptivo.</div>
                     </div>
                     <div class="full">
-                        <label for="modal-padre-cat">Categoría superior (padre)</label>
+                        <label for="modal-padre-cat">Categoría principal (opcional)</label>
                         <div class="inp">
                             <select id="modal-padre-cat" name="idPadre" class="w-full bg-transparent border-0 outline-none text-sm text-ink font-semibold cursor-pointer">
-                                <option value="" selected>— Ninguna (Crear como categoría raíz) —</option>
+                                <option value="" selected>— Ninguna (será una categoría principal) —</option>
                                 <option th:each="nodo : ${arbol.recorrerEnProfundidad()}"
                                         th:value="${nodo.id()}"
                                         th:text="${nodo.nombre()}">
@@ -147,7 +161,7 @@
                                 </option>
                             </select>
                         </div>
-                        <div class="help">Deja en blanco si es una categoría principal del catálogo.</div>
+                        <div class="help">Déjalo vacío si es un grupo principal.</div>
                     </div>
                 </div>
                 <div class="mf">
@@ -160,6 +174,31 @@
             </form>
         </div>
     </div>
+    <style>
+        @keyframes resaltar-fila-cat {
+            0% { background-color: rgba(22, 106, 85, 0.35); }
+            50% { background-color: rgba(22, 106, 85, 0.18); }
+            100% { background-color: transparent; }
+        }
+        .categoria-resaltada {
+            animation: resaltar-fila-cat 2.5s ease-out;
+            position: relative;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .categoria-resaltada {
+                animation: none;
+                background-color: rgba(22, 106, 85, 0.12);
+            }
+        }
+    </style>
     <script th:src="@{/js/modales.js}" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const el = document.querySelector('.categoria-resaltada');
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        });
+    </script>
 </body>
 </html>
