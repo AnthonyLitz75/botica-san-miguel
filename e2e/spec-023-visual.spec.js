@@ -244,7 +244,7 @@ test.describe('Spec 023: Fase 1 — Pruebas de estilos computados y tokens', () 
 
     // 14. Modal Nuevo cliente: toggle segmentado DNI / RUC con aria-pressed
     await page.goto('/clientes', { waitUntil: 'domcontentloaded' });
-    const btnNuevoCliente = page.locator('a[data-modal-open="modal-nuevo-cliente"]');
+    const btnNuevoCliente = page.locator('a[data-modal-open="modal-nuevo-cliente"][data-modo="crear"]');
     await btnNuevoCliente.click();
     const modalCliente = page.locator('#modal-nuevo-cliente');
     await expect(modalCliente).toBeVisible();

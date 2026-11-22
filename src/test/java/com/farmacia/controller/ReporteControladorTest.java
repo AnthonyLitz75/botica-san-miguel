@@ -1,6 +1,7 @@
 package com.farmacia.controller;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -332,5 +333,132 @@ class ReporteControladorTest {
                 .andExpect(header().string("Content-Type", containsString("text/csv")))
                 .andExpect(header().string("Content-Disposition", containsString("attachment; filename=\"compras.csv\"")))
                 .andExpect(content().string(containsString("OC-001,2026-11-10,Droguería San Jorge,PENDIENTE,500.00,100,0,100")));
+    }
+
+    @Test
+    @DisplayName("TDD Ajuste 023: GET /reportes/ventas cumple contrato visual unificado (chip, título, pestañas, descuento — y gráfico)")
+    void ventas_contratoVisualUnificado() throws Exception {
+        LocalDate hoy = LocalDate.of(2026, 11, 10);
+        var filaDescuentoCero = new VentasDiaVista(hoy, 1, new BigDecimal("50.00"), BigDecimal.ZERO, new BigDecimal("50.00"));
+        var barrasMock = List.of(new BarraGraficoVista(hoy, new BigDecimal("50.00"), 100));
+
+        when(reporteServicio.normalizarFiltro(any())).thenReturn(new FiltroReporteFormulario(hoy, hoy, 10, null, null));
+        when(reporteServicio.ventasPorDia(eq("admin"), any())).thenReturn(List.of(filaDescuentoCero));
+        when(reporteServicio.calcularBarrasGrafico(any(), any(), any())).thenReturn(barrasMock);
+        when(reporteServicio.generarResumenGrafico(any(), any(), any())).thenReturn("Resumen gráfico");
+
+        mvc.perform(get("/reportes/ventas").with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("REPORTES / GESTIÓN")))
+                .andExpect(content().string(containsString("Ventas por período")))
+                .andExpect(content().string(containsString("/reportes/ventas.csv")))
+                .andExpect(content().string(containsString("Mayor venta del día:")))
+                .andExpect(content().string(not(containsString("S/ · máx. S/"))))
+                .andExpect(content().string(containsString("Más vendidos")))
+                .andExpect(content().string(containsString("Mermas y bajas")))
+                .andExpect(content().string(containsString("Estado de compras")))
+                .andExpect(content().string(containsString("Panel resumen")));
+    }
+
+    @Test
+    @DisplayName("TDD Ajuste 023: GET /reportes/mas-vendidos cumple contrato visual unificado")
+    void masVendidos_contratoVisualUnificado() throws Exception {
+        LocalDate hoy = LocalDate.of(2026, 11, 10);
+        when(reporteServicio.normalizarFiltro(any())).thenReturn(new FiltroReporteFormulario(hoy, hoy, 10, null, null));
+        when(reporteServicio.masVendidos(eq("admin"), any())).thenReturn(List.of());
+
+        mvc.perform(get("/reportes/mas-vendidos").with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("REPORTES / GESTIÓN")))
+                .andExpect(content().string(containsString("Medicamentos más vendidos")))
+                .andExpect(content().string(containsString("/reportes/mas-vendidos.csv")))
+                .andExpect(content().string(containsString("Mermas y bajas")));
+    }
+
+    @Test
+    @DisplayName("TDD Ajuste 023: GET /reportes/mermas cumple contrato visual unificado")
+    void mermas_contratoVisualUnificado() throws Exception {
+        LocalDate hoy = LocalDate.of(2026, 11, 10);
+        when(reporteServicio.normalizarFiltro(any())).thenReturn(new FiltroReporteFormulario(hoy, hoy, 10, null, null));
+        when(reporteServicio.mermas(eq("admin"), any())).thenReturn(List.of());
+
+        mvc.perform(get("/reportes/mermas").with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("REPORTES / GESTIÓN")))
+                .andExpect(content().string(containsString("Mermas y bajas")))
+                .andExpect(content().string(not(containsString("Reporte de mermas e inventario dado de baja"))))
+                .andExpect(content().string(containsString("/reportes/mermas.csv")));
+    }
+
+    @Test
+    @DisplayName("TDD Ajuste 023: GET /reportes/inventario lotes cerrados por defecto sin open")
+    void inventario_contratoVisualUnificado() throws Exception {
+        var lote = new com.farmacia.model.LoteInventarioReporteVista(
+                10, "LOT-999", LocalDate.of(2027, 5, 20), 50, 180L
+        );
+        var item = new com.farmacia.model.InventarioReporteVista(
+                1, "AMX-01", "Amoxicilina 500mg", "CAPSULA", 50, 0, 10, "OK", List.of(lote)
+        );
+        when(reporteServicio.reporteInventario(eq("admin"), any())).thenReturn(List.of(item));
+
+        mvc.perform(get("/reportes/inventario").with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("REPORTES / GESTIÓN")))
+                .andExpect(content().string(containsString("Inventario")))
+                .andExpect(content().string(not(containsString("Reporte de inventario"))))
+                .andExpect(content().string(containsString("/reportes/inventario.csv")))
+                .andExpect(content().string(not(containsString("<details open"))))
+                .andExpect(content().string(containsString("Ver lotes (1)")));
+    }
+
+    @Test
+    @DisplayName("TDD Ajuste 023: GET /reportes/compras muestra — en pendientes de canceladas e 'Incluye canceladas'")
+    void compras_contratoVisualUnificado() throws Exception {
+        LocalDate hoy = LocalDate.of(2026, 11, 10);
+        var compraCancelada = new com.farmacia.model.CompraReporteVista(
+                2, "OC-2026-0002", hoy, "Proveedor Alfa", "CANCELADA",
+                new BigDecimal("300.00"), 50, 0, 50
+        );
+        var resumen = new com.farmacia.model.EstadoComprasResumenVista(
+                java.util.Map.of(
+                        "PENDIENTE", new com.farmacia.model.EstadoComprasResumenVista.CantidadYMonto(0, BigDecimal.ZERO),
+                        "PARCIALMENTE_RECIBIDA", new com.farmacia.model.EstadoComprasResumenVista.CantidadYMonto(0, BigDecimal.ZERO),
+                        "RECIBIDA", new com.farmacia.model.EstadoComprasResumenVista.CantidadYMonto(0, BigDecimal.ZERO),
+                        "CANCELADA", new com.farmacia.model.EstadoComprasResumenVista.CantidadYMonto(1, new BigDecimal("300.00"))
+                ),
+                1,
+                new BigDecimal("300.00")
+        );
+        when(reporteServicio.normalizarFiltro(any())).thenReturn(new FiltroReporteFormulario(hoy, hoy, 10, null, null));
+        when(reporteServicio.reporteCompras(eq("admin"), any())).thenReturn(List.of(compraCancelada));
+        when(reporteServicio.resumenCompras(any())).thenReturn(resumen);
+
+        mvc.perform(get("/reportes/compras").with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("REPORTES / GESTIÓN")))
+                .andExpect(content().string(containsString("Estado de compras")))
+                .andExpect(content().string(not(containsString("Reporte de estado de compras"))))
+                .andExpect(content().string(containsString("/reportes/compras.csv")))
+                .andExpect(content().string(containsString("Incluye canceladas")));
+    }
+
+    @Test
+    @DisplayName("TDD Ajuste 023: GET /reportes/panel cumple textos y botones unificados")
+    void panel_contratoVisualUnificado() throws Exception {
+        var resumen = new com.farmacia.model.PanelVista(
+                new BigDecimal("5000.00"), 100, new BigDecimal("50.00"), 3, 2, 90);
+        when(reporteServicio.panelResumen("admin")).thenReturn(resumen);
+
+        mvc.perform(get("/reportes/panel").with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("REPORTES / GESTIÓN")))
+                .andExpect(content().string(containsString("Panel resumen")))
+                .andExpect(content().string(not(containsString("Panel resumen de gestión"))))
+                .andExpect(content().string(not(containsString("Exportar CSV"))))
+                .andExpect(content().string(containsString("Descarga los reportes en CSV para abrirlos en Excel.")))
+                .andExpect(content().string(not(containsString("compatible con hojas de cálculo"))))
+                .andExpect(content().string(containsString("Ventas por período")))
+                .andExpect(content().string(containsString("Más vendidos")))
+                .andExpect(content().string(containsString("Mermas y bajas")));
     }
 }

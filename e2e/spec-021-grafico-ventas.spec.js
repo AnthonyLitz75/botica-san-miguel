@@ -57,7 +57,11 @@ test.describe('Spec 021: Gráfico de ventas netas por día', () => {
       expect(title).toMatch(/S\/\s*[\d,.]+/);
 
       const etiquetaSmall = barra.locator('small');
-      await expect(etiquetaSmall).toHaveText(fechasEsperadas[i]);
+      if (i === 0 || i === 5 || i === 6) {
+        await expect(etiquetaSmall).toHaveText(fechasEsperadas[i]);
+      } else {
+        await expect(etiquetaSmall).toHaveCount(0);
+      }
     }
 
     // 4. Los días sin ventas (16, 17, 18, 20) tienen altura 0% y clase barra-cero (CA-1.3)
