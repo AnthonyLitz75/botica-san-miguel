@@ -105,7 +105,7 @@ BEGIN
         INSERT INTO orden_compra
         (numero_orden, id_usuario, id_proveedor, total_estimado, observaciones)
         SELECT 'OC-DEMO-001', u.id_usuario, p.id_proveedor, 50.00,
-               'Orden de compra de demostracion'
+               'Orden de compra de demostración'
         FROM usuario u CROSS JOIN proveedor p
         WHERE u.nombre_usuario = 'compras_demo' AND p.ruc = '20000000001'
         RETURNING id_orden

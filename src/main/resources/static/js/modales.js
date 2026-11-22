@@ -559,10 +559,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const elTitulo = modalConfirmar.querySelector('#modal-confirmar-titulo');
         const elMensaje = modalConfirmar.querySelector('#modal-confirmar-mensaje');
         const elBoton = modalConfirmar.querySelector('#modal-confirmar-accion');
+        const elCancelar = modalConfirmar.querySelector('#modal-confirmar-cancelar');
+        const textoCancelar = disparador?.getAttribute?.('data-confirmar-cancelar') || formulario?.getAttribute?.('data-confirmar-cancelar') || 'Cancelar';
 
         if (elTitulo) elTitulo.textContent = titulo;
         if (elMensaje) elMensaje.textContent = mensaje;
         if (elBoton) elBoton.textContent = boton;
+        if (elCancelar) elCancelar.textContent = textoCancelar;
 
         formularioPendienteConfirmacion = formulario;
         abrirModal('modal-confirmar', disparador);
