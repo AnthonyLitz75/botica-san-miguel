@@ -81,3 +81,31 @@
   mask-image: url("../images/icons/save.svg");
   -webkit-mask-image: url("../images/icons/save.svg");
 }
+.icono-circle-alert {
+  mask-image: url("../images/icons/circle-alert.svg");
+  -webkit-mask-image: url("../images/icons/circle-alert.svg");
+}
+.icono-file-text {
+  mask-image: url("../images/icons/file-text.svg");
+  -webkit-mask-image: url("../images/icons/file-text.svg");
+}
+.icono-chart-bar {
+  mask-image: url("../images/icons/chart-bar.svg");
+  -webkit-mask-image: url("../images/icons/chart-bar.svg");
+}
+.icono-credit-card {
+  mask-image: url("../images/icons/credit-card.svg");
+  -webkit-mask-image: url("../images/icons/credit-card.svg");
+}
+.icono-clock {
+  mask-image: url("../images/icons/clock.svg");
+  -webkit-mask-image: url("../images/icons/clock.svg");
+}
+.icono-download {
+  mask-image: url("../images/icons/download.svg");
+  -webkit-mask-image: url("../images/icons/download.svg");
+}
+.icono-calendar {
+  mask-image: url("../images/icons/calendar.svg");
+  -webkit-mask-image: url("../images/icons/calendar.svg");
+}
