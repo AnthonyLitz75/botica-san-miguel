@@ -112,6 +112,108 @@ class MigracionesFlywayTest extends AbstractRepositorioIntegrationTest {
         assertEquals("YES", esNullable, "La columna ultimo_acceso debe admitir NULL");
     }
 
+    @Test
+    @DisplayName("V8 crea indices unicos parciales para correo y telefono en cliente y proveedor")
+    void indicesUnicosContactoExistenYBloqueanDuplicados() {
+        List<String> indices = List.of(
+                "uq_cliente_correo", "uq_cliente_telefono",
+                "uq_proveedor_correo", "uq_proveedor_telefono");
+
+        for (String indice : indices) {
+            Integer existe = jdbcTemplate.queryForObject("""
+                    SELECT COUNT(*) FROM pg_indexes
+                    WHERE schemaname = 'public' AND indexname = ?
+                    """, Integer.class, indice);
+            assertEquals(1, existe, "Debe existir el índice " + indice);
+        }
+
+        // Permite múltiples registros con teléfono y correo NULL
+        jdbcTemplate.update("""
+                INSERT INTO cliente (tipo_documento, numero_documento, nombre_completo, telefono, correo)
+                VALUES ('DNI', '99000001', 'Cliente Sin Contacto 1', NULL, NULL),
+                       ('DNI', '99000002', 'Cliente Sin Contacto 2', NULL, NULL)
+                """);
+
+        // Falla si se intenta insertar teléfono duplicado en cliente
+        jdbcTemplate.update("""
+                INSERT INTO cliente (tipo_documento, numero_documento, nombre_completo, telefono, correo)
+                VALUES ('DNI', '99000003', 'Cliente Con Telefono', '999888777', 'contacto1@test.com')
+                """);
+
+        assertThrows(org.springframework.dao.DataAccessException.class, () -> {
+            jdbcTemplate.update("""
+                    INSERT INTO cliente (tipo_documento, numero_documento, nombre_completo, telefono, correo)
+                    VALUES ('DNI', '99000004', 'Cliente Telefono Repetido', '999888777', 'contacto2@test.com')
+                    """);
+        }, "Debe fallar por índice único parcial uq_cliente_telefono");
+
+        // Falla si se intenta insertar correo duplicado en cliente
+        assertThrows(org.springframework.dao.DataAccessException.class, () -> {
+            jdbcTemplate.update("""
+                    INSERT INTO cliente (tipo_documento, numero_documento, nombre_completo, telefono, correo)
+                    VALUES ('DNI', '99000005', 'Cliente Correo Repetido', '999888776', 'contacto1@test.com')
+                    """);
+        }, "Debe fallar por índice único parcial uq_cliente_correo");
+    }
+
+    @Test
+    @DisplayName("V8 resuelve duplicados existentes conservando el menor id y anulando los posteriores")
+    void migracionResuelveDuplicadosPreexistentes() {
+        String esquema = "test_v8_duplicados";
+        Flyway flywayV7 = Flyway.configure()
+                .dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())
+                .schemas(esquema)
+                .locations("classpath:db/migration")
+                .target("7")
+                .cleanDisabled(false)
+                .load();
+
+        try {
+            flywayV7.clean();
+            assertTrue(flywayV7.migrate().success, "Debe migrar hasta V7 exitosamente");
+
+            // Insertar datos con duplicados en cliente y proveedor antes de V8
+            jdbcTemplate.update("INSERT INTO " + esquema + ".cliente (tipo_documento, numero_documento, nombre_completo, telefono, correo) VALUES " +
+                    "('DNI', '88880001', 'Cliente Antiguo', '+51 958 145 341', 'Juan@Gmail.com '), " +
+                    "('DNI', '88880002', 'Cliente Reciente', '958145341', 'juan@gmail.com')");
+
+            jdbcTemplate.update("INSERT INTO " + esquema + ".proveedor (ruc, razon_social, telefono, correo) VALUES " +
+                    "('20111111111', 'Proveedor A', '(01) 456-7890', 'VENTAS@PROV.PE '), " +
+                    "('20111111112', 'Proveedor B', '014567890', 'ventas@prov.pe')");
+
+            // Ahora aplicar V8
+            Flyway flywayV8 = Flyway.configure()
+                    .dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())
+                    .schemas(esquema)
+                    .locations("classpath:db/migration")
+                    .load();
+
+            assertTrue(flywayV8.migrate().success, "V8 debe aplicarse resolviendo duplicados sin error");
+
+            // Verificar cliente: id menor conserva teléfono '958145341' y correo 'juan@gmail.com', el segundo tiene NULL
+            Integer idMinCliente = jdbcTemplate.queryForObject(
+                    "SELECT MIN(id_cliente) FROM " + esquema + ".cliente", Integer.class);
+            Integer idMaxCliente = jdbcTemplate.queryForObject(
+                    "SELECT MAX(id_cliente) FROM " + esquema + ".cliente", Integer.class);
+
+            String telMin = jdbcTemplate.queryForObject(
+                    "SELECT telefono FROM " + esquema + ".cliente WHERE id_cliente = ?", String.class, idMinCliente);
+            String corMin = jdbcTemplate.queryForObject(
+                    "SELECT correo FROM " + esquema + ".cliente WHERE id_cliente = ?", String.class, idMinCliente);
+            assertEquals("958145341", telMin);
+            assertEquals("juan@gmail.com", corMin);
+
+            String telMax = jdbcTemplate.queryForObject(
+                    "SELECT telefono FROM " + esquema + ".cliente WHERE id_cliente = ?", String.class, idMaxCliente);
+            String corMax = jdbcTemplate.queryForObject(
+                    "SELECT correo FROM " + esquema + ".cliente WHERE id_cliente = ?", String.class, idMaxCliente);
+            assertEquals(null, telMax, "El cliente más reciente debe tener teléfono NULL");
+            assertEquals(null, corMax, "El cliente más reciente debe tener correo NULL");
+        } finally {
+            jdbcTemplate.execute("DROP SCHEMA IF EXISTS " + esquema + " CASCADE");
+        }
+    }
+
     private int contar(String esquema, String tabla) {
         // Identificadores constantes de esta prueba (no provienen del usuario).
         return jdbcTemplate.queryForObject(
