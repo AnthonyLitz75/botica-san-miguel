@@ -271,6 +271,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 selPadreCat.querySelectorAll('option').forEach(opt => opt.disabled = false);
                 selPadreCat.value = '';
             }
+
+            // Existencias Iniciales (Spec 023)
+            const inpMotivoExistencias = modal.querySelector('#modal-existencias-motivo');
+            if (inpMotivoExistencias) {
+                inpMotivoExistencias.value = 'Existencias iniciales';
+            }
+            const chkAcumularExistencias = modal.querySelector('#modal-existencias-confirmarAcumulacion');
+            if (chkAcumularExistencias) {
+                chkAcumularExistencias.checked = false;
+            }
         }
     }
 
@@ -476,7 +486,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         for (const [campo, mensaje] of Object.entries(errores)) {
             const input = modal.querySelector(`[name="${campo}"]`) ||
                           modal.querySelector(`#modal-${campo}`) ||
-                          modal.querySelector(`#modal-${campo}-prov`);
+                          modal.querySelector(`#modal-${campo}-prov`) ||
+                          modal.querySelector(`#modal-existencias-${campo}`);
             if (!input) continue;
 
             if (!primerInputConError) {

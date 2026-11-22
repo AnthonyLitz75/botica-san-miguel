@@ -5,6 +5,8 @@ import com.farmacia.dto.PaginacionModelo;
 import com.farmacia.model.MovimientoInventario;
 import com.farmacia.service.MedicamentoServicio;
 import com.farmacia.service.MovimientoInventarioServicio;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -37,7 +39,15 @@ public class MovimientoInventarioControlador {
     public String listar(
             @ModelAttribute("filtro") FiltroMovimientosFormulario filtro,
             @RequestParam(name = "pagina", required = false) Integer pagina,
+            HttpServletRequest request,
             Model model) {
+        if (request != null) {
+            HttpSession session = request.getSession(false);
+            if (session != null && session.getAttribute("exito") != null) {
+                model.addAttribute("exito", session.getAttribute("exito"));
+                session.removeAttribute("exito");
+            }
+        }
         model.addAttribute("medicamentos", medicamentoServicio.listarActivos());
         model.addAttribute("usuarios", servicio.listarUsuariosActivos());
 
