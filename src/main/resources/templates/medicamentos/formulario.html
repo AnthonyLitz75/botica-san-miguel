@@ -15,7 +15,7 @@
                 <div>
                     <div class="eyebrow">INVENTARIO / CATÁLOGO</div>
                     <h1 class="text-3xl font-extrabold tracking-tight text-ink" th:text="${idMedicamento != null ? 'Editar medicamento' : 'Nuevo medicamento'}">Medicamento</h1>
-                    <div class="sub">Completa los datos del fármaco para el control de inventario y venta.</div>
+                    <div class="sub" th:text="${idMedicamento != null ? 'Modifica los datos del medicamento para el control de inventario y venta.' : 'Registra un medicamento para poder venderlo y controlar su stock.'}">Registra un medicamento para poder venderlo y controlar su stock.</div>
                 </div>
                 <div class="row" style="align-items:center">
                     <a class="btn s inventario-boton boton-secundario" th:href="@{/medicamentos}">
@@ -42,18 +42,19 @@
 
                     <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="codigo" class="text-xs font-bold text-ink-2 mb-1.5 block">Código interno <span class="text-rose">*</span></label>
+                            <label for="codigo" class="text-xs font-bold text-ink-2 mb-1.5 block">Código <span class="text-rose">*</span></label>
                             <div class="inp" th:classappend="${#fields.hasErrors('codigo')} ? 'err' : ''">
                                 <input type="text" id="codigo" th:field="*{codigo}" maxlength="50" required
                                     class="w-full bg-transparent border-0 outline-none text-ink text-sm font-semibold"
                                     placeholder="Ej. MED-003"
-                                    th:attr="aria-invalid=${#fields.hasErrors('codigo')},aria-describedby=${#fields.hasErrors('codigo') ? 'error-codigo' : null}">
+                                    th:attr="aria-invalid=${#fields.hasErrors('codigo')},aria-describedby=${#fields.hasErrors('codigo') ? 'error-codigo' : 'ayuda-codigo'}">
                             </div>
+                            <span class="block text-[11px] text-ink-3 mt-1" id="ayuda-codigo">Es único y no se puede cambiar después.</span>
                             <p class="help e error" id="error-codigo" th:if="${#fields.hasErrors('codigo')}" th:errors="*{codigo}"></p>
                         </div>
 
                         <div>
-                            <label for="unidadControl" class="text-xs font-bold text-ink-2 mb-1.5 block">Unidad de control <span class="text-rose">*</span></label>
+                            <label for="unidadControl" class="text-xs font-bold text-ink-2 mb-1.5 block">Unidad de venta <span class="text-rose">*</span></label>
                             <div class="inp" th:classappend="${#fields.hasErrors('unidadControl')} ? 'err' : ''">
                                 <select id="unidadControl" th:field="*{unidadControl}" required
                                     class="w-full bg-transparent border-0 outline-none text-ink text-sm font-semibold cursor-pointer"
@@ -78,7 +79,7 @@
                         </div>
 
                         <div>
-                            <label for="concentracion" class="text-xs font-bold text-ink-2 mb-1.5 block">Concentración <span class="text-ink-3 font-normal">(opcional)</span></label>
+                            <label for="concentracion" class="text-xs font-bold text-ink-2 mb-1.5 block">Concentración (opcional)</label>
                             <div class="inp" th:classappend="${#fields.hasErrors('concentracion')} ? 'err' : ''">
                                 <input type="text" id="concentracion" th:field="*{concentracion}" maxlength="100"
                                     class="w-full bg-transparent border-0 outline-none text-ink text-sm"
@@ -100,12 +101,12 @@
                         </div>
 
                         <div class="md:col-span-2">
-                            <label for="idCategoria" class="text-xs font-bold text-ink-2 mb-1.5 block">Categoría taxonómica <span class="text-ink-3 font-normal">(opcional)</span></label>
+                            <label for="idCategoria" class="text-xs font-bold text-ink-2 mb-1.5 block">Categoría (opcional)</label>
                             <div class="inp" th:classappend="${#fields.hasErrors('idCategoria')} ? 'err' : ''">
                                 <select id="idCategoria" th:field="*{idCategoria}"
                                     class="w-full bg-transparent border-0 outline-none text-ink text-sm cursor-pointer"
                                     th:attr="aria-invalid=${#fields.hasErrors('idCategoria')},aria-describedby=${#fields.hasErrors('idCategoria') ? 'error-idCategoria' : null}">
-                                    <option value="">Sin categoría asignada</option>
+                                    <option value="">Sin categoría</option>
                                     <option th:each="cat : ${categorias}"
                                             th:value="${cat.idCategoria()}"
                                             th:text="${cat.nombre()}">Categoría</option>
@@ -121,21 +122,21 @@
                                 <input type="number" id="precioVenta" th:field="*{precioVenta}" min="0" step="0.01" required
                                     class="w-full bg-transparent border-0 outline-none text-ink text-sm font-semibold"
                                     placeholder="0.00"
-                                    th:attr="aria-invalid=${#fields.hasErrors('precioVenta')},aria-describedby=${#fields.hasErrors('precioVenta') ? 'error-precioVenta' : null}">
+                                    th:attr="aria-invalid=${#fields.hasErrors('precioVenta')},aria-describedby=${#fields.hasErrors('precioVenta') ? 'error-precioVenta' : 'ayuda-precio'}">
                             </div>
-                            <span class="text-xs text-ink-3 mt-1 block">Precio por unidad de control.</span>
+                            <span class="text-xs text-ink-3 mt-1 block" id="ayuda-precio">Puedes poner 0.00 si es una donación.</span>
                             <p class="help e error" id="error-precioVenta" th:if="${#fields.hasErrors('precioVenta')}" th:errors="*{precioVenta}"></p>
                         </div>
 
                         <div>
-                            <label for="stockMinimo" class="text-xs font-bold text-ink-2 mb-1.5 block">Stock mínimo de alerta <span class="text-rose">*</span></label>
+                            <label for="stockMinimo" class="text-xs font-bold text-ink-2 mb-1.5 block">Stock mínimo <span class="text-rose">*</span></label>
                             <div class="inp" th:classappend="${#fields.hasErrors('stockMinimo')} ? 'err' : ''">
                                 <input type="number" id="stockMinimo" th:field="*{stockMinimo}" min="0" step="1" required
                                     class="w-full bg-transparent border-0 outline-none text-ink text-sm font-semibold"
                                     placeholder="Ej. 10"
-                                    th:attr="aria-invalid=${#fields.hasErrors('stockMinimo')},aria-describedby=${#fields.hasErrors('stockMinimo') ? 'error-stockMinimo' : null}">
+                                    th:attr="aria-invalid=${#fields.hasErrors('stockMinimo')},aria-describedby=${#fields.hasErrors('stockMinimo') ? 'error-stockMinimo' : 'ayuda-stockMinimo'}">
                             </div>
-                            <span class="text-xs text-ink-3 mt-1 block">Umbral mínimo antes de generar alerta.</span>
+                            <span class="text-xs text-ink-3 mt-1 block" id="ayuda-stockMinimo">Te avisamos en Alertas cuando el stock baje a este número.</span>
                             <p class="help e error" id="error-stockMinimo" th:if="${#fields.hasErrors('stockMinimo')}" th:errors="*{stockMinimo}"></p>
                         </div>
                     </div>

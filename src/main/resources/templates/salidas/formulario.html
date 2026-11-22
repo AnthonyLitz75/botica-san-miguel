@@ -15,7 +15,7 @@
                 <div>
                     <div class="eyebrow seccion-etiqueta">Inventario / Control de existencias</div>
                     <h1>Registrar salida de inventario</h1>
-                    <div class="sub">Descargo de stock por merma, vencimiento o ajuste del lote.</div>
+                    <div class="sub">Retira unidades de este lote por merma, vencimiento o ajuste.</div>
                 </div>
                 <div class="row items-center">
                     <a class="btn s inventario-boton boton-secundario"
@@ -36,7 +36,7 @@
                         </dd>
                     </div>
                     <div>
-                        <dt class="lbl uppercase tracking-wider font-bold">Lote seleccionado</dt>
+                        <dt class="lbl uppercase tracking-wider font-bold">Lote</dt>
                         <dd class="mt-1 flex flex-wrap items-center gap-2">
                             <span class="mono codigo-medicamento font-bold text-pine-700" th:text="${lote.numeroLote()}">LOT-2026-A</span>
                             <span
@@ -102,7 +102,7 @@
                                         th:attr="aria-invalid=${#fields.hasErrors('cantidad')},aria-describedby=${#fields.hasErrors('cantidad') ? 'error-cantidad' : null}">
                                 </div>
                                 <div class="lbl mt-1 campo-ayuda"
-                                    th:text="${'Máximo permitido: ' + lote.stockActual() + ' ' + medicamento.unidadControl()}"></div>
+                                    th:text="${'Puedes retirar hasta ' + lote.stockActual() + ' unidades.'}"></div>
                                 <p class="error text-xs text-rose-600 font-semibold mt-1" id="error-cantidad"
                                     th:if="${#fields.hasErrors('cantidad')}" th:errors="*{cantidad}"></p>
                             </div>
@@ -119,17 +119,18 @@
                             <div class="md:col-span-2">
                                 <label for="motivo">Motivo de la salida <span class="text-rose-600">*</span></label>
                                 <textarea id="motivo" th:field="*{motivo}" maxlength="250" rows="3"
-                                    placeholder="Ej. Salida de demostración, merma por rotura, ajuste de inventario..."
+                                    placeholder="Ej. Frasco quebrado, lote vencido o merma por humedad"
                                     required
                                     class="w-full p-3 rounded-xl border border-line bg-white text-sm text-ink focus:outline-none focus:ring-2 focus:ring-pine-700/20"
-                                    th:attr="aria-invalid=${#fields.hasErrors('motivo')},aria-describedby=${#fields.hasErrors('motivo') ? 'error-motivo' : null}"></textarea>
+                                    th:attr="aria-invalid=${#fields.hasErrors('motivo')},aria-describedby=${#fields.hasErrors('motivo') ? 'error-motivo' : 'ayuda-motivo'}"></textarea>
+                                <div class="lbl mt-1 campo-ayuda" id="ayuda-motivo">Queda registrado en el historial junto con tu usuario.</div>
                                 <p class="error text-xs text-rose-600 font-semibold mt-1" id="error-motivo"
                                     th:if="${#fields.hasErrors('motivo')}" th:errors="*{motivo}"></p>
                             </div>
 
                             <div class="md:col-span-2 note" style="background:#fffbeb;border-color:#fde68a;color:#92400e">
                                 <svg class="ico flex-none text-amber-600" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/></svg>
-                                <span class="text-xs font-medium">Esta acción es irreversible y quedará registrada de forma inmutable en la bitácora de Auditoría.</span>
+                                <span class="text-xs font-medium">Esto descuenta el stock y queda registrado en Auditoría con tu usuario.</span>
                             </div>
                         </div>
                     </fieldset>

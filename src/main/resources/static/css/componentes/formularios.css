@@ -31,7 +31,8 @@
 }
 
 .inp input,
-.inp select {
+.inp select,
+.inp textarea {
   width: 100%;
   border: none !important;
   background: transparent !important;
@@ -44,7 +45,8 @@
 }
 
 .inp input:focus,
-.inp select:focus {
+.inp select:focus,
+.inp textarea:focus {
   border: none !important;
   outline: none !important;
   box-shadow: none !important;

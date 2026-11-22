@@ -16,7 +16,7 @@
                 <div>
                     <div class="eyebrow">ADMINISTRACIÓN / USUARIOS</div>
                     <h1 th:text="${idUsuario != null ? 'Editar usuario' : 'Nuevo usuario'}">Usuario</h1>
-                    <div class="sub">Cuenta de acceso para el personal. El rol define los módulos y permisos visibles.</div>
+                    <div class="sub" th:text="${idUsuario != null ? 'Modifica los datos del usuario y sus permisos de acceso.' : 'Crea la cuenta de un trabajador y elige qué puede hacer en el sistema.'}">Crea la cuenta de un trabajador y elige qué puede hacer en el sistema.</div>
                 </div>
                 <div class="flex items-center gap-3">
                     <a class="btn s" th:href="@{/usuarios}">
@@ -54,7 +54,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <!-- Nombre de usuario -->
                         <div>
-                            <label for="nombreUsuario">Usuario (login) <span class="text-rose-600">*</span></label>
+                            <label for="nombreUsuario">Nombre de usuario <span class="text-rose-600">*</span></label>
                             <div class="inp" th:classappend="${#fields.hasErrors('nombreUsuario')} ? 'err' : ''">
                                 <svg class="ico text-ink-3 flex-none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                     <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
@@ -66,28 +66,29 @@
                                     th:classappend="${idUsuario != null} ? 'opacity-60 cursor-not-allowed' : ''"
                                     th:attr="aria-invalid=${#fields.hasErrors('nombreUsuario')},aria-describedby=${#fields.hasErrors('nombreUsuario') ? 'error-usuario' : 'ayuda-usuario'}">
                             </div>
-                            <span class="block text-[11px] text-ink-3 mt-1" id="ayuda-usuario" th:if="${idUsuario == null}">Sin espacios · único en el sistema.</span>
+                            <span class="block text-[11px] text-ink-3 mt-1" id="ayuda-usuario" th:if="${idUsuario == null}">De 4 a 50 caracteres. Letras, números, puntos o guiones, sin espacios.</span>
                             <span class="block text-[11px] text-ink-3 mt-1" id="ayuda-usuario-fijo" th:if="${idUsuario != null}">El identificador de usuario no se puede modificar.</span>
                             <p class="text-xs text-rose-600 font-semibold mt-1" id="error-usuario" th:if="${#fields.hasErrors('nombreUsuario')}" th:errors="*{nombreUsuario}"></p>
                         </div>
 
                         <!-- Rol -->
                         <div>
-                            <label for="rol">Rol en el sistema <span class="text-rose-600">*</span></label>
+                            <label for="rol">Rol <span class="text-rose-600">*</span></label>
                             <div class="inp" th:classappend="${#fields.hasErrors('rol')} ? 'err' : ''">
                                 <select id="rol" th:field="*{rol}" required
                                     class="w-full bg-transparent border-0 focus:outline-none text-ink text-sm font-semibold cursor-pointer"
                                     th:attr="aria-invalid=${#fields.hasErrors('rol')},aria-describedby=${#fields.hasErrors('rol') ? 'error-rol' : null}">
-                                    <option th:each="r : ${roles}" th:value="${r}" th:text="${r}">ROL</option>
+                                    <option th:each="r : ${roles}" th:value="${r}"
+                                        th:text="${r == 'VENDEDOR' ? 'Vendedor: atención y caja' : (r == 'ALMACENERO' ? 'Almacenero: inventario y movimientos' : (r == 'COMPRAS' ? 'Compras: proveedores y órdenes de compra' : 'Administrador: acceso total'))}">ROL</option>
                                 </select>
                             </div>
-                            <span class="block text-[11px] text-ink-3 mt-1">Define los módulos y permisos visibles.</span>
+                            <span class="block text-[11px] text-ink-3 mt-1">Elige qué puede hacer en el sistema.</span>
                             <p class="text-xs text-rose-600 font-semibold mt-1" id="error-rol" th:if="${#fields.hasErrors('rol')}" th:errors="*{rol}"></p>
                         </div>
 
                         <!-- Nombre completo -->
                         <div class="md:col-span-2">
-                            <label for="nombre">Nombre completo del personal <span class="text-rose-600">*</span></label>
+                            <label for="nombre">Nombre completo <span class="text-rose-600">*</span></label>
                             <div class="inp" th:classappend="${#fields.hasErrors('nombre')} ? 'err' : ''">
                                 <input id="nombre" type="text" th:field="*{nombre}" maxlength="100"
                                     autocomplete="name" placeholder="Ej. Carla Mendoza Ríos" required
@@ -109,7 +110,7 @@
                                     class="w-full bg-transparent border-0 focus:outline-none text-ink text-sm"
                                     th:attr="aria-invalid=${#fields.hasErrors('clave')},aria-describedby=${#fields.hasErrors('clave') ? 'error-clave' : 'ayuda-clave'}">
                             </div>
-                            <span class="block text-[11px] text-ink-3 mt-1" id="ayuda-clave">Mínimo 10 caracteres; debe contener letras y números.</span>
+                            <span class="block text-[11px] text-ink-3 mt-1" id="ayuda-clave">Se guarda cifrada: nadie podrá verla después.</span>
                             <p class="text-xs text-rose-600 font-semibold mt-1" id="error-clave" th:if="${#fields.hasErrors('clave')}" th:errors="*{clave}"></p>
                         </div>
                     </div>

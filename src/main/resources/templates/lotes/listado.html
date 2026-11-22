@@ -140,7 +140,7 @@
                 </div>
                 <div style="flex:1">
                     <h3 id="titulo-modal-salida">Registrar salida de inventario</h3>
-                    <p>Descargo de stock por merma, vencimiento o ajuste de lote.</p>
+                    <p>Retira unidades de este lote por merma, vencimiento o ajuste.</p>
                 </div>
                 <button type="button" class="ibtn btn-cerrar-modal" aria-label="Cerrar modal">
                     <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
@@ -157,7 +157,7 @@
                         </div>
                     </div>
                     <div>
-                        <div class="lbl">Lote seleccionado</div>
+                        <div class="lbl">Lote</div>
                         <div class="inp" style="background:#f7f9f8">
                             <b id="modal-salida-lote-num" class="mono text-pine-700">LOT-XXXX</b>
                             <span id="modal-salida-lote-stock" class="badge t-ok ml-auto">Stock: 0</span>
@@ -168,18 +168,18 @@
                         <div class="inp">
                             <input id="modal-salida-cantidad" name="cantidad" type="number" min="1" step="1" value="1" required class="w-full bg-transparent border-0 outline-none text-sm text-ink font-semibold">
                         </div>
-                        <div class="help" id="modal-salida-max-help">Máximo disponible en el lote</div>
+                        <div class="help" id="modal-salida-max-help">Puedes retirar hasta las unidades disponibles del lote.</div>
                     </div>
                     <div class="full">
                         <label for="modal-salida-motivo">Motivo de la salida <span class="req">*</span></label>
                         <div class="inp ta">
-                            <textarea id="modal-salida-motivo" name="motivo" maxlength="250" rows="3" placeholder="Ej. Lote vencido según inspección, frasco quebrado, merma por humedad..." required class="w-full bg-transparent border-0 outline-none text-sm text-ink font-medium resize-none"></textarea>
+                            <textarea id="modal-salida-motivo" name="motivo" maxlength="250" rows="3" placeholder="Ej. Frasco quebrado, lote vencido o merma por humedad" required class="w-full bg-transparent border-0 outline-none text-sm text-ink font-medium resize-none"></textarea>
                         </div>
-                        <div class="help">Obligatorio según Decisión D-7 (Mermas / Bajas).</div>
+                        <div class="help">Queda registrado en el historial junto con tu usuario.</div>
                     </div>
                     <div class="full note" style="background:#fffbeb;border-color:#fde68a;color:#92400e;margin-bottom:0">
                         <svg class="ico flex-none text-amber-600" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/></svg>
-                        <span class="text-xs font-medium">Esta acción descuenta stock y queda auditada de forma inmutable (D-13).</span>
+                        <span class="text-xs font-medium">Esto descuenta el stock y queda registrado en Auditoría con tu usuario.</span>
                     </div>
                 </div>
                 <div class="mf">
@@ -216,7 +216,7 @@
                         inpCant.value = '1';
                     }
                     if (maxHelp && stock) {
-                        maxHelp.textContent = 'Máximo permitido para este lote: ' + stock + ' unidades';
+                        maxHelp.textContent = 'Puedes retirar hasta ' + stock + ' unidades.';
                     }
                 });
             });
