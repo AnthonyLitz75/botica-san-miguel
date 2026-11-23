@@ -64,11 +64,12 @@ class MigracionesFlywayTest extends AbstractRepositorioIntegrationTest {
             flyway.clean();
             assertTrue(flyway.migrate().success, "La migración con datos demo debe completarse");
 
+            // Conteos del seed actual; su coherencia completa la valida DatosDemostracionSeedTest.
             assertEquals(4, contar(esquema, "usuario"));
-            assertEquals(3, contar(esquema, "medicamento"));
-            assertEquals(3, contar(esquema, "lote"));
-            assertEquals(2, contar(esquema, "proveedor"));
-            assertEquals(1, contar(esquema, "orden_compra"));
+            assertEquals(28, contar(esquema, "medicamento"));
+            assertEquals(37, contar(esquema, "lote"));
+            assertEquals(5, contar(esquema, "proveedor"));
+            assertEquals(5, contar(esquema, "orden_compra"));
 
             // Segunda ejecución: no hay nada pendiente y los datos no se duplican.
             assertEquals(0, flyway.migrate().migrationsExecuted);
