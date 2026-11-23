@@ -93,7 +93,9 @@ class GuardaOrtografiaAtributosTest {
                 "La razon social admite",
                 "El telefono admite",
                 "Ingresa un correo valido",
-                "La direccion admite"
+                "La direccion admite",
+                "Selecciona un medicamento valido",
+                "El costo unitario no es valido"
         );
 
         try (Stream<Path> stream = Files.walk(javaDir)) {

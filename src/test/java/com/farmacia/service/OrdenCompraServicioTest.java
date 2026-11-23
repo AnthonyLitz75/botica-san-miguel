@@ -467,7 +467,7 @@ class OrdenCompraServicioTest {
             var ex = assertThrows(IllegalArgumentException.class,
                     () -> servicio.guardar("admin", form));
 
-            assertEquals("Selecciona un medicamento valido", ex.getMessage());
+            assertEquals("Selecciona un medicamento válido", ex.getMessage());
             verifyNoInteractions(ordenRepositorio, detalleRepositorio, medicamentoRepositorio);
         }
 
@@ -485,9 +485,9 @@ class OrdenCompraServicioTest {
             var exNeg = assertThrows(IllegalArgumentException.class,
                     () -> servicio.guardar("admin", new OrdenCompraFormulario(5, "Obs", List.of(detNegativo))));
 
-            assertEquals("Selecciona un medicamento valido", exNulo.getMessage());
-            assertEquals("Selecciona un medicamento valido", exCero.getMessage());
-            assertEquals("Selecciona un medicamento valido", exNeg.getMessage());
+            assertEquals("Selecciona un medicamento válido", exNulo.getMessage());
+            assertEquals("Selecciona un medicamento válido", exCero.getMessage());
+            assertEquals("Selecciona un medicamento válido", exNeg.getMessage());
             verifyNoInteractions(ordenRepositorio, detalleRepositorio, medicamentoRepositorio);
         }
 
@@ -591,8 +591,8 @@ class OrdenCompraServicioTest {
             var exNeg = assertThrows(IllegalArgumentException.class,
                     () -> servicio.guardar("admin", new OrdenCompraFormulario(5, "Obs", List.of(detNeg))));
 
-            assertEquals("El costo unitario no es valido", exNulo.getMessage());
-            assertEquals("El costo unitario no es valido", exNeg.getMessage());
+            assertEquals("El costo unitario no es válido", exNulo.getMessage());
+            assertEquals("El costo unitario no es válido", exNeg.getMessage());
             verifyNoInteractions(ordenRepositorio, detalleRepositorio);
         }
 
@@ -605,7 +605,7 @@ class OrdenCompraServicioTest {
             var ex = assertThrows(IllegalArgumentException.class,
                     () -> servicio.guardar("admin", form));
 
-            assertEquals("El costo unitario no es valido", ex.getMessage());
+            assertEquals("El costo unitario no es válido", ex.getMessage());
             verifyNoInteractions(ordenRepositorio, detalleRepositorio);
         }
 
@@ -619,7 +619,7 @@ class OrdenCompraServicioTest {
             var ex = assertThrows(IllegalArgumentException.class,
                     () -> servicio.guardar("admin", form));
 
-            assertEquals("El costo unitario no es valido", ex.getMessage());
+            assertEquals("El costo unitario no es válido", ex.getMessage());
             verifyNoInteractions(ordenRepositorio, detalleRepositorio);
         }
 
