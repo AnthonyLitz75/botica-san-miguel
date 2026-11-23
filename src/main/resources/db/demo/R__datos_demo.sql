@@ -303,6 +303,7 @@ BEGIN
     -- 8. Ventas de los ultimos 45 dias (60 ventas, de la mas antigua a la mas reciente) ----------
     -- Cada venta: comprobante de la secuencia V3, lineas con precio historico (una por lote) y un
     -- unico movimiento SALIDA con id_venta y su detalle. Juan Perez Quispe suma 12 compras.
+    -- Las 5 ultimas ventas son de hoy (3 de vendedor_demo) para que "Mis ventas" no salga vacio.
     SELECT array_agg(l.id_lote ORDER BY p.codigo), COUNT(*)
     INTO v_pool, v_tam_pool
     FROM demo_plan_lote p
@@ -312,7 +313,7 @@ BEGIN
 
     FOR i IN 1..60 LOOP
         v_fecha := LEAST(
-            v_hoy - make_interval(days => 44 - ((i - 1) * 45) / 60)
+            v_hoy - make_interval(days => GREATEST(0, 44 - ((i - 1) * 48) / 60))
                   + make_interval(hours => 9 + (i * 5) % 11, mins => (i * 17) % 60),
             v_ahora - make_interval(mins => (61 - i) * 7));
         v_usuario := CASE WHEN i % 3 = 0 THEN v_admin ELSE v_vendedor END;
