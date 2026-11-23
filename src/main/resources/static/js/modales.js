@@ -293,7 +293,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const modal = document.getElementById(modalId);
         if (!modal) return;
 
-        ultimoElementoFoco = disparador || document.activeElement;
+        ultimoElementoFoco = (disparador && typeof disparador.closest === 'function' ? disparador.closest('button, a, input, select') : null) || disparador || document.activeElement;
         modalActivo = modal;
 
         configurarFormularioModal(modal, disparador);
@@ -302,22 +302,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden'; // Evita scroll de fondo
 
-        // Foco al primer control editable (o botón cancelar si es confirmación)
+        // Foco accesible al primer control editable (o botón cancelar si es confirmación)
+        // Se reintenta en cuadros sucesivos para sincronizar con la visibilidad del overlay tras la animación
+        function enfocarConReintento(el, maxIntentos = 10) {
+            if (!el) return;
+            let intentos = 0;
+            function intentar() {
+                el.focus();
+                if (document.activeElement === el || intentos >= maxIntentos) {
+                    return;
+                }
+                intentos++;
+                requestAnimationFrame(intentar);
+            }
+            requestAnimationFrame(intentar);
+        }
+
         if (modalId === 'modal-confirmar') {
             const btnCancelar = modal.querySelector('#modal-confirmar-cancelar');
             if (btnCancelar) {
-                requestAnimationFrame(() => btnCancelar.focus());
+                enfocarConReintento(btnCancelar);
                 return;
             }
         }
 
         const primerControl = modal.querySelector('input:not([type="hidden"]):not([readonly]), select, textarea, button:not(.btn-cerrar-modal)');
         if (primerControl) {
-            requestAnimationFrame(() => {
-                if (!modal.contains(document.activeElement) || document.activeElement === document.body) {
-                    primerControl.focus();
-                }
-            });
+            enfocarConReintento(primerControl);
         }
     }
 
@@ -335,11 +346,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             formularioPendienteConfirmacion = null;
         }
 
-        if (ultimoElementoFoco && typeof ultimoElementoFoco.focus === 'function') {
-            ultimoElementoFoco.focus();
-        }
-
+        const elementoADevolver = ultimoElementoFoco;
         modalActivo = null;
+
+        if (elementoADevolver && typeof elementoADevolver.focus === 'function') {
+            requestAnimationFrame(() => {
+                try { elementoADevolver.focus(); } catch (err) {}
+            });
+        }
     }
 
     // Variable para rastrear el formulario pendiente de confirmación (Spec 023)
@@ -529,7 +543,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Intercepción de formularios con confirmación previa (Spec 023)
     document.addEventListener('submit', (e) => {
         const formulario = e.target;
-        const disparador = e.submitter || document.activeElement;
+        const disparador = (e.submitter && typeof e.submitter.closest === 'function' ? e.submitter.closest('button, [data-confirmar-titulo]') : null)
+            || (document.activeElement && typeof document.activeElement.closest === 'function' ? document.activeElement.closest('button, [data-confirmar-titulo]') : null)
+            || e.submitter || document.activeElement;
         const titulo = disparador?.getAttribute?.('data-confirmar-titulo') || formulario?.getAttribute?.('data-confirmar-titulo');
 
         if (!titulo) return;
