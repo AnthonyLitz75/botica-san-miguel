@@ -84,6 +84,7 @@ class CategoriaControladorTest {
                 .andExpect(content().string(not(containsString("Nueva categoría"))))
                 .andExpect(content().string(not(containsString("data-modal-open=\"modal-nueva-categoria\""))))
                 .andExpect(content().string(not(containsString("id=\"modal-nueva-categoria\""))))
+                .andExpect(content().string(not(containsString("Usa + para añadir una subcategoría"))))
                 .andExpect(model().attribute("puedeGestionarCategorias", false));
     }
 
@@ -98,6 +99,7 @@ class CategoriaControladorTest {
                 .andExpect(content().string(containsString("Nueva categoría")))
                 .andExpect(content().string(containsString("data-modal-open=\"modal-nueva-categoria\"")))
                 .andExpect(content().string(containsString("id=\"modal-nueva-categoria\"")))
+                .andExpect(content().string(containsString("Usa + para añadir una subcategoría")))
                 .andExpect(model().attribute("puedeGestionarCategorias", true));
     }
 
