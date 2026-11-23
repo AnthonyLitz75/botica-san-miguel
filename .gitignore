@@ -54,3 +54,7 @@ e2e/test-results-suite-completa.txt
 Thumbs.db
 *.zip
 *.tar.gz
+
+# Escáner local de SonarQube
+.sonar/
+.sonarlint/
