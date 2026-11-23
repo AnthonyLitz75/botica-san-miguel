@@ -48,12 +48,9 @@ test.describe('Spec 020: Último acceso de los usuarios', () => {
     const thUltimoAcceso = page.locator('table thead th:has-text("Último acceso")');
     await expect(thUltimoAcceso).toBeVisible();
 
-    // 6. Verificar fila de vendedor_demo: debe mostrar "Hoy HH:mm"
-    let filaVendedor = page.locator('table tbody tr:has(.mono:text("vendedor_demo"))');
-    if (await filaVendedor.count() === 0) {
-      await page.goto('/usuarios?pagina=2', { waitUntil: 'domcontentloaded' });
-      filaVendedor = page.locator('table tbody tr:has(.mono:text("vendedor_demo"))');
-    }
+    // 6. Verificar fila de vendedor_demo: debe mostrar "Hoy HH:mm" (buscando directamente para ser inmune a la paginación)
+    await page.goto('/usuarios?buscar=vendedor_demo', { waitUntil: 'domcontentloaded' });
+    const filaVendedor = page.locator('table tbody tr:has(.mono:text("vendedor_demo"))');
     await expect(filaVendedor).toBeVisible();
     const celdaAccesoVendedor = filaVendedor.locator('td.lbl');
     await expect(celdaAccesoVendedor).toBeVisible();
@@ -83,12 +80,9 @@ test.describe('Spec 020: Último acceso de los usuarios', () => {
     // Esperar a que el servidor procese el POST y muestre el mensaje de éxito
     await expect(page.locator('.aviso-operacion.aviso-exito')).toContainText('Usuario registrado correctamente', { timeout: 15000 });
 
-    // 8. Verificar que el usuario recién creado muestra "Nunca" en Último acceso
-    let filaNuevo = page.locator(`table tbody tr:has(.mono:text("${usuarioNuevo}"))`);
-    if (await filaNuevo.count() === 0) {
-      await page.goto('/usuarios?pagina=2', { waitUntil: 'domcontentloaded' });
-      filaNuevo = page.locator(`table tbody tr:has(.mono:text("${usuarioNuevo}"))`);
-    }
+    // 8. Verificar que el usuario recién creado muestra "Nunca" en Último acceso (buscando directamente)
+    await page.goto(`/usuarios?buscar=${encodeURIComponent(usuarioNuevo)}`, { waitUntil: 'domcontentloaded' });
+    const filaNuevo = page.locator(`table tbody tr:has(.mono:text("${usuarioNuevo}"))`);
     await expect(filaNuevo).toBeVisible();
     const celdaAccesoNuevo = filaNuevo.locator('td.lbl');
     await expect(celdaAccesoNuevo).toHaveText('Nunca');

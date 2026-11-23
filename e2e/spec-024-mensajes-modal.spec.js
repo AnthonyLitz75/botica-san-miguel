@@ -37,11 +37,8 @@ test.describe('Spec 024: Avisos flash tras operaciones en modal AJAX', () => {
     await expect(avisoCrear).toContainText('Usuario registrado correctamente.');
 
     // 2. Editar usuario
-    let filaUser = page.locator(`table tbody tr:has(.mono:text("${loginUser}"))`);
-    if (await filaUser.count() === 0) {
-      await page.goto('/usuarios?pagina=2', { waitUntil: 'domcontentloaded' });
-      filaUser = page.locator(`table tbody tr:has(.mono:text("${loginUser}"))`);
-    }
+    await page.goto(`/usuarios?buscar=${encodeURIComponent(loginUser)}`, { waitUntil: 'domcontentloaded' });
+    const filaUser = page.locator(`table tbody tr:has(.mono:text("${loginUser}"))`);
     await expect(filaUser).toBeVisible();
 
     const lapizUser = filaUser.locator('a[title="Editar usuario"]');
@@ -83,6 +80,7 @@ test.describe('Spec 024: Avisos flash tras operaciones en modal AJAX', () => {
     await expect(avisoCrear).toContainText('Cliente registrado correctamente.');
 
     // 2. Editar cliente
+    await page.goto(`/clientes?buscar=${encodeURIComponent(ts)}`, { waitUntil: 'domcontentloaded' });
     const filaCli = page.locator(`table tbody tr:has-text("${nombreCliente}")`);
     await expect(filaCli).toBeVisible();
 
@@ -127,6 +125,7 @@ test.describe('Spec 024: Avisos flash tras operaciones en modal AJAX', () => {
     await expect(avisoCrear).toContainText('Proveedor registrado correctamente.');
 
     // 2. Editar proveedor
+    await page.goto(`/proveedores?buscar=${encodeURIComponent(ruc)}`, { waitUntil: 'domcontentloaded' });
     const filaProv = page.locator(`table tbody tr:has-text("${razonSocial}")`);
     await expect(filaProv).toBeVisible();
 
@@ -174,6 +173,7 @@ test.describe('Spec 024: Avisos flash tras operaciones en modal AJAX', () => {
     await expect(avisoCrear).toContainText('Medicamento registrado correctamente.');
 
     // 2. Editar medicamento
+    await page.goto(`/medicamentos?buscar=${encodeURIComponent(codigoMed)}`, { waitUntil: 'domcontentloaded' });
     const filaMed = page.locator(`table tbody tr:has-text("${codigoMed}")`);
     await expect(filaMed).toBeVisible();
 
@@ -218,8 +218,10 @@ test.describe('Spec 024: Avisos flash tras operaciones en modal AJAX', () => {
     // 2. Crear subcategoría
     const filaPrincipal = page.locator(`.tr:has-text("${nombreCatPrincipal}")`);
     await expect(filaPrincipal).toBeVisible();
+    await filaPrincipal.scrollIntoViewIfNeeded();
 
     const btnSub = filaPrincipal.locator('a.boton-subcategoria');
+    await expect(btnSub).toBeVisible();
     await btnSub.click();
     await expect(modalCat).toHaveClass(/activo|on/);
 
