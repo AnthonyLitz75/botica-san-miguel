@@ -1,5 +1,7 @@
 package com.farmacia.controller;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -11,6 +13,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -26,6 +29,8 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -65,6 +70,42 @@ class CategoriaControladorTest {
                 .andExpect(model().attributeExists("arbol", "categorias", "totalCategorias", "raices", "stockPorRama", "alertasPorRama"))
                 .andExpect(model().attribute("nombreUsuario", "admin"))
                 .andExpect(model().attribute("rolUsuario", "Administrador"));
+    }
+
+    @ParameterizedTest(name = "GET /categorias con {0} no muestra botones ni modal de gestión")
+    @ValueSource(strings = {"VENDEDOR", "ALMACENERO", "COMPRAS"})
+    @DisplayName("GET /categorias oculta los botones y el modal de gestión a roles sin permiso")
+    void getCategorias_rolSinPermisoDeGestion_noMuestraBotonesNiModal(String rol) throws Exception {
+        prepararArbolConUnaCategoria();
+
+        mvc.perform(get("/categorias").with(user("usuario").roles(rol)))
+                .andExpect(status().isOk())
+                .andExpect(view().name("categorias/arbol"))
+                .andExpect(content().string(not(containsString("Nueva categoría"))))
+                .andExpect(content().string(not(containsString("data-modal-open=\"modal-nueva-categoria\""))))
+                .andExpect(content().string(not(containsString("id=\"modal-nueva-categoria\""))))
+                .andExpect(model().attribute("puedeGestionarCategorias", false));
+    }
+
+    @Test
+    @DisplayName("GET /categorias con ADMINISTRADOR muestra los botones y el modal de gestión")
+    void getCategorias_administrador_muestraBotonesYModal() throws Exception {
+        prepararArbolConUnaCategoria();
+
+        mvc.perform(get("/categorias").with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("categorias/arbol"))
+                .andExpect(content().string(containsString("Nueva categoría")))
+                .andExpect(content().string(containsString("data-modal-open=\"modal-nueva-categoria\"")))
+                .andExpect(content().string(containsString("id=\"modal-nueva-categoria\"")))
+                .andExpect(model().attribute("puedeGestionarCategorias", true));
+    }
+
+    private void prepararArbolConUnaCategoria() {
+        ArbolCategorias arbol = new ArbolCategorias();
+        arbol.insertar(1, "Analgésicos", null);
+        when(categoriaServicio.arbol()).thenReturn(arbol);
+        when(categoriaServicio.listarActivas()).thenReturn(List.of(new Categoria(1, "Analgésicos", null, true)));
     }
 
     @Test
