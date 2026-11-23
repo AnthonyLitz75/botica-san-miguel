@@ -40,10 +40,12 @@ class UsuarioUltimoAccesoDemoPostgresTest extends AbstractRepositorioIntegration
             String vendedorUser = "vendedor_d_" + sufijo;
 
             // 2. Insertar usando la misma logica de R__datos_demo.sql con zona America/Lima en PostgreSQL
+            // Para garantizar que Almacen siempre caiga en el dia previo a Admin sin importar si el test corre
+            // cerca de medianoche (entre 00:00 y 02:00), se desfasa 1 dia completo respecto al instante de Admin (-26 horas).
             jdbcTemplate.update("""
                     INSERT INTO usuario (nombre, nombre_usuario, clave_hash, rol, activo, ultimo_acceso) VALUES
                     ('Admin Demo Test', ?, '{bcrypt}$2a$10$demoHash', 'ADMINISTRADOR', true, (NOW() AT TIME ZONE 'America/Lima') - INTERVAL '2 hours'),
-                    ('Almacen Demo Test', ?, '{bcrypt}$2a$10$demoHash', 'ALMACENERO', true, (NOW() AT TIME ZONE 'America/Lima') - INTERVAL '1 day'),
+                    ('Almacen Demo Test', ?, '{bcrypt}$2a$10$demoHash', 'ALMACENERO', true, (NOW() AT TIME ZONE 'America/Lima') - INTERVAL '26 hours'),
                     ('Compras Demo Test', ?, '{bcrypt}$2a$10$demoHash', 'COMPRAS', true, (NOW() AT TIME ZONE 'America/Lima') - INTERVAL '10 days'),
                     ('Vendedor Demo Test', ?, '{bcrypt}$2a$10$demoHash', 'VENDEDOR', true, NULL)
                     """, adminUser, almacenUser, comprasUser, vendedorUser);
