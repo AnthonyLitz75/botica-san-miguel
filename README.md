@@ -35,7 +35,7 @@ Las versiones oficiales del entorno se extraen directamente de los descriptores 
 
 - **Java JDK 25:** Establecido en `pom.xml` (`<java.version>25</java.version>`). Requiere JDK completo, no solo JRE.
 - **Spring Boot 4.1.2:** Gestionado en `pom.xml` (`<version>4.1.2</version>`).
-- **PostgreSQL 16 (versión usada en las pruebas):** Servicio local en puerto 5432 o contenedor `postgres:16-alpine` definido en `docker-compose.dev.yml`.
+- **PostgreSQL 16 o 18:** La ejecución local se verificó con 16 y las pruebas automatizadas usan 18. Compatible con servicio local en puerto 5432 o contenedor Docker.
 - **Node.js (LTS 18+) y npm:** Requerido para la compilación de estilos mediante Tailwind CLI (`package.json`).
 - **Docker y Docker Compose:** Para despliegue multi-contenedor y ejecución de pruebas de integración con Testcontainers.
 - **Maven Wrapper:** Incluido en la raíz (`./mvnw` en Linux/macOS y `.\mvnw.cmd` en Windows); no es necesario instalar Maven manualmente.
@@ -80,11 +80,12 @@ Si dispones de PostgreSQL local (servicio en puerto 5432) y Node.js:
    ```bash
    npm install
    ```
-3. Arranca con datos de demostración precargados:
+3. Configura la contraseña de base de datos e inicia con datos de demostración:
    ```bash
+   export DB_PASSWORD="tu-contraseña-postgres"
    ./mvnw spring-boot:run -Dspring-boot.run.profiles=demo
    ```
-   *(En Windows PowerShell: `.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=demo"`)*
+   *(En Windows PowerShell: `$env:DB_PASSWORD="tu-contraseña"; .\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=demo"`)*
 
 ## Variables de entorno
 
@@ -96,9 +97,9 @@ Configuraciones admitidas por la aplicación (`application.properties` y `applic
 | :--- | :--- | :--- | :---: |
 | `DB_URL` | URL JDBC de conexión a PostgreSQL | `jdbc:postgresql://localhost:5432/farmacia_aed` | Sí (si cambia host/puerto) |
 | `DB_USER` | Usuario de conexión a la base de datos | `postgres` | Sí |
-| `DB_PASSWORD` | Contraseña del usuario de base de datos | *(Sin valor por defecto en producción)* | **Sí** |
+| `DB_PASSWORD` | Contraseña del usuario de base de datos | En `dev`: `postgres`; en `demo`/producción: sin valor por defecto | **Sí** |
 | `PORT` | Puerto de escucha HTTP del servidor web | `8080` | No |
-| `SPRING_PROFILES_ACTIVE` | Perfiles de Spring Boot activos | *(Vacío en producción)* | No |
+| `SPRING_PROFILES_ACTIVE` | Perfiles de Spring Boot activos | `ninguno` (sin perfil por defecto) | No |
 | `DIAS_POR_VENCER` | Ventana preventiva en días para alerta por vencer | `90` | No |
 | `BOTICA_NOMBRE` | Razón social institucional para comprobantes | *(Ficticio en dev/demo)* | **Sí** |
 | `BOTICA_RUC` | RUC institucional de 11 dígitos numéricos | *(Ficticio en dev/demo)* | **Sí** |
