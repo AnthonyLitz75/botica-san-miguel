@@ -219,7 +219,7 @@
 }
 
 .recepcion-resumen strong {
-  color: var(--color-primario-hover, #0e4b3c);
+  color: #0f2a24;
   font-size: 16px;
 }
 
@@ -254,7 +254,6 @@
 }
 
 .recepcion-seleccion-resumen {
-  color: var(--color-primario-hover, #0e4b3c);
   font-size: 13px;
   font-weight: 650;
   white-space: nowrap;

@@ -195,13 +195,8 @@ export function pintarEstado(estado, catalogoMedicamentos = []) {
 
   const btnCancelarVenta = document.getElementById("btn-cancelar-venta");
   if (btnCancelarVenta) {
-    if (tieneLineas) {
-      btnCancelarVenta.style.opacity = "1";
-      btnCancelarVenta.style.cursor = "pointer";
-    } else {
-      btnCancelarVenta.style.opacity = "0.6";
-      btnCancelarVenta.style.cursor = "default";
-    }
+    btnCancelarVenta.style.opacity = "1";
+    btnCancelarVenta.style.cursor = "pointer";
   }
 
   // Contador reactivo de productos en la canasta (estilo boceto)
