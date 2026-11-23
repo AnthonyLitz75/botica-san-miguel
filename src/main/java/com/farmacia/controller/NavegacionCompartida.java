@@ -70,6 +70,7 @@ public class NavegacionCompartida {
                 modelo.addAttribute("puedeConsultarAuditoria", roles.contains("ROLE_ADMINISTRADOR"));
                 modelo.addAttribute("puedeGestionarUsuarios", roles.contains("ROLE_ADMINISTRADOR"));
                 modelo.addAttribute("puedeVerReportes", roles.contains("ROLE_ADMINISTRADOR"));
+                modelo.addAttribute("puedeGestionarCategorias", roles.contains("ROLE_ADMINISTRADOR"));
         }
 
 }
