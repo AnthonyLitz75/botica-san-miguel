@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 public record DetalleOrdenCompraFormulario(
-                @NotNull(message = "Selecciona un medicamento") @Min(value = 1, message = "El medicamento no es valido") Integer idMedicamento,
+                @NotNull(message = "Selecciona un medicamento") @Min(value = 1, message = "El medicamento no es válido") Integer idMedicamento,
 
                 @NotNull(message = "La cantidad es obligatoria") @Min(value = 1, message = "La cantidad debe ser mayor que cero") Integer cantidadSolicitada,
 

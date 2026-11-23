@@ -150,7 +150,7 @@ public class OrdenCompraServicio {
                         if (detalle == null || detalle.idMedicamento() == null
                                         || detalle.idMedicamento() <= 0) {
                                 throw new IllegalArgumentException(
-                                                "Selecciona un medicamento valido");
+                                                "Selecciona un medicamento válido");
                         }
 
                         if (!medicamentosIncluidos.add(detalle.idMedicamento())) {
@@ -179,7 +179,7 @@ public class OrdenCompraServicio {
                                         || costo.compareTo(limite) > 0
                                         || costo.stripTrailingZeros().scale() > 2) {
                                 throw new IllegalArgumentException(
-                                                "El costo unitario no es valido");
+                                                "El costo unitario no es válido");
                         }
 
                         total = total.add(costo.multiply(

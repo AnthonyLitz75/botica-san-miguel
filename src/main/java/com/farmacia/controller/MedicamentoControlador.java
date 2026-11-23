@@ -122,7 +122,7 @@ public class MedicamentoControlador {
             resultado.rejectValue(
                     "codigo",
                     "codigo.duplicado",
-                    "Ya existe un medicamento con este codigo");
+                    "Ya existe un medicamento con este código");
             model.addAttribute("categorias", categoriaServicio.listarActivas());
             return "medicamentos/formulario";
         }
@@ -207,7 +207,7 @@ public class MedicamentoControlador {
             resultado.rejectValue(
                     "codigo",
                     "codigo.duplicado",
-                    "Ya existe un medicamento con este codigo");
+                    "Ya existe un medicamento con este código");
             return "medicamentos/formulario";
         }
     }
