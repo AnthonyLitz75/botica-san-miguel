@@ -30,6 +30,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -470,5 +471,49 @@ class MedicamentoControladorTest {
                 .andExpect(model().attributeExists("categoriaSeleccionada", "categoriaId", "medicamentos"));
 
         verify(servicio).buscarActivosPorCategorias("", List.of(1, 2, 3));
+    }
+
+    @Test
+    @DisplayName("POST /medicamentos via AJAX válido retorna 200 JSON y guarda aviso flash")
+    void guardar_ajaxValido_retornaOkJsonYGuardaAvisoFlash() throws Exception {
+        mvc.perform(post("/medicamentos")
+                        .with(user("admin").roles("ADMINISTRADOR"))
+                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .param("codigo", "MED-AJAX-01")
+                        .param("nombre", "Ibuprofeno 400mg")
+                        .param("concentracion", "400 mg")
+                        .param("presentacion", "Tableta")
+                        .param("unidadControl", "CAJA")
+                        .param("precioVenta", "5.50")
+                        .param("stockMinimo", "10"))
+                .andExpect(status().isOk())
+                .andExpect(flash().attribute("mensaje", "Medicamento registrado correctamente."));
+
+        verify(servicio).guardar(any(MedicamentoFormulario.class));
+    }
+
+    @Test
+    @DisplayName("POST /medicamentos/{id}/editar via AJAX válido retorna 200 JSON y guarda aviso flash")
+    void actualizar_ajaxValido_retornaOkJsonYGuardaAvisoFlash() throws Exception {
+        Medicamento med = crearMedicamentoPrueba(1, "MED-001", "Paracetamol");
+        when(servicio.buscarPorId(1)).thenReturn(Optional.of(med));
+        when(servicio.actualizar(eq(1), any(MedicamentoFormulario.class))).thenReturn(true);
+
+        mvc.perform(post("/medicamentos/1/editar")
+                        .with(user("admin").roles("ADMINISTRADOR"))
+                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .param("codigo", "MED-001")
+                        .param("nombre", "Paracetamol Modificado")
+                        .param("concentracion", "500 mg")
+                        .param("presentacion", "Tableta")
+                        .param("unidadControl", "CAJA")
+                        .param("precioVenta", "2.50")
+                        .param("stockMinimo", "20"))
+                .andExpect(status().isOk())
+                .andExpect(flash().attribute("mensaje", "Cambios del medicamento guardados correctamente."));
+
+        verify(servicio).actualizar(eq(1), any(MedicamentoFormulario.class));
     }
 }

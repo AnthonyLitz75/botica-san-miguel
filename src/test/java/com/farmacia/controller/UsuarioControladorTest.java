@@ -11,6 +11,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -228,5 +229,40 @@ class UsuarioControladorTest {
                 .andExpect(redirectedUrl("/usuarios"));
 
         verify(servicio).activar("admin", 5);
+    }
+
+    @Test
+    @DisplayName("POST /usuarios vía AJAX válido retorna 200 JSON y guarda aviso flash")
+    void guardar_ajaxValido_retornaOkJsonYGuardaAvisoFlash() throws Exception {
+        when(servicio.crear(eq("admin"), any())).thenReturn(10);
+
+        mvc.perform(post("/usuarios")
+                        .with(user("admin").roles("ADMINISTRADOR"))
+                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .param("nombre", "Nuevo Empleado")
+                        .param("nombreUsuario", "nempleado")
+                        .param("rol", "VENDEDOR")
+                        .param("clave", "ClaveSegura2026!"))
+                .andExpect(status().isOk())
+                .andExpect(flash().attribute("mensaje", "Usuario registrado correctamente."));
+
+        verify(servicio).crear(eq("admin"), any());
+    }
+
+    @Test
+    @DisplayName("POST /usuarios/{id}/editar vía AJAX válido retorna 200 JSON y guarda aviso flash")
+    void actualizar_ajaxValido_retornaOkJsonYGuardaAvisoFlash() throws Exception {
+        mvc.perform(post("/usuarios/5/editar")
+                        .with(user("admin").roles("ADMINISTRADOR"))
+                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .param("nombre", "Carlos Modificado")
+                        .param("nombreUsuario", "clopez")
+                        .param("rol", "COMPRAS"))
+                .andExpect(status().isOk())
+                .andExpect(flash().attribute("mensaje", "Cambios del usuario guardados correctamente."));
+
+        verify(servicio).actualizar(eq("admin"), eq(5), any(UsuarioFormulario.class));
     }
 }

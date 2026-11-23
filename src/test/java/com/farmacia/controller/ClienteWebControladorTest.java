@@ -366,4 +366,40 @@ class ClienteWebControladorTest {
                 .andExpect(model().attribute("idCliente", 8))
                 .andExpect(model().attributeHasFieldErrorCode("formulario", "correo", "correo.duplicado"));
     }
+
+    @Test
+    @DisplayName("POST /clientes via AJAX válido retorna 200 JSON y guarda aviso flash")
+    void guardar_ajaxValido_retornaOkJsonYGuardaAvisoFlash() throws Exception {
+        mvc.perform(post("/clientes")
+                        .with(user("vendedor1").roles("VENDEDOR"))
+                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .param("tipoDocumento", "DNI")
+                        .param("numeroDocumento", "12345678")
+                        .param("nombreCompleto", "Carlos López")
+                        .param("telefono", "999888777"))
+                .andExpect(status().isOk())
+                .andExpect(flash().attribute("mensaje", "Cliente registrado correctamente."));
+
+        verify(servicio).guardar(any(ClienteFormulario.class));
+    }
+
+    @Test
+    @DisplayName("POST /clientes/{id}/editar via AJAX válido retorna 200 JSON y guarda aviso flash")
+    void actualizar_ajaxValido_retornaOkJsonYGuardaAvisoFlash() throws Exception {
+        when(servicio.actualizar(eq(8), any(ClienteFormulario.class))).thenReturn(true);
+
+        mvc.perform(post("/clientes/8/editar")
+                        .with(user("admin1").roles("ADMINISTRADOR"))
+                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .param("tipoDocumento", "DNI")
+                        .param("numeroDocumento", "12345678")
+                        .param("nombreCompleto", "Carlos Modificado")
+                        .param("telefono", "999888777"))
+                .andExpect(status().isOk())
+                .andExpect(flash().attribute("mensaje", "Cambios del cliente guardados correctamente."));
+
+        verify(servicio).actualizar(eq(8), any(ClienteFormulario.class));
+    }
 }

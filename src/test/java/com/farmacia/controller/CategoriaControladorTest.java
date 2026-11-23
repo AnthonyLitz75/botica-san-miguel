@@ -142,4 +142,38 @@ class CategoriaControladorTest {
 
         verify(categoriaServicio).desactivar(1);
     }
+
+    @Test
+    @DisplayName("POST /categorias/nueva via AJAX válido retorna 200 JSON y guarda aviso flash")
+    void postNuevaCategoriaAjaxValida_retornaOkJsonYGuardaAvisoFlash() throws Exception {
+        when(categoriaServicio.crear(anyString(), any())).thenReturn(10);
+
+        mvc.perform(post("/categorias/nueva")
+                        .with(user("admin").roles("ADMINISTRADOR"))
+                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .param("nombre", "Antibióticos")
+                        .param("idPadre", ""))
+                .andExpect(status().isOk())
+                .andExpect(flash().attribute("mensaje", "Categoría 'Antibióticos' registrada exitosamente."))
+                .andExpect(flash().attribute("mensajeExito", "Categoría 'Antibióticos' registrada exitosamente."));
+
+        verify(categoriaServicio).crear(eq("Antibióticos"), any());
+    }
+
+    @Test
+    @DisplayName("POST /categorias/{id}/editar via AJAX válido retorna 200 JSON y guarda aviso flash")
+    void postEditarCategoriaAjaxValida_retornaOkJsonYGuardaAvisoFlash() throws Exception {
+        mvc.perform(post("/categorias/1/editar")
+                        .with(user("admin").roles("ADMINISTRADOR"))
+                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .param("nombre", "Analgésicos y Antipiréticos")
+                        .param("idPadre", ""))
+                .andExpect(status().isOk())
+                .andExpect(flash().attribute("mensaje", "Categoría 'Analgésicos y Antipiréticos' actualizada correctamente."))
+                .andExpect(flash().attribute("mensajeExito", "Categoría 'Analgésicos y Antipiréticos' actualizada correctamente."));
+
+        verify(categoriaServicio).actualizar(eq(1), eq("Analgésicos y Antipiréticos"), any());
+    }
 }

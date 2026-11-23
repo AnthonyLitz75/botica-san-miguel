@@ -29,6 +29,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -493,5 +494,45 @@ class ProveedorControladorTest {
                 .andExpect(view().name("proveedores/formulario"))
                 .andExpect(model().attribute("idProveedor", 1))
                 .andExpect(model().attributeHasFieldErrorCode("formulario", "telefono", "telefono.duplicado"));
+    }
+
+    @Test
+    @DisplayName("POST /proveedores via AJAX válido retorna 200 JSON y guarda aviso flash")
+    void guardar_ajaxValido_retornaOkJsonYGuardaAvisoFlash() throws Exception {
+        mvc.perform(post("/proveedores")
+                        .with(user("compras").roles("COMPRAS"))
+                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .param("ruc", "20123456789")
+                        .param("razonSocial", "Laboratorios Unidos SAC")
+                        .param("telefono", "987654321")
+                        .param("correo", "ventas@unidos.com")
+                        .param("direccion", "Av. Grau 456, Lima"))
+                .andExpect(status().isOk())
+                .andExpect(flash().attribute("mensaje", "Proveedor registrado correctamente."));
+
+        verify(servicio).guardar(any(ProveedorFormulario.class));
+    }
+
+    @Test
+    @DisplayName("POST /proveedores/{id}/editar via AJAX válido retorna 200 JSON y guarda aviso flash")
+    void actualizar_ajaxValido_retornaOkJsonYGuardaAvisoFlash() throws Exception {
+        Proveedor prov = crearProveedorPrueba(1, "20100000001", "Drogueria Central SAC");
+        when(servicio.buscarPorId(1)).thenReturn(Optional.of(prov));
+        when(servicio.actualizar(eq(1), any(ProveedorFormulario.class))).thenReturn(true);
+
+        mvc.perform(post("/proveedores/1/editar")
+                        .with(user("compras").roles("COMPRAS"))
+                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .param("ruc", "20100000001")
+                        .param("razonSocial", "Drogueria Central SAC")
+                        .param("telefono", "019998877")
+                        .param("correo", "contacto@central.pe")
+                        .param("direccion", "Av. Principal 123"))
+                .andExpect(status().isOk())
+                .andExpect(flash().attribute("mensaje", "Cambios del proveedor guardados correctamente."));
+
+        verify(servicio).actualizar(eq(1), any(ProveedorFormulario.class));
     }
 }
