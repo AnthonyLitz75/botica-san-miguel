@@ -5,7 +5,7 @@ module.exports = {
     "./src/main/resources/static/js/**/*.js"
   ],
   corePlugins: {
-    // preflight desactivado para convivir armónicamente con estilos.css e inventario.css
+    // preflight desactivado para preservar los estilos base, resets y componentes modulares propios
     preflight: false,
   },
   theme: {

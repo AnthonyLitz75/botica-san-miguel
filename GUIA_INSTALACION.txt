@@ -1,5 +1,6 @@
 BOTICA SAN MIGUEL - GUIA DE INSTALACION Y DEMOSTRACION
 ===================================================
+NOTA: Para la arquitectura general y opciones de inicio rapido con Docker, consulte primero el README.md.
 Dirigida a Windows y PowerShell. Proyecto academico en desarrollo.
 El esquema de la base lo crea Flyway al iniciar la aplicacion, con las
 migraciones de src/main/resources/db/migration. No hay que ejecutar SQL a mano. No contiene credenciales reales de PostgreSQL.
@@ -19,7 +20,7 @@ IMPORTANTE
 1. REQUISITOS
 -------------
 - JDK 25 (el pom.xml actual establece java.version=25), no solo JRE.
-- PostgreSQL 18 y pgAdmin 4. Servicio local en puerto 5432.
+- PostgreSQL 16 o superior y pgAdmin 4 (en Docker se utiliza PostgreSQL 16). Servicio local en puerto 5432.
 - Git para clonar; si usa ZIP, Git no es necesario para ejecutar la aplicacion.
 - Node.js (version LTS) y npm. Maven los usa para compilar los estilos Tailwind CSS.
 - Internet en la primera ejecucion para descargar Maven, dependencias de Java y paquetes de Node.
@@ -224,7 +225,7 @@ Vendedor:
 - Probar la estructura de pila LIFO con el boton "Deshacer" para revertir cambios en memoria.
 - Aplicar descuentos por linea en soles.
 - Confirmar la venta: emite el comprobante interno B001-XXXXXXXX con formato de ticket termico y descuenta el stock real.
-- Consultar sus ventas del dia en /ventas/mis-ventas.
+- Consultar sus ventas del dia en /ventas/mias.
 
 9. DETENER Y VOLVER A INICIAR
 ----------------------------
