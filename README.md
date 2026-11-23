@@ -11,12 +11,13 @@
 ![Spring Security](https://img.shields.io/badge/Spring_Security-RBAC-6DB33F?logo=springsecurity&logoColor=white)
 ![Thymeleaf](https://img.shields.io/badge/Thymeleaf-SSR-005F0F?logo=thymeleaf&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?logo=tailwindcss&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-compose_dev-2496ED?logo=docker&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16_|_18-4169E1?logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Producción-2496ED?logo=docker&logoColor=white)
 
 [Requisitos](#requisitos) ·
-[Inicio rápido](#inicio-rápido-con-docker) ·
+[Ejecución](#ejecución-del-proyecto) ·
 [Variables de entorno](#variables-de-entorno) ·
+[Despliegue](#despliegue-con-docker) ·
 [Pruebas](#pruebas-y-calidad) ·
 [Módulos y roles](#funcionalidades-por-rol) ·
 [Seguridad](#seguridad-y-calidad)
@@ -35,52 +36,22 @@ Las versiones oficiales del entorno se extraen directamente de los descriptores 
 
 - **Java JDK 25:** Establecido en `pom.xml` (`<java.version>25</java.version>`). Requiere JDK completo, no solo JRE.
 - **Spring Boot 4.1.2:** Gestionado en `pom.xml` (`<version>4.1.2</version>`).
-- **PostgreSQL 16 o 18:** La ejecución local se verificó con 16 y las pruebas automatizadas usan 18. Compatible con servicio local en puerto 5432 o contenedor Docker.
+- **PostgreSQL 16 o 18:** La ejecución local se verificó con 16 y las pruebas automatizadas usan 18. Compatible con servicio local en puerto 5432 o contenedor de base de datos.
 - **Node.js (LTS 18+) y npm:** Requerido para la compilación de estilos mediante Tailwind CLI (`package.json`).
-- **Docker y Docker Compose:** Para despliegue multi-contenedor y ejecución de pruebas de integración con Testcontainers.
+- **Docker:** Para la construcción de la imagen de producción y la ejecución de pruebas de integración con Testcontainers.
 - **Maven Wrapper:** Incluido en la raíz (`./mvnw` en Linux/macOS y `.\mvnw.cmd` en Windows); no es necesario instalar Maven manualmente.
 
-## Inicio rápido con Docker
+## Ejecución del proyecto
 
-Para levantar la base de datos, el backend con recarga en vivo y el compilador continuo de Tailwind en un único paso:
+Para ejecutar la aplicación localmente con PostgreSQL local (puerto 5432) y Node.js:
 
-```bash
-docker compose -f docker-compose.dev.yml up -d --build
-```
-
-Comprueba que el entorno está operativo abriendo en tu navegador:
-**[http://localhost:8080/acceso/login](http://localhost:8080/acceso/login)**
-
-### Cuentas de demostración
-
-Los datos demo se insertan automáticamente mediante la migración repetible `src/main/resources/db/demo/R__datos_demo.sql` únicamente cuando el perfil activo incluye `dev` o `demo`:
-
-| Rol | Usuario | Contraseña | Pantalla de inicio |
-| :--- | :--- | :--- | :--- |
-| **ADMINISTRADOR** | `admin_demo` | `AdminDemo2026!` | Catálogo (`/medicamentos`), reportes y administración |
-| **VENDEDOR** | `vendedor_demo` | `VendedorDemo2026!` | Caja POS (`/ventas/nueva`) y Mis ventas (`/ventas/mias`) |
-| **ALMACENERO** | `almacen_demo` | `FarmaciaDemo2026!` | Inventario, recepciones (`/ordenes-compra`) y alertas |
-| **COMPRAS** | `compras_demo` | `ComprasDemo2026!` | Proveedores y emisión de órdenes de compra |
-
-> [!WARNING]
-> Estas cuentas y contraseñas son de uso público para pruebas locales. Los datos de demostración solo se cargan en perfiles `dev` o `demo` cuando las tablas están vacías. **Nunca utilices estas credenciales en entornos de producción.**
-
-Para detener los contenedores preservando los datos:
-
-```bash
-docker compose -f docker-compose.dev.yml down
-```
-
-## Ejecución sin Docker
-
-Si dispones de PostgreSQL local (servicio en puerto 5432) y Node.js:
-
-1. Crea una base de datos vacía (ej. `farmacia_aed`). Flyway aplicará automáticamente las migraciones versionadas.
-2. Instala las dependencias de Node.js en la raíz:
+1. Crea una base de datos vacía en PostgreSQL (ej. `farmacia_aed`). Flyway aplicará automáticamente las migraciones versionadas.
+2. Instala las dependencias de Node.js y compila los estilos:
    ```bash
    npm install
+   npm run build:css
    ```
-3. Configura la contraseña de base de datos e inicia con datos de demostración:
+3. Configura la contraseña de la base de datos e inicia con datos de demostración:
 
    **Linux / macOS (Bash):**
    ```bash
@@ -101,9 +72,45 @@ Si dispones de PostgreSQL local (servicio en puerto 5432) y Node.js:
    .\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=demo"
    ```
 
+4. Comprueba que la aplicación está operativa abriendo en tu navegador:
+   **[http://localhost:8080/acceso/login](http://localhost:8080/acceso/login)**
+
+### Cuentas de demostración
+
+Los datos demo se insertan automáticamente mediante la migración repetible `src/main/resources/db/demo/R__datos_demo.sql` únicamente cuando el perfil activo incluye `dev` o `demo`:
+
+| Rol | Usuario | Contraseña | Pantalla de inicio |
+| :--- | :--- | :--- | :--- |
+| **ADMINISTRADOR** | `admin_demo` | `AdminDemo2026!` | Catálogo (`/medicamentos`), reportes y administración |
+| **VENDEDOR** | `vendedor_demo` | `VendedorDemo2026!` | Caja POS (`/ventas/nueva`) y Mis ventas (`/ventas/mias`) |
+| **ALMACENERO** | `almacen_demo` | `FarmaciaDemo2026!` | Inventario, recepciones (`/ordenes-compra`) y alertas |
+| **COMPRAS** | `compras_demo` | `ComprasDemo2026!` | Proveedores y emisión de órdenes de compra |
+
+> [!WARNING]
+> Estas cuentas y contraseñas son de uso público para pruebas locales. Los datos de demostración solo se cargan en perfiles `dev` o `demo` cuando las tablas están vacías. **Nunca utilices estas credenciales en entornos de producción.**
+
+## Despliegue con Docker
+
+El repositorio incluye un `Dockerfile` multi-etapa optimizado para generar una imagen de producción ligera y segura, con ejecución bajo el usuario sin privilegios `spring:spring`:
+
+```bash
+# 1. Construir la imagen de producción
+docker build -t botica-san-miguel .
+
+# 2. Ejecutar el contenedor
+docker run -d -p 8080:8080 \
+  -e DB_URL=jdbc:postgresql://host.docker.internal:5432/farmacia_aed \
+  -e DB_USER=postgres \
+  -e DB_PASSWORD="tu-contraseña-postgres" \
+  -e BOTICA_NOMBRE="Botica San Miguel" \
+  -e BOTICA_RUC="20601234567" \
+  -e BOTICA_DIRECCION="Av. Principal 123" \
+  botica-san-miguel
+```
+
 ## Variables de entorno
 
-La aplicación lee variables de entorno directamente del sistema operativo o de la línea de comandos, y **no carga archivos .env por sí sola**.
+La aplicación lee variables de entorno directamente del sistema operativo o de la línea de comandos.
 
 Configuraciones admitidas por la aplicación (`application.properties` y `application-dev.properties`):
 
@@ -143,24 +150,13 @@ npm run build:css
 
 # 2. Suite de pruebas backend (Unitarias, Controladores y Persistencia con Testcontainers)
 ./mvnw test
-
-# 3. Suite de pruebas funcionales y de accesibilidad End-to-End (Playwright)
-npx playwright test
 ```
 
 - **Pruebas en Maven:** **1080 pruebas automatizadas** en verde. JaCoCo exige y verifica umbrales mínimos de cobertura del **85% en instrucciones** y **70% en ramas** (valores reales actuales: **90%** en instrucciones y **71%** en ramas).
-- **Pruebas en Playwright:** **200 pruebas en 34 archivos** (`npm run test:e2e`). Requieren la aplicación en funcionamiento en `http://localhost:8080`.
+- **Pruebas End-to-End:** Las pruebas de interfaz E2E se ejecutan en el entorno local del desarrollador y no forman parte del repositorio.
 - **Scripts de Node (`package.json`):**
   - `npm run build:css`: Compila y minifica `tailwind.css`.
   - `npm run watch:css`: Compilador en modo escucha para desarrollo en vivo.
-  - `npm run test:e2e`: Ejecuta Playwright en modo headless.
-  - `npm run test:e2e:headed`: Ejecuta Playwright con interfaz de navegador visible.
-  - `npm run test:e2e:report`: Muestra el reporte interactivo HTML de Playwright.
-
-> [!IMPORTANT]
-> Las pruebas E2E crean registros en la base de datos de desarrollo. Para reiniciar el entorno Docker con una base completamente limpia antes de una corrida E2E, ejecuta:  
-> `docker compose -f docker-compose.dev.yml down -v` seguido de `up -d --build`.  
-> *(Ten en cuenta que `down -v` elimina los volúmenes nombrados y los datos acumulados).*
 
 ## Funcionalidades por rol
 
@@ -194,7 +190,7 @@ El sistema implementa control de acceso basado en roles (RBAC) con seguridad por
 - **Cookies de Sesión:** Protegidas con banderas `HttpOnly` y atributo `SameSite=Lax`.
 - **Cabeceras HTTP Defensivas:** Incluye `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff` y `Referrer-Policy: strict-origin-when-cross-origin`.
 - **Auditoría Transaccional:** Registro inmutable en PostgreSQL (`auditoria`) con trigger que rechaza `UPDATE` y `DELETE`.
-- **Accesibilidad (A11y):** Evaluada con `@axe-core/playwright` sin violaciones críticas en las pantallas principales.
+- **Accesibilidad (A11y):** Evaluada con escaneos de accesibilidad sin violaciones críticas en las pantallas principales.
 - **Limitación Conocida:** No se aplica cabecera `Content-Security-Policy` (CSP) estricta debido al uso de scripts y estilos en línea en fragmentos Thymeleaf; su migración hacia nonces dinámicos está catalogada como mejora futura.
 
 ## Estructura del proyecto
@@ -206,38 +202,14 @@ La arquitectura de estilos desacopla la entrada modular de Tailwind CSS:
 
 ```text
 botica-san-miguel/
-├── src/
-│   ├── main/
-│   │   ├── java/com/farmacia/
-│   │   │   ├── config/        # Seguridad web/API, sesiones y navegación compartida
-│   │   │   ├── controller/    # Controladores MVC y REST
-│   │   │   ├── service/       # Lógica de negocio, FEFO, transacciones y auditoría
-│   │   │   ├── repository/    # Consultas parametrizadas JDBC directas
-│   │   │   ├── estructuras/   # ListaEnlazada, PilaDeshacer, ColaPrioridadLotes, ArbolCategorias
-│   │   │   ├── model/         # Entidades del dominio
-│   │   │   └── dto/           # Formularios y transferencia de datos
-│   │   └── resources/
-│   │       ├── templates/     # Vistas y fragmentos Thymeleaf
-│   │       ├── static/        # CSS compilado, JS sin frameworks, imágenes corporativas
-│   │       ├── db/migration/  # Migraciones Flyway del esquema
-│   │       └── db/demo/       # Datos ficticios de prueba (R__datos_demo.sql)
-│   └── test/java/             # 1080 pruebas unitarias, de integración y Testcontainers
-├── e2e/                       # 200 pruebas automatizadas Playwright en 34 archivos
-├── POSTMAN/                   # Colección oficial de endpoints REST
-├── API_POSTMAN.md             # Guía de uso de la API REST
-├── DOCKER_DEV.md              # Guía avanzada del entorno Docker de desarrollo
-├── GUIA_INSTALACION.txt       # Guía complementaria para Windows
-├── docs/bocetos/DIFERENCIAS.md # Registro de alineación visual con bocetos
-├── docker-compose.dev.yml     # Orquestación de desarrollo (PostgreSQL 16, Spring Boot, Watcher)
-├── package.json               # Configuración de Tailwind CLI y Playwright
-├── tailwind.config.js         # Tokens y paleta corporativa
-└── pom.xml                    # Descriptores Maven, dependencias y reglas JaCoCo
+├── src/ (main/java/com/farmacia: config, controller, service, repository, estructuras [ListaEnlazada, PilaDeshacer, ColaPrioridadLotes, ArbolCategorias], model, dto; resources: templates, static, db/migration, db/demo, application.properties, application-demo.properties; test/java)
+├── POSTMAN/  ├── API_POSTMAN.md  ├── package.json  ├── tailwind.config.js  ├── GUIA_INSTALACION.txt  ├── Dockerfile  ├── .dockerignore  └── pom.xml
 ```
+
+Archivos raíz adicionales: `mvnw`, `mvnw.cmd`, `.mvn/`, `README.md`, `.gitignore`, `.gitattributes`.
 
 ## Documentación adicional
 
 - [`GUIA_INSTALACION.txt`](GUIA_INSTALACION.txt): Pasos detallados para ejecución en Windows PowerShell con base local.
-- [`DOCKER_DEV.md`](DOCKER_DEV.md): Arquitectura detallada de contenedores, LiveReload, depuración remota y watchers.
 - [`API_POSTMAN.md`](API_POSTMAN.md): Catálogo de endpoints REST bajo `/api/**` con autenticación HTTP Basic.
 - Colección Postman: Carpeta [`POSTMAN/`](POSTMAN/) con ejemplos interactivos de consulta y mutación.
-- [`docs/bocetos/DIFERENCIAS.md`](docs/bocetos/DIFERENCIAS.md): Registro oficial de decisiones y alineación visual frente a bocetos de diseño.

@@ -1,6 +1,6 @@
 BOTICA SAN MIGUEL - GUIA DE INSTALACION Y DEMOSTRACION
 ===================================================
-NOTA: Para la arquitectura general y opciones de inicio rapido con Docker, consulte primero el README.md.
+NOTA: Para la arquitectura general y opciones de ejecucion, consulte primero el README.md.
 Dirigida a Windows y PowerShell. Proyecto academico en desarrollo.
 El esquema de la base lo crea Flyway al iniciar la aplicacion, con las
 migraciones de src/main/resources/db/migration. No hay que ejecutar SQL a mano. No contiene credenciales reales de PostgreSQL.
@@ -133,7 +133,6 @@ Si creo botica_demo_companero:
 
 Si su puerto es diferente, ajuste 5432 en esa URL.
 Las variables se aplican a esta terminal y a los procesos que inicie desde ella.
-No se cargan automaticamente desde un archivo .env.
 No use setx para guardar la clave permanentemente.
 
 DATOS DE LA BOTICA PARA COMPROBANTES:
