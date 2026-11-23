@@ -64,7 +64,7 @@
                     <a th:if="${#strings.isEmpty(buscar)}" class="lnk mt-3 inline-flex" th:href="@{/clientes/nuevo}">Registrar primer cliente</a>
                 </div>
 
-                <div class="card overflow-hidden tabla-contenedor inventario-tabla tabla-clientes" th:unless="${#lists.isEmpty(clientes)}" role="region" aria-label="Clientes, tabla desplazable">
+                <div class="card overflow-hidden tabla-contenedor inventario-tabla tabla-clientes" th:unless="${#lists.isEmpty(clientes)}" role="region" aria-label="Clientes, tabla desplazable" tabindex="0">
                     <table>
                         <thead>
                             <tr>

@@ -97,6 +97,11 @@
   color: #be123c;
 }
 
+.campo-opcional {
+  font-weight: 400;
+  color: #5b6d66;
+}
+
 /* Panel de Filtros de Inventario */
 .inventario-filtros {
   display: grid;

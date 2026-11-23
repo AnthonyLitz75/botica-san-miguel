@@ -132,7 +132,7 @@
                 </div>
 
                 <div class="card overflow-hidden" th:unless="${#lists.isEmpty(consulta.eventos())}">
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto" tabindex="0" role="region" aria-label="Tabla de eventos de auditoría">
                         <table>
                             <caption class="sr-only">Eventos de auditoría, del más reciente al más antiguo</caption>
                             <thead>

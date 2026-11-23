@@ -27,6 +27,7 @@
                     <div th:each="b, iterStat : ${barras}"
                          class="barra-item"
                          th:classappend="${b.porcentajeAltura() == 0} ? 'barra-cero' : ''"
+                         role="img"
                          tabindex="0"
                          th:style="|height: ${b.porcentajeAltura()}%;|"
                          th:title="${#temporals.format(b.fecha(), 'dd/MM') + ': S/ ' + #numbers.formatDecimal(b.total(), 1, 'COMMA', 2, 'POINT')}"

@@ -82,7 +82,7 @@
                     <p class="text-ink-2 font-medium">No hay necesidades de reposición pendientes.</p>
                 </div>
 
-                <div class="card overflow-x-auto tabla-contenedor inventario-tabla" th:unless="${#lists.isEmpty(reposicion)}" role="region" aria-label="Necesidades de reposición, tabla desplazable">
+                <div class="card overflow-x-auto tabla-contenedor inventario-tabla" th:unless="${#lists.isEmpty(reposicion)}" role="region" aria-label="Necesidades de reposición, tabla desplazable" tabindex="0">
                     <table class="w-full">
                         <thead>
                             <tr>
@@ -133,7 +133,7 @@
                     <p class="text-ink-2 font-medium">No se encontraron lotes vencidos.</p>
                 </div>
 
-                <div class="card overflow-x-auto tabla-contenedor inventario-tabla" th:unless="${#lists.isEmpty(panel.vencidos())}" role="region" aria-label="Lotes vencidos, tabla desplazable">
+                <div class="card overflow-x-auto tabla-contenedor inventario-tabla" th:unless="${#lists.isEmpty(panel.vencidos())}" role="region" aria-label="Lotes vencidos, tabla desplazable" tabindex="0">
                     <table class="w-full">
                         <thead>
                             <tr>
@@ -184,7 +184,7 @@
                     <p class="text-ink-2 font-medium" th:text="|No hay lotes próximos a vencer en los siguientes ${diasPorVencer} días.|">No hay lotes próximos a vencer.</p>
                 </div>
 
-                <div class="card overflow-x-auto tabla-contenedor inventario-tabla" th:unless="${#lists.isEmpty(panel.porVencer())}" role="region" aria-label="Lotes próximos a vencer, tabla desplazable">
+                <div class="card overflow-x-auto tabla-contenedor inventario-tabla" th:unless="${#lists.isEmpty(panel.porVencer())}" role="region" aria-label="Lotes próximos a vencer, tabla desplazable" tabindex="0">
                     <table class="w-full">
                         <thead>
                             <tr>

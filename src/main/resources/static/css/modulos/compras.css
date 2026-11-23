@@ -60,7 +60,7 @@
 
 .campo-opcional {
   font-weight: 400;
-  color: #74827b;
+  color: #5b6d66;
 }
 
 .proveedor-campos input:not([type="checkbox"]):not([type="radio"]),
