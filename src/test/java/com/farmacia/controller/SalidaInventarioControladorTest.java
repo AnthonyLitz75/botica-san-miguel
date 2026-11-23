@@ -33,7 +33,9 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -173,7 +175,7 @@ class SalidaInventarioControladorTest {
     // 7. POST /salidas/nueva exitoso: redirección correcta
     // -------------------------------------------------------------------------
     @Test
-    @DisplayName("Escenario 7: POST /salidas/nueva válido redirige a /movimientos/{id}")
+    @DisplayName("Escenario 7: POST /salidas/nueva válido redirige a /movimientos/{id} con mensaje flash")
     void guardarSalidaDirecta_valida_redirigeADetalleMovimiento() throws Exception {
         when(movimientoServicio.registrarSalida(eq(5), eq("almacen1"), any()))
                 .thenReturn(101);
@@ -185,7 +187,28 @@ class SalidaInventarioControladorTest {
                         .param("cantidad", "4")
                         .param("motivo", "Salida por rotura"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/movimientos/101"));
+                .andExpect(redirectedUrl("/movimientos/101"))
+                .andExpect(flash().attribute("mensaje", "Salida registrada correctamente."));
+
+        verify(movimientoServicio).registrarSalida(eq(5), eq("almacen1"), any());
+    }
+
+    @Test
+    @DisplayName("Escenario 7b: POST /salidas/nueva vía AJAX retorna 200 OK con JSON de redirección y guarda aviso flash")
+    void guardarSalidaDirecta_viaAjax_retornaJsonYGuardaAvisoFlash() throws Exception {
+        when(movimientoServicio.registrarSalida(eq(5), eq("almacen1"), any()))
+                .thenReturn(101);
+
+        mvc.perform(post("/salidas/nueva")
+                        .with(user("almacen1").roles("ALMACENERO"))
+                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .param("idLote", "5")
+                        .param("cantidad", "4")
+                        .param("motivo", "Salida por rotura"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ok").value(true))
+                .andExpect(jsonPath("$.url").value("/movimientos/101"));
 
         verify(movimientoServicio).registrarSalida(eq(5), eq("almacen1"), any());
     }
@@ -360,7 +383,7 @@ class SalidaInventarioControladorTest {
     // 13. POST /lotes/{idLote}/salida exitoso: redirección correcta
     // -------------------------------------------------------------------------
     @Test
-    @DisplayName("Escenario 13: POST /lotes/{idLote}/salida válido redirige a /movimientos/{id}")
+    @DisplayName("Escenario 13: POST /lotes/{idLote}/salida válido redirige a /movimientos/{id} con mensaje flash")
     void guardarPorLote_valido_redirigeADetalleMovimiento() throws Exception {
         var lote = new Lote(5, 1, "LOT-100", LocalDate.now().plusMonths(6), 25);
         var medicamento = new Medicamento(1, "MED-01", "Amoxicilina", "500mg", "Caja", "CAJA", BigDecimal.valueOf(15.0), 5, true);
@@ -379,7 +402,35 @@ class SalidaInventarioControladorTest {
                         .param("cantidad", "5")
                         .param("motivo", "Merma justificada"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/movimientos/105"));
+                .andExpect(redirectedUrl("/movimientos/105"))
+                .andExpect(flash().attribute("mensaje", "Salida registrada correctamente."));
+
+        verify(movimientoServicio).registrarSalida(eq(5), eq("almacen1"), any());
+    }
+
+    @Test
+    @DisplayName("Escenario 13b: POST /lotes/{idLote}/salida vía AJAX retorna 200 OK con JSON de redirección y guarda aviso flash")
+    void guardarPorLote_viaAjax_retornaJsonYGuardaAvisoFlash() throws Exception {
+        var lote = new Lote(5, 1, "LOT-100", LocalDate.now().plusMonths(6), 25);
+        var medicamento = new Medicamento(1, "MED-01", "Amoxicilina", "500mg", "Caja", "CAJA", BigDecimal.valueOf(15.0), 5, true);
+
+        when(loteServicio.buscarPorId(5)).thenReturn(Optional.of(lote));
+        when(medicamentoServicio.buscarPorId(1)).thenReturn(Optional.of(medicamento));
+        when(loteServicio.listarDisponiblesPorMedicamento(1)).thenReturn(List.of());
+        when(prioridadServicio.identificarLotesPrioritarios(any())).thenReturn(Set.of());
+
+        when(movimientoServicio.registrarSalida(eq(5), eq("almacen1"), any()))
+                .thenReturn(105);
+
+        mvc.perform(post("/lotes/5/salida")
+                        .with(user("almacen1").roles("ALMACENERO"))
+                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .param("cantidad", "5")
+                        .param("motivo", "Merma justificada"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ok").value(true))
+                .andExpect(jsonPath("$.url").value("/movimientos/105"));
 
         verify(movimientoServicio).registrarSalida(eq(5), eq("almacen1"), any());
     }
