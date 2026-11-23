@@ -239,7 +239,7 @@ test.describe('Ajuste 023: Paso 6 — Textos, comprobante y pulido de interfaces
 
     // Panel derecho: "Después de cobrar"
     const panelLateral = page.locator('.ann');
-    await expect(panelLateral.locator('h3')).toHaveText('Después de cobrar');
+    await expect(panelLateral.locator(':is(h2, h3)')).toHaveText('Después de cobrar');
     await expect(panelLateral).toContainText('Imprime el ticket si el cliente lo pide (está formateado a 80 mm).');
     await expect(panelLateral).toContainText(/El número de boleta es B001-\d{8}; búscalo en Ventas si necesitas reimprimir\./);
     await expect(panelLateral).toContainText('Los lotes y vencimientos se descontaron del inventario.');

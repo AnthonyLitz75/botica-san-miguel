@@ -110,7 +110,7 @@ test.describe('AJUSTE 023 (paso 4A): Órdenes de compra', () => {
 
     // Verificar diseño a dos columnas (formulario a la izquierda, resumen a la derecha)
     const cardFormulario = page.locator('form > div.card').first();
-    const cardResumen = page.locator('.card:has(h3:has-text("Resumen de la orden"))');
+    const cardResumen = page.locator('.card:has(:is(h2, h3):has-text("Resumen de la orden"))');
     await expect(cardFormulario).toBeVisible();
     await expect(cardResumen).toBeVisible();
 

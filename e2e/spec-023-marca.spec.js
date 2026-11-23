@@ -37,7 +37,7 @@ test.describe('Ajuste 023 (Paso 7): Logo y pie del menú lateral', () => {
     // a) El <img> del logo en el menú es visible, está cargado (naturalWidth > 0) y su boundingBox queda dentro del cuadro blanco
     const logoImg = cuadro.locator('img');
     await expect(logoImg).toBeVisible();
-    await expect(logoImg).toHaveAttribute('alt', 'Botica San Miguel');
+    await expect(logoImg).toHaveAttribute('alt', '');
 
     const naturalWidth = await logoImg.evaluate((img) => img.naturalWidth);
     expect(naturalWidth).toBeGreaterThan(0);

@@ -43,13 +43,13 @@ class MarcaMenuVistaTest {
     private UsuarioDetallesServicio usuarioDetallesServicio;
 
     @Test
-    @DisplayName("El menú lateral renderiza un <img> apuntando al logo con alt 'Botica San Miguel' y width/height")
+    @DisplayName("El menú lateral renderiza un <img> apuntando al logo con alt='' por accesibilidad y width/height")
     void menuLateralRenderizaImagenLogoConAtributosRequeridos() throws Exception {
         when(medicamentoServicio.buscarPorEstado(any(), anyBoolean())).thenReturn(Collections.emptyList());
 
         mvc.perform(get("/medicamentos").with(user("admin").roles("ADMINISTRADOR")))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("alt=\"Botica San Miguel\"")))
+                .andExpect(content().string(containsString("alt=\"\"")))
                 .andExpect(content().string(containsString("/images/logo-botica-san-miguel-256.png")));
     }
 
