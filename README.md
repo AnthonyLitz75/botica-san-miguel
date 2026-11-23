@@ -75,17 +75,31 @@ docker compose -f docker-compose.dev.yml down
 
 Si dispones de PostgreSQL local (servicio en puerto 5432) y Node.js:
 
-1. Crea una base de datos vacía (ej. `farmacia_aed`). Flyway aplicará automáticamente las migraciones versionadas (`V1` a `V5`).
+1. Crea una base de datos vacía (ej. `farmacia_aed`). Flyway aplicará automáticamente las migraciones versionadas.
 2. Instala las dependencias de Node.js en la raíz:
    ```bash
    npm install
    ```
 3. Configura la contraseña de base de datos e inicia con datos de demostración:
+
+   **Linux / macOS (Bash):**
    ```bash
-   export DB_PASSWORD="tu-contraseña-postgres"
-   ./mvnw spring-boot:run -Dspring-boot.run.profiles=demo
+   DB_PASSWORD="tu-contraseña-postgres" ./mvnw spring-boot:run -Dspring-boot.run.profiles=demo
    ```
-   *(En Windows PowerShell: `$env:DB_PASSWORD="tu-contraseña"; .\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=demo"`)*
+
+   **Windows (PowerShell):**
+   ```powershell
+   $env:DB_PASSWORD = "tu-contraseña-postgres"
+   .\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=demo"
+   ```
+
+   *(Opcional: Si tu base de datos utiliza un host, puerto o usuario diferente al predeterminado `postgres`, define también `DB_URL` y `DB_USER`:)*
+   ```powershell
+   $env:DB_URL = "jdbc:postgresql://localhost:5432/farmacia_aed"
+   $env:DB_USER = "postgres"
+   $env:DB_PASSWORD = "tu-contraseña-postgres"
+   .\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=demo"
+   ```
 
 ## Variables de entorno
 
@@ -115,7 +129,7 @@ Para despliegues productivos (Render, AWS, VPS o contenedores aislados):
 
 1. **Cookie de sesión segura:** Al publicar bajo HTTPS, habilita `SERVER_SERVLET_SESSION_COOKIE_SECURE=true` para marcar `JSESSIONID` con la bandera `Secure`.
 2. **Proxy inverso confiable:** Detrás de un terminador TLS o balanceador (Nginx, Traefik, Cloudflare), configura `SERVER_FORWARD_HEADERS_STRATEGY=framework` para interpretar `X-Forwarded-For` y registrar la IP real del cliente en la bitácora de auditoría.
-3. **Perfil de producción limpio:** No actives los perfiles `dev` ni `demo`. En producción solo se ejecutan las migraciones canónicas de `src/main/resources/db/migration/` (`V1__` a `V5__`).
+3. **Perfil de producción limpio:** No actives los perfiles `dev` ni `demo`. En producción solo se ejecutan las migraciones canónicas de `src/main/resources/db/migration/`.
 4. **Rotación de secretos:** Configura credenciales robustas mediante `DB_PASSWORD` y asegúrate de cambiar o no cargar contraseñas demo.
 
 ## Pruebas y calidad
@@ -205,7 +219,7 @@ botica-san-miguel/
 │   │   └── resources/
 │   │       ├── templates/     # Vistas y fragmentos Thymeleaf
 │   │       ├── static/        # CSS compilado, JS sin frameworks, imágenes corporativas
-│   │       ├── db/migration/  # Migraciones Flyway del esquema (V1__ a V5__)
+│   │       ├── db/migration/  # Migraciones Flyway del esquema
 │   │       └── db/demo/       # Datos ficticios de prueba (R__datos_demo.sql)
 │   └── test/java/             # 1080 pruebas unitarias, de integración y Testcontainers
 ├── e2e/                       # 200 pruebas automatizadas Playwright en 34 archivos
