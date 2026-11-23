@@ -3,23 +3,10 @@
 .gitignore
 .gitattributes
 
-# Especificaciones locales y documentación
-.specify
-.agents
-specs
-docs
-AGENTS.md
-
-# Directorios de compilación local y binarios
+# Directorios de compilación local y registros
 target/
 node_modules/
 *.log
-
-# Documentación de texto y guías de desarrollo
-*.md
-!README.md
-API_POSTMAN.md
-GUIA_INSTALACION.txt
 
 # Configuración local sensible
 application-local.properties
