@@ -24,6 +24,10 @@ public final class AvisoFlash {
             request.setAttribute(DispatcherServlet.OUTPUT_FLASH_MAP_ATTRIBUTE, flashMap);
         }
 
+        // Compatibilidad retroactiva: algunas plantillas (ej. categorias/arbol.html)
+        // verifican 'mensajeExito', mientras que la mayoría (medicamentos, clientes,
+        // usuarios, proveedores, ordenes-compra, movimientos) leen 'mensaje'. Registrar ambas
+        // claves garantiza que el banner de notificación se renderice en cualquier pantalla.
         flashMap.put("mensaje", mensaje);
         flashMap.put("mensajeExito", mensaje);
 

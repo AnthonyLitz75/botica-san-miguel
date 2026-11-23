@@ -26,6 +26,11 @@
                 </div>
             </div>
 
+            <div class="note aviso-operacion aviso-exito mb-4" th:if="${mensaje != null}" role="status">
+                <svg class="ico text-pine-700 flex-none" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                <span th:text="${mensaje}">Operación exitosa.</span>
+            </div>
+
             <dl class="card pad resumen-registro grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <div>
                     <dt class="text-[11px] font-bold uppercase tracking-wider text-ink-3 mb-1">ID de operación</dt>

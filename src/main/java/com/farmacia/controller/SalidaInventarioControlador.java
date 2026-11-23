@@ -9,12 +9,21 @@ import com.farmacia.service.MedicamentoServicio;
 import com.farmacia.service.MovimientoInventarioServicio;
 import com.farmacia.service.LotePrioridadServicio;
 import com.farmacia.model.LoteDisponibleVista;
+import com.farmacia.util.AvisoFlash;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.server.ResponseStatusException;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
@@ -49,13 +58,28 @@ public class SalidaInventarioControlador {
         }
 
         @PostMapping("/salidas/nueva")
-        public String guardarSalidaDirecta(
+        public Object guardarSalidaDirecta(
                         @Valid @ModelAttribute("formulario") SalidaDirectaFormulario formulario,
                         BindingResult resultado,
                         Model model,
-                        Authentication autenticacion) {
+                        Authentication autenticacion,
+                        RedirectAttributes redireccion,
+                        HttpServletRequest request,
+                        HttpServletResponse response,
+                        @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
+                        @RequestHeader(value = "Accept", required = false) String accept) {
+
+                boolean esAjax = "XMLHttpRequest".equalsIgnoreCase(requestedWith)
+                                || (accept != null && accept.contains("application/json"));
 
                 if (resultado.hasErrors()) {
+                        if (esAjax) {
+                                Map<String, String> errores = new LinkedHashMap<>();
+                                for (FieldError err : resultado.getFieldErrors()) {
+                                        errores.putIfAbsent(err.getField(), err.getDefaultMessage());
+                                }
+                                return ResponseEntity.badRequest().body(Map.of("errores", errores));
+                        }
                         cargarLotesDisponibles(model);
                         return "salidas/formulario-directo";
                 }
@@ -66,8 +90,18 @@ public class SalidaInventarioControlador {
                                         autenticacion.getName(),
                                         new SalidaInventarioFormulario(formulario.cantidad(), formulario.motivo()));
 
-                        return "redirect:/movimientos/" + idMovimiento;
+                        String destino = "/movimientos/" + idMovimiento;
+                        String mensajeExito = "Salida registrada correctamente.";
+                        redireccion.addFlashAttribute("mensaje", mensajeExito);
+                        if (esAjax) {
+                                AvisoFlash.guardar(request, response, destino, mensajeExito);
+                                return ResponseEntity.ok(Map.of("ok", true, "url", destino));
+                        }
+                        return "redirect:" + destino;
                 } catch (IllegalArgumentException excepcion) {
+                        if (esAjax) {
+                                return ResponseEntity.badRequest().body(Map.of("mensaje", excepcion.getMessage()));
+                        }
                         resultado.reject("salida.invalida", excepcion.getMessage());
                         cargarLotesDisponibles(model);
                         return "salidas/formulario-directo";
@@ -105,12 +139,20 @@ public class SalidaInventarioControlador {
         }
 
         @PostMapping("/lotes/{idLote}/salida")
-        public String guardar(
+        public Object guardar(
                         @PathVariable("idLote") Integer idLote,
                         @Valid @ModelAttribute("formulario") SalidaInventarioFormulario formulario,
                         BindingResult resultado,
                         Model model,
-                        Authentication autenticacion) {
+                        Authentication autenticacion,
+                        RedirectAttributes redireccion,
+                        HttpServletRequest request,
+                        HttpServletResponse response,
+                        @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
+                        @RequestHeader(value = "Accept", required = false) String accept) {
+
+                boolean esAjax = "XMLHttpRequest".equalsIgnoreCase(requestedWith)
+                                || (accept != null && accept.contains("application/json"));
 
                 Lote lote = loteServicio.buscarPorId(idLote)
                                 .orElseThrow(() -> new ResponseStatusException(
@@ -126,6 +168,13 @@ public class SalidaInventarioControlador {
                 model.addAttribute("lotePrioritario", esLotePrioritario(lote.idLote(), lote.idMedicamento()));
 
                 if (resultado.hasErrors()) {
+                        if (esAjax) {
+                                Map<String, String> errores = new LinkedHashMap<>();
+                                for (FieldError err : resultado.getFieldErrors()) {
+                                        errores.putIfAbsent(err.getField(), err.getDefaultMessage());
+                                }
+                                return ResponseEntity.badRequest().body(Map.of("errores", errores));
+                        }
                         return "salidas/formulario";
                 }
 
@@ -135,8 +184,18 @@ public class SalidaInventarioControlador {
                                         autenticacion.getName(),
                                         formulario);
 
-                        return "redirect:/movimientos/" + idMovimiento;
+                        String destino = "/movimientos/" + idMovimiento;
+                        String mensajeExito = "Salida registrada correctamente.";
+                        redireccion.addFlashAttribute("mensaje", mensajeExito);
+                        if (esAjax) {
+                                AvisoFlash.guardar(request, response, destino, mensajeExito);
+                                return ResponseEntity.ok(Map.of("ok", true, "url", destino));
+                        }
+                        return "redirect:" + destino;
                 } catch (IllegalArgumentException excepcion) {
+                        if (esAjax) {
+                                return ResponseEntity.badRequest().body(Map.of("mensaje", excepcion.getMessage()));
+                        }
                         resultado.reject(
                                         "salida.invalida",
                                         excepcion.getMessage());
