@@ -43,7 +43,7 @@ public class MovimientoInventarioServicio {
                         LoteRepositorio loteRepositorio,
                         UsuarioRepositorio usuarioRepositorio,
                         AuditoriaServicio auditoria) {
-                this(repositorio, loteRepositorio, usuarioRepositorio, null, Clock.systemDefaultZone(), auditoria);
+                this(repositorio, loteRepositorio, usuarioRepositorio, null, Clock.system(com.farmacia.util.FormatoUltimoAcceso.ZONA_LIMA), auditoria);
         }
 
         @org.springframework.beans.factory.annotation.Autowired
@@ -59,7 +59,7 @@ public class MovimientoInventarioServicio {
                 this.loteRepositorio = loteRepositorio;
                 this.usuarioRepositorio = usuarioRepositorio;
                 this.medicamentoRepositorio = medicamentoRepositorio;
-                this.clock = clock != null ? clock : Clock.systemDefaultZone();
+                this.clock = clock != null ? clock : Clock.system(com.farmacia.util.FormatoUltimoAcceso.ZONA_LIMA);
                 this.auditoria = auditoria;
         }
 

@@ -41,7 +41,7 @@ public class CategoriaServicio {
     }
 
     public CategoriaServicio(CategoriaRepositorio categoriaRepositorio, AuditoriaServicio auditoriaServicio) {
-        this(categoriaRepositorio, auditoriaServicio, null, Clock.systemDefaultZone());
+        this(categoriaRepositorio, auditoriaServicio, null, Clock.system(com.farmacia.util.FormatoUltimoAcceso.ZONA_LIMA));
     }
 
     /**

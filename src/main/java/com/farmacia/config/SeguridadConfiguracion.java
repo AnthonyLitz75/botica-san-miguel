@@ -33,9 +33,10 @@ public class SeguridadConfiguracion {
                 return new org.springframework.security.web.session.HttpSessionEventPublisher();
         }
 
+        /** Reloj de la aplicación en la hora de Lima, independiente de la zona del JVM o del contenedor. */
         @Bean
         public Clock clock() {
-                return Clock.systemDefaultZone();
+                return Clock.system(com.farmacia.util.FormatoUltimoAcceso.ZONA_LIMA);
         }
 
         @Bean

@@ -6,6 +6,7 @@ import com.farmacia.model.DetalleVenta;
 import com.farmacia.model.MetodoPago;
 import com.farmacia.model.VentaResumenVista;
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,9 +19,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class VentaRepositorio {
     private final JdbcTemplate jdbcTemplate;
+    private final Clock clock;
 
-    public VentaRepositorio(JdbcTemplate jdbcTemplate) {
+    public VentaRepositorio(JdbcTemplate jdbcTemplate, Clock clock) {
         this.jdbcTemplate = jdbcTemplate;
+        this.clock = clock;
     }
 
     /**
@@ -36,12 +39,13 @@ public class VentaRepositorio {
     public Integer insertar(Integer idUsuario, Integer idCliente, BigDecimal subtotal,
             BigDecimal descuentoTotal, BigDecimal total, String numeroComprobante, MetodoPago metodoPago) {
         String sql = """
-                INSERT INTO venta (id_usuario, id_cliente, subtotal, descuento_total, total, numero_comprobante, metodo_pago)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO venta (id_usuario, id_cliente, fecha_hora, subtotal, descuento_total, total,
+                                   numero_comprobante, metodo_pago)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 RETURNING id_venta
                 """;
         return jdbcTemplate.queryForObject(sql, Integer.class,
-                idUsuario, idCliente, subtotal, descuentoTotal, total, numeroComprobante,
+                idUsuario, idCliente, LocalDateTime.now(clock), subtotal, descuentoTotal, total, numeroComprobante,
                 metodoPago != null ? metodoPago.name() : null);
     }
 

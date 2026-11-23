@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +35,11 @@ public class MovimientoInventarioRepositorio {
                         cantidadMedicamento);
         };
 
-        public MovimientoInventarioRepositorio(JdbcTemplate jdbcTemplate) {
+        private final Clock clock;
+
+        public MovimientoInventarioRepositorio(JdbcTemplate jdbcTemplate, Clock clock) {
                 this.jdbcTemplate = jdbcTemplate;
+                this.clock = clock;
         }
 
         /**
@@ -213,11 +217,12 @@ public class MovimientoInventarioRepositorio {
          */
         public Integer registrarEntrada(Integer idUsuario, Integer idOrden, String motivo) {
                 String sql = """
-                                INSERT INTO movimiento_inventario (id_usuario, id_orden, tipo, motivo)
-                                VALUES (?, ?, 'ENTRADA', ?)
+                                INSERT INTO movimiento_inventario (id_usuario, id_orden, tipo, fecha_hora, motivo)
+                                VALUES (?, ?, 'ENTRADA', ?, ?)
                                 RETURNING id_movimiento
                                 """;
-                return jdbcTemplate.queryForObject(sql, Integer.class, idUsuario, idOrden, motivo);
+                return jdbcTemplate.queryForObject(sql, Integer.class, idUsuario, idOrden,
+                                LocalDateTime.now(clock), motivo);
         }
 
         /**
@@ -225,11 +230,11 @@ public class MovimientoInventarioRepositorio {
          */
         public Integer registrarEntradaInicial(Integer idUsuario, String motivo) {
                 String sql = """
-                                INSERT INTO movimiento_inventario (id_usuario, tipo, motivo)
-                                VALUES (?, 'ENTRADA', ?)
+                                INSERT INTO movimiento_inventario (id_usuario, tipo, fecha_hora, motivo)
+                                VALUES (?, 'ENTRADA', ?, ?)
                                 RETURNING id_movimiento
                                 """;
-                return jdbcTemplate.queryForObject(sql, Integer.class, idUsuario, motivo);
+                return jdbcTemplate.queryForObject(sql, Integer.class, idUsuario, LocalDateTime.now(clock), motivo);
         }
 
         public void registrarDetalleEntrada(Integer idMovimiento, Integer idLote,
@@ -246,9 +251,10 @@ public class MovimientoInventarioRepositorio {
                                 INSERT INTO movimiento_inventario (
                                     id_usuario,
                                     tipo,
+                                    fecha_hora,
                                     motivo
                                 )
-                                VALUES (?, 'SALIDA', ?)
+                                VALUES (?, 'SALIDA', ?, ?)
                                 RETURNING id_movimiento
                                 """;
 
@@ -256,17 +262,19 @@ public class MovimientoInventarioRepositorio {
                                 sql,
                                 Integer.class,
                                 idUsuario,
+                                LocalDateTime.now(clock),
                                 motivo);
         }
 
         /** Cabecera de la salida que genera una venta confirmada (exactamente una por venta: id_venta es UNIQUE). */
         public Integer registrarSalidaPorVenta(Integer idUsuario, Integer idVenta, String motivo) {
                 String sql = """
-                                INSERT INTO movimiento_inventario (id_usuario, id_venta, tipo, motivo)
-                                VALUES (?, ?, 'SALIDA', ?)
+                                INSERT INTO movimiento_inventario (id_usuario, id_venta, tipo, fecha_hora, motivo)
+                                VALUES (?, ?, 'SALIDA', ?, ?)
                                 RETURNING id_movimiento
                                 """;
-                return jdbcTemplate.queryForObject(sql, Integer.class, idUsuario, idVenta, motivo);
+                return jdbcTemplate.queryForObject(sql, Integer.class, idUsuario, idVenta,
+                                LocalDateTime.now(clock), motivo);
         }
 
         public void registrarDetalle(

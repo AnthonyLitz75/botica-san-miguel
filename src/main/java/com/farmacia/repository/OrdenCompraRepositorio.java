@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.math.BigDecimal;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -18,9 +19,11 @@ import java.util.List;
 public class OrdenCompraRepositorio {
 
         private final JdbcTemplate jdbcTemplate;
+        private final Clock clock;
 
-        public OrdenCompraRepositorio(JdbcTemplate jdbcTemplate) {
+        public OrdenCompraRepositorio(JdbcTemplate jdbcTemplate, Clock clock) {
                 this.jdbcTemplate = jdbcTemplate;
+                this.clock = clock;
         }
 
         public int contar(String estado) {
@@ -245,11 +248,12 @@ public class OrdenCompraRepositorio {
                                     numero_orden,
                                     id_usuario,
                                     id_proveedor,
+                                    fecha_hora,
                                     estado,
                                     total_estimado,
                                     observaciones
                                 )
-                                VALUES (?, ?, ?, 'PENDIENTE', ?, ?)
+                                VALUES (?, ?, ?, ?, 'PENDIENTE', ?, ?)
                                 RETURNING id_orden
                                 """;
 
@@ -259,6 +263,7 @@ public class OrdenCompraRepositorio {
                                 numeroOrden,
                                 idUsuario,
                                 idProveedor,
+                                LocalDateTime.now(clock),
                                 totalEstimado,
                                 observaciones);
         }
