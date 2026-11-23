@@ -152,7 +152,7 @@ npm run build:css
 ./mvnw test
 ```
 
-- **Pruebas en Maven:** **1087 pruebas automatizadas** en verde. JaCoCo exige y verifica umbrales mínimos de cobertura del **85% en instrucciones** y **70% en ramas** (valores reales actuales: **90%** en instrucciones y **71%** en ramas).
+- **Pruebas en Maven:** **1097 pruebas automatizadas** en verde. JaCoCo exige y verifica umbrales mínimos de cobertura del **85% en instrucciones** y **70% en ramas** (valores reales actuales: **90%** en instrucciones y **71%** en ramas).
 - **Pruebas End-to-End:** Las pruebas de interfaz E2E se ejecutan en el entorno local del desarrollador y no forman parte del repositorio.
 - **Scripts de Node (`package.json`):**
   - `npm run build:css`: Compila y minifica `tailwind.css`.
