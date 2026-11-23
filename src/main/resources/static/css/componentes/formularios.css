@@ -58,6 +58,21 @@
   box-shadow: 0 0 0 3px rgba(22,106,85,.15);
 }
 
+/* Inputs de solo lectura accesibles */
+.inp input[readonly],
+.inp input[readonly]:focus,
+input[readonly] {
+  color: #10201b !important;
+  background-color: transparent !important;
+  cursor: default !important;
+  opacity: 1 !important;
+}
+
+.inp:has(input[readonly]) {
+  background-color: #f7f9f8;
+  border-color: #dfe6e3;
+}
+
 .inp.err {
   border-color: #be123c;
   background-color: #fff8f9;

@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (inpCodigoMed && disparador.dataset.codigo !== undefined) {
                 inpCodigoMed.value = disparador.dataset.codigo;
                 inpCodigoMed.setAttribute('readonly', 'true');
-                inpCodigoMed.classList.add('bg-gray-100', 'cursor-not-allowed');
+                inpCodigoMed.classList.add('bg-gray-100', 'cursor-default');
             }
             const inpNombreMed = modal.querySelector('#modal-nombre-med');
             if (inpNombreMed && disparador.dataset.nombre !== undefined) {
@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (inpNomUsuario && disparador.dataset.usuario !== undefined) {
                 inpNomUsuario.value = disparador.dataset.usuario;
                 inpNomUsuario.setAttribute('readonly', 'true');
-                inpNomUsuario.classList.add('bg-gray-100', 'cursor-not-allowed');
+                inpNomUsuario.classList.add('bg-gray-100', 'cursor-default');
             }
             const selRolUser = modal.querySelector('#modal-rol-user');
             if (selRolUser && disparador.dataset.rol !== undefined) {
@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const inpCodigoMed = modal.querySelector('#modal-codigo-med');
             if (inpCodigoMed) {
                 inpCodigoMed.removeAttribute('readonly');
-                inpCodigoMed.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                inpCodigoMed.classList.remove('bg-gray-100', 'cursor-not-allowed', 'cursor-default');
             }
             const selCatMed = modal.querySelector('#modal-categoria-med');
             if (selCatMed) selCatMed.value = '';
@@ -254,7 +254,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const inpNomUsuario = modal.querySelector('#modal-nombreUsuario');
             if (inpNomUsuario) {
                 inpNomUsuario.removeAttribute('readonly');
-                inpNomUsuario.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                inpNomUsuario.classList.remove('bg-gray-100', 'cursor-not-allowed', 'cursor-default');
             }
             const contenedorClave = modal.querySelector('#modal-contenedor-clave');
             const inpClaveUser = modal.querySelector('#modal-clave-user');

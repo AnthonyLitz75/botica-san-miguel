@@ -101,7 +101,7 @@
                                 <td class="c font-bold text-ink-2" th:text="${fila.cantidadVentas()}">1</td>
                                 <td class="r text-xs text-ink-3" th:text="${'S/ ' + #numbers.formatDecimal(fila.subtotal(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</td>
                                 <td class="r text-xs">
-                                    <span th:if="${fila.descuento() != null and fila.descuento().compareTo(T(java.math.BigDecimal).ZERO) > 0}" class="text-rose-600"
+                                    <span th:if="${fila.descuento() != null and fila.descuento().compareTo(T(java.math.BigDecimal).ZERO) > 0}" class="text-rose-700"
                                           th:text="${'S/ ' + #numbers.formatDecimal(fila.descuento(), 1, 'COMMA', 2, 'POINT')}">S/ 0.00</span>
                                     <span th:unless="${fila.descuento() != null and fila.descuento().compareTo(T(java.math.BigDecimal).ZERO) > 0}" class="text-ink-3">—</span>
                                 </td>
@@ -114,7 +114,7 @@
                                 <td class="c font-bold text-ink" th:text="${totalVentas}">0</td>
                                 <td class="r font-bold text-ink-3" th:text="${'S/ ' + #numbers.formatDecimal(subtotal, 1, 'COMMA', 2, 'POINT')}">S/ 0.00</td>
                                 <td class="r font-bold text-xs">
-                                    <span th:if="${descuento != null and descuento.compareTo(T(java.math.BigDecimal).ZERO) > 0}" class="text-rose-600"
+                                    <span th:if="${descuento != null and descuento.compareTo(T(java.math.BigDecimal).ZERO) > 0}" class="text-rose-700"
                                           th:text="${'S/ ' + #numbers.formatDecimal(descuento, 1, 'COMMA', 2, 'POINT')}">S/ 0.00</span>
                                     <span th:unless="${descuento != null and descuento.compareTo(T(java.math.BigDecimal).ZERO) > 0}" class="text-ink-3">—</span>
                                 </td>

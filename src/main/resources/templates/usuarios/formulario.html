@@ -63,7 +63,7 @@
                                     autocomplete="username" placeholder="Ej. jperez o vendedor_02" required
                                     th:readonly="${idUsuario != null}"
                                     class="w-full bg-transparent border-0 focus:outline-none text-ink text-sm font-semibold"
-                                    th:classappend="${idUsuario != null} ? 'opacity-60 cursor-not-allowed' : ''"
+                                    th:classappend="${idUsuario != null} ? 'cursor-default' : ''"
                                     th:attr="aria-invalid=${#fields.hasErrors('nombreUsuario')},aria-describedby=${#fields.hasErrors('nombreUsuario') ? 'error-usuario' : 'ayuda-usuario'}">
                             </div>
                             <span class="block text-[11px] text-ink-3 mt-1" id="ayuda-usuario" th:if="${idUsuario == null}">De 4 a 50 caracteres. Letras, números, puntos o guiones, sin espacios.</span>
