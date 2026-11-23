@@ -120,4 +120,24 @@ class AccesibilidadVistaTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("alt=\"\"")));
     }
+
+    @Test
+    @DisplayName("A11Y-06: Descuentos en tabla de ventas usan clase text-rose-700 para contraste >= 4.5:1")
+    void reporteVentas_descuentosUsanTextRose700() throws Exception {
+        LocalDate hoy = LocalDate.of(2026, 11, 10);
+        var filtro = new FiltroReporteFormulario(hoy.minusDays(6), hoy, 10, null, null);
+        var fila = new VentasDiaVista(hoy, 1, new BigDecimal("50.00"), new BigDecimal("5.00"), new BigDecimal("45.00"));
+
+        when(reporteServicio.normalizarFiltro(any())).thenReturn(filtro);
+        when(reporteServicio.ventasPorDia(eq("admin"), eq(filtro))).thenReturn(List.of(fila));
+        when(reporteServicio.calcularBarrasGrafico(any(), any(), any())).thenReturn(List.of());
+        when(reporteServicio.generarResumenGrafico(any(), any(), any())).thenReturn("Resumen gráfico de prueba");
+
+        mvc.perform(get("/reportes/ventas")
+                .param("desde", hoy.minusDays(6).toString())
+                .param("hasta", hoy.toString())
+                .with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("class=\"text-rose-700\"")));
+    }
 }
