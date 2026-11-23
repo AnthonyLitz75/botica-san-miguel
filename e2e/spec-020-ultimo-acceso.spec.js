@@ -68,7 +68,7 @@ test.describe('Spec 020: Último acceso de los usuarios', () => {
     const sufijo = Date.now().toString().slice(-4);
     const usuarioNuevo = `user_test_${sufijo}`;
 
-    const btnNuevo = page.locator('a[data-modal-open="modal-nuevo-usuario"]');
+    const btnNuevo = page.locator('a[data-modal-open="modal-nuevo-usuario"][data-modo="crear"]');
     await btnNuevo.click();
 
     const modal = page.locator('#modal-nuevo-usuario');
