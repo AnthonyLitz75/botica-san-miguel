@@ -1,53 +1,56 @@
-HELP.md
+# Compilación (Java/Maven)
 target/
+build/
 .mvn/wrapper/maven-wrapper.jar
+HELP.md
 !**/src/main/**/target/
 !**/src/test/**/target/
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-### STS ###
+# Credenciales y configuración local
+.env
+.env.*
+*.env
+sonar.env
+application-local.properties
+!.env.example
+
+# Node y pruebas
+node_modules/
+playwright-report/
+test-results/
+e2e/.last-run.json
+e2e/test-results-suite-completa.txt
+
+# IDE y editores
+.vscode/
+*.code-workspace
+.idea/
+*.iws
+*.iml
+*.ipr
 .apt_generated
 .classpath
 .factorypath
 .project
-.settings
+.settings/
 .springBeans
-.sts4-cache
-
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-
-### NetBeans ###
+.sts4-cache/
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
 
-### VS Code ###
-.vscode/
-
-# Credenciales y configuracion local
-.env
-.env.*
-*.env
-sonar.env
-!.env.example
-application-local.properties
-
-# Registros de ejecucion
+# Temporales y respaldos
 *.log
-
-# Node & Frontend
-node_modules/
-package-lock.json
-playwright-report/
-test-results/
-e2e/test-results-suite-completa.txt
-
-
+*.tmp
+*.bak
+*.orig
+*.swp
+*~
+.DS_Store
+Thumbs.db
+*.zip
+*.tar.gz
