@@ -11,8 +11,8 @@
 ![Spring Security](https://img.shields.io/badge/Spring_Security-RBAC-6DB33F?logo=springsecurity&logoColor=white)
 ![Thymeleaf](https://img.shields.io/badge/Thymeleaf-SSR-005F0F?logo=thymeleaf&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?logo=tailwindcss&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16_|_18-4169E1?logo=postgresql&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-Producción-2496ED?logo=docker&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%20y%2018-4169E1?logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Producci%C3%B3n-2496ED?logo=docker&logoColor=white)
 
 [Requisitos](#requisitos) ·
 [Ejecución](#ejecución-del-proyecto) ·
@@ -152,7 +152,7 @@ npm run build:css
 ./mvnw test
 ```
 
-- **Pruebas en Maven:** **1080 pruebas automatizadas** en verde. JaCoCo exige y verifica umbrales mínimos de cobertura del **85% en instrucciones** y **70% en ramas** (valores reales actuales: **90%** en instrucciones y **71%** en ramas).
+- **Pruebas en Maven:** **1083 pruebas automatizadas** en verde. JaCoCo exige y verifica umbrales mínimos de cobertura del **85% en instrucciones** y **70% en ramas** (valores reales actuales: **90%** en instrucciones y **71%** en ramas).
 - **Pruebas End-to-End:** Las pruebas de interfaz E2E se ejecutan en el entorno local del desarrollador y no forman parte del repositorio.
 - **Scripts de Node (`package.json`):**
   - `npm run build:css`: Compila y minifica `tailwind.css`.
@@ -196,17 +196,53 @@ El sistema implementa control de acceso basado en roles (RBAC) con seguridad por
 ## Estructura del proyecto
 
 La arquitectura de estilos desacopla la entrada modular de Tailwind CSS:
+
 - `src/main/resources/static/css/tailwind-input.css` actúa como manifiesto maestro e importa los estilos propios estructurados en `base/`, `layout/`, `componentes/` y `modulos/`.
 - La compilación genera el archivo minificado `src/main/resources/static/css/tailwind.css`.
 - Los archivos `estilos.css` e `inventario.css` se mantienen únicamente como stubs de compatibilidad hacia atrás que redirigen a `tailwind.css`.
 
 ```text
 botica-san-miguel/
-├── src/ (main/java/com/farmacia: config, controller, service, repository, estructuras [ListaEnlazada, PilaDeshacer, ColaPrioridadLotes, ArbolCategorias], model, dto; resources: templates, static, db/migration, db/demo, application.properties, application-demo.properties; test/java)
-├── POSTMAN/  ├── API_POSTMAN.md  ├── package.json  ├── tailwind.config.js  ├── GUIA_INSTALACION.txt  ├── Dockerfile  ├── .dockerignore  └── pom.xml
+├── src/
+│   ├── main/
+│   │   ├── java/com/farmacia/
+│   │   │   ├── config/          # Seguridad: cadenas web y API
+│   │   │   ├── controller/      # Controladores web (Thymeleaf) y API REST
+│   │   │   ├── service/         # Lógica de negocio
+│   │   │   ├── repository/      # Acceso a datos con JDBC
+│   │   │   ├── estructuras/     # ListaEnlazada, PilaDeshacer, ColaPrioridadLotes, ArbolCategorias
+│   │   │   ├── model/           # Entidades del dominio
+│   │   │   ├── dto/             # Objetos de transferencia
+│   │   │   ├── exception/       # Excepciones de negocio
+│   │   │   ├── util/            # Utilidades
+│   │   │   ├── FarmaciaAedApplication.java
+│   │   │   └── VerificacionBaseDatos.java
+│   │   └── resources/
+│   │       ├── application.properties
+│   │       ├── application-dev.properties
+│   │       ├── application-demo.properties
+│   │       ├── templates/       # Vistas Thymeleaf por módulo
+│   │       ├── static/          # css, js e images
+│   │       └── db/
+│   │           ├── migration/   # Migraciones Flyway (V1 a V8)
+│   │           └── demo/        # Datos de demostración (perfiles dev y demo)
+│   └── test/java/com/farmacia/  # Pruebas unitarias, de controlador, seguridad y persistencia
+├── POSTMAN/                     # Colección Postman de la API
+├── API_POSTMAN.md
+├── GUIA_INSTALACION.txt
+├── Dockerfile
+├── .dockerignore
+├── .gitignore
+├── .gitattributes
+├── mvnw
+├── mvnw.cmd
+├── .mvn/
+├── package.json
+├── package-lock.json
+├── tailwind.config.js
+├── pom.xml
+└── README.md
 ```
-
-Archivos raíz adicionales: `mvnw`, `mvnw.cmd`, `.mvn/`, `README.md`, `.gitignore`, `.gitattributes`.
 
 ## Documentación adicional
 
