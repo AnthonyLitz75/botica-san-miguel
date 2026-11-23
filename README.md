@@ -35,7 +35,7 @@ Las versiones oficiales del entorno se extraen directamente de los descriptores 
 
 - **Java JDK 25:** Establecido en `pom.xml` (`<java.version>25</java.version>`). Requiere JDK completo, no solo JRE.
 - **Spring Boot 4.1.2:** Gestionado en `pom.xml` (`<version>4.1.2</version>`).
-- **PostgreSQL 16 o superior:** Servicio local en puerto 5432 o contenedor `postgres:16-alpine` definido en `docker-compose.dev.yml`.
+- **PostgreSQL 16 (versión usada en las pruebas):** Servicio local en puerto 5432 o contenedor `postgres:16-alpine` definido en `docker-compose.dev.yml`.
 - **Node.js (LTS 18+) y npm:** Requerido para la compilación de estilos mediante Tailwind CLI (`package.json`).
 - **Docker y Docker Compose:** Para despliegue multi-contenedor y ejecución de pruebas de integración con Testcontainers.
 - **Maven Wrapper:** Incluido en la raíz (`./mvnw` en Linux/macOS y `.\mvnw.cmd` en Windows); no es necesario instalar Maven manualmente.
@@ -88,7 +88,9 @@ Si dispones de PostgreSQL local (servicio en puerto 5432) y Node.js:
 
 ## Variables de entorno
 
-Configuraciones admitidas por la aplicación (`application.properties`, `application-dev.properties`, `docker-compose.dev.yml` y `.env.example`):
+La aplicación lee variables de entorno directamente del sistema operativo o de la línea de comandos, y **no carga archivos .env por sí sola**.
+
+Configuraciones admitidas por la aplicación (`application.properties` y `application-dev.properties`):
 
 | Variable | Propósito | Valor por defecto | Obligatoria en producción |
 | :--- | :--- | :--- | :---: |
@@ -96,14 +98,12 @@ Configuraciones admitidas por la aplicación (`application.properties`, `applica
 | `DB_USER` | Usuario de conexión a la base de datos | `postgres` | Sí |
 | `DB_PASSWORD` | Contraseña del usuario de base de datos | *(Sin valor por defecto en producción)* | **Sí** |
 | `PORT` | Puerto de escucha HTTP del servidor web | `8080` | No |
-| `SPRING_PROFILES_ACTIVE` | Perfiles de Spring Boot activos | `dev` (en Docker Compose) | No (dejar vacío en prod) |
+| `SPRING_PROFILES_ACTIVE` | Perfiles de Spring Boot activos | *(Vacío en producción)* | No |
 | `DIAS_POR_VENCER` | Ventana preventiva en días para alerta por vencer | `90` | No |
 | `BOTICA_NOMBRE` | Razón social institucional para comprobantes | *(Ficticio en dev/demo)* | **Sí** |
 | `BOTICA_RUC` | RUC institucional de 11 dígitos numéricos | *(Ficticio en dev/demo)* | **Sí** |
 | `BOTICA_DIRECCION` | Dirección física de la botica para tickets | *(Ficticio en dev/demo)* | **Sí** |
 | `CLIENTE_FRECUENTE_MINIMO_COMPRAS` | Umbral mínimo para badge de Cliente Frecuente | `10` | No |
-
-En Docker Compose puedes personalizar los puertos del host y credenciales copiando `.env.example` hacia `.env` (`cp .env.example .env`), el cual es leído automáticamente por `docker compose`.
 
 > [!NOTE]
 > En los perfiles `dev` y `demo`, los tickets y reportes cargan datos institucionales ficticios de prueba. En el perfil estándar de producción, la aplicación valida estrictamente la presencia de `BOTICA_NOMBRE`, `BOTICA_RUC` (11 dígitos) y `BOTICA_DIRECCION`, deteniendo el arranque si alguna de ellas falta.

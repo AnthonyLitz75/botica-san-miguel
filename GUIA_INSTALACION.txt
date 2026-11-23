@@ -20,7 +20,7 @@ IMPORTANTE
 1. REQUISITOS
 -------------
 - JDK 25 (el pom.xml actual establece java.version=25), no solo JRE.
-- PostgreSQL 16 o superior y pgAdmin 4 (en Docker se utiliza PostgreSQL 16). Servicio local en puerto 5432.
+- PostgreSQL 16 (versión usada en las pruebas) y pgAdmin 4. Servicio local en puerto 5432.
 - Git para clonar; si usa ZIP, Git no es necesario para ejecutar la aplicacion.
 - Node.js (version LTS) y npm. Maven los usa para compilar los estilos Tailwind CSS.
 - Internet en la primera ejecucion para descargar Maven, dependencias de Java y paquetes de Node.
@@ -99,7 +99,7 @@ Los datos demo instalan pgcrypto para generar hashes BCrypt, compatibles
 con el prefijo {bcrypt} de Spring Security. Use el propietario de la base o
 un usuario con permiso CREATE. Si falta la extension, revise la instalacion
 de PostgreSQL. Documentacion:
-    https://www.postgresql.org/docs/18/pgcrypto.html
+    https://www.postgresql.org/docs/16/pgcrypto.html
 
 Los ID son generados por PostgreSQL. Los datos se enlazan por nombre/codigo,
 sin suponer que el usuario almacen o el lote tengan siempre el ID 1.
