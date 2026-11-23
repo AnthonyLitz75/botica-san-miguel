@@ -140,10 +140,10 @@
   text-align: right;
 }
 
-/* Reglas Estrictas de Impresión Térmica de 80 mm */
+/* Reglas Estrictas de Impresión Térmica: 80 mm de ancho y 297 mm de alto para tickets largos */
 @media print {
   @page {
-    size: 80mm auto;
+    size: 80mm 297mm;
     margin: 0;
   }
 
