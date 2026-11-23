@@ -5,6 +5,9 @@ import com.farmacia.exception.ValidacionContactoException;
 import com.farmacia.model.Cliente;
 import com.farmacia.model.ClienteResumenVista;
 import com.farmacia.service.ClienteServicio;
+import com.farmacia.util.AvisoFlash;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -54,6 +57,7 @@ public class ClienteWebControlador {
     @PostMapping
     public Object guardar(@Valid @ModelAttribute("formulario") ClienteFormulario formulario,
             BindingResult resultado, Model model, RedirectAttributes redireccion,
+            HttpServletRequest request, HttpServletResponse response,
             @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
             @RequestHeader(value = "Accept", required = false) String accept) {
 
@@ -74,6 +78,7 @@ public class ClienteWebControlador {
         try {
             servicio.guardar(formulario);
             if (esAjax) {
+                AvisoFlash.guardar(request, response, "/clientes", "Cliente registrado correctamente.");
                 return ResponseEntity.ok(Map.of("ok", true, "url", "/clientes"));
             }
             redireccion.addFlashAttribute("mensaje", "Cliente registrado correctamente.");
@@ -111,6 +116,7 @@ public class ClienteWebControlador {
     public Object actualizar(@PathVariable Integer idCliente,
             @Valid @ModelAttribute("formulario") ClienteFormulario formulario,
             BindingResult resultado, Model model, RedirectAttributes redireccion,
+            HttpServletRequest request, HttpServletResponse response,
             @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
             @RequestHeader(value = "Accept", required = false) String accept) {
 
@@ -133,6 +139,7 @@ public class ClienteWebControlador {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente no encontrado");
             }
             if (esAjax) {
+                AvisoFlash.guardar(request, response, "/clientes", "Cambios del cliente guardados correctamente.");
                 return ResponseEntity.ok(Map.of("ok", true, "url", "/clientes"));
             }
             redireccion.addFlashAttribute("mensaje", "Cambios del cliente guardados correctamente.");

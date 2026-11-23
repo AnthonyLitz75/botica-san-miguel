@@ -6,6 +6,9 @@ import com.farmacia.dto.UsuarioFormulario;
 import com.farmacia.model.Usuario;
 import com.farmacia.model.UsuarioListadoVista;
 import com.farmacia.service.UsuarioServicio;
+import com.farmacia.util.AvisoFlash;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -99,6 +102,8 @@ public class UsuarioControlador {
             Model model,
             RedirectAttributes redireccion,
             Authentication autenticacion,
+            HttpServletRequest request,
+            HttpServletResponse response,
             @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
             @RequestHeader(value = "Accept", required = false) String accept) {
 
@@ -121,6 +126,7 @@ public class UsuarioControlador {
         try {
             servicio.crear(autenticacion.getName(), formulario);
             if (esAjax) {
+                AvisoFlash.guardar(request, response, "/usuarios", "Usuario registrado correctamente.");
                 return ResponseEntity.ok(Map.of("ok", true, "url", "/usuarios"));
             }
             redireccion.addFlashAttribute("mensaje", "Usuario registrado correctamente.");
@@ -172,6 +178,8 @@ public class UsuarioControlador {
             Model model,
             RedirectAttributes redireccion,
             Authentication autenticacion,
+            HttpServletRequest request,
+            HttpServletResponse response,
             @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
             @RequestHeader(value = "Accept", required = false) String accept) {
 
@@ -194,6 +202,7 @@ public class UsuarioControlador {
         try {
             servicio.actualizar(autenticacion.getName(), idUsuario, formulario);
             if (esAjax) {
+                AvisoFlash.guardar(request, response, "/usuarios", "Cambios del usuario guardados correctamente.");
                 return ResponseEntity.ok(Map.of("ok", true, "url", "/usuarios"));
             }
             redireccion.addFlashAttribute("mensaje", "Cambios del usuario guardados correctamente.");

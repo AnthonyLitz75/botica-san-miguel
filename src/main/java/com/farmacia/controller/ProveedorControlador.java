@@ -4,6 +4,9 @@ import com.farmacia.dto.ProveedorFormulario;
 import com.farmacia.exception.ValidacionContactoException;
 import com.farmacia.model.Proveedor;
 import com.farmacia.service.ProveedorServicio;
+import com.farmacia.util.AvisoFlash;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -71,6 +74,9 @@ public class ProveedorControlador {
     public Object guardar(
             @Valid @ModelAttribute("formulario") ProveedorFormulario formulario,
             BindingResult resultado,
+            RedirectAttributes redireccion,
+            HttpServletRequest request,
+            HttpServletResponse response,
             @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
             @RequestHeader(value = "Accept", required = false) String accept) {
 
@@ -91,6 +97,7 @@ public class ProveedorControlador {
         try {
             servicio.guardar(formulario);
             if (esAjax) {
+                AvisoFlash.guardar(request, response, "/proveedores", "Proveedor registrado correctamente.");
                 return ResponseEntity.ok(Map.of("ok", true, "url", "/proveedores"));
             }
         } catch (ValidacionContactoException excepcion) {
@@ -113,6 +120,7 @@ public class ProveedorControlador {
             return "proveedores/formulario";
         }
 
+        redireccion.addFlashAttribute("mensaje", "Proveedor registrado correctamente.");
         return "redirect:/proveedores";
     }
 
@@ -143,6 +151,8 @@ public class ProveedorControlador {
             BindingResult resultado,
             Model model,
             RedirectAttributes redireccion,
+            HttpServletRequest request,
+            HttpServletResponse response,
             @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
             @RequestHeader(value = "Accept", required = false) String accept) {
 
@@ -176,6 +186,7 @@ public class ProveedorControlador {
                         "Proveedor no encontrado");
             }
             if (esAjax) {
+                AvisoFlash.guardar(request, response, "/proveedores", "Cambios del proveedor guardados correctamente.");
                 return ResponseEntity.ok(Map.of("ok", true, "url", "/proveedores"));
             }
             redireccion.addFlashAttribute("mensaje", "Cambios del proveedor guardados correctamente.");

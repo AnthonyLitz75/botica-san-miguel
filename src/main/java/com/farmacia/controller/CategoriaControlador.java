@@ -4,6 +4,9 @@ import com.farmacia.dto.CategoriaFormulario;
 import com.farmacia.estructuras.ArbolCategorias;
 import com.farmacia.model.Categoria;
 import com.farmacia.service.CategoriaServicio;
+import com.farmacia.util.AvisoFlash;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -74,6 +77,8 @@ public class CategoriaControlador {
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes,
             Model model,
+            HttpServletRequest request,
+            HttpServletResponse response,
             @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
             @RequestHeader(value = "Accept", required = false) String accept) {
 
@@ -96,6 +101,7 @@ public class CategoriaControlador {
         try {
             Integer nuevoId = categoriaServicio.crear(formulario.nombre(), formulario.idPadre());
             if (esAjax) {
+                AvisoFlash.guardar(request, response, "/categorias", "Categoría '" + formulario.nombre() + "' registrada exitosamente.");
                 return ResponseEntity.ok(Map.of("ok", true, "url", "/categorias?resaltar=" + nuevoId, "id", nuevoId));
             }
             redirectAttributes.addFlashAttribute("mensajeExito", "Categoría '" + formulario.nombre() + "' registrada exitosamente.");
@@ -144,6 +150,8 @@ public class CategoriaControlador {
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes,
             Model model,
+            HttpServletRequest request,
+            HttpServletResponse response,
             @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
             @RequestHeader(value = "Accept", required = false) String accept) {
 
@@ -165,6 +173,7 @@ public class CategoriaControlador {
         try {
             categoriaServicio.actualizar(id, formulario.nombre(), formulario.idPadre());
             if (esAjax) {
+                AvisoFlash.guardar(request, response, "/categorias", "Categoría '" + formulario.nombre() + "' actualizada correctamente.");
                 return ResponseEntity.ok(Map.of("ok", true, "url", "/categorias?resaltar=" + id, "id", id));
             }
             redirectAttributes.addFlashAttribute("mensajeExito", "Categoría '" + formulario.nombre() + "' actualizada correctamente.");

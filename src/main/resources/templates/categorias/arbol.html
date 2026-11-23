@@ -24,9 +24,9 @@
             </div>
 
             <!-- Avisos de operación -->
-            <div class="card pad mb-6 bg-emerald-50 border-emerald-200 text-pine-800 aviso-operacion aviso-exito flex items-center gap-2" th:if="${mensajeExito != null}" role="status">
+            <div class="card pad mb-6 bg-emerald-50 border-emerald-200 text-pine-800 aviso-operacion aviso-exito flex items-center gap-2" th:if="${mensajeExito != null or mensaje != null}" role="status">
                 <svg class="ico text-pine-700" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-                <span th:text="${mensajeExito}"></span>
+                <span th:text="${mensajeExito != null ? mensajeExito : mensaje}"></span>
             </div>
             <div class="card pad mb-6 bg-rose-bg border-rose/30 text-rose aviso-operacion aviso-error flex items-center gap-2" th:if="${mensajeError != null}" role="alert">
                 <svg class="ico text-rose" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>

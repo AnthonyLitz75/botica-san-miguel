@@ -3,6 +3,9 @@ package com.farmacia.controller;
 import com.farmacia.dto.ExistenciaInicialFormulario;
 import com.farmacia.service.MedicamentoServicio;
 import com.farmacia.service.MovimientoInventarioServicio;
+import com.farmacia.util.AvisoFlash;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +56,8 @@ public class ExistenciaInicialControlador {
             BindingResult validacion,
             Authentication autenticacion,
             HttpSession session,
+            HttpServletRequest request,
+            HttpServletResponse response,
             Model model,
             RedirectAttributes redirectAttributes,
             @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
@@ -78,6 +83,7 @@ public class ExistenciaInicialControlador {
             movimientoServicio.registrarExistenciaInicial(usuario, formulario);
 
             if (esAjax) {
+                AvisoFlash.guardar(request, response, "/movimientos", "Existencias iniciales registradas correctamente");
                 if (session != null) {
                     session.setAttribute("exito", "Existencias iniciales registradas correctamente");
                 }

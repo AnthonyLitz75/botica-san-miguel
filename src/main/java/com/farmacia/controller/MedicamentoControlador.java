@@ -5,6 +5,9 @@ import com.farmacia.estructuras.ArbolCategorias;
 import com.farmacia.model.Medicamento;
 import com.farmacia.service.CategoriaServicio;
 import com.farmacia.service.MedicamentoServicio;
+import com.farmacia.util.AvisoFlash;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -83,6 +86,8 @@ public class MedicamentoControlador {
             BindingResult resultado,
             Model model,
             RedirectAttributes redireccion,
+            HttpServletRequest request,
+            HttpServletResponse response,
             @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
             @RequestHeader(value = "Accept", required = false) String accept) {
 
@@ -104,6 +109,7 @@ public class MedicamentoControlador {
         try {
             servicio.guardar(formulario);
             if (esAjax) {
+                AvisoFlash.guardar(request, response, "/medicamentos", "Medicamento registrado correctamente.");
                 return ResponseEntity.ok(Map.of("ok", true, "url", "/medicamentos"));
             }
             redireccion.addFlashAttribute("mensaje", "Medicamento registrado correctamente.");
@@ -152,6 +158,8 @@ public class MedicamentoControlador {
             BindingResult resultado,
             Model model,
             RedirectAttributes redireccion,
+            HttpServletRequest request,
+            HttpServletResponse response,
             @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
             @RequestHeader(value = "Accept", required = false) String accept) {
 
@@ -186,6 +194,7 @@ public class MedicamentoControlador {
                         "Medicamento no encontrado");
             }
             if (esAjax) {
+                AvisoFlash.guardar(request, response, "/medicamentos", "Cambios del medicamento guardados correctamente.");
                 return ResponseEntity.ok(Map.of("ok", true, "url", "/medicamentos"));
             }
             redireccion.addFlashAttribute("mensaje", "Cambios del medicamento guardados correctamente.");
