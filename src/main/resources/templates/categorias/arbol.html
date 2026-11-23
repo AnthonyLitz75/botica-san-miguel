@@ -38,7 +38,7 @@
                 <div class="sec" style="margin-top:0">
                     <h2 id="titulo-arbol">Categorías</h2>
                     <span class="cnt cantidad-resultados" th:text="${totalCategorias}">0</span>
-                    <span class="lbl text-xs text-ink-3 font-normal" style="color: var(--ink-3); font-size: 12px; font-weight: normal;">Usa + para añadir una subcategoría y el lápiz para editar.</span>
+                    <span th:if="${puedeGestionarCategorias}" class="lbl text-xs text-ink-3 font-normal" style="color: var(--ink-3); font-size: 12px; font-weight: normal;">Usa + para añadir una subcategoría y el lápiz para editar.</span>
                 </div>
 
                 <div class="card pad inventario-vacio text-center" th:if="${totalCategorias == 0}">
