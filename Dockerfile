@@ -8,11 +8,11 @@ WORKDIR /app
 COPY package.json ./
 RUN npm install --no-audit --no-fund
 
-# Copiar la configuración de Tailwind y los archivos que escanea (plantillas y JS)
+# Copiar la configuración de Tailwind y los archivos que escanea (plantillas, JS y hojas CSS modulares)
 COPY tailwind.config.js ./
 COPY src/main/resources/templates ./src/main/resources/templates
 COPY src/main/resources/static/js ./src/main/resources/static/js
-COPY src/main/resources/static/css/tailwind-input.css ./src/main/resources/static/css/tailwind-input.css
+COPY src/main/resources/static/css ./src/main/resources/static/css
 
 # Generar tailwind.css minificado
 RUN npm run build:css
