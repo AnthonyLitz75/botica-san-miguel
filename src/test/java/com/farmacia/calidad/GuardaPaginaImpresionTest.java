@@ -71,7 +71,11 @@ class GuardaPaginaImpresionTest {
     }
 
     private static boolean esSizeValido(String valor) {
-        String normalizado = valor.replaceAll("\\s*!important\\s*$", "").trim().replaceAll("\\s+", " ");
+        String v = valor.strip();
+        if (v.endsWith("!important")) {
+            v = v.substring(0, v.length() - "!important".length());
+        }
+        String normalizado = v.trim().replaceAll("\\s+", " ");
         return PATRON_SIZE_VALIDO.matcher(normalizado).matches();
     }
 
