@@ -287,4 +287,25 @@ class MovimientoInventarioControladorTest {
                 .andExpect(content().string(containsString("Úsalo para cargar el stock con el que empiezas, sin necesidad de una orden de compra.")))
                 .andExpect(content().string(containsString("Sumar a un lote que ya existe")));
     }
+
+    @Test
+    @DisplayName("GET /movimientos limpia atributo exito de sesión y normaliza página no positiva")
+    void listar_conExitoEnSesionYPaginaCero_cargaExitoYUsaPaginaUno() throws Exception {
+        var kardex = new MovimientoInventarioServicio.Kardex(List.of(), 0, 1, 1);
+        when(servicio.listarKardex(any(), eq(1))).thenReturn(kardex);
+
+        var session = new org.springframework.mock.web.MockHttpSession();
+        session.setAttribute("exito", "Existencias iniciales registradas.");
+
+        mvc.perform(get("/movimientos")
+                        .session(session)
+                        .param("pagina", "0")
+                        .with(user("almacen1").roles("ALMACENERO")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("movimientos/listado"))
+                .andExpect(model().attribute("exito", "Existencias iniciales registradas."));
+
+        org.junit.jupiter.api.Assertions.assertNull(session.getAttribute("exito"));
+        verify(servicio).listarKardex(any(), eq(1));
+    }
 }

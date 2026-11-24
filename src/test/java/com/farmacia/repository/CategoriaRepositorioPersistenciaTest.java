@@ -102,4 +102,24 @@ class CategoriaRepositorioPersistenciaTest extends AbstractRepositorioIntegratio
 
         assertEquals(1, categoriaRepositorio.contarMedicamentosActivos(idPadre));
     }
+
+    @Test
+    @DisplayName("listarTodas, buscarPorId(null/inexistente) y buscarPorPadreYNombre cubren casos borde")
+    void listarTodasYBusquedas_cubrenCasosBorde() {
+        Integer idRaiz = categoriaRepositorio.guardar("Dermatología", null);
+        Integer idHija = categoriaRepositorio.guardar("Cremas", idRaiz);
+        categoriaRepositorio.actualizarEstado(idHija, false);
+
+        List<Categoria> todas = categoriaRepositorio.listarTodas();
+        assertEquals(2, todas.size());
+        assertFalse(todas.get(1).activo());
+
+        assertTrue(categoriaRepositorio.buscarPorId(null).isEmpty());
+        assertTrue(categoriaRepositorio.buscarPorId(999_999).isEmpty());
+
+        assertTrue(categoriaRepositorio.buscarPorPadreYNombre(null, null).isEmpty());
+        assertTrue(categoriaRepositorio.buscarPorPadreYNombre(null, "dermatología").isPresent());
+        assertTrue(categoriaRepositorio.buscarPorPadreYNombre(idRaiz, "CREMAS").isPresent());
+        assertTrue(categoriaRepositorio.buscarPorPadreYNombre(idRaiz, "Inexistente").isEmpty());
+    }
 }

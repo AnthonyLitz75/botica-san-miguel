@@ -535,4 +535,68 @@ class ProveedorControladorTest {
 
         verify(servicio).actualizar(eq(1), any(ProveedorFormulario.class));
     }
+
+    @Test
+    @DisplayName("POST /proveedores y /proveedores/{id}/editar via AJAX manejan errores de validación y RUC duplicado")
+    void guardarYActualizar_ajaxErroresYDuplicadoRuc_retornanBadRequestJson() throws Exception {
+        mvc.perform(post("/proveedores")
+                        .with(user("compras").roles("COMPRAS"))
+                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .param("ruc", "123")
+                        .param("razonSocial", ""))
+                .andExpect(status().isBadRequest())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.errores.ruc").exists());
+
+        org.mockito.Mockito.doThrow(new DuplicateKeyException("RUC duplicado"))
+                .when(servicio).guardar(any(ProveedorFormulario.class));
+
+        mvc.perform(post("/proveedores")
+                        .with(user("compras").roles("COMPRAS"))
+                        .with(csrf())
+                        .header("Accept", "application/json")
+                        .param("ruc", "20123456789")
+                        .param("razonSocial", "Drogueria Central SAC"))
+                .andExpect(status().isBadRequest())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.errores.ruc")
+                        .value("Ya existe un proveedor con este RUC"));
+
+        Proveedor prov = crearProveedorPrueba(1, "20100000001", "Drogueria Central SAC");
+        when(servicio.buscarPorId(1)).thenReturn(Optional.of(prov));
+
+        mvc.perform(post("/proveedores/1/editar")
+                        .with(user("compras").roles("COMPRAS"))
+                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .param("ruc", "123")
+                        .param("razonSocial", ""))
+                .andExpect(status().isBadRequest())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.errores.ruc").exists());
+
+        when(servicio.actualizar(eq(1), any(ProveedorFormulario.class)))
+                .thenThrow(new com.farmacia.exception.ValidacionContactoException(
+                        java.util.Map.of("correo", "Correo duplicado")))
+                .thenThrow(new DuplicateKeyException("RUC duplicado"));
+
+        mvc.perform(post("/proveedores/1/editar")
+                        .with(user("compras").roles("COMPRAS"))
+                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .param("ruc", "20100000001")
+                        .param("razonSocial", "Drogueria Central SAC")
+                        .param("correo", "dup@central.pe"))
+                .andExpect(status().isBadRequest())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.errores.correo")
+                        .value("Correo duplicado"));
+
+        mvc.perform(post("/proveedores/1/editar")
+                        .with(user("compras").roles("COMPRAS"))
+                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .param("ruc", "20100000001")
+                        .param("razonSocial", "Drogueria Central SAC"))
+                .andExpect(status().isBadRequest())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.errores.ruc")
+                        .value("Ya existe un proveedor con este RUC"));
+    }
 }

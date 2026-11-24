@@ -332,4 +332,31 @@ class ProveedorRepositorioTest extends AbstractRepositorioIntegrationTest {
         assertEquals(0, proveedorRepositorio.desactivar(999_999), "Desactivar ID inexistente retorna 0");
         assertEquals(0, proveedorRepositorio.activar(999_999), "Activar ID inexistente retorna 0");
     }
+
+    @Test
+    @DisplayName("PR-13: buscarTitularPorCorreo y buscarTitularPorTelefono validan unicidad con y sin exclusión")
+    void buscarTitularPorCorreoYTelefono_validaUnicidadConYSinExclusion() {
+        Integer idProv = jdbcTemplate.queryForObject("""
+            INSERT INTO proveedor (ruc, razon_social, telefono, correo, activo)
+            VALUES (?, 'Droguería Titular S.A.', '987654321', 'ventas@titular.pe', true)
+            RETURNING id_proveedor
+            """, Integer.class, generarRucValido());
+
+        assertTrue(proveedorRepositorio.buscarTitularPorCorreo(null, null).isEmpty());
+        assertTrue(proveedorRepositorio.buscarTitularPorCorreo("   ", null).isEmpty());
+        assertTrue(proveedorRepositorio.buscarTitularPorTelefono(null, null).isEmpty());
+        assertTrue(proveedorRepositorio.buscarTitularPorTelefono("   ", null).isEmpty());
+
+        assertEquals(Optional.of("Droguería Titular S.A."),
+                proveedorRepositorio.buscarTitularPorCorreo("ventas@titular.pe", null));
+        assertTrue(proveedorRepositorio.buscarTitularPorCorreo("ventas@titular.pe", idProv).isEmpty());
+        assertEquals(Optional.of("Droguería Titular S.A."),
+                proveedorRepositorio.buscarTitularPorCorreo("ventas@titular.pe", idProv + 1));
+
+        assertEquals(Optional.of("Droguería Titular S.A."),
+                proveedorRepositorio.buscarTitularPorTelefono("987654321", null));
+        assertTrue(proveedorRepositorio.buscarTitularPorTelefono("987654321", idProv).isEmpty());
+        assertEquals(Optional.of("Droguería Titular S.A."),
+                proveedorRepositorio.buscarTitularPorTelefono("987654321", idProv + 1));
+    }
 }

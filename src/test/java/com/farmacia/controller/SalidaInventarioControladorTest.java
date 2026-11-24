@@ -434,4 +434,81 @@ class SalidaInventarioControladorTest {
 
         verify(movimientoServicio).registrarSalida(eq(5), eq("almacen1"), any());
     }
+
+    @Test
+    @DisplayName("Salidas directas y por lote via AJAX con errores de validación o negocio retornan 400 JSON")
+    void salidasAjax_conErroresValidacionYNegocio_retornan400Json() throws Exception {
+        mvc.perform(post("/salidas/nueva")
+                        .with(user("almacen1").roles("ALMACENERO"))
+                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .param("cantidad", "0")
+                        .param("motivo", ""))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errores").exists());
+
+        when(movimientoServicio.registrarSalida(eq(5), eq("almacen1"), any()))
+                .thenThrow(new IllegalArgumentException("Stock insuficiente en lote"));
+
+        mvc.perform(post("/salidas/nueva")
+                        .with(user("almacen1").roles("ALMACENERO"))
+                        .with(csrf())
+                        .header("Accept", "application/json")
+                        .param("idLote", "5")
+                        .param("cantidad", "50")
+                        .param("motivo", "Salida excesiva"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensaje").value("Stock insuficiente en lote"));
+
+        var lote = new Lote(5, 1, "LOT-100", LocalDate.now().plusMonths(6), 25);
+        var medicamento = new Medicamento(1, "MED-01", "Amoxicilina", "500mg", "Caja", "CAJA", BigDecimal.valueOf(15.0), 5, true);
+        when(loteServicio.buscarPorId(5)).thenReturn(Optional.of(lote));
+        when(medicamentoServicio.buscarPorId(1)).thenReturn(Optional.of(medicamento));
+        when(loteServicio.listarDisponiblesPorMedicamento(1)).thenReturn(List.of());
+        when(prioridadServicio.identificarLotesPrioritarios(any())).thenReturn(Set.of());
+
+        mvc.perform(post("/lotes/5/salida")
+                        .with(user("almacen1").roles("ALMACENERO"))
+                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .param("cantidad", "0")
+                        .param("motivo", ""))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errores").exists());
+
+        mvc.perform(post("/lotes/5/salida")
+                        .with(user("almacen1").roles("ALMACENERO"))
+                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .param("cantidad", "50")
+                        .param("motivo", "Merma"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensaje").value("Stock insuficiente en lote"));
+    }
+
+    @Test
+    @DisplayName("GET y POST /lotes/{idLote}/salida con medicamento inexistente o lote inexistente retornan 404")
+    void salidaPorLote_recursosInexistentes_retornan404() throws Exception {
+        var lote = new Lote(5, 99, "LOT-100", LocalDate.now().plusMonths(6), 25);
+        when(loteServicio.buscarPorId(5)).thenReturn(Optional.of(lote));
+        when(medicamentoServicio.buscarPorId(99)).thenReturn(Optional.empty());
+        when(loteServicio.buscarPorId(888)).thenReturn(Optional.empty());
+
+        mvc.perform(get("/lotes/5/salida").with(user("almacen1").roles("ALMACENERO")))
+                .andExpect(status().isNotFound());
+
+        mvc.perform(post("/lotes/888/salida")
+                        .with(user("almacen1").roles("ALMACENERO"))
+                        .with(csrf())
+                        .param("cantidad", "1")
+                        .param("motivo", "Merma"))
+                .andExpect(status().isNotFound());
+
+        mvc.perform(post("/lotes/5/salida")
+                        .with(user("almacen1").roles("ALMACENERO"))
+                        .with(csrf())
+                        .param("cantidad", "1")
+                        .param("motivo", "Merma"))
+                .andExpect(status().isNotFound());
+    }
 }

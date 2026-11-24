@@ -486,4 +486,46 @@ class ReporteControladorTest {
         mvc.perform(get("/reportes").with(user("vendedor").roles("VENDEDOR")))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    @DisplayName("GET /reportes/ventas, /mas-vendidos, /mermas y /compras capturan IllegalArgumentException y muestran error")
+    void reportesConRangoInvalido_capturanExcepcionYMuestranError() throws Exception {
+        LocalDate hoy = LocalDate.of(2026, 11, 10);
+        when(reporteServicio.normalizarFiltro(any())).thenReturn(new FiltroReporteFormulario(hoy, hoy.minusDays(1), 10, null, null));
+        when(reporteServicio.ventasPorDia(eq("admin"), any())).thenThrow(new IllegalArgumentException("Rango de ventas inválido"));
+        when(reporteServicio.masVendidos(eq("admin"), any())).thenThrow(new IllegalArgumentException("Rango de rotación inválido"));
+        when(reporteServicio.mermas(eq("admin"), any())).thenThrow(new IllegalArgumentException("Rango de mermas inválido"));
+        when(reporteServicio.reporteCompras(eq("admin"), any())).thenThrow(new IllegalArgumentException("Rango de compras inválido"));
+        when(reporteServicio.resumenCompras(List.of())).thenReturn(new com.farmacia.model.EstadoComprasResumenVista(
+                java.util.Map.of(
+                        "PENDIENTE", new com.farmacia.model.EstadoComprasResumenVista.CantidadYMonto(0, BigDecimal.ZERO),
+                        "PARCIALMENTE_RECIBIDA", new com.farmacia.model.EstadoComprasResumenVista.CantidadYMonto(0, BigDecimal.ZERO),
+                        "RECIBIDA", new com.farmacia.model.EstadoComprasResumenVista.CantidadYMonto(0, BigDecimal.ZERO),
+                        "CANCELADA", new com.farmacia.model.EstadoComprasResumenVista.CantidadYMonto(0, BigDecimal.ZERO)
+                ),
+                0,
+                BigDecimal.ZERO
+        ));
+        when(proveedorServicio.listarActivos()).thenReturn(List.of());
+
+        mvc.perform(get("/reportes/ventas").with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("reportes/ventas"))
+                .andExpect(model().attribute("error", "Rango de ventas inválido"));
+
+        mvc.perform(get("/reportes/mas-vendidos").with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("reportes/mas-vendidos"))
+                .andExpect(model().attribute("error", "Rango de rotación inválido"));
+
+        mvc.perform(get("/reportes/mermas").with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("reportes/mermas"))
+                .andExpect(model().attribute("error", "Rango de mermas inválido"));
+
+        mvc.perform(get("/reportes/compras").with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("reportes/compras"))
+                .andExpect(model().attribute("error", "Rango de compras inválido"));
+    }
 }

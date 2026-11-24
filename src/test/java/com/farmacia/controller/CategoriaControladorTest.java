@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,6 +16,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -218,5 +220,111 @@ class CategoriaControladorTest {
                 .andExpect(flash().attribute("mensajeExito", "Categoría 'Analgésicos y Antipiréticos' actualizada correctamente."));
 
         verify(categoriaServicio).actualizar(eq(1), eq("Analgésicos y Antipiréticos"), any());
+    }
+
+    @Test
+    @DisplayName("POST /categorias/nueva via AJAX inválido y con error de negocio retorna 400 JSON")
+    void postNuevaCategoriaAjax_invalidoYErrorNegocio_retorna400Json() throws Exception {
+        mvc.perform(post("/categorias/nueva")
+                        .with(user("admin").roles("ADMINISTRADOR"))
+                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .param("nombre", "   "))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errores.nombre").exists());
+
+        when(categoriaServicio.crear(anyString(), any()))
+                .thenThrow(new IllegalArgumentException("Ya existe la categoría"));
+
+        mvc.perform(post("/categorias/nueva")
+                        .with(user("admin").roles("ADMINISTRADOR"))
+                        .with(csrf())
+                        .header("Accept", "application/json")
+                        .param("nombre", "Analgésicos"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errores.nombre").value("Ya existe la categoría"));
+
+        mvc.perform(post("/categorias/nueva")
+                        .with(user("admin").roles("ADMINISTRADOR"))
+                        .with(csrf())
+                        .param("nombre", "Analgésicos"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("categorias/formulario"))
+                .andExpect(model().attribute("errorNegocio", "Ya existe la categoría"));
+    }
+
+    @Test
+    @DisplayName("GET /categorias/{id}/editar inexistente redirige con mensajeError")
+    void getEditarInexistente_redirigeConMensajeError() throws Exception {
+        when(categoriaServicio.buscarPorId(99)).thenReturn(Optional.empty());
+
+        mvc.perform(get("/categorias/99/editar").with(user("admin").roles("ADMINISTRADOR")))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/categorias"))
+                .andExpect(flash().attribute("mensajeError", "Categoría no encontrada con ID: 99"));
+    }
+
+    @Test
+    @DisplayName("POST /categorias/{id}/editar en HTML válido, inválido y con error de negocio en HTML y AJAX")
+    void postEditarCategoria_todosLosFlujos() throws Exception {
+        prepararArbolConUnaCategoria();
+
+        mvc.perform(post("/categorias/1/editar")
+                        .with(user("admin").roles("ADMINISTRADOR"))
+                        .with(csrf())
+                        .param("nombre", "Analgésicos Editado"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/categorias"))
+                .andExpect(flash().attributeExists("mensajeExito"));
+
+        mvc.perform(post("/categorias/1/editar")
+                        .with(user("admin").roles("ADMINISTRADOR"))
+                        .with(csrf())
+                        .param("nombre", ""))
+                .andExpect(status().isOk())
+                .andExpect(view().name("categorias/formulario"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().attribute("esEdicion", true));
+
+        mvc.perform(post("/categorias/1/editar")
+                        .with(user("admin").roles("ADMINISTRADOR"))
+                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .param("nombre", ""))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errores.nombre").exists());
+
+        doThrow(new IllegalArgumentException("Ciclo detectado"))
+                .when(categoriaServicio).actualizar(eq(1), eq("Analgésicos"), any());
+
+        mvc.perform(post("/categorias/1/editar")
+                        .with(user("admin").roles("ADMINISTRADOR"))
+                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .param("nombre", "Analgésicos"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errores.nombre").value("Ciclo detectado"));
+
+        mvc.perform(post("/categorias/1/editar")
+                        .with(user("admin").roles("ADMINISTRADOR"))
+                        .with(csrf())
+                        .param("nombre", "Analgésicos"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("categorias/formulario"))
+                .andExpect(model().attribute("errorNegocio", "Ciclo detectado"));
+    }
+
+    @Test
+    @DisplayName("POST /categorias/{id}/desactivar con error de negocio redirige con mensajeError")
+    void postDesactivar_conErrorNegocio_redirigeConMensajeError() throws Exception {
+        doThrow(new IllegalStateException("Tiene subcategorías activas"))
+                .when(categoriaServicio).desactivar(1);
+
+        mvc.perform(post("/categorias/1/desactivar")
+                        .with(user("admin").roles("ADMINISTRADOR"))
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/categorias"))
+                .andExpect(flash().attribute("mensajeError", "Tiene subcategorías activas"));
     }
 }
