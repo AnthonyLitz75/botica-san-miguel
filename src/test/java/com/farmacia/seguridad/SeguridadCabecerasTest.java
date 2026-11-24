@@ -5,15 +5,22 @@ import com.farmacia.controller.AccesoControlador;
 import com.farmacia.controller.NavegacionCompartida;
 import com.farmacia.service.UsuarioDetallesServicio;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.env.Environment;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Arrays;
+
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -47,5 +54,22 @@ class SeguridadCabecerasTest {
         mvc.perform(get("/login"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(not(containsString("livereload"))));
+    }
+
+    @Nested
+    @ActiveProfiles("dev")
+    class ConPerfilDevActivo {
+
+        @Autowired private Environment environment;
+
+        @Test
+        @DisplayName("GET /login no incluye 'livereload' ni '35729' aunque el perfil dev esté activo")
+        void loginNoIncluyeLiveReloadNiPuertoConPerfilDev() throws Exception {
+            assertTrue(Arrays.asList(environment.getActiveProfiles()).contains("dev"));
+            mvc.perform(get("/login"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(not(containsStringIgnoringCase("livereload"))))
+                    .andExpect(content().string(not(containsString("35729"))));
+        }
     }
 }
