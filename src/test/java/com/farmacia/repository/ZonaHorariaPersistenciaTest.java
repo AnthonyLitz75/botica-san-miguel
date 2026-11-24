@@ -110,7 +110,7 @@ class ZonaHorariaPersistenciaTest extends AbstractRepositorioIntegrationTest {
 
     private static void assertCercaDeLaHoraDeLima(LocalDateTime guardada) {
         LocalDateTime ahoraLima = LocalDateTime.now(LIMA);
-        assertThat(Duration.between(guardada, ahoraLima).abs())
+        assertThat(Duration.between(guardada.atZone(LIMA), ahoraLima.atZone(LIMA)).abs())
                 .as("fecha_hora guardada %s frente a la hora de Lima %s", guardada, ahoraLima)
                 .isLessThan(TOLERANCIA);
     }
