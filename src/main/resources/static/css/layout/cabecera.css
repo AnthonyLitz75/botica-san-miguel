@@ -140,6 +140,23 @@ header.inventario-cabecera.top {
   background: #ffffff;
   cursor: pointer;
   transition: all 0.15s ease;
+  padding: 0;
+  flex: none;
+  line-height: 1;
+  box-sizing: border-box;
+}
+
+/* El SVG como bloque elimina el hueco de línea base y lo centra en el botón */
+.pagina-inventario .cerrar-sesion svg,
+.sq svg {
+  display: block;
+}
+
+/* Formulario de cierre de sesión alineado con la cápsula de usuario */
+.cabecera-salir {
+  margin: 0;
+  display: flex;
+  align-items: center;
 }
 
 .pagina-inventario .cerrar-sesion:hover,
